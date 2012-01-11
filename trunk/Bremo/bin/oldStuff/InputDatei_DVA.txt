@@ -1,0 +1,141 @@
+/////Bremo Input-Datei/////
+Diese Datei ist wie folgt aufgebaut.
+Die Daten sind in sogenannten Blocks gruppiert. Ein Block besteht aus einem
+Namen, der in eckigen Klammern geschrieben ist, z.B. [Motor]. 
+
+Zwischen diesem Namen und dem nächsten Blocknamen müssen alle entsprechende
+Parameter geschrieben sein. Die Parameternamen dürfen vor dem entsprechenden
+Blocknamen erscheinen, sonst nirgendwo. Jeder Parameter gehört auf einer 
+Zeile, die Reihenfolge der Parameter bzw. der Zeilen ist jedoch egal. Auf 
+der linken Seite von der Reihe steht der Name der jeweiligen Variable (z.B.
+Bohrung). Dieser Name ist fest in der Einleseroutine eingeschrieben; falls
+der Name in dieser Datei falsch geschrieben ist, dann kommt eine
+Fehlermeldung, in der der richtige Name zu sehen ist. Nach dem Namen kommt
+die Einheit, die der Variable zugewiesen ist. Diese muss auch in eckigen
+Klammern geschrieben sein. Falls die Einheit nicht der Entspricht, die in
+der Einleseroutine geschrieben ist, dann erscheint eine Fehlermeldung mit 
+der richtigen Einheit. 
+
+Dann kommt die Trennung zwischen der Beschreibung der
+Variable und dem Wert der Variable. Diese Trennung ist stets mit ':=' 
+gemacht. Als Trennzeichen kann entweder ein Komma oder ein Punkt verwendet
+werden. Die Werte werden von der Einleseroutine geprüft, damit die
+weder zu klein noch zu groß sind.
+
+Falls der Name, die Einheit oder der Wert nicht stimmen, werden die 
+erzeugten Objekte nicht vollständig erstellt.
+
+
+Alles bis zur Eingabe von [Bremo::Input::Start]  wird als Kommentar betrachtet!
+[Bremo::Input::Start]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[Motor: HubKolbenMotor]
+Leere Zeilen sind kein Problem.
+
+%%%%So eine Zeile geht auch...
+Bohrung [m]                  	:=0.122
+Brennraumdachflaeche [m^2]   	:=0.012
+Feuersteghoehe [m]				:=0.015
+Hub [m]					     	:=0.150
+Kolbenflaeche [m^2]          	:=0.012
+Pleuellaenge [m]	         	:=0.274
+Verdichtung [-]				 	:=12,5
+Schraenkung [m]              	:=0
+Desachsierung [m]				:=0
+Arbeitsverfahren [-]			:=4-Takt
+Einlassschluss [KWnZOT]     	:=-130,0
+Auslassoeffnet [KWnZOT]      	:=100,0000
+Einlassoeffnet [KWnZOT]      	:=-400,0000
+Auslassschluss[KWnZOT]      	:=430
+EV_Hub_max [m]					:=11.5e-3
+EV_Hub [m]						:=11.5e-3
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%Daten von Messung 18 vom 13.12.2010
+%%Die Drehzahl wird mehrfach eingesetzt, um die Umrechnung zwischen
+%%Zeit und KW zu machen
+Drehzahl [min^-1]			 		:=1275
+mLuft_feucht [kg/h]				:=102.570
+T_Ladeluft [K] :=335
+relative_Luftfeuchte [%] :=13.23
+p_Ladeluft [Pa] :=223500
+
+%mAGR_extern [kg/h]	:=1.688
+mAGR_extern [kg/h]	:=34.366
+T_feuchteMessung [K] :=292.45
+p_FeuchteMessung [Pa] :=224500
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+anzahlEinspritzungen [-] := 2
+
+[einspritzModell_1 : SRE]
+krst_1 [-]:= RON_95
+Hu_RON_95 [MJ/mol] :=4.12815
+mKrst_1 [kg/h] :=3.57
+BOI_1 [KWnZOT] := -360
+EOI_1 [KWnZOT] := -245
+
+[einspritzModell_2 : SRE]
+krst_2 [-]:= Diesel
+mKrst_2 [kg/h] := 0.167
+BOI_2 [KWnZOT] := -360
+EOI_2 [KWnZOT] := -245
+
+[internesRestgasModell: RestgasVorgabe]
+mAGR_intern_ASP [kg] :=0.00
+
+[Wandwaermemodell: Hohenberg]
+wandtemperatur [K] :=500
+refPunktWoschniHuber [KWnZOT]:= -60
+drallgeschwindigkeit [m/s] :=2
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+///Manche Parameter sind als Text einzugeben. Es wird in der
+///jeweiligen set-Funktion überprüft, ob der Text richtig ist.
+mAGR_intern_ASP [kg] :=0.00
+
+%%Druckkorrektur
+nullLinienMethode [-] := polytropenMethode
+KW_Beginn_Druckabgleich [KWnZOT] := -275
+KW_Ende_Druckabgleich [KWnZOT] := -265
+kappa_Druckabgleich [-] := 1.38
+
+
+[OHC_Solver: Grill ]
+standerdBildungsEnthalpien [-] 	:=ChemieStandard
+nullLinienMethode [-] := polytropenMethode
+arbeitsverfahren [-]			:=4T
+minimaleZonenMasse	[kg]		:=1.85e-4
+rechenGenauigkeit_DVA [bar]		:=0.001
+polynomKoeffizienten [-] 		:=Janaf
+%Zeit-Einheiten, wird unter anderem für die Wandwärmemodelle verwendet
+zeit_oder_KW_Basiert [-]		:=KW
+rechnungsSchrittweite [KW]		:=0.1
+rechnungsBeginn [KWnZOT]		:=-130
+rechnungsEnde [KWnZOT]			:=100
+gleichGewichtsKonstanten [-] 	:=Burcat
+T_freeze [K]					:=1600
+
+indizierFileName [-] 			:= p_Zyl_20101213_18.txt
+spalte_pZyl []:=2
+spalte_pEin []:=3
+spalte_pAbg[-]:=4
+
+durchflusskennzahlEinFileName [-] := Durchflusskennzahl_Ein.txt
+durchflusskennzahlAusFileName [-] := Durchflusskennzahl_Aus.txt
+spalte_alphaVor [] := 2
+spalte_alphaRueck [] := 3
+
+
+
+hier sind keine Parameter notwendig, da das Modell relativ einfach ist...
+[Bremo::Input::Stop]

@@ -229,22 +229,11 @@ public class SwingBremo extends javax.swing.JFrame {
 								.addComponent(konsole2,
 										javax.swing.GroupLayout.DEFAULT_SIZE,
 										644, Short.MAX_VALUE).addContainerGap()));
-
 		pack();
-		
-
-		
-
-		
-	
 	}
 	
-	
 
-	
-
-	
-
+	//Button Setting To Run Bremo Thread / to Run the calcul
 	private void BerechnungPush(java.awt.event.MouseEvent evt) {
 		// TODO add your handling code here:
 		grosArea.setText("");
@@ -259,8 +248,10 @@ public class SwingBremo extends javax.swing.JFrame {
 		} else {
 			stop.setVisible(true);
 			control = true;
+			t1 = System.currentTimeMillis();
 			bremo = new Bremo(file);
 			bremo.start();
+			t2 = System.currentTimeMillis();
 			// play();
 
 		}
@@ -274,7 +265,8 @@ public class SwingBremo extends javax.swing.JFrame {
 		berechnen.setVisible(true);
 		stop.setVisible(false);
 	}
-
+    
+	//Button Setting To Stop Running of Bremo Thread
 	@SuppressWarnings("static-access")
 	private void stopPush(java.awt.event.MouseEvent evt) {
 		// TODO add your handling code here:
@@ -286,11 +278,13 @@ public class SwingBremo extends javax.swing.JFrame {
 			if (bremo.isAlive()) {
 				bremo.interrupt();
 				control = false;
+			    kleinArea.append(new Timer(t2-t1).toString());
 			}
 
 		}
 	}
-
+    
+	//Button Setting To Choose a File
 	private void wahlPush(java.awt.event.MouseEvent evt) {
 		// TODO add your handling code here:
 		grosArea.setText("");
@@ -323,14 +317,16 @@ public class SwingBremo extends javax.swing.JFrame {
 		}
 		berechnen.setEnabled(true);
 	}
-
+    
+	// place Frame to the center
 	private void placeFrame() {
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		Rectangle window = getBounds();
 		this.setLocation((screen.width - window.width) / 2,
 				(screen.height - window.height) / 2);
 	}
-
+    
+	// close the Frame 
 	public void closeFrame() {
 		final JOptionPane optionPane = new JOptionPane(
 				"Wollen Sie Wirklich das Program beendet ?", JOptionPane.QUESTION_MESSAGE,
@@ -422,6 +418,8 @@ public class SwingBremo extends javax.swing.JFrame {
 	private javax.swing.JButton stop;
 	private javax.swing.JTextField textFile;
 	private javax.swing.JButton wahlFile;
+	private double t1;
+	private double t2;
 	// End of variables declaration
 
 	PrintStream outStream = new PrintStream(System.out) {
@@ -429,14 +427,14 @@ public class SwingBremo extends javax.swing.JFrame {
 		@Override
 		public void println(String s) {
 
-			grosArea.append(s + "\n");
+			//grosArea.append(s + "\n");
 			grosArea.setCaretPosition(grosArea.getDocument().getLength());
 		}
 
 		@Override
 		public void print(String s) {
 
-			grosArea.append(s);
+			//grosArea.append(s);
 			grosArea.setCaretPosition(grosArea.getDocument().getLength());
 
 		}

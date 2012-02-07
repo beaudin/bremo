@@ -10,7 +10,7 @@ public class Timer {
 	
 	int stunde;
 	int minute;
-	int sekunde;
+	int sekunde; 
 	
 
 /**

@@ -24,23 +24,23 @@ public class SpeziesFabrik {
 	//damit der Vektor mit den zu integrierenden Spezies nicht ueberfluessiferweise mit 
 	//doppelten Grundspezies gefuellt ist wird jede Spezies nur einmal erzeugt!
 	
-	static Spezies spezH;
-	static Spezies spezO;
-	static Spezies spezN;
-	static Spezies spezH2;
-	static Spezies spezOH;
-	static Spezies spezCO;
-	static Spezies spezNO;
-	static Spezies spezO2;
-	static Spezies spezH2O;
-	static Spezies spezCO2;
-	static Spezies spezN2;
-	static Spezies spezAr;
-	static Spezies spezLuftTr;
-	static Spezies spezRON_91;
-	static Spezies spezRON_95;
-	static Spezies spezRON_98;
-	static Spezies spezDiesel;
+	private Spezies spezH;
+	private Spezies spezO;
+	private Spezies spezN;
+	private Spezies spezH2;
+	private Spezies spezOH;
+	private Spezies spezCO;
+	private Spezies spezNO;
+	private Spezies spezO2;
+	private Spezies spezH2O;
+	private Spezies spezCO2;
+	private Spezies spezN2;
+	private Spezies spezAr;
+	private Spezies spezLuftTr;
+	private Spezies spezRON_91;
+	private Spezies spezRON_95;
+	private Spezies spezRON_98;
+	private Spezies spezDiesel;
 	
 //	private  Spezies [] allSpez =new Spezies[25]; //erstmal nicht mehr als 25 Spezies bitte
 	private  int nmbrOfSpez=0; //dann wirds bei der ersten Spezies null

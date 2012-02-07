@@ -24,8 +24,7 @@ public class Bremo extends Thread {
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {				
 			e.stopBremo();
-		}
-		
+		}		
 	}
 
 	public void run() {
@@ -34,6 +33,7 @@ public class Bremo extends Thread {
 			r.berechnungDurchfuehren();
 		} catch (Exception e) {
 			this.interrupt();
+			e.printStackTrace();
 		}
 	}
 

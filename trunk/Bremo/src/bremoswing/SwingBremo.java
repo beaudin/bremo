@@ -427,14 +427,14 @@ public class SwingBremo extends javax.swing.JFrame {
 		@Override
 		public void println(String s) {
 
-			//grosArea.append(s + "\n");
+			grosArea.append(s + "\n");
 			grosArea.setCaretPosition(grosArea.getDocument().getLength());
 		}
 
 		@Override
 		public void print(String s) {
 
-			//grosArea.append(s);
+			grosArea.append(s);
 			grosArea.setCaretPosition(grosArea.getDocument().getLength());
 
 		}

@@ -15,7 +15,6 @@ public class Paket_Hiroyasu {
 	private int radialPosIndex, axialPosIndex;
 	public double mfl_Paket_0; //Kraftstoffmasse eines Pakets
 	public double paketErzeugungszeit;
-//	private double rhoL_0;
 	private double pZyl_0; //Druck bei der Erzeugung des Pakets
 	private double pInj; //in Pa
 	private double Tkrst_0;
@@ -35,7 +34,7 @@ public class Paket_Hiroyasu {
 	private double cRad;
 	private final CasePara CP;
 	private final double Cd;
-	private final double CW; //Frickelfaktor für Erhioehung des air entrainment bei Wandkontakt
+	private final double C1; //Frickelfaktor zur Anpassung des Modells
 	private VektorBuffer ma_buffer;
 	
 
@@ -63,7 +62,7 @@ public class Paket_Hiroyasu {
 		this.Tkrst_0=Tkrst_0;
 		this.d0=d0;	
 		this.Cd=cd;
-		this.CW=1.555; //aus paper Hiroyasu
+		this.C1=2.95/3.555; //2.95 aus paper Hiroyasu 3.555 so ausgewaehlt dass es ungefaehr zu dma aus der CFD passt
 		
 		this.ma_buffer=new VektorBuffer(CP);
 		
@@ -144,7 +143,7 @@ public class Paket_Hiroyasu {
 		if(lifetime>0 && lifetime<tb)
 			sStrahlspitze = v0*lifetime;
 		else if(lifetime>=tb){
-			sStrahlspitze = 2.95*Math.pow(deltaP/rhoZyl_0,0.25)*Math.sqrt(d0*lifetime);
+			sStrahlspitze = C1*Math.pow(deltaP/rhoZyl_0,0.25)*Math.sqrt(d0*lifetime);
 		}
 		return sStrahlspitze;
 	}
@@ -164,7 +163,7 @@ public class Paket_Hiroyasu {
     		v = v0;
     	}
     	else if(lifetime>=tb){
-    		v=1.475*Math.pow(deltaP*d0*d0/rhoZyl_0,0.25)/Math.sqrt(lifetime);
+    		v=0.5*C1*Math.pow(deltaP*d0*d0/rhoZyl_0,0.25)/Math.sqrt(lifetime);
     	}
     	return v;
     }
@@ -217,25 +216,25 @@ public class Paket_Hiroyasu {
 	 */
 	public double get_dma_Paket(double time){
     	double dma_Paket = 0; 
-    	if(get_lifetime(time)>this.breakupZeit){
+    	if(get_lifetime(time)>this.breakupZeit){    		
     		
     		//Ableitung aus ma=mf*(v0/(ds/dt) -1) --> ableiten nach dt --> dma=mf*v0/([ds/dt]^2)*d2s/dt2
-    		dma_Paket=mfl_Paket_0*v0/Math.sqrt(get_lifetime(time))/(2.95*Math.pow(deltaP/rhoZyl_0,0.25)*Math.sqrt(d0))
+    		dma_Paket=mfl_Paket_0*v0/Math.sqrt(get_lifetime(time))/(C1*Math.pow(deltaP/rhoZyl_0,0.25)*Math.sqrt(d0))
     								/Math.exp(cRad*radialPosIndex*radialPosIndex);
-//    		Bei Wandkontakt erhoeht sich das air entrainment 
-    		if(this.get_s(time)>=0.5*CP.get_Bohrung())
-    			dma_Paket=CW*dma_Paket; 
-    		
-
-//    		double delta_t=0.05*Bremo.get_casePara().SYS.WRITE_INTERVAL_SEC;
-//    		double m1=this.get_ma_Paket(time+delta_t);
-//    		double m2=this.get_ma_Paket(time);
-//    		dma_Paket=(m1-m2)/delta_t;
+    		//Glechungen nach Thoma für die Voreinspritzung --> liefert sehr kleine Wert für dma wenn m=-0.9  		
+//    		double v=get_v(time)/1.475;
+//    		double t=get_lifetime(time);
+//    		double a1=Math.pow(deltaP/rhoZyl_0,0.25)*Math.sqrt(d0)*Math.exp(cRad*radialPosIndex*radialPosIndex);
+//    		double c1=1.475;
+//    		double m=-0.5;
+//    		dma_Paket=3.555*mfl_Paket_0*v0*-1*m/c1/a1/Math.pow(get_lifetime(time), (m+1));
+//    		Bei Wandkontakt erhoeht sich das air entrainment --> liefert aber eher Bloedsinn
+//    		if(this.get_s(time)>=0.5*CP.get_Bohrung())
+//    			dma_Paket=CW*dma_Paket; 
     	}
     	
-    	//Faktor hingedreht, dass es ungefaehr zur CFD-Passt und dass bei SOID=15°KW (20100714_12)
-		//die im Premixed Peak freigesetzt Energie zur eingesaugten Luftmasse passt 
-    	return 2*dma_Paket;
+    	//Faktor hingedreht, dass es ungefaehr zur CFD-Passt 
+    	return dma_Paket;
 	}
 	
 	private double get_gasKonstantePaket(double time){
@@ -319,9 +318,12 @@ public class Paket_Hiroyasu {
 		if(get_lifetime(time)>0&&this.verdampfungIsAbgeschlossen()==false){			
 			double v_relativ=this.get_v(time)/3;
 			dm=-1*this.verdampf.get_dm_dD_dT(time, m_D_T, v_relativ, zn)[0];
-			if(((Double) dm).isNaN()) dm=0; //Passiert wennder Krst fast vollst. verdampft ist
-			if(dm<0) 
+			if(((Double) dm).isNaN()) 
+				dm=0; //Passiert wennder Krst fast vollst. verdampft ist
+			if(dm<0){ 
 				System.err.println("FUCK"); 
+				dm=0;
+			}
 		}
 		return dm*anzTropfen;
 	}

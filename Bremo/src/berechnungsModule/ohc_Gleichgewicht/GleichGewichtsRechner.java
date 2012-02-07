@@ -3,17 +3,15 @@ package berechnungsModule.ohc_Gleichgewicht;
 
 import java.util.Hashtable;
 
-import berechnungsModule.ModulPrototyp;
 import bremo.main.Bremo;
 import bremo.parameter.CasePara;
 import bremoExceptions.BirdBrainedProgrammerException;
-import kalorik.spezies.KoeffizientenSpeziesFabrik;
+import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 // TODO Beruecksichtigung von Ar --> zurzeit verschwindet Ar bei der Verbrennung spurlos
-public abstract class GleichGewichtsRechner extends ModulPrototyp {
+public abstract class GleichGewichtsRechner {
 	
-	public static final String OHC_SOLVER_FLAG="OHC_Solver";
-	public final static String[] OHC_SOLVER={"OlikaraBorman" , "Grill"};	
+		
 	
 	Spezies spezH;
 	Spezies spezO;
@@ -29,25 +27,25 @@ public abstract class GleichGewichtsRechner extends ModulPrototyp {
 	Spezies spezAr;
 	protected final double T_FREEZE; 
 	private final String GLGW_KONST;	
-	private static GleichGewichtsRechner ohcSolver=null;
 
-	protected GleichGewichtsRechner(String gleichGewichtsKonstantenVorgabe, double T_freeze) {	
+
+	protected GleichGewichtsRechner(CasePara cp,String gleichGewichtsKonstantenVorgabe, double T_freeze) {	
 		
 		T_FREEZE=T_freeze; //Vorgabe der Einfriertemperatur
 		GLGW_KONST=gleichGewichtsKonstantenVorgabe; //Vorgabe der Gleichgewichtskonstanten
 		
-		spezH=KoeffizientenSpeziesFabrik.get_spezH();	
-		spezO=KoeffizientenSpeziesFabrik.get_spezO();
-		spezN=KoeffizientenSpeziesFabrik.get_spezN();
-		spezH2=KoeffizientenSpeziesFabrik.get_spezH2();
-		spezOH=KoeffizientenSpeziesFabrik.get_spezOH();
-		spezCO=KoeffizientenSpeziesFabrik.get_spezCO();
-		spezNO=KoeffizientenSpeziesFabrik.get_spezNO();
-		spezO2=KoeffizientenSpeziesFabrik.get_spezO2();
-		spezH2O=KoeffizientenSpeziesFabrik.get_spezH2O();
-		spezCO2=KoeffizientenSpeziesFabrik.get_spezCO2();
-		spezN2=KoeffizientenSpeziesFabrik.get_spezN2();		
-		spezAr=KoeffizientenSpeziesFabrik.get_spezAr();	
+		spezH=cp.SPEZIES_FABRIK.get_spezH();	
+		spezO=cp.SPEZIES_FABRIK.get_spezO();
+		spezN=cp.SPEZIES_FABRIK.get_spezN();
+		spezH2=cp.SPEZIES_FABRIK.get_spezH2();
+		spezOH=cp.SPEZIES_FABRIK.get_spezOH();
+		spezCO=cp.SPEZIES_FABRIK.get_spezCO();
+		spezNO=cp.SPEZIES_FABRIK.get_spezNO();
+		spezO2=cp.SPEZIES_FABRIK.get_spezO2();
+		spezH2O=cp.SPEZIES_FABRIK.get_spezH2O();
+		spezCO2=cp.SPEZIES_FABRIK.get_spezCO2();
+		spezN2=cp.SPEZIES_FABRIK.get_spezN2();		
+		spezAr=cp.SPEZIES_FABRIK.get_spezAr();	
 	}	
 
 	/**
@@ -57,49 +55,9 @@ public abstract class GleichGewichtsRechner extends ModulPrototyp {
 	 * GleichGewichtsRechner auszulesen.
 	 * @param CaseParameter cp
 	 * @return GleichGewichtsRechner
-	 */
-	public static GleichGewichtsRechner get_Instance(CasePara cp) {
-		
-		if(ohcSolver==null){
+	 */	
 
-			String ohcSolverVorgabe=get_ModulWahl(OHC_SOLVER_FLAG, OHC_SOLVER,cp);
-	
-			if(ohcSolverVorgabe.equals(OHC_SOLVER[0]))	//"OlikaraBorman"
-				ohcSolver=
-					new GleichGewichtsRechner_Olikara_Borman(cp.SYS.GLEICHGEWICHTSKONSTANTEN_VORGABE,cp.SYS.T_FREEZE);
-			else if(ohcSolverVorgabe.equals(OHC_SOLVER[1])) // "Grill"
-				ohcSolver=
-					new GleichGewichtsRechner_Grill(cp.SYS.GLEICHGEWICHTSKONSTANTEN_VORGABE,cp.SYS.T_FREEZE);
-	
-			else if (ohcSolver==null){
-				try {
-					throw new BirdBrainedProgrammerException(
-							"Der ausgewaehlte OHC_Solver \"" +ohcSolverVorgabe + " \" wurde im InputFile " +
-							"zwar als valide akzeptiert ist im Programm aber nicht richtig eingepflegt worden. " +
-							"Es fehlt der entsprechende else-if-Block  oder er wurde noch nicht implementiert\n" +
-							"Verwendet wird Grill");
-				} catch (BirdBrainedProgrammerException e) {
-					e.log_Message();
-					ohcSolver=
-						new GleichGewichtsRechner_Grill(cp.SYS.GLEICHGEWICHTSKONSTANTEN_VORGABE,cp.SYS.T_FREEZE);
-				}
-			}
-		}
-		return ohcSolver;		
-	}	
-	
-	/**
-	 * Ruft die gleichnamige Methode mit dem Eingabeparameter cp vom Typ CasePara auf und 
-	 * Liefert ein GleichGewichtsRechner Objekt zur Berechnung des ohc-Gleichgewichts 
-	 * entsprechend der Auswahl im InputFile zurueck. 
-	 * Die variable cp vom Typ CasePara wird benötigt um aus dem Eingabefile den gewuenschten 
-	 * GleichGewichtsRechner auszulesen.
-	 * Die variable cp vom Typ CasePara wird mittels einer statischen Methode aus Bremo.java ausgecheckt.	 
-	 * @return GleichGewichtsRechner
-	 */
-	public static GleichGewichtsRechner get_Instance(){
-		return get_Instance(Bremo.get_casePara());
-	}
+
 	
 	
 	/**

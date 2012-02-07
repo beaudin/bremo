@@ -3,10 +3,11 @@ package misc;
 import java.util.Hashtable;
 
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
+import bremo.parameter.CasePara;
 import bremoExceptions.MiscException;
 
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.KoeffizientenSpeziesFabrik;
+import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 
 public class HeizwertRechner {
@@ -22,13 +23,13 @@ public class HeizwertRechner {
 	 * @param krst
 	 * @return Hu [J/mol]
 	 */
-	public static double calcHup_perfekt(Spezies krst){
+	public static double calcHup_perfekt(CasePara cp, Spezies krst){
 		
 		double x=krst.get_AnzC_Atome();
 		double y=krst.get_AnzH_Atome();		
-		double hf_O2=KoeffizientenSpeziesFabrik.get_spezO2().get_delta_hf298_mol();
-		double hf_CO2=KoeffizientenSpeziesFabrik.get_spezCO2().get_delta_hf298_mol();
-		double hf_H2O=KoeffizientenSpeziesFabrik.get_spezH2O().get_delta_hf298_mol();
+		double hf_O2=cp.SPEZIES_FABRIK.get_spezO2().get_delta_hf298_mol();
+		double hf_CO2=cp.SPEZIES_FABRIK.get_spezCO2().get_delta_hf298_mol();
+		double hf_H2O=cp.SPEZIES_FABRIK.get_spezH2O().get_delta_hf298_mol();
 		double hf_krst=krst.get_delta_hf298_mol();
 		double o2min=krst.get_O2_min();
 		
@@ -47,14 +48,14 @@ public class HeizwertRechner {
 	 * @param hu gewuenschter Heizwert [J/mol]
 	 * @return Stabdardbildungsenthalpie [J/mol]
 	 */
-	public static double deltaHf4Hu(double c, double h, double o, double hu ){
+	public static double deltaHf4Hu(CasePara cp,double c, double h, double o, double hu ){
 		
 		double x=c;
 		double y=h;		
 		double z=o;
-		double hf_O2=KoeffizientenSpeziesFabrik.get_spezO2().get_delta_hf298_mol();
-		double hf_CO2=KoeffizientenSpeziesFabrik.get_spezCO2().get_delta_hf298_mol();
-		double hf_H2O=KoeffizientenSpeziesFabrik.get_spezH2O().get_delta_hf298_mol();
+		double hf_O2=cp.SPEZIES_FABRIK.get_spezO2().get_delta_hf298_mol();
+		double hf_CO2=cp.SPEZIES_FABRIK.get_spezCO2().get_delta_hf298_mol();
+		double hf_H2O=cp.SPEZIES_FABRIK.get_spezH2O().get_delta_hf298_mol();
 		
 		double o2min=x-0.25*y-0.5*z;		
 
@@ -71,7 +72,7 @@ public class HeizwertRechner {
 	 * @param bezugsTemp Temperatur mit dem Luft und Krafstoff zugefuehrt werden
 	 * @return Hu [J/mol]
 	 */
-	public static double calcHup_perfekt(Spezies krst, double bezugsTemp){
+	public static double calcHup_perfekt(CasePara cp,Spezies krst, double bezugsTemp){
 
 		double lst=krst.get_Lst();
 
@@ -90,7 +91,7 @@ public class HeizwertRechner {
 		Hashtable<Spezies,Double> gemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
 
 		gemisch_MassenbruchHash.put(krst, mk/m_ges);
-		gemisch_MassenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezLuft_trocken(), mL_tr/m_ges);		
+		gemisch_MassenbruchHash.put(cp.SPEZIES_FABRIK.get_spezLuft_trocken(), mL_tr/m_ges);		
 		GasGemisch gemisch=new GasGemisch("Gemisch");
 		gemisch.set_Gasmischung_massenBruch(gemisch_MassenbruchHash);		
 
@@ -100,7 +101,7 @@ public class HeizwertRechner {
 
 		double lambda=1d;	
 
-		GasGemisch abgas=new GasGemisch(calcMolenBruechePerfekteVerbrennung(krst,lambda),"Gemisch");
+		GasGemisch abgas=new GasGemisch(calcMolenBruechePerfekteVerbrennung(cp,krst,lambda),"Gemisch");
 		double H_verbrannt=abgas.get_h_mass(bezugsTemp)*m_ges/mk;	
 		double Hu=(H_unverbrannt-H_verbrannt)*krst.get_M();		
 		return Hu;
@@ -120,7 +121,7 @@ public class HeizwertRechner {
 	 * @param bezugsDruck	noetig fuer chemGLGW
 	 * @return Heizwert Hu in [J/mol]
 	 */	
-	public static double calcHup_chemGLGW(Spezies krst, double bezugsTemp, double lambda, double bezugsDruck){			
+	public static double calcHup_chemGLGW(CasePara cp, Spezies krst, double bezugsTemp, double lambda, double bezugsDruck){			
 
 		double lst=krst.get_Lst();
 
@@ -139,7 +140,7 @@ public class HeizwertRechner {
 		Hashtable<Spezies,Double> gemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
 
 		gemisch_MassenbruchHash.put(krst, mk/m_ges);
-		gemisch_MassenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezLuft_trocken(), mL_tr/m_ges);		
+		gemisch_MassenbruchHash.put(cp.SPEZIES_FABRIK.get_spezLuft_trocken(), mL_tr/m_ges);		
 		GasGemisch gemisch=new GasGemisch("Gemisch");
 		gemisch.set_Gasmischung_massenBruch(gemisch_MassenbruchHash);		
 
@@ -148,7 +149,7 @@ public class HeizwertRechner {
 		double H_unverbrannt=h_unverbrannt*m_ges/mk; //auf ein kg Krafstoff bezogene Enthalpie in [J]
 
 		//Abgas
-		GleichGewichtsRechner gg=GleichGewichtsRechner.get_Instance();		
+		GleichGewichtsRechner gg=cp.OHC_SOLVER;		
 		//liegt die Bezugstemp unterhalb von T_Freeze (was ratsam ist) 
 		//wird T_Frezze fuer das chem. Glgw verwendet
 		gemisch.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche(bezugsDruck, bezugsTemp, gemisch));
@@ -170,13 +171,14 @@ public class HeizwertRechner {
 	 * @param bezugsTemp 	Enthalpie bestimmung
 	 * @return Heizwert Hu in [J/kg]
 	 */	
-	public static double calcGemischHeizwert_chemGLGW_mass(Spezies gemisch, double bezugsTemp, double bezugsDruck){
+	public static double calcGemischHeizwert_chemGLGW_mass(
+			CasePara cp,Spezies gemisch, double bezugsTemp, double bezugsDruck){
 		double m_ges=1;
 		double h_unverbrannt=gemisch.get_h_mass(bezugsTemp);
 		double H_unverbrannt=h_unverbrannt*m_ges; //auf ein kg Gemsich bezogene Enthalpie in [J]
 
 		//Abgas
-		GleichGewichtsRechner gg=GleichGewichtsRechner.get_Instance();		
+		GleichGewichtsRechner gg=cp.OHC_SOLVER;		
 		//liegt die Bezugstemp unterhalb von T_Freeze (was ratsam ist) 
 		//wird T_Frezze fuer das chem. Glgw verwendet
 		GasGemisch abgas=new GasGemisch("Abgas");
@@ -195,7 +197,8 @@ public class HeizwertRechner {
 	
 	
 
-	public static Hashtable<Spezies,Double>calcMolenBruechePerfekteVerbrennung(Spezies krst, double lambda){
+	public static Hashtable<Spezies,Double>calcMolenBruechePerfekteVerbrennung(
+			CasePara cp,Spezies krst, double lambda){
 		if(lambda<1){
 			try{
 				throw new MiscException("Funktion ist nicht definiert fuer Lambda<1");
@@ -220,10 +223,10 @@ public class HeizwertRechner {
 
 		Hashtable<Spezies,Double> abgas_MolenbruchHash=new Hashtable<Spezies,Double>();
 
-		abgas_MolenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezCO2(),mb_CO2);
-		abgas_MolenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezH2O(),mb_H2O);
-		abgas_MolenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezN2(),mb_N2);
-		abgas_MolenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezO2(),mb_O2);	
+		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezCO2(),mb_CO2);
+		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezH2O(),mb_H2O);
+		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezN2(),mb_N2);
+		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezO2(),mb_O2);	
 		return abgas_MolenbruchHash;
 		
 	}
@@ -231,7 +234,8 @@ public class HeizwertRechner {
 	
 	
 	
-	public static Hashtable<Spezies,Double>calcMolenBruechePerfekteVerbrennung(Spezies gemisch){
+	public static Hashtable<Spezies,Double>calcMolenBruechePerfekteVerbrennung(
+			CasePara cp,Spezies gemisch){
 		if(gemisch.get_O2_min()>0){
 			try{
 				throw new MiscException("Funktion ist nicht definiert fuer Lambda<1");
@@ -254,10 +258,10 @@ public class HeizwertRechner {
 		double moleAbgas=e+f+g+i;		
 		
 		Hashtable<Spezies,Double> abgas_MolenbruchHash=new Hashtable<Spezies,Double>();
-		abgas_MolenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezCO2(),e/moleAbgas);
-		abgas_MolenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezH2O(),f/moleAbgas);
-		abgas_MolenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezN2(),g/moleAbgas);
-		abgas_MolenbruchHash.put(KoeffizientenSpeziesFabrik.get_spezO2(),i/moleAbgas);	
+		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezCO2(),e/moleAbgas);
+		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezH2O(),f/moleAbgas);
+		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezN2(),g/moleAbgas);
+		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezO2(),i/moleAbgas);	
 
 		return abgas_MolenbruchHash;		
 	}
@@ -272,7 +276,7 @@ public class HeizwertRechner {
 	 * @param lambda Luftverhaeltnis
 	 * @return adiabate Verbrennungstemperatur in [K]
 	 */
-	public static double calcadiabateFlammenTempPerfekt(Spezies krst, double T, double lambda){	
+	public static double calcadiabateFlammenTempPerfekt(CasePara cp,Spezies krst, double T, double lambda){	
 		if(krst.get_Hu_mass()<=0){
 			try{
 				throw new MiscException("Funktion ist nicht definiert fuer Spezies ohne Heizwert");
@@ -286,10 +290,10 @@ public class HeizwertRechner {
 			double mL_tr=lambda*mk*lst;
 			double m_ges=mk+mL_tr;
 	
-			Spezies luft=KoeffizientenSpeziesFabrik.get_spezLuft_trocken();
+			Spezies luft=cp.SPEZIES_FABRIK.get_spezLuft_trocken();
 			
 			GasGemisch abgas=new GasGemisch("Abgas");	
-			abgas.set_Gasmischung_molenBruch(calcMolenBruechePerfekteVerbrennung(krst,lambda));	
+			abgas.set_Gasmischung_molenBruch(calcMolenBruechePerfekteVerbrennung(cp,krst,lambda));	
 			
 			double h_=mk/m_ges*krst.get_h_mass(T)+mL_tr/m_ges*luft.get_h_mass(T);			
 			
@@ -305,7 +309,7 @@ public class HeizwertRechner {
 	 * @param lambda Luftverhaeltnis
 	 * @return adiabate Verbrennungstemperatur in [K]
 	 */
-	public static double calcadiabateFlammenTempPerfekt(Spezies gemisch, double T){	
+	public static double calcadiabateFlammenTempPerfekt(CasePara cp,Spezies gemisch, double T){	
 		if(gemisch.get_Hu_mass()<=0){
 			try{
 				throw new MiscException("Funktion ist nicht definiert fuer Spezies ohne Heizwert");
@@ -320,7 +324,7 @@ public class HeizwertRechner {
 		//und damit verändert sich auch der Heizwert
 		double hu=gemisch.get_Hu_mass()+gemisch.get_h_h298_mass(T);	
 		GasGemisch abgas=new GasGemisch("Abgas");	
-		abgas.set_Gasmischung_molenBruch(calcMolenBruechePerfekteVerbrennung(gemisch));			
+		abgas.set_Gasmischung_molenBruch(calcMolenBruechePerfekteVerbrennung(cp,gemisch));			
 
 		int idx=0;
 		double To=6000, Tu=T; 
@@ -354,21 +358,22 @@ public class HeizwertRechner {
 	 * @param lambda  Luftverhaeltnis mit dem der Kraftstoff verbrannt wird
 	 * @return adiabate Verbrennungstemperatur in [K]
 	 */
-	public static double calcAdiabateFlammenTemp(Spezies krst,double p, double T, double lambda ){				
+	public static double calcAdiabateFlammenTemp(
+			CasePara cp, Spezies krst,double p, double T, double lambda ){				
 	
 			double lst=krst.get_Lst();
 			double mk=1; //[kg]
 			double mL_tr=lambda*mk*lst;
 			double m_ges=mk+mL_tr;
 	
-			Spezies luft=KoeffizientenSpeziesFabrik.get_spezLuft_trocken();
-			GleichGewichtsRechner gg=GleichGewichtsRechner.get_Instance();
+			Spezies luft=cp.SPEZIES_FABRIK.get_spezLuft_trocken();
+			GleichGewichtsRechner gg=cp.OHC_SOLVER;
 			GasGemisch abgas=new GasGemisch("Abgas");		
 			
 			double h_=mk/m_ges*krst.get_h_mass(T)+mL_tr/m_ges*luft.get_h_mass(T);	
 			
 			int idx=0;
-			double To=calcadiabateFlammenTempPerfekt(krst,T,lambda), Tu=T; 
+			double To=calcadiabateFlammenTempPerfekt(cp,krst,T,lambda), Tu=T; 
 			double Tb;
 			//Intervallschachtelung da get_T4h() fuer hohe Anfangstemp nicht konvergiert!
 			do{
@@ -405,13 +410,13 @@ public class HeizwertRechner {
 	 * @param T Temperatur mit der das Gemisch zugefuehrt wird
 	 * @return
 	 */
-	public static double calcAdiabateFlammenTemp(Spezies gemisch,double p, double T){		
+	public static double calcAdiabateFlammenTemp(CasePara cp, Spezies gemisch,double p, double T){		
 
 		//totale Enthalpie im unverbrannten Gemisch	
 		double hu=gemisch.get_h_mass(T);
 		
 		//Abgas
-		GleichGewichtsRechner gg=GleichGewichtsRechner.get_Instance();
+		GleichGewichtsRechner gg=cp.OHC_SOLVER;
 		GasGemisch abgas=new GasGemisch("Abgas");	
 
 		int idx=0;

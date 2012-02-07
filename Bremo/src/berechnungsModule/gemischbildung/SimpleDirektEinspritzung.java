@@ -7,18 +7,18 @@ import bremoExceptions.ParameterFileWrongInputException;
 
 public class SimpleDirektEinspritzung extends Einspritzung {
 	
-	protected static final String FLAG="simpleDI"; //Eingabe im Inputfile um dieses Modell zu verwenden	
+	public static final String FLAG="simpleDI"; //Eingabe im Inputfile um dieses Modell zu verwenden	
 	private double mKrst_verdampft=0;
 	double dm_krst;	
 	private Kraftstoff_Eigenschaften krstProp;
 
-	protected SimpleDirektEinspritzung(CasePara cp,int index) {
+	public SimpleDirektEinspritzung(CasePara cp,int index) {
 		super(cp,index);
 		
 		String vergleichsKraftstoff=CP.get_vergleichsKrstVerdampfung(index);
 		krstProp =new Kraftstoff_Eigenschaften(vergleichsKraftstoff);
 		
-		if(super.boi<super.CP.get_Auslassoeffnet()+CP.SYS.DAUER_ASP_SEC&&super.isLWA){
+		if(super.boi<super.CP.get_Auslassoeffnet()+CP.SYS.DAUER_ASP_SEC){ //TODO &&!super.isLWA --> war das noetig?
 			try {
 				throw new ParameterFileWrongInputException("" +
 						"Fuer das gewaehlte Einspritzmodell" +this.FLAG+ " der " +index+

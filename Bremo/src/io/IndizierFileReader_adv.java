@@ -58,11 +58,12 @@ public class IndizierFileReader_adv extends IndizierFileReader{
 
 
 	////Konstruktor mit drei Kanalnummern (pZyl, pEin, pAus)
-	public IndizierFileReader_adv(String fileName,
+	public IndizierFileReader_adv (CasePara cp,String fileName,
 			int kanal_pZyl,
 			int kanal_pEin,
 			int kanal_pAus){
 
+		super(cp);
 		spalte_pZyl = kanal_pZyl;
 		spalte_pEin = kanal_pEin;
 		spalte_pAbg = kanal_pAus;		
@@ -81,7 +82,8 @@ public class IndizierFileReader_adv extends IndizierFileReader{
 	}
 
 	///Konstruktor mit einer Kanalnummer (nur pZyl)
-	public IndizierFileReader_adv(String fileName,int kanal_pZyl){
+	public IndizierFileReader_adv(CasePara cp,String fileName,int kanal_pZyl){
+		super(cp);
 		dreiDruecke=false;
 		spalte_pZyl = kanal_pZyl;
 		spalte_pEin = spalte_pZyl;

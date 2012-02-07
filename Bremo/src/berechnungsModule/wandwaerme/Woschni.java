@@ -27,7 +27,7 @@ public class Woschni extends WandWaermeUebergang {
 	private double C_1;
 	private double C_2;
 
-public Woschni(CasePara mp) {
+	protected Woschni(CasePara mp) {
 		super(mp);
 		this.cp=super.cp;
 		indiD=new IndizierDaten(cp);	//TODO: umprogrammieren, so dass die Indizierdatei nur ein einziges Mal eingelesen wird

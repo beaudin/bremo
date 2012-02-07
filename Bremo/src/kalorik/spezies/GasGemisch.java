@@ -19,13 +19,13 @@ public class GasGemisch extends Spezies {
 	private Hashtable<Spezies,Double> speziesMolenBruchHashDetail;	
 	
 	public GasGemisch(String name){				
-		super(false);
+		super();
 		this.name=name;		
 	}
 	
 	
 	public GasGemisch(Hashtable<Spezies,Double> speziesMolenBruchHash, String name) {	
-		super(false);
+		super();
 		erzeugeGasGemsich(speziesMolenBruchHash, name);
 	}
 	/**
@@ -683,8 +683,7 @@ public class GasGemisch extends Spezies {
 													anzC_Atome,
 													anzH_Atome,
 													anzN_Atome,
-													name, 
-													isToIntegrate);
+													name);
 			return gemisch;
 			
 		}	

@@ -3,24 +3,29 @@ package bremo.parameter;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.Hashtable;
-
 import misc.LittleHelpers;
 import misc.PhysKonst;
-
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.KoeffizientenSpeziesFabrik;
+import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 import io.InputFileReader;
-
-
-import berechnungsModule.ModulPrototyp;
 import berechnungsModule.Berechnung.BerechnungsModell;
-import berechnungsModule.Berechnung.ZonenVerwaltung;
+import berechnungsModule.Berechnung.BerechnungsModellFabrik;
+import berechnungsModule.Berechnung.DVA;
+import berechnungsModule.Berechnung.DVA_DualFuel;
+import berechnungsModule.Berechnung.DVA_Homogen_EinZonig;
+import berechnungsModule.Berechnung.DVA_homogen_ZweiZonig;
 import berechnungsModule.gemischbildung.Kraftstoff_Eigenschaften;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.internesRestgas.InternesRestgas;
+import berechnungsModule.internesRestgas.InternesRestgasFabrik;
 import berechnungsModule.motor.Motor;
+import berechnungsModule.motor.MotorFabrik;
+import berechnungsModule.motor.Motor_HubKolbenMotor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
+import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechnerFabrik;
+import berechnungsModule.wandwaerme.WandWaermeUebergang;
+import berechnungsModule.wandwaerme.WandWaermeUebergangFabrik;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -29,39 +34,38 @@ import bremoExceptions.ParameterFileWrongInputException;
 
 public class CasePara {	
 	
-	private static CasePara instanz;
 
-	private ZonenVerwaltung zonenVerwaltung;	
+
+	
 	
 	private final Hashtable<String,String[]> INPUTFILE_PARAMETER;
 	public final Hashtable<String,String> MODUL_VORGABEN;	
 	private double aktuelle_RZ;	//Aktuelle Rechenzeit
 //	public final BerechnungsModule MODULE;
-	public final SysPara SYS; //SystemParameter
+	public final SysPara SYS; //SystemParameter	
 	private final String WD; //WorkingDirectory
 	/**
 	 * Name des Inputfiles OHNE Dateiendung
 	 */
-	private final String CASE_NAME;
-
+	private final String CASE_NAME;	
 	
 	
-	// auf diese Weise wird nur eine einzige Instanz der Klasse erzeugt!
-	public static CasePara erzeuge_EINZIGE_Instanz(File inputFile){
-		if (CasePara.instanz == null) {
-			try {
-				CasePara.instanz = new CasePara(inputFile);
-			} catch (ParameterFileWrongInputException e) {				
-				e.stopBremo();
-			}
-		}
-		return CasePara.instanz;
-	}
+	public final Motor MOTOR;
+	public final GleichGewichtsRechner OHC_SOLVER;
+	public final WandWaermeUebergang WAND_WAERME;
+	public final WandWaermeUebergang WAND_WAERME_LW;
+	public final InternesRestgas RESTGASMODELL;
+	public final BerechnungsModell BERECHNUNGS_MODELL;
+	public final SpeziesFabrik SPEZIES_FABRIK;
+	public final MasterEinspritzung MASTER_EINSPRITZUNG;
+	
+	
+	
 
 
 
-	private CasePara(File inputFile) throws ParameterFileWrongInputException {
-		
+
+	public CasePara(File inputFile) throws ParameterFileWrongInputException {	
 		
 		InputFileReader	ifr =new InputFileReader(inputFile);
 		INPUTFILE_PARAMETER=ifr.get_eingabeParameter();
@@ -71,21 +75,49 @@ public class CasePara {
 		
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));
-		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 
+		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 		
 		SYS=new SysPara(INPUTFILE_PARAMETER);
+		
+		
+		//Erzeugung der verschiedenen BerechnungsModule 
+		//SpeziesFabrik
+		SPEZIES_FABRIK=new SpeziesFabrik(this, new MakeMeUnique());		
+		
+		//Motor
+		MotorFabrik mf=new MotorFabrik(this);
+		MOTOR=mf.MOTOR;
+		
+		//ohc-Solver
+		GleichGewichtsRechnerFabrik ohcf=new GleichGewichtsRechnerFabrik(this);
+		OHC_SOLVER=ohcf.OHC_SOLVER;
+		
+		//Wandwaerme
+		WandWaermeUebergangFabrik wwf=new WandWaermeUebergangFabrik(this);
+		WAND_WAERME=wwf.WAND_WAERME_MODUL;
+		//Die LWA soll mit einem anderen WW-Modell durchgefuehrt werden koennen
+		WAND_WAERME_LW=wwf.WAND_WAERME_MODUL_LW; 
+		
+		//MasterEinspritzung
+		MASTER_EINSPRITZUNG=new MasterEinspritzung(this);
+		
+		//Restgas benoetigt MASTER_EINSPRITZUNG
+		InternesRestgasFabrik irgf=new InternesRestgasFabrik(this);
+		RESTGASMODELL=irgf.RESTGAS_MODELL;
+		
+		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG
+		BerechnungsModellFabrik bmf=new BerechnungsModellFabrik(this);
+		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;
+	
+		
 		
 	}		
 	
-	/**
-	 * Gibt an ob die einzige Instanz von CasePara schon instanziert wurde
-	 * @return
-	 */
-	public static boolean exists(){
-		if(CasePara.instanz!=null)
-			return true;
-		else 
-			return false;
+	public class MakeMeUnique{
+		private MakeMeUnique (){
+			
+		}
 	}
+
 	
 	public String get_workingDirectory(){
 		return WD;
@@ -228,15 +260,15 @@ public class CasePara {
 		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....
 		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
 		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
-		MasterEinspritzung me=MasterEinspritzung.get_Instance(cp);//zirkuläre Referenz ;-( naja mal schauen...
+		MasterEinspritzung me=this.MASTER_EINSPRITZUNG;//zirkuläre Referenz ;-( naja mal schauen...
 		double mKrst=me.get_mKrst_Sum_ASP();
 		Spezies krst=me.get_spezKrstALL(); //liefert die Mischung aller Krafstoffe		
 		double mFG=mLuft_tr+mW+mKrst;	//gesamte Masse des Verbrennenden Gases
 		Hashtable<Spezies,Double>frischGemisch_MassenBruchHash=new Hashtable<Spezies,Double>();
 		//trockene Luft
-		frischGemisch_MassenBruchHash.put(KoeffizientenSpeziesFabrik.get_spezLuft_trocken(),mLuft_tr/mFG);
+		frischGemisch_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezLuft_trocken(),mLuft_tr/mFG);
 		//Wasser
-		frischGemisch_MassenBruchHash.put(KoeffizientenSpeziesFabrik.get_spezH2O(),mW/mFG);
+		frischGemisch_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezH2O(),mW/mFG);
 		//Kraftstoff
 		frischGemisch_MassenBruchHash.put(krst,mKrst/mFG);
 		
@@ -247,7 +279,7 @@ public class CasePara {
 		
 		//Bestimmen der AGR-Zusammensetzung --> das Hinzufuegen von AGR hat keinen Einfluss auf die 
 		//AGR-Zusammensetzung da die Anzahl der c/h/o-Atome gleich bleibt und nur vom Frischgemisch abhaengt
-		GleichGewichtsRechner gg=GleichGewichtsRechner.get_Instance(cp); //zirkuläre Referenz ;-( naja mal schauen...
+		GleichGewichtsRechner gg=this.OHC_SOLVER; //zirkuläre Referenz ;-( naja mal schauen...
 		GasGemisch abgas=new GasGemisch("Abgas");
 		//eigentlich muesste die GLGW-Zusammensetzung aus der DVA kommen der Druck wuerde auf den Wert festgelegt, 
 		//den er hat wenn 1600K in der verbrannten Zone vorliegen
@@ -271,13 +303,13 @@ public class CasePara {
 		Spezies abgas=this.get_spezAbgas();
 		//Bestimmung der Verbrennungsluftzusammensetzung		
 		double mAGRex=cp.get_mAGR_extern_ASP();
-		double mAGRin=InternesRestgas.get_Instance(cp).get_mInternesRestgas_ASP();//zirkuläre Referenz ;-( naja mal schauen...
+		double mAGRin=this.RESTGASMODELL.get_mInternesRestgas_ASP();//zirkuläre Referenz ;-( naja mal schauen...
 		double mAGR=mAGRex+mAGRin;
 		double mGes=mLuft_tr+mW+mAGR; //gesamte Masse im Zylinder (ohne Kraftstoff)
 		Hashtable<Spezies,Double>verbrennungsLuft_MassenBruchHash=new Hashtable<Spezies,Double>();
 		verbrennungsLuft_MassenBruchHash.put(abgas, mAGR/mGes);
-		verbrennungsLuft_MassenBruchHash.put(KoeffizientenSpeziesFabrik.get_spezLuft_trocken(),mLuft_tr/mGes);		
-		verbrennungsLuft_MassenBruchHash.put(KoeffizientenSpeziesFabrik.get_spezH2O(),mW/mGes);
+		verbrennungsLuft_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezLuft_trocken(),mLuft_tr/mGes);		
+		verbrennungsLuft_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezH2O(),mW/mGes);
 		GasGemisch verbrennungsLuft=new GasGemisch("Verbrennungsluft");
 		verbrennungsLuft.set_Gasmischung_massenBruch(verbrennungsLuft_MassenBruchHash);		
 
@@ -296,7 +328,7 @@ public class CasePara {
 		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
 		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
 		double mAGRex=cp.get_mAGR_extern_ASP();
-		double mAGRin=InternesRestgas.get_Instance(cp).get_mInternesRestgas_ASP();//zirkuläre Referenz ;-( naja mal schauen...
+		double mAGRin=this.RESTGASMODELL.get_mInternesRestgas_ASP();//zirkuläre Referenz ;-( naja mal schauen...
 		double mAGR=mAGRex+mAGRin;		
 		
 		return mLuft_tr+mW+mAGR;
@@ -313,7 +345,7 @@ public class CasePara {
 		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....
 		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
 		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
-		double mAGRin=InternesRestgas.get_Instance(cp).get_mInternesRestgas_ASP();//zirkuläre Referenz ;-( naja mal schauen...	
+		double mAGRin=this.RESTGASMODELL.get_mInternesRestgas_ASP();//zirkuläre Referenz ;-( naja mal schauen...	
 		
 		return mAGRin/(mLuft_tr+mW);  //TODO Kraftstoffmasse aus Einspritzung bei Einlassschluss beruecksichtigen
 	}
@@ -438,7 +470,7 @@ public class CasePara {
 	public double get_Lambda_trocken(){
 		
 		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....		
-		MasterEinspritzung me=MasterEinspritzung.get_Instance(cp);//zirkuläre Referenz ;-( naja mal schauen...
+		MasterEinspritzung me=this.MASTER_EINSPRITZUNG;//zirkuläre Referenz ;-( naja mal schauen...
 		double mKrst=me.get_mKrst_Sum_ASP();
 		Spezies krst=me.get_spezKrstALL(); //liefert die Mischung aller Krafstoffe			
 		double Lst=krst.get_Lst();	
@@ -618,7 +650,7 @@ public class CasePara {
 		}		
 
 		//Die Koeffizienten Speziesfabrik liefert eine hashtable mit allen moeglichen Krafstoffen
-		Hashtable<String,Spezies> krstHash=KoeffizientenSpeziesFabrik.get_alleKrafstoffe();
+		Hashtable<String,Spezies> krstHash=this.SPEZIES_FABRIK.get_alleKrafstoffe();
 		String moeglicheFlags []=new String[krstHash.size()+2];
 		//Die Kraftsoffapproximationsspezies ist nicht in der Hashtable enthalten
 		moeglicheFlags[0]="ohc";  //jetzt schon ;-)
@@ -1581,17 +1613,8 @@ public class CasePara {
 			e.stopBremo();
 			return Double.NaN;
 		}
-	}
-	
-	
-	
-	public  ZonenVerwaltung get_zonenVerwaltung(){	
-		if(zonenVerwaltung==null){
-			zonenVerwaltung =new ZonenVerwaltung();
-			return zonenVerwaltung;
-		}else
-			return zonenVerwaltung;		
-	}
+	}	
+
 	
 	
 
@@ -1780,7 +1803,7 @@ public class CasePara {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	public final class SysPara{
+	public  class SysPara{
 		private final Hashtable<String,String[]> PARAMETER;
 		
 		
@@ -1948,7 +1971,7 @@ public class CasePara {
 				IS_KW_BASIERT=false;
 				IS_ZEIT_BASIERT=true;
 				IS_ZEIT_BASIERT_START_IN_KW=false;
-				if(MODUL_VORGABEN.get(Motor.MOTOR_FLAG)=="HubKolbenMotor")
+				if(MODUL_VORGABEN.get(MotorFabrik.MOTOR_FLAG)=="HubKolbenMotor")
 					throw new ParameterFileWrongInputException("Eine vollstaendig zeitbasierte Rechnung kann " +
 							"nur mit einem filebasierten Motorobjekt und einem Eingabefile der Form [ZEIT] [ZYLINDERVOLUMEN] erfolgen." +
 							"Alternativ ist \"sec_RechenBeginnInKW\" zu wählen");
@@ -2115,13 +2138,11 @@ public class CasePara {
 			indexOf=VentilhubEinFileName.indexOf(".");
 			VENTILHUB_EIN_FORMAT=VentilhubEinFileName.substring(indexOf+1); //Dateiendung;
 			indexOf=VentilhubAusFileName.indexOf(".");
-			VENTILHUB_AUS_FORMAT=VentilhubAusFileName.substring(indexOf+1); //Dateiendung;;
-//			
+			VENTILHUB_AUS_FORMAT=VentilhubAusFileName.substring(indexOf+1); //Dateiendung;	
 			
 			
 		}//Konstruktor SysPara	
 		
 	}//Klasse SysPara
-
 
 }//Klasse CasePara

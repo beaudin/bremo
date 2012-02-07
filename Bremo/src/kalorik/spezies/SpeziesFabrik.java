@@ -4,7 +4,12 @@
 package kalorik.spezies;
 
 import java.util.Hashtable;
+import java.util.Vector;
+
 import bremo.main.Bremo;
+import bremo.parameter.CasePara;
+import bremo.parameter.CasePara.MakeMeUnique;
+import bremoExceptions.MiscException;
 
 import kalorik.spezies.GasGemisch.Gasmischer;
 import misc.HeizwertRechner;
@@ -14,7 +19,7 @@ import misc.PhysKonst;
  * @author eichmeier
  *
  */
-public class KoeffizientenSpeziesFabrik {		
+public class SpeziesFabrik {		
 	// TODO Heizwerte recherchieren und eintragen
 	//damit der Vektor mit den zu integrierenden Spezies nicht ueberfluessiferweise mit 
 	//doppelten Grundspezies gefuellt ist wird jede Spezies nur einmal erzeugt!
@@ -36,13 +41,66 @@ public class KoeffizientenSpeziesFabrik {
 	static Spezies spezRON_95;
 	static Spezies spezRON_98;
 	static Spezies spezDiesel;
+	
+//	private  Spezies [] allSpez =new Spezies[25]; //erstmal nicht mehr als 25 Spezies bitte
+	private  int nmbrOfSpez=0; //dann wirds bei der ersten Spezies null
 
-	static final boolean STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD=
-		Bremo.get_casePara().SYS.STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD;	
+	public final boolean STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD;
 
-	//so kann kein Objekt erzeugt werden
-	private KoeffizientenSpeziesFabrik(){		
+	private final CasePara CP;
+	private Hashtable<Spezies,Integer> allSpez;
+	private Vector<Spezies> allSpezVec;
+
+	
+	public SpeziesFabrik(CasePara cp, MakeMeUnique mmu){	
+		CP=cp;
+		STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD=CP.SYS.STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD;
+		allSpez=new Hashtable<Spezies,Integer>();
+		allSpezVec =new Vector<Spezies>();
+	}
+	
+	
+	public void integrierMich(Spezies spez){	
+		if(allSpez.containsKey(spez)==false){
+			nmbrOfSpez=nmbrOfSpez+1;
+			int index=nmbrOfSpez-1;
+			allSpez.put(spez,index); //Speichern der grade erzeugten Spezies im Vektor
+			allSpezVec.add(index,spez);
+			spez.set_isTointegrate(true);
+		}
 	}	
+	
+	public boolean isToIntegrate(Spezies spez){
+		if(allSpez.containsKey(spez)&&spez.isToIntegrate)
+			return true;
+		else if(!allSpez.containsKey(spez)&&!spez.isToIntegrate) 
+			return false;
+		else{
+			try{
+				throw new MiscException("Bei Spezies "+ spez.get_name()+" stimmt die" +
+						"Belegung von isTointegrate nicht+ \n" +
+						"SpeziesFabrik und Spezis haben unterschiedliche Werte");
+			}catch(MiscException me){
+				me.stopBremo();
+				
+			}
+			return false;
+		}
+	}
+	
+	public  int get_NmbrOfAllSpez(){
+		return nmbrOfSpez;
+	}
+	
+	public int get_indexOf(Spezies spez){		
+		return allSpez.get(spez);
+	}
+	
+	public  Spezies get_Spez(int i){
+		//TODO Fehlerabfrage einbauen fuer indexOutOfBounds		
+		return allSpezVec.get(i);		
+	}
+	
 
 	/**
 	 * <p>Diese Methode erstellt eine Hashtable mit allen Kraftstoffen (KoeffSpezies mit Heizwert Hu>0). 
@@ -53,7 +111,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * --> safty first
 	 * @return Hashtable<String,Spezies> krstHash
 	 */
-	public static Hashtable<String,Spezies> get_alleKrafstoffe(){
+	public Hashtable<String,Spezies> get_alleKrafstoffe(){
 		Hashtable<String,Spezies> krstHash=new Hashtable<String,Spezies>();
 		krstHash.put(get_spezH().get_name(), get_spezH());
 		krstHash.put(get_spezH2().get_name(), get_spezH2());
@@ -70,7 +128,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies H wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezH
 	 */
-	public static Spezies get_spezH() {	
+	public Spezies get_spezH() {	
 
 		if(spezH==null){
 
@@ -80,11 +138,11 @@ public class KoeffizientenSpeziesFabrik {
 			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>218000
 			//else (also nach deJaegher und Grill etc.  hf=338905;	
-			hf=HeizwertRechner.deltaHf4Hu(0, 1, 0,hu );
+			hf=HeizwertRechner.deltaHf4Hu(CP,0, 1, 0,hu );
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_H_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_H_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -96,8 +154,11 @@ public class KoeffizientenSpeziesFabrik {
 			//Heizwert berechnet --> ziemlich hoch
 			spezH=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_H(),								
-					hf,-10e10,hu,0,0,1,0,"H",true);	//TODO Verdampfungsenthalpie + Heizwert korrigieren
+					hf,-10e10,hu,0,0,1,0,"H");	//TODO Verdampfungsenthalpie + Heizwert korrigieren
+			
+			this.integrierMich(spezH);
 		}
+		
 		return spezH;
 	}
 
@@ -105,14 +166,14 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies O wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezO
 	 */
-	public static Spezies get_spezO() {	
+	public Spezies get_spezO() {	
 		
 		if(spezO==null){
 			double hf=249200; //kein Unterschied
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_O_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_O_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -123,8 +184,11 @@ public class KoeffizientenSpeziesFabrik {
 			}
 			spezO=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_O(),								
-					hf,-10e10,0,1,0,0,0,"O",true); //TODO Verdampfungsenthalpie korrigieren
+					hf,-10e10,0,1,0,0,0,"O"); //TODO Verdampfungsenthalpie korrigieren
+			
+			this.integrierMich(spezO);
 		}
+		
 		return spezO;
 	}
 
@@ -132,8 +196,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies N wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezN
 	 */
-	public static Spezies get_spezN() {
-
+	public Spezies get_spezN() {
 
 		if(spezN==null){
 
@@ -141,7 +204,7 @@ public class KoeffizientenSpeziesFabrik {
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_N_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_N_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -153,7 +216,9 @@ public class KoeffizientenSpeziesFabrik {
 
 			spezN=new KoeffizientenSpezies(	koeffs,
 					PhysKonst.get_M_N(),								
-					hf,-10e10,0,0,0,0,1,"N",true);
+					hf,-10e10,0,0,0,0,1,"N");
+			
+			this.integrierMich(spezN);
 		}
 
 		return spezN;
@@ -163,7 +228,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies H2 wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezH2
 	 */
-	public static Spezies get_spezH2() {
+	public Spezies get_spezH2() {
 		
 		if(spezH2==null){				
 			
@@ -174,11 +239,11 @@ public class KoeffizientenSpeziesFabrik {
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>0
 			//else hf=241810;
 			double hf;
-			hf=HeizwertRechner.deltaHf4Hu(0, 2, 0,hu );
+			hf=HeizwertRechner.deltaHf4Hu(CP,0, 2, 0,hu );
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_H2_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_H2_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -190,7 +255,9 @@ public class KoeffizientenSpeziesFabrik {
 	
 			spezH2=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_H2(),								
-					hf,-10e10,hu,0,0,2,0,"H2",true);//TODO Verdampfungsenthalpie korrigieren
+					hf,-10e10,hu,0,0,2,0,"H2");//TODO Verdampfungsenthalpie korrigieren
+			
+			this.integrierMich(spezH2);
 		}
 		return spezH2;
 	}
@@ -199,7 +266,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies OH wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezOH
 	 */
-	public static Spezies get_spezOH() {
+	public Spezies get_spezOH() {
 		
 		if(spezOH==null){
 			double hf;			
@@ -211,7 +278,7 @@ public class KoeffizientenSpeziesFabrik {
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_OH_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_OH_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -223,7 +290,9 @@ public class KoeffizientenSpeziesFabrik {
 			//OH kann nicht mit Luft verbrannt werden Hu=0.....
 			spezOH=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_OH(),								
-					hf,-10e10,0,1,0,1,0,"OH",true); //TODO Heizwert + Verdampfungsenthalpie korrigiren
+					hf,-10e10,0,1,0,1,0,"OH"); //TODO Heizwert + Verdampfungsenthalpie korrigiren
+			
+			this.integrierMich(spezOH);
 		}
 		return spezOH;
 	}
@@ -232,7 +301,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies CO wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezCO
 	 */
-	public static Spezies get_spezCO() {
+	public Spezies get_spezCO() {
 		
 		if(spezCO==null){
 			double hf;	
@@ -241,11 +310,11 @@ public class KoeffizientenSpeziesFabrik {
 			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-110530
 			//else (also nach deJaegher und Grill etc.  hf=282970;	
-			hf=HeizwertRechner.deltaHf4Hu(1,0,1,hu );
+			hf=HeizwertRechner.deltaHf4Hu(CP,1,0,1,hu );
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_CO_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_CO_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -257,7 +326,9 @@ public class KoeffizientenSpeziesFabrik {
 			//Hu gerechnet --> stimmt mit Wert aus Pischinger Thermodynamik der... ueberein
 			spezCO=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_CO(),								
-					hf,-10e10,hu,1,1,0,0,"CO",true); //TODO Heizwert korrigieren
+					hf,-10e10,hu,1,1,0,0,"CO"); //TODO Heizwert korrigieren
+			
+			this.integrierMich(spezCO);
 		}
 		return spezCO;
 	}
@@ -266,7 +337,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies NO wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezNO
 	 */
-	public static Spezies get_spezNO() {
+	public Spezies get_spezNO() {
 
 		if(spezNO==null){
 			
@@ -274,7 +345,7 @@ public class KoeffizientenSpeziesFabrik {
 			double hf=91290; //nach Janaf Thermobuild
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_NO_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_NO_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -286,7 +357,9 @@ public class KoeffizientenSpeziesFabrik {
 
 			spezNO=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_NO(),								
-					hf,-10e10,0,1,0,0,1,"NO",true);
+					hf,-10e10,0,1,0,0,1,"NO");
+			
+			this.integrierMich(spezNO);
 		}
 		return spezNO;
 	}
@@ -295,14 +368,14 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies CO2 wird automatisch integriert 	
 	 * @return KoeffizientenSpezies spezO2
 	 */
-	public static Spezies get_spezO2() {
+	public Spezies get_spezO2() {
 		
 		if(spezO2==null){
 			double hf=0; //kein Unterscheidung notwendig
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_O2_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_O2_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -314,7 +387,9 @@ public class KoeffizientenSpeziesFabrik {
 
 			spezO2=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_O2(),								
-					hf,-10e10,0,2,0,0,0,"O2",true);
+					hf,-10e10,0,2,0,0,0,"O2");
+			
+			this.integrierMich(spezO2);
 		}
 		return spezO2;
 	}
@@ -323,7 +398,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies H2O wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezH2O
 	 */
-	public static Spezies get_spezH2O() {
+	public Spezies get_spezH2O() {
 		
 		if(spezH2O==null){
 			
@@ -335,7 +410,7 @@ public class KoeffizientenSpeziesFabrik {
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_H2O_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_H2O_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -347,7 +422,9 @@ public class KoeffizientenSpeziesFabrik {
 
 			spezH2O=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_H2O(),									
-					hf,-10e10,0,1,0,2,0,"H2O",true); 
+					hf,-10e10,0,1,0,2,0,"H2O"); 
+			
+			this.integrierMich(spezH2O);
 		}
 		return spezH2O;
 	}
@@ -356,7 +433,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezCO2
 	 */
-	public static Spezies get_spezCO2() {
+	public Spezies get_spezCO2() {
 		
 		if(spezCO2==null){
 			double hf;			
@@ -367,7 +444,7 @@ public class KoeffizientenSpeziesFabrik {
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_CO2_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_CO2_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -378,7 +455,9 @@ public class KoeffizientenSpeziesFabrik {
 			}
 			spezCO2=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_CO2(),									
-					hf,-10e10,0,2,1,0,0,"CO2",true);
+					hf,-10e10,0,2,1,0,0,"CO2");
+			
+			this.integrierMich(spezCO2);
 		}
 		return spezCO2;
 	}
@@ -387,14 +466,14 @@ public class KoeffizientenSpeziesFabrik {
 	 * Spezies N2 wird automatisch integriert 	
 	 * @return KoeffizientenSpezies spezN2
 	 */
-	public static Spezies get_spezN2() {
+	public Spezies get_spezN2() {
 		
 		if(spezN2==null){
 			double hf=0; //keine Unterscheidung notwendig
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_N2_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_N2_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -405,7 +484,9 @@ public class KoeffizientenSpeziesFabrik {
 			}
 			spezN2=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_N2(),								
-					hf,-10e10,0,0,0,0,2,"N2",true);	
+					hf,-10e10,0,0,0,0,2,"N2");	
+			
+			this.integrierMich(spezN2);
 		}
 		return spezN2;
 	}
@@ -414,14 +495,14 @@ public class KoeffizientenSpeziesFabrik {
 	 * Ar wird NICHT automatisch integriert  
 	 * @return KoeffizientenSpezies spezAr
 	 */
-	public static Spezies get_spezAr() {
+	public Spezies get_spezAr() {
 		
 		if(spezAr==null){
 			double hf=0; //keine Unterscheidung notwendig
 
 			double koeffs [][]=new double [3][];
 
-			if(Bremo.get_casePara().SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_Ar_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_Ar_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
@@ -433,7 +514,9 @@ public class KoeffizientenSpeziesFabrik {
 
 			spezAr=new KoeffizientenSpezies(koeffs,
 					PhysKonst.get_M_Ar(),								
-					hf,-10e10,0,0,0,0,0,"Ar",false);
+					hf,-10e10,0,0,0,0,0,"Ar");
+			
+			this.integrierMich(spezAr);
 		}
 		return spezAr;
 	}
@@ -443,7 +526,7 @@ public class KoeffizientenSpeziesFabrik {
 	 * Luft wird NICHT automatisch integriert
 	 * @return GasGemisch spezAir
 	 */
-	public static Spezies get_spezLuft_trocken() {
+	public Spezies get_spezLuft_trocken() {
 		if(spezLuftTr==null){
 			Hashtable<Spezies, Double> koeffSpeziesMolenBruchHash= new Hashtable<Spezies,Double>();
 
@@ -472,15 +555,16 @@ public class KoeffizientenSpeziesFabrik {
 	 *  RON_91 wird NICHT automatisch integriert
 	 *  @return KoeffizientenSpezies spezRON_91
 	 */
-	public static Spezies get_spezRON_91() {
+	public Spezies get_spezRON_91() {
+		//TODO Molare Masse als Eingabeparameter inm Inputfile deklarieren
 		if(spezRON_91==null){
-			double Hu=Bremo.get_casePara().get_Hu_RON_91();	
+			double Hu=CP.get_Hu_RON_91();	
 			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-1.3939e+04
 			//else (also nach deJaegher und Grill etc.  hf=;
 			double hf; //-1.8314266E+05
 
-			hf=HeizwertRechner.deltaHf4Hu(7.317412935,14.19104478,0,Hu );
+			hf=HeizwertRechner.deltaHf4Hu(CP,7.317412935,14.19104478,0,Hu );
 			
 			double koeffs [][]=new double [3][];
 
@@ -489,7 +573,7 @@ public class KoeffizientenSpeziesFabrik {
 			koeffs[2]=Koeffs_KrstFVV.get_TemperaturGrenze();
 
 			spezRON_91=new KoeffizientenSpezies(koeffs, 102.19e-3,								
-					hf,0,Hu,0,7.317412935,14.19104478,0,"RON_91",false); 
+					hf,0,Hu,0,7.317412935,14.19104478,0,"RON_91"); 
 		}
 		return spezRON_91;
 	}
@@ -501,14 +585,15 @@ public class KoeffizientenSpeziesFabrik {
 	 *  RON_95 wird NICHT automatisch integriert
 	 *  @return KoeffizientenSpezies spezRON_95
 	 */
-	public static Spezies get_spezRON_95() {
+	public Spezies get_spezRON_95() {
+		//TODO Molare Masse als Eingabeparameter inm Inputfile deklarieren
 		if(spezRON_95==null){
-			double Hu=Bremo.get_casePara().get_Hu_RON_95();
+			double Hu=CP.get_Hu_RON_95();
 			double hf;
 			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-3.5775e+04;
 			//else (also nach deJaegher und Grill etc.  hf=XXX;
-			hf=HeizwertRechner.deltaHf4Hu(6.96292482,12.46549949,0,Hu );				
+			hf=HeizwertRechner.deltaHf4Hu(CP,6.96292482,12.46549949,0,Hu );				
 
 		
 			double koeffs [][]=new double [3][];
@@ -519,7 +604,7 @@ public class KoeffizientenSpeziesFabrik {
 
 			spezRON_95=new KoeffizientenSpezies(koeffs,
 					96.19e-3,								
-					hf,0,Hu,0,6.96292482,12.46549949,0,"RON_95",false);	
+					hf,0,Hu,0,6.96292482,12.46549949,0,"RON_95");	
 		}
 		return spezRON_95;
 	}
@@ -530,14 +615,15 @@ public class KoeffizientenSpeziesFabrik {
 	 *  RON_98 wird NICHT automatisch integriert
 	 *  @return KoeffizientenSpezies spezRON_98
 	 */
-	public static Spezies get_spezRON_98() {
+	public Spezies get_spezRON_98() {
+		//TODO Molare Masse als Eingabeparameter inm Inputfile deklarieren
 		if(spezRON_98==null){
-			double Hu=Bremo.get_casePara().get_Hu_RON_98();
+			double Hu=CP.get_Hu_RON_98();
 			double hf;
 			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-4.3438e+04;
 			//else (also nach deJaegher und Grill etc.  hf=XXX;
-			hf=HeizwertRechner.deltaHf4Hu(6.895209581,11.9001996,0,Hu );		
+			hf=HeizwertRechner.deltaHf4Hu(CP,6.895209581,11.9001996,0,Hu );		
 			
 			double koeffs [][]=new double [3][];
 
@@ -547,7 +633,7 @@ public class KoeffizientenSpeziesFabrik {
 
 			spezRON_98=new KoeffizientenSpezies(koeffs,
 					94.81e-3,								
-					hf,0,Hu,0,6.895209581,11.9001996,0,"RON_98",false);
+					hf,0,Hu,0,6.895209581,11.9001996,0,"RON_98");
 		}
 		return spezRON_98;
 	}
@@ -558,15 +644,16 @@ public class KoeffizientenSpeziesFabrik {
 	 *  Diesel wird NICHT automatisch integriert
 	 *  @return KoeffizientenSpezies spezDiesel
 	 */
-	public static Spezies get_spezDiesel() {
+	public Spezies get_spezDiesel() {
+		//TODO Molare Masse als Eingabeparameter inm Inputfile deklarieren
 		if(spezDiesel==null){
-			double Hu=Bremo.get_casePara().get_Hu_Diesel();
+			double Hu=CP.get_Hu_Diesel();
 			
 			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>4.5996e+04;
 			//else (also nach deJaegher und Grill etc.  hf=8084899.999999999;
 			double hf;
-			hf=HeizwertRechner.deltaHf4Hu(12.60179278,23.52813985,0,Hu );	
+			hf=HeizwertRechner.deltaHf4Hu(CP,12.60179278,23.52813985,0,Hu );	
 
 			double koeffs [][]=new double [3][];
 
@@ -576,7 +663,7 @@ public class KoeffizientenSpeziesFabrik {
 
 			spezDiesel=new KoeffizientenSpezies(koeffs,
 					175.07e-3,								
-					hf,0,Hu,0,12.60179278,23.52813985,0,"Diesel",false);	
+					hf,0,Hu,0,12.60179278,23.52813985,0,"Diesel");	
 
 		}
 		return spezDiesel;

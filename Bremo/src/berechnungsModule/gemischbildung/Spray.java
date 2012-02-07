@@ -15,7 +15,7 @@ public class Spray extends Einspritzung {
 	private double einspritzDruck;
 	private double tEinspritzBeginn; //in s
 	private int axialAnzahl,radialAnzahl;
-	protected static final String FLAG="Hiroyasu";
+	public static final String FLAG="Hiroyasu";
 	private final double ANZ_SPL;
 	private ErgebnisBuffer ergBuf;
 	private VektorBuffer dmKRst_buffer;;
@@ -55,7 +55,7 @@ public class Spray extends Einspritzung {
 
 
 
-		if(super.boi<super.CP.SYS.RECHNUNGS_BEGINN_DVA_SEC&&!super.isLWA){	
+		if(super.boi<super.CP.SYS.RECHNUNGS_BEGINN_DVA_SEC){	//TODO &&!super.isLWA --> war das noetig?
 			try {
 				throw new ParameterFileWrongInputException("" +
 						"Fuer das gewaehlte Einspritzmodell " +this.FLAG+ " der " +index+
@@ -211,7 +211,7 @@ public class Spray extends Einspritzung {
 	@Override
 	public void berechneIntegraleGroessen(double time, Zone zn) {		
 		
-		//Die INtegration des Verdampften KRst ist nicht ganz sauber!!
+		//Die Integration des Verdampften Krst ist nicht ganz sauber!!
 		//Der Zustand der Zone entspricht dem grade berechneten Zeitschrit 
 		//--> dmKrst passt also zu time
 		//m_D_T allerdings passt zu time-WRITE_INTERVAL_SEC 
@@ -335,6 +335,12 @@ public class Spray extends Einspritzung {
 			j=pakete[i].length-1;
 			value=this.pakete[i][j].get_dQ(time, zn);
 			name="dQvap"+"_"+i+"_"+j;
+			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
+			spalte=spalte+1;
+			
+			j=0;
+			value=this.pakete[i][j].get_dma_Paket(time);
+			name="dma"+"_"+i+"_"+j;
 			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
 			spalte=spalte+1;
 			

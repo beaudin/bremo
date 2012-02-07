@@ -4,6 +4,8 @@ package berechnungsModule.ohc_Gleichgewicht;
 
 import java.util.Hashtable;
 
+import bremo.parameter.CasePara;
+
 import misc.PhysKonst;
 import kalorik.spezies.Spezies;
 
@@ -19,8 +21,8 @@ public class GleichGewichtsRechner_Grill extends GleichGewichtsRechner{
 	//Gleichgewichtskonstanten
 	double Kp1, Kp2, Kp3, Kp4 ,Kp5, Kp6, Kp7;		
 	
-	protected GleichGewichtsRechner_Grill(String gleichGewichtsKonstantenVorgabe, double T_freeze){
-		super(gleichGewichtsKonstantenVorgabe,T_freeze);
+	protected GleichGewichtsRechner_Grill(CasePara cp,String gleichGewichtsKonstantenVorgabe, double T_freeze){
+		super(cp,gleichGewichtsKonstantenVorgabe,T_freeze);
 	}		
 
 		

@@ -27,7 +27,7 @@ import bremoExceptions.ParameterFileWrongInputException;
  * @author eichmeier
  *
  */
-class DVA_Homogen_EinZonig extends DVA{
+public class DVA_Homogen_EinZonig extends DVA{
 
 	private  WandWaermeUebergang wandWaermeModell;
 	private Motor motor;
@@ -74,10 +74,10 @@ class DVA_Homogen_EinZonig extends DVA{
 		
 		ANZAHL_ZONEN=1;
 		
-		motor = Motor.get_Instance(super.CP);
-		wandWaermeModell=WandWaermeUebergang.get_Instance(super.CP);	
-		masterEinspritzung=MasterEinspritzung.get_Instance(super.CP);
-		gg=GleichGewichtsRechner.get_Instance(super.CP);
+		motor = CP.MOTOR;
+		wandWaermeModell=CP.WAND_WAERME;	
+		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
+		gg=CP.OHC_SOLVER;
 		this.checkEinspritzungen(masterEinspritzung);
 		
 		T_buffer = new misc.VektorBuffer(cp);
@@ -117,7 +117,7 @@ class DVA_Homogen_EinZonig extends DVA{
 		double R=ggZone_init.get_R();
 		double T_init=(p_init*V_init)/(mINIT*R);		
 
-		initialZones[0]=new Zone(p_init, V_init, T_init, 
+		initialZones[0]=new Zone(CP,p_init, V_init, T_init, 
 				mINIT,ggZone_init , false,0);			
 		
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
@@ -264,7 +264,7 @@ class DVA_Homogen_EinZonig extends DVA{
 		T_buffer.addValue(time, Tm);
 		
 		i+=1;
-		double T_BurnAdiabat=HeizwertRechner.calcAdiabateFlammenTemp(
+		double T_BurnAdiabat=HeizwertRechner.calcAdiabateFlammenTemp(super.CP,
 				get_frischGemisch(), zn[0].get_p(), zn[0].get_T());		
 //		double T_BurnAdiabat=0;
 		super.buffer_EinzelErgebnis("T_BurnAdiabat [K]", T_BurnAdiabat,i);
@@ -386,7 +386,7 @@ class DVA_Homogen_EinZonig extends DVA{
 		int iter=i;
 		double []mi=zn[0].get_mi();
 		for(int idx=0;idx<mi.length;idx++)
-			super.buffer_EinzelErgebnis(Spezies.get_Spez(idx).get_name()
+			super.buffer_EinzelErgebnis(CP.SPEZIES_FABRIK.get_Spez(idx).get_name()
 					+"_Massenbruch [kg]" ,mi[idx]/zn[0].get_m(),iter+idx);	
 
 	}

@@ -24,22 +24,23 @@ public abstract class Spezies {
 	protected double anzN_Atome=-1;
 	protected boolean isGasGemisch;
 	protected boolean isToIntegrate;
-	public static Spezies [] allSpez =new Spezies[25]; //erstmal nicht mehr als 25 Spezies bitte
-	protected static int nmbrOfSpez=0; //dann wirds bei der ersten Spezies null
-	protected int index=-1;
-	private boolean wirdSchonIntegriert=false; //gibt an ob die Methode integrierMich shon aufgerufen wurde
+//	public static Spezies [] allSpez =new Spezies[25]; //erstmal nicht mehr als 25 Spezies bitte
+//	protected static int nmbrOfSpez=0; //dann wirds bei der ersten Spezies null
+//	protected int index=-1;
+//	private boolean wirdSchonIntegriert=false; //gibt an ob die Methode integrierMich shon aufgerufen wurde
 	
-	public Spezies(boolean isToIntegrate){
+	protected Spezies(){
 		//diese Anweisung sorgt dafuer, dass alle Spezies AUTOMATISCH keine GasGemische sind 
 		//Der GasGemsich-Konstruktor ueberschreibt diesen Wert
 		isGasGemisch=false; 
-		this.isToIntegrate=isToIntegrate;
-		if(isToIntegrate){
-			nmbrOfSpez=nmbrOfSpez+1;
-			index=nmbrOfSpez-1;			
-			allSpez[index]=this; //Speichern der grade erzeugten Spezies im Vektor
-			wirdSchonIntegriert=true;
-		}
+		isToIntegrate=false;
+//		this.isToIntegrate=isToIntegrate;
+//		if(isToIntegrate){
+//			nmbrOfSpez=nmbrOfSpez+1;
+//			index=nmbrOfSpez-1;			
+//			allSpez[index]=this; //Speichern der grade erzeugten Spezies im Vektor
+//			wirdSchonIntegriert=true;
+//		}
 	}
 	
 	public abstract double get_M();							// kg / mol	
@@ -48,34 +49,37 @@ public abstract class Spezies {
 
 	
 	
-	public static Spezies get_Spez(int i){
-		//TODO Fehlerabfrage einbauen fuer indexOutOfBounds
-		return allSpez[i];		
-	}
-	
+//	public static Spezies get_Spez(int i){
+//		//TODO Fehlerabfrage einbauen fuer indexOutOfBounds
+//		return allSpez[i];		
+//	}
+//	
 	/**
 	 * Diese Funktion sorgt dafuer, dass die entsprechende Spezies vom 
 	 * Solver integriert wird
 	 */
-	public void integrierMich(){	
-		if(wirdSchonIntegriert==false){
-			isToIntegrate=true;
-			nmbrOfSpez=nmbrOfSpez+1;
-			index=nmbrOfSpez-1;
-			allSpez[index]=this; //Speichern der grade erzeugten Spezies im Vektor
-			wirdSchonIntegriert=true;
-		}
+//	public void integrierMich(){	
+//		if(wirdSchonIntegriert==false){
+//			isToIntegrate=true;
+//			nmbrOfSpez=nmbrOfSpez+1;
+//			index=nmbrOfSpez-1;
+//			allSpez[index]=this; //Speichern der grade erzeugten Spezies im Vektor
+//			wirdSchonIntegriert=true;
+//		}
+//	}
+	
+//	public static int get_NmbrOfAllSpez(){
+//		return nmbrOfSpez;
+//	}
+//	
+//	public int get_index(){
+//		return index;
+//	}
+	
+	protected void set_isTointegrate(boolean isToint){
+		this.isToIntegrate=isToint;
 	}
 	
-	public static int get_NmbrOfAllSpez(){
-		return nmbrOfSpez;
-	}
-	
-	public int get_index(){
-		return index;
-	}
-	
-		
 	public String get_name() {
 		return name;
 	}
@@ -216,9 +220,9 @@ public abstract class Spezies {
 	}
 	
 	
-	public boolean isToIntegrate(){
-		return isToIntegrate;
-	}
+//	public boolean isToIntegrate(){
+//		return isToIntegrate;
+//	}
 	
 	
 	/**

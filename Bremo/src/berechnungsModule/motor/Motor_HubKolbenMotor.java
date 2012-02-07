@@ -37,7 +37,7 @@ public class Motor_HubKolbenMotor extends Motor{
 	private final CasePara CP;	
 	
 	
-	public Motor_HubKolbenMotor(CasePara cp){
+	protected Motor_HubKolbenMotor(CasePara cp){
 		super(cp);
 		CP=super.CP;
 		PLEUELLAENGE =CP.get_Pleuellaenge();			//m

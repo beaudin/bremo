@@ -29,7 +29,7 @@ public class Chang extends WandWaermeUebergang {
 	private double C_2;
 	private double alpha_scaling;
 	
-	public Chang(CasePara mp){
+	protected Chang(CasePara mp){
 		super(mp);
 		this.cp=super.cp;
 		indiD=new IndizierDaten(cp);	//TODO: umprogrammieren, so dass die Indizierdatei nur ein einziges Mal eingelesen wird

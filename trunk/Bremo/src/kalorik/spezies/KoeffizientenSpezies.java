@@ -27,7 +27,7 @@ public class KoeffizientenSpezies extends Spezies {
  * @param anzN_Atome
  * @param neuerName
  */
-	public KoeffizientenSpezies(double [][]thermodynKoeffs,
+	protected KoeffizientenSpezies(double [][]thermodynKoeffs,
 							double molekularGewicht,							
 							double delta_hf298_mol,
 							double h_evap_mol,
@@ -36,10 +36,8 @@ public class KoeffizientenSpezies extends Spezies {
 							double anzC_Atome,
 							double anzH_Atome,
 							double anzN_Atome,				
-							String name,
-							boolean isToIntegrate) {
-		
-		super(isToIntegrate);			
+							String name) {
+		super();			
 		this.thermodynKoeffs[0] = thermodynKoeffs[0];
 		this.thermodynKoeffs[1] = thermodynKoeffs[1];
 		this.molekularGewicht=molekularGewicht;

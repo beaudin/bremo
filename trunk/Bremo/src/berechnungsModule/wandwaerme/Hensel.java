@@ -20,7 +20,7 @@ public class Hensel extends WandWaermeUebergang {
     private VentilhubFileReader VH_Datei_Ein;
 	private VentilhubFileReader VH_Datei_Aus;
 	
-	public Hensel(CasePara mp) {
+	protected Hensel(CasePara mp) {
 		super(mp);
 		this.cp=super.cp;
 		indiD=new IndizierDaten(cp);	//TODO: umprogrammieren, so dass die Indizierdatei nur ein einziges Mal eingelesen wird

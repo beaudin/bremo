@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
+import berechnungsModule.wandwaerme.WandWaermeUebergangFabrik;
 import bremoExceptions.ParameterFileWrongInputException;
 
 public class InputFileReader {
@@ -166,10 +167,10 @@ public class InputFileReader {
 
 						if(idxModulNameEnde-1<0 || idxModulNameEnde<=idxModulNameAnfang || currentLine.endsWith("]")==false) {
 							try{
-								throw new ParameterFileWrongInputException("falsche Eingabe im Inputfile: "+ currentLine +"\n"+
+								throw new ParameterFileWrongInputException("Falsche Eingabe im Inputfile: "+ currentLine +"\n"+
 										"Berechnungsmodule muessen wie folgt eingegeben werden: \n" +
 										"[MODULKENNZEICHNUNG: MODULNAME] z.B.: \t " +
-										" [" + WandWaermeUebergang.WANDWAERME_FLAG+": " + WandWaermeUebergang.WANDWAERMEMODELLE[0]+"] \n " +
+										" [" + WandWaermeUebergangFabrik.WANDWAERME_FLAG+": " + WandWaermeUebergangFabrik.WANDWAERMEMODELLE[0]+"] \n " +
 								"Soll kein Berechnungsmodul definiert werden, duerfen eckige Klammern nicht am Zeilenanfang stehen!");								
 							}catch(ParameterFileWrongInputException e){
 								e.stopBremo();

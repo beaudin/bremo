@@ -29,17 +29,15 @@ public class KrstApproxSpezies extends Spezies  {
 	 * @param anzN_Atome
 	 * @param name
 	 */
-	public KrstApproxSpezies(double molekularGewicht,							
+	protected KrstApproxSpezies(double molekularGewicht,							
 			double h_evap_mol,
 			double Hu_mol,
 			double anzO_Atome,
 			double anzC_Atome,
 			double anzH_Atome,
 			double anzN_Atome,				
-			String name,
-			boolean isToIntegrate){
-		
-		super(isToIntegrate);		
+			String name){
+		super();
 		this.molekularGewicht=molekularGewicht;
 		this.h_evap_mol=h_evap_mol;
 		this.Hu_mol=Hu_mol;

@@ -5,13 +5,16 @@ package berechnungsModule.ohc_Gleichgewicht;
 
 import java.util.Hashtable;
 
+import bremo.parameter.CasePara;
+
 import misc.PhysKonst;
 import kalorik.spezies.Spezies;
 
 	public class GleichGewichtsRechner_Olikara_Borman extends GleichGewichtsRechner{
 		
-		protected GleichGewichtsRechner_Olikara_Borman(String gleichGewichtsKonstantenVorgabe,double T_freeze){
-			super(gleichGewichtsKonstantenVorgabe,T_freeze);
+		protected GleichGewichtsRechner_Olikara_Borman(CasePara cp,
+				String gleichGewichtsKonstantenVorgabe,double T_freeze){
+			super(cp,gleichGewichtsKonstantenVorgabe,T_freeze);
 		}	
 		
 		protected  double [] calc_gg(	double p, 

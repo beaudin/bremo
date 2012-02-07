@@ -3,7 +3,7 @@ package berechnungsModule.Berechnung;
 import java.util.Hashtable;
 
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.KoeffizientenSpeziesFabrik;
+import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 import matLib.MatLibBase;
 import misc.HeizwertRechner;
@@ -79,11 +79,11 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 		ANZAHL_ZONEN=2;
 
-		motor = Motor.get_Instance(super.CP);
-		wandWaermeModell=WandWaermeUebergang.get_Instance(super.CP);	
-		masterEinspritzung=MasterEinspritzung.get_Instance(super.CP);
+		motor = CP.MOTOR;
+		wandWaermeModell=CP.WAND_WAERME;	
+		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		checkEinspritzungen(masterEinspritzung); //checkt ob alle Einspritzungen in die unverbrennte Zone erfolgen
-		gg=GleichGewichtsRechner.get_Instance(super.CP);
+		gg=CP.OHC_SOLVER;
 
 		T_buffer = new misc.VektorBuffer(cp);
 		dQb_buffer = new misc.VektorBuffer(cp);	
@@ -122,16 +122,16 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		double R=ggZone_init.get_R();
 		double T_init=(p_init*V_init)/(mINIT*R);		
 		//unverbrannte Zone
-		this.initialZones[0]=new Zone(p_init, V_init, T_init, 
+		this.initialZones[0]=new Zone(CP,p_init, V_init, T_init, 
 				mINIT,ggZone_init , false,0);
 
 		//verbrannte Zone--> wird spaeter nochmal initialisiert
 		GasGemisch rauchgas=new GasGemisch("Rauchgas");
 		Hashtable <Spezies,Double> ht=new Hashtable<Spezies,Double>();
-		ht.put(KoeffizientenSpeziesFabrik.get_spezCO2(), 1D); //nur als Dummi belegung --> sonst gibt's nen Fehler
+		ht.put(CP.SPEZIES_FABRIK.get_spezCO2(), 1D); //nur als Dummi belegung --> sonst gibt's nen Fehler
 		rauchgas.set_Gasmischung_molenBruch(ht);
 
-		this.initialZones[1]=new Zone(1, 1e-55, 1, 
+		this.initialZones[1]=new Zone(CP,1, 1e-55, 1, 
 				1e-55,rauchgas, true,1);
 
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
@@ -331,7 +331,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		T_buffer.addValue(time, Tm);
 
 		i+=1;
-		double T_BurnAdiabat=HeizwertRechner.calcAdiabateFlammenTemp(
+		double T_BurnAdiabat=HeizwertRechner.calcAdiabateFlammenTemp(super.CP,
 				zn[0].get_ggZone(), zn[0].get_p(), zn[0].get_T());	
 
 		super.buffer_EinzelErgebnis("T_BurnAdiabat [K]", T_BurnAdiabat,i);
@@ -386,7 +386,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 		i+=1;
 		super.buffer_EinzelErgebnis("Hu frischGemsich [J/kg]", 
-				zn[0].get_ggZone().get_Hu_mass(),i);		
+				this.get_frischGemisch().get_Hu_mass(),i);		
 
 		i+=1;
 		super.buffer_EinzelErgebnis("Phi_Delay [°KW]",10*fortschritt*1000/(CP.get_DrehzahlInUproSec()*60),i);
@@ -471,7 +471,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		double m_ges=zn[0].get_m();
 		for(int idx=0;idx<mi.length;idx++){
 			i=iter+idx;
-			super.buffer_EinzelErgebnis("Zu_"+Spezies.get_Spez(idx).get_name()
+			super.buffer_EinzelErgebnis("Zu_"+CP.SPEZIES_FABRIK.get_Spez(idx).get_name()
 					+" [kg]" ,mi[idx]/m_ges,i);			
 		}
 
@@ -481,7 +481,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		m_ges=zn[1].get_m();
 		for(int idx=0;idx<mi.length;idx++){
 			i=iter+idx;
-			super.buffer_EinzelErgebnis("Zb_"+Spezies.get_Spez(idx).get_name()
+			super.buffer_EinzelErgebnis("Zb_"+CP.SPEZIES_FABRIK.get_Spez(idx).get_name()
 					+" [kg]" ,mi[idx]/m_ges,iter+idx);
 		}		
 		i+=1;		
@@ -500,7 +500,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		//TODO mach mich public und ruf mich vom solver aus auf
 		initialZonesWhileRunning=new Zone[zonen_IN.length];
 
-		double T_BurnAdiabat=HeizwertRechner.calcAdiabateFlammenTemp(
+		double T_BurnAdiabat=HeizwertRechner.calcAdiabateFlammenTemp(super.CP,
 				zonen_IN[0].get_ggZone(), zonen_IN[0].get_p(), zonen_IN[0].get_T()); 
 		double Tb=T_BurnAdiabat;	
 
@@ -515,7 +515,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		Hashtable<Spezies,Double> ht=new Hashtable<Spezies,Double>();		
 		ht=LittleHelpers.addiereHashs(ht, 
 				rauchgas.get_speziesMassenBruecheDetailToIntegrate(), mb);
-		initialZonesWhileRunning[1]=new Zone(zonen_IN[1].get_p_V_T_mi(),zonen_IN[1].isBurnt(),zonen_IN[1].getID());
+		initialZonesWhileRunning[1]=new Zone(CP,zonen_IN[1].get_p_V_T_mi(),zonen_IN[1].isBurnt(),zonen_IN[1].getID());
 		initialZonesWhileRunning[1].set_p_V_T_mi(p, Vb_init, Tb,ht);
 
 		double mub=zonen_IN[0].get_m()-mb; 
@@ -528,7 +528,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 				zonen_IN[0].get_ggZone().get_speziesMassenBruecheDetailToIntegrate(), mub);
 
 
-		initialZonesWhileRunning[0]=new Zone(zonen_IN[0].get_p_V_T_mi(),zonen_IN[0].isBurnt(),zonen_IN[0].getID());
+		initialZonesWhileRunning[0]=new Zone(CP,zonen_IN[0].get_p_V_T_mi(),zonen_IN[0].isBurnt(),zonen_IN[0].getID());
 		initialZonesWhileRunning[0].set_p_V_T_mi(p,Vub, Tub,ht2);	
 		burntZonesAlreadyInitialised=true;		
 	}

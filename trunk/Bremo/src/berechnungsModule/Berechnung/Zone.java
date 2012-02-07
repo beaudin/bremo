@@ -3,11 +3,12 @@ package berechnungsModule.Berechnung;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
+import bremo.parameter.CasePara;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.MiscException;
 import bremoExceptions.NegativeMassException;
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.KoeffizientenSpeziesFabrik;
+import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 
 
@@ -28,7 +29,6 @@ public class Zone {
 	private GasGemisch gg_Zone; 
 	private final boolean burns;
 
-
 	//		//Hashtable mit den Änderungen der Massenbrüche mit der Temperatur aufgrund von Dissoziation
 	//		Hashtable<Spezies,Double> dmj_dT;
 	//
@@ -41,8 +41,8 @@ public class Zone {
 	// gibt an ob es sich um eine Zone mit Rauchgas handelt
 	boolean loeseChemGleichgwicht=false;
 
-	private final GleichGewichtsRechner GG_SOLVER; //=Bremo.get_casePara().MODULE.get_GleichGewichtsRechner();		
-
+	private final GleichGewichtsRechner GG_SOLVER; 		
+	private final CasePara CP;
 
 
 	/**
@@ -55,23 +55,23 @@ public class Zone {
 	 * @param burns
 	 * @param id
 	 */
-	public Zone(double p_init,double V_init, double T_init, double m_init,
+	public Zone(CasePara cp,double p_init,double V_init, double T_init, double m_init,
 			Spezies gg,boolean burns, int id ) {	
 
-
+		CP=cp;
 
 		//			if(Bremo.get_casePara().get_zonenVerwaltung().existsID(id))
 		//				throw new IllegalArgumentException("Zone: " +
 		//				"Es wurde versucht eine Zone mit einer bereits bestehenden ID zu erzeugen");	
 
-		this.GG_SOLVER=GleichGewichtsRechner.get_Instance();
+		this.GG_SOLVER=cp.OHC_SOLVER;
 		this.ID=id;//TODO ZonenID automatisch Verwalten?
 		this.gg_Zone=new GasGemisch("ggZone"+id);
 		this.burns=burns;
 
 		Hashtable<Spezies, Double> einzelMassen =new Hashtable<Spezies, Double>();
 
-		if(gg.isGasGemisch()&&!gg.isToIntegrate()){
+		if(gg.isGasGemisch()&&!CP.SPEZIES_FABRIK.isToIntegrate(gg)){
 			einzelMassen=this.get_einzelMassenHash(
 					((GasGemisch)gg).get_speziesMassenBruecheDetailToIntegrate(), m_init);
 		}else{				
@@ -89,9 +89,10 @@ public class Zone {
 	 * @param burns gibt an ob chemGlgw geloest werden soll --> aka verbrannte Zone
 	 * @param id 
 	 */
-	public Zone(double [] p_V_T_mi,	boolean burns, int id) {
+	public Zone(CasePara cp, double [] p_V_T_mi,	boolean burns, int id) {
+		this.CP=cp;
 		this.ID=id;
-		this.GG_SOLVER=GleichGewichtsRechner.get_Instance();		
+		this.GG_SOLVER=CP.OHC_SOLVER;		
 		this.gg_Zone=new GasGemisch("ggZone"+id);
 		this.burns=burns;
 		this.set_p_V_T_mi(p_V_T_mi);
@@ -99,7 +100,7 @@ public class Zone {
 
 	public void set_p_V_T_mi(double [] p_V_T_mi){
 
-		if(p_V_T_mi.length!=(Spezies.get_NmbrOfAllSpez()+3)){
+		if(p_V_T_mi.length!=(CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()+3)){
 			try{
 				throw new BirdBrainedProgrammerException("NmbrOfAllSpez " +
 				"entspricht nicht der Anzahl der Spezies in dieser Zone");
@@ -115,7 +116,7 @@ public class Zone {
 
 		for(int i=0; i<p_V_T_mi.length-3;i++) {
 			if(p_V_T_mi[i+3]!=0){ //Abfrage ob mi <0 kommt in "set_p_V_T_mi(p_init,V_init,T_init,miHT)"
-				miHT.put(Spezies.get_Spez(i), p_V_T_mi[i+3]);	
+				miHT.put(CP.SPEZIES_FABRIK.get_Spez(i), p_V_T_mi[i+3]);	
 			}
 		}
 
@@ -194,7 +195,8 @@ public class Zone {
 
 			}else{
 				Hashtable<Spezies, Double> massenBrueche =new Hashtable<Spezies, Double>();
-				massenBrueche.put(KoeffizientenSpeziesFabrik.get_spezCO2(),1D); //TODO irgendwie uncool
+				Spezies co2=CP.SPEZIES_FABRIK.get_spezCO2();
+				massenBrueche.put(co2,1D); //TODO irgendwie uncool
 				gg_Zone.set_Gasmischung_massenBruch(massenBrueche);	
 			}
 			dmj_ein=new Hashtable<Spezies, Double>();
@@ -234,7 +236,7 @@ public class Zone {
 		if(dm_a>0){				
 			//Hinzufügen der Einzelmassen der entnommenen Spezies zur Hashtable dmj
 			Hashtable<Spezies, Double>einzelMassenHash_aus = new Hashtable<Spezies,Double>();
-			if(spez.isGasGemisch()&& spez.isToIntegrate()==false){
+			if(spez.isGasGemisch()&& CP.SPEZIES_FABRIK.isToIntegrate(spez)==false){
 				Hashtable<Spezies, Double> massenBruchHash_aus=	
 					((GasGemisch)spez).get_speziesMassenBruecheDetailToIntegrate();
 
@@ -250,7 +252,7 @@ public class Zone {
 			Spezies spez1;
 			while(e.hasMoreElements()){
 				spez1=e.nextElement();
-				if(!spez1.isToIntegrate()){
+				if(!CP.SPEZIES_FABRIK.isToIntegrate(spez1)){
 					try{
 						throw new BirdBrainedProgrammerException("Aus Zone " +this.ID + " wurde eine Spezies "
 								+"("+ spez1.get_name()+ ") entnommen die nicht integriert werden soll"+
@@ -297,7 +299,7 @@ public class Zone {
 
 			//Hinzufügen der Einzelmassen der zugefügten Spezies zur Hashtable dmj
 			Hashtable<Spezies, Double>einzelMassenHash_zu = new Hashtable<Spezies,Double>();
-			if(spez_zu.isGasGemisch()&& spez_zu.isToIntegrate()==false){
+			if(spez_zu.isGasGemisch()&& CP.SPEZIES_FABRIK.isToIntegrate(spez_zu)==false){
 
 				Hashtable<Spezies, Double> massenBruchHash_zu=	
 					((GasGemisch)spez_zu).get_speziesMassenBruecheDetailToIntegrate();
@@ -314,7 +316,7 @@ public class Zone {
 			Spezies spez;
 			while(e.hasMoreElements()){
 				spez=e.nextElement();
-				if(!spez.isToIntegrate()){
+				if(!CP.SPEZIES_FABRIK.isToIntegrate(spez)){
 					try{
 						throw new BirdBrainedProgrammerException("In Zone " +this.ID + " wurde eine Spezies "
 								+"("+ spez.get_name()+ ") eingebracht die nicht integriert werden soll"+
@@ -464,12 +466,12 @@ public class Zone {
 	public double [] get_dmi_dp() {
 
 		Hashtable<Spezies, Double> dmdp=this.calc_dmj_dp();
-		double dmi []=new double[Spezies.get_NmbrOfAllSpez()];
+		double dmi []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
 		Enumeration<Spezies> e=dmdp.keys();
 		Spezies spez;
 		while(e.hasMoreElements()){
 			spez=e.nextElement();
-			dmi[spez.get_index()]=dmdp.get(spez);				
+			dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=dmdp.get(spez);				
 		}	
 		return dmi;
 	}
@@ -481,12 +483,12 @@ public class Zone {
 
 	public double [] get_dmi_dT() {		
 		Hashtable<Spezies, Double> dmdT=this.calc_dmj_dp();
-		double dmi []=new double[Spezies.get_NmbrOfAllSpez()];
+		double dmi []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
 		Enumeration<Spezies> e=dmdT.keys();
 		Spezies spez;
 		while(e.hasMoreElements()){
 			spez=e.nextElement();
-			dmi[spez.get_index()]=dmdT.get(spez);				
+			dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=dmdT.get(spez);				
 		}	
 		return dmi;
 	}
@@ -494,36 +496,37 @@ public class Zone {
 	public double [] get_mi(){
 		//TODO mach mich mi[] zur Klassenvariablen, dann duerfte es etwas schneller rechnen
 		Hashtable<Spezies, Double> mb=gg_Zone.get_speziesMassenBruecheDetailToIntegrate();
-		double mi []=new double[Spezies.get_NmbrOfAllSpez()];
+		double mi []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
 		Enumeration<Spezies> e=mb.keys();
 		Spezies spez;
 		while(e.hasMoreElements()){
 			spez=e.nextElement();
-			mi[spez.get_index()]=mb.get(spez)*m_Zone;				
+			mi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=mb.get(spez)*m_Zone;				
 		}			
 		return mi;
 	}
 
 	public double [] get_dmi(){
 		//TODO mach mich dmi[] zur Klassenvariablen
-		double dmi []=new double[Spezies.get_NmbrOfAllSpez()];
+		double dmi []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
 		Enumeration<Spezies> e=dmj_ein.keys();
 		Spezies spez;
 		while(e.hasMoreElements()){
 			spez=e.nextElement();
-			dmi[spez.get_index()]=dmj_ein.get(spez);				
+			dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=dmj_ein.get(spez);				
 		}
 		e=null;		
 		e=dm_aus.keys();
 		while(e.hasMoreElements()){
 			spez=e.nextElement();
-			dmi[spez.get_index()]=dmi[spez.get_index()]-this.dm_aus.get(spez);	
+			dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=
+				dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]-this.dm_aus.get(spez);	
 		}
 		return dmi;
 	}
 
 	public double [] get_p_V_T_mi(){			
-		double[]p_V_T_mi=new double [3+Spezies.get_NmbrOfAllSpez()];
+		double[]p_V_T_mi=new double [3+CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
 		p_V_T_mi[0]=this.p_Zone;
 		p_V_T_mi[1]=this.V_Zone;
 		p_V_T_mi[2]=this.T_Zone;
@@ -903,7 +906,7 @@ public class Zone {
 	}
 
 
-	public static Zone zonenMischen(Zone z1, Zone z2,boolean burns, int ID){
+	public static Zone zonenMischen(CasePara cp,Zone z1, Zone z2,boolean burns, int ID){
 		double p=z1.get_p();//fuer beide Zonen gleich
 		double m1=z1.get_m();
 		double T1=z1.get_T();
@@ -932,7 +935,7 @@ public class Zone {
 		//Das Volumen beider Zonen wird addiert
 		double V0=V1+V2;
 
-		Zone z0=new Zone(p, V0, T0, mGes, s0, burns, ID);		
+		Zone z0=new Zone(cp,p, V0, T0, mGes, s0, burns, ID);		
 		return z0;
 	}
 

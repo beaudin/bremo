@@ -49,11 +49,11 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("pMax [bar]",indi.get_pZyl_MAX()*1e-5,i);
 		
 			
-			double mAGR_inter=InternesRestgas.get_Instance(CP).get_mInternesRestgas_ASP();
+			double mAGR_inter=CP.RESTGASMODELL.get_mInternesRestgas_ASP();
 			i+=1;
 			ergB.buffer_EinzelErgebnis("mAGR_intern [kg]",mAGR_inter,i);	
 			
-			MasterEinspritzung me=	MasterEinspritzung.get_Instance(CP);
+			MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
 			double mKrst=me.get_mKrst_Sum_ASP();
 			double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
 			double mGes= mVerbrennungsLuft+mKrst;
@@ -167,8 +167,8 @@ public class PostProcessor {
 
 	
 	private double [] clacVerlustteilung(double x50,double Qw,double pmi){
-		MasterEinspritzung me=	MasterEinspritzung.get_Instance(CP);
-		Motor m=Motor.get_Instance(CP);
+		MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
+		Motor m=CP.MOTOR;
 		double [] h=new double [7];
 		double Hu=me.get_spezKrstALL().get_Hu_mass();	
 		double mKrstAll=me.get_mKrst_Sum_ASP();
@@ -214,7 +214,7 @@ public class PostProcessor {
 		///////////////////////////////////
 		GasGemisch abgas =new GasGemisch("abgas");
 		abgas.set_Gasmischung_molenBruch(
-				GleichGewichtsRechner.get_Instance(CP).get_GG_molenBrueche(1e5, 300, frischGemisch));
+				CP.OHC_SOLVER.get_GG_molenBrueche(1e5, 300, frischGemisch));
 		
 		double M=abgas.get_M();
 		double hc=CP.get_HC();

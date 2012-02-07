@@ -5,21 +5,17 @@ import java.util.Hashtable;
 import io.DurchflusskennzahlFileReader;
 import io.VentilhubFileReader;
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.KoeffizientenSpeziesFabrik;
+import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
-import misc.PhysKonst;
 import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.Zone;
 import misc.VektorBuffer;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
-import berechnungsModule.internesRestgas.InternesRestgas;
 import berechnungsModule.motor.Motor;
-import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
 import bremo.parameter.CasePara;
 import bremo.parameter.IndizierDaten;
-import bremoExceptions.MiscException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -29,7 +25,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	private Motor m;
 	private MasterEinspritzung masterEinspritzung;
 	protected final IndizierDaten indiD;
-	private double pInit,VInit,TInit;
+	private double pInit,VInit;
 	private double A_E;	//Referenzfläche für den Durchflusskennwert des Einlassventils
 	private double A_A; //Referenzfläche für den Durchflusskennwert des Auslassventils
 	private double alpha_E_vor; //Durchflusskennwert des Einlassventils, vorwärts
@@ -57,14 +53,14 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	public LadungsWechselAnalyse(CasePara cp) {
 		super(cp,new ErgebnisBuffer(cp,"LWA_"));	
 		T_buffer = new VektorBuffer(CP);
-		m = Motor.get_Instance(super.CP);
+		m = CP.MOTOR;
 		indiD=new IndizierDaten(cp);
-		masterEinspritzung=MasterEinspritzung.get_Instance_LWA(super.CP);
+		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		anzZonen=1;
 		gAbgasbehaelter =new GasGemisch("AGR_intern_LWA");
 		gAbgasbehaelter.set_Gasmischung_molenBruch(
 				((GasGemisch)CP.get_spezAbgas()).get_speziesMassenBruecheDetailToIntegrate());
-		gAbgasbehaelter.integrierMich();
+		CP.SPEZIES_FABRIK.integrierMich(gAbgasbehaelter);
 		
 		//Kraftstoff aus Saugrohreinspritzungen wird unabhängig 
 		//vom Zeitpunkt direkt zum Behaeltergemisch gerechnet
@@ -81,17 +77,18 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		//Bestimmung der Verbrennungsluftzusammensetzung	
 		GasGemisch agrEX=new GasGemisch("AGR_extern_LWA");
 		agrEX.set_Gasmischung_molenBruch(((GasGemisch)CP.get_spezAbgas()).get_speziesMolenBrueche());
-		agrEX.integrierMich();
+		CP.SPEZIES_FABRIK.integrierMich(agrEX);
 		
 		//feuchte Luft
 		double mLF=mLuft_tr+mW; //gesamte Masse im Zylinder (ohne Kraftstoff)	
 		mLF_mess=mLF;
 		Hashtable<Spezies,Double>feuchteLuft_MassenBruchHash=new Hashtable<Spezies,Double>();
-		feuchteLuft_MassenBruchHash.put(KoeffizientenSpeziesFabrik.get_spezLuft_trocken(),mLuft_tr/mLF);		
-		feuchteLuft_MassenBruchHash.put(KoeffizientenSpeziesFabrik.get_spezH2O(),mW/mLF);
+		feuchteLuft_MassenBruchHash.put(CP.SPEZIES_FABRIK.get_spezLuft_trocken(),mLuft_tr/mLF);		
+		feuchteLuft_MassenBruchHash.put(CP.SPEZIES_FABRIK.get_spezH2O(),mW/mLF);
 		feuchteLuft=new GasGemisch("feuchteLuft_LWA");
 		feuchteLuft.set_Gasmischung_massenBruch(feuchteLuft_MassenBruchHash);
-		feuchteLuft.integrierMich();		
+		
+		CP.SPEZIES_FABRIK.integrierMich(feuchteLuft);		
 		
 		//gesamte Masse 
 		double mGes=mLF+mAGRex+mKrst; 
@@ -106,7 +103,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		gFrischluftbehaelter=gemischINIT;	
 		TSaug=super.CP.get_T_LadeLuft();
 		TAbg=super.CP.get_T_Abgas();
-		wandWaermeModell=WandWaermeUebergang.get_Instance_LW(super.CP);
+		wandWaermeModell=CP.WAND_WAERME_LW;
 		A_E=super.CP.get_ReferenzflaecheEinlass();
 		A_A=super.CP.get_ReferenzflaecheAuslass();
 		
@@ -293,7 +290,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		i++;
 		double []mi=zonen[0].get_mi();
 		for(int idx=0;idx<mi.length;idx++)
-			super.buffer_EinzelErgebnis(Spezies.get_Spez(idx).get_name()
+			super.buffer_EinzelErgebnis(CP.SPEZIES_FABRIK.get_Spez(idx).get_name()
 					+"_Massenbruch",mi[idx]/mZ,i+idx);
 
 	}
@@ -337,7 +334,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 				
 		double TInit =pInit*VInit/(mInit*sInit.get_R());
 		
-		zn[0]=new Zone(pInit, VInit, TInit, mInit, sInit, false, 0);
+		zn[0]=new Zone(CP,pInit, VInit, TInit, mInit, sInit, false, 0);
 		return zn;
 	}
 	
@@ -371,7 +368,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		for(int i=0;i<me.get_AlleEinspritzungen().length;i++){			
 			if(me.get_AlleEinspritzungen()[i].get_ID_Zone()!=0){
 				try {
-					throw new ParameterFileWrongInputException("Für die Ladungswechselanalyse " +
+					throw new ParameterFileWrongInputException("Fuer die Ladungswechselanalyse " +
 							"koennen die Einspritzungen" +
 							"nur in Zone 0 erfolgen.\n Gewaehlt wurde aber Zone "+ 
 							me.get_AlleEinspritzungen()[i].get_ID_Zone());

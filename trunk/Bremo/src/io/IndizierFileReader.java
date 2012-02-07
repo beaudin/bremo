@@ -1,5 +1,6 @@
 package io;
 
+import bremo.parameter.CasePara;
 import bremoExceptions.ParameterFileWrongInputException;
 
 
@@ -17,8 +18,11 @@ public abstract class IndizierFileReader {
 	protected int punkteProArbeitsspiel;
 	protected double pZylMAX=-5.55;
 	protected double dauerASP;
+	protected final CasePara CP;
 	
-	
+	public IndizierFileReader(CasePara cp){
+		CP=cp;
+	}
 	
 	//Routine, um die Daten einzulesen. Innerhalb dieser Methode müssen 
 	//pZyl, pSaug, pAbg, Drehzahl, anzahlZyklen und punkteProArbeitsspiel 

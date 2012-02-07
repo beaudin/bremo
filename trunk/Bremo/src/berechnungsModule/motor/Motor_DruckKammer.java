@@ -6,6 +6,7 @@ import bremoExceptions.BirdBrainedProgrammerException;
 public class Motor_DruckKammer extends Motor {
 
 	private double V;
+	
 	protected Motor_DruckKammer(CasePara cp) {
 		super(cp);
 		V=super.CP.get_DruckKammerVolumen();
@@ -18,7 +19,7 @@ public class Motor_DruckKammer extends Motor {
 			throw new BirdBrainedProgrammerException("Fuer den Motortyp \"DruckKammer\"" +
 					"wurde diese Funktion nicht implementiert. \n Bis jetzt gab es auch keine " +
 					"Wandwaermeuebergangsmodelle" +
-					"die dies Unterstuezt");
+					"die dies unterstuezen");
 		}catch(BirdBrainedProgrammerException bbpe){
 			bbpe.stopBremo();
 		}

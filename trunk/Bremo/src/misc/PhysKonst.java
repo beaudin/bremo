@@ -1,6 +1,6 @@
 package misc;
 
-import kalorik.spezies.KoeffizientenSpeziesFabrik;
+import kalorik.spezies.SpeziesFabrik;
 import bremoExceptions.MiscException;
 
 public class PhysKonst {
@@ -170,8 +170,8 @@ public class PhysKonst {
 	//Molaremasse Luft	
 	public static double get_M_Luft(){
 		double M_Luft= 0.0289644; 	// kg/mol
-//		return M_Luft;
-		return KoeffizientenSpeziesFabrik.get_spezLuft_trocken().get_M();
+		return M_Luft;
+//		return SpeziesFabrik.get_spezLuft_trocken().get_M();
 	}
 
 	

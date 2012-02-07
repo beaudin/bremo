@@ -4,6 +4,7 @@ package io;
 import java.io.*;
 
 import bremo.main.Bremo;
+import bremo.parameter.CasePara;
 import bremoExceptions.ParameterFileWrongInputException;
 
 public class IndizierFileReader_txt extends IndizierFileReader{
@@ -20,10 +21,11 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 	private boolean convertKW2SEC=false;
 
 	
-	public IndizierFileReader_txt(String pfad,
+	public IndizierFileReader_txt(CasePara cp,String pfad,
 									int kanal_pZyl,
 									int kanal_pEin,
-									int kanal_pAus, double dauerASP){		
+									int kanal_pAus, double dauerASP){	
+		super(cp);
 		
 		spalte_pZyl = kanal_pZyl;
 		spalte_pEin = kanal_pEin;
@@ -47,7 +49,8 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 	
 	
 	
-	public IndizierFileReader_txt(String fileName,int kanal_pZyl, double dauerASP){			
+	public IndizierFileReader_txt(CasePara cp,String fileName,int kanal_pZyl, double dauerASP){		
+		super(cp);
 		dreiDruecke=false;
 		spalte_pZyl = kanal_pZyl;
 		spalte_pEin = spalte_pZyl;
@@ -207,7 +210,7 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 					String[] theline = line.split("\t");
 					t=Double.parseDouble(theline[0]);	//°KW oder s
 					if(convertKW2SEC){
-						data[0][cnt]=Bremo.get_casePara().convert_KW2SEC(t);
+						data[0][cnt]=super.CP.convert_KW2SEC(t);
 					}else{
 						data[0][cnt]=t;
 					}

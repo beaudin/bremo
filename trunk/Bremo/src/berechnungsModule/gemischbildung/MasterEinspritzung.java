@@ -3,63 +3,75 @@ package berechnungsModule.gemischbildung;
 
 import java.util.Hashtable;
 
+import berechnungsModule.ModulFabrik;
 import berechnungsModule.Berechnung.Zone;
 import bremo.parameter.CasePara;
 import bremoExceptions.BirdBrainedProgrammerException;
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.KoeffizientenSpeziesFabrik;
+import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 
-public class MasterEinspritzung{
-
-	protected final CasePara CP;
-	protected int anzEinspr;
-	private static MasterEinspritzung me=null;
-	private static MasterEinspritzung meLWA=null;
+public class MasterEinspritzung extends ModulFabrik{
+	
+	protected int anzEinspr;	
+	
+	public static final String EINSPRITZ_MODELL_FLAG="einspritzModell_"; //gibt den Eintrag im inputfile an
+	public  final static String[] MOEGLICHE_EINSPRITZ_MODELLE={SaugrohrEinspritzungHomogen.FLAG,
+															SaugrohrEinspritzungHomogen.FLAG2, 
+															Spray.FLAG,
+															SimpleDirektEinspritzung.FLAG};	
+	
 
 	//Vielleicht kann hier noch eine extra Klasse verwendet werden, ist aber doppelt gemoppelt. 
 	protected final Einspritzung[] einspritzungen; 
 
-	private MasterEinspritzung(CasePara cp,boolean isLWA){
-		this.CP=cp;	
+	public  MasterEinspritzung(CasePara cp){
+		super(cp);
 		anzEinspr=CP.get_AnzahlEinspritzungen(); //untere Grenze liegt bei eins!
 
 		einspritzungen= new Einspritzung [anzEinspr];	
 		for(int index=0;index<anzEinspr;index++){
-			if(isLWA)
-				einspritzungen[index]=Einspritzung.get_Instance_LWA(cp, index+1); //Im Inputfile beginnen die Einspritzugnen mit eins!
-			else
-				einspritzungen[index]=Einspritzung.get_Instance(cp, index+1); //Im Inputfile beginnen die Einspritzugnen mit eins!
+			einspritzungen[index]=get_Einzeleinspritzung(cp, index+1); //Im Inputfile beginnen die Einspritzugnen mit eins!
 		}
 
 	}
 
-	/**
-	 * Erzeugt die Mastereinspritzung fuer die Druckverlaufsanalyse (DVA)
-	 * @param cp
-	 * @return
-	 */
-	public static MasterEinspritzung get_Instance(CasePara cp){
-		if(me==null){
-			me=new MasterEinspritzung(cp,false);
+	
+	private  Einspritzung get_Einzeleinspritzung(CasePara cp, int index){
+		Einspritzung einspritzung=null;	
+		String modulFlag=EINSPRITZ_MODELL_FLAG+index;
+		 String einspritzungsModellVorgabe=
+			get_ModulWahl(modulFlag, MOEGLICHE_EINSPRITZ_MODELLE);
+
+		if(einspritzungsModellVorgabe.equals(SaugrohrEinspritzungHomogen.FLAG)|| 
+				einspritzungsModellVorgabe.equals(SaugrohrEinspritzungHomogen.FLAG2)){
+			
+			einspritzung=(Einspritzung) new SaugrohrEinspritzungHomogen(cp, index);
+
+		}else if(einspritzungsModellVorgabe.equals(Spray.FLAG)){
+			einspritzung=new Spray(cp, index);	
+			
+		}else if(einspritzungsModellVorgabe.equals(SimpleDirektEinspritzung.FLAG)){			
+			einspritzung=new SimpleDirektEinspritzung(cp, index);			
 		}
-		return me;		
-	}
+
+		if(einspritzung==null){
+			try {
+				throw new BirdBrainedProgrammerException(
+						"Das Einspritzungsmodell \"" +einspritzungsModellVorgabe + 
+						" \" wurde im InputFile " +
+						"zwar als valide akzeptiert ist im Programm aber nicht richtig eingepflegt worden. \n" +
+				"Es fehlt der entsprechende else-if-Block oder das  Modell wurde noch nicht implementiert");
+			} catch (BirdBrainedProgrammerException e) {
+				e.stopBremo();
+			}
+		}
+		return einspritzung;		
+	}	
+	
 
 
-	/**
-	 * Erzeugt die Mastereinspritzung fuer die Ladungswechselanalyse (LWA)
-	 * Fuer die DVA und die LWA sind zwei verschiedenen Mastereinspritzungen notwendig da 
-	 * sont die Mastereinspritzung der DVA schon Werte der ME der LWA beinhaltet
-	 * @param cp
-	 * @return
-	 */
-	public static MasterEinspritzung get_Instance_LWA(CasePara cp){
-		if(meLWA==null){
-			meLWA=new MasterEinspritzung(cp,true);
-		}
-		return meLWA;		
-	}
+
 
 
 	/**
@@ -116,17 +128,18 @@ public class MasterEinspritzung{
 					posZn=x;
 			}
 			if(posZn==-1){
-				if(einspritzungen[index].isLWA==false){
+//				if(einspritzungen[index].isLWA==false){
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ " wurde die ID der Zone in die eingespritzt wrid "
 								+"nicht richtig definiert --> Programmierfehler im Berechnungsmodell");
 					}catch(BirdBrainedProgrammerException bbpE){					
 						bbpE.stopBremo();				
 					}				
-				}
+//				}
 			}else{
 				double dmKrst=einspritzungen[index].get_diff_mKrst_dampf(time, zn[posZn]);
-				zn[posZn].set_dm_ein(dmKrst, einspritzungen[index].get_Tkrst_dampf(time, zn[posZn]), einspritzungen[index].get_Krst());
+				if(dmKrst>0)
+					zn[posZn].set_dm_ein(dmKrst, einspritzungen[index].get_Tkrst_dampf(time, zn[posZn]), einspritzungen[index].get_Krst());
 			}
 		}
 		return zn;
@@ -148,7 +161,7 @@ public class MasterEinspritzung{
 					posZn=x;
 			}
 			if(posZn==-1){
-				if(einspritzungen[index].isLWA==false){
+//				if(einspritzungen[index].isLWA==false){
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ 
 								" wurde die ID der Zone in die eingespritzt wrid "
@@ -156,7 +169,7 @@ public class MasterEinspritzung{
 					}catch(BirdBrainedProgrammerException bbpE){					
 						bbpE.stopBremo();				
 					}
-				}
+//				}
 			}else{			
 				dQ=einspritzungen[index].get_dQ_krstDampf(time, zn[posZn]);
 				zn[posZn].set_dQ_ein_aus(-1*dQ);
@@ -182,7 +195,7 @@ public class MasterEinspritzung{
 					posZn=x;
 			}
 			if(posZn==-1){
-				if(einspritzungen[index].isLWA==false){
+//				if(einspritzungen[index].isLWA==false){
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ 
 								" wurde die ID der Zone in die eingespritzt wrid "
@@ -190,7 +203,7 @@ public class MasterEinspritzung{
 					}catch(BirdBrainedProgrammerException bbpE){					
 						bbpE.stopBremo();				
 					}
-				}
+//				}
 			}else{			
 				dQ=dQ+einspritzungen[index].get_dQ_krstDampf(time, zn[posZn]);
 			}
@@ -210,14 +223,12 @@ public class MasterEinspritzung{
 					posZn=x;
 			}
 			if(posZn==-1){
-				if(einspritzungen[index].isLWA==false){
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +(index+1)+ " wurde die ID der Zone in die eingespritzt wrid "
 								+"nicht richtig definiert --> Programmierfehler im Berechnungsmodell");
 					}catch(BirdBrainedProgrammerException bbpE){					
 						bbpE.stopBremo();				
-					}
-				}
+					}				
 			}else{				
 				einspritzungen[index].berechneIntegraleGroessen(time,zn[posZn]);
 			}
@@ -259,7 +270,7 @@ public class MasterEinspritzung{
 
 			return mixKrst;
 		}else
-			return KoeffizientenSpeziesFabrik.get_spezCO2(); //Damit was zurückgegeben wird!
+			return CP.SPEZIES_FABRIK.get_spezCO2(); //Damit was zurückgegeben wird!
 	}	
 
 

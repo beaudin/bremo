@@ -50,7 +50,7 @@ public abstract class DVA extends BerechnungsModell{
 			converged= true;
 		}else{	
 			converged= false;
-			Motor m=Motor.get_Instance(super.CP);
+			Motor m=CP.MOTOR;
 			double delta_time=CP.SYS.WRITE_INTERVAL_SEC;				
 
 			//Berechnung des Startwerts
@@ -147,7 +147,7 @@ public abstract class DVA extends BerechnungsModell{
 			double Tu,												
 			double p){	
 		double dmBurn=0;
-		GleichGewichtsRechner gg=GleichGewichtsRechner.get_Instance(CP);
+		GleichGewichtsRechner gg=CP.OHC_SOLVER;
 		GasGemisch abgas=new GasGemisch("Abgas");	
 		abgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche(p, Tu, frischGemisch));
 
@@ -182,10 +182,11 @@ public abstract class DVA extends BerechnungsModell{
 			if(foundVerbrennungsBeginn==false){
 				//Berechnung des Heizverlaufs
 				//Frischgemisch als Spezies Objekt erstellen
+				MasterEinspritzung me=CP.MASTER_EINSPRITZUNG;
 				Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuft();		
-				Spezies krst=MasterEinspritzung.get_Instance(CP).get_spezKrstALL();	
+				Spezies krst=me.get_spezKrstALL();	
 				Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
-				double mKrst=MasterEinspritzung.get_Instance(CP).get_mKrst_Sum_ASP();
+				double mKrst=me.get_mKrst_Sum_ASP();
 				double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
 				double mGes= mVerbrennungsLuft+mKrst;
 				frischGemisch_MassenbruchHash.put(verbrennungsLuft, mVerbrennungsLuft/mGes);
@@ -193,7 +194,7 @@ public abstract class DVA extends BerechnungsModell{
 
 				GasGemisch frischGemisch=new GasGemisch("Frischgemisch");	
 				frischGemisch.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);	
-				Motor motor = Motor.get_Instance(super.CP);
+				Motor motor = CP.MOTOR;
 				double t0=CP.SYS.RECHNUNGS_BEGINN_DVA_SEC;		
 				double dQb_buffer[]=new double[CP.SYS.ANZ_BERECHNETER_WERTE];
 				double dt=CP.SYS.WRITE_INTERVAL_SEC;

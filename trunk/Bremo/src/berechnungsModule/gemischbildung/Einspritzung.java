@@ -1,21 +1,15 @@
 package berechnungsModule.gemischbildung;
 
 import kalorik.spezies.Spezies;
-import berechnungsModule.ModulPrototyp;
 import berechnungsModule.Berechnung.Zone;
 import misc.VektorBuffer;
 import bremo.parameter.CasePara;
 import bremoExceptions.BirdBrainedProgrammerException;
 
 
-public abstract class Einspritzung extends ModulPrototyp {	
+public abstract class Einspritzung{	
 	
 	protected final CasePara CP;
-	public static final String EINSPRITZ_MODELL_FLAG="einspritzModell_"; //gibt den Eintrag im inputfile an
-	private  final static String[] MOEGLICHE_EINSPRITZ_MODELLE={SaugrohrEinspritzungHomogen.FLAG,
-															SaugrohrEinspritzungHomogen.FLAG2, 
-															Spray.FLAG,
-															SimpleDirektEinspritzung.FLAG};	
 	
 	/**
 	 * ID der Zone in die eingespritzt wird															
@@ -26,7 +20,8 @@ public abstract class Einspritzung extends ModulPrototyp {
 	protected double mKrst;
 	protected double eoi=-1,boi=-1; //Einspritzbeginn und Ende in [s n.Rechenbeginn]
 	protected final int INDEX;	
-	protected static boolean isLWA=false;
+	private double T_krst_fl;
+
 	
 	//TODO Checken ob die buffer ueberhaupt gebraucht werden --> Bei LWA kann die bisherige (20111012) implementierung falsch sein
 	protected VektorBuffer mKrst_fluesssig;
@@ -40,17 +35,18 @@ public abstract class Einspritzung extends ModulPrototyp {
 
 		mKrst=CP.get_mKrst_ASP(index);
 		krst=CP.get_kraftsoff(index);
-		krst.integrierMich(); //Diese Anweisung sorgt dafür, dass nur verwendete Kraftstoffe integriert werden
+		CP.SPEZIES_FABRIK.integrierMich(krst); //Diese Anweisung sorgt dafür, dass nur verwendete Kraftstoffe integriert werden
 
 		boi=CP.get_BOI(index);
 		eoi=CP.get_EOI(index);		
 	
+		T_krst_fl=CP.get_T_Krst_fl(index);
 
 		double time=-1*CP.SYS.DAUER_ASP_SEC;
 		double inc=CP.SYS.WRITE_INTERVAL_SEC;
 		//Einspritzbeginn so legen, dass er auf einem Rechenschritt liegt!
 		do{
-			boi=time;//legt boi immer auf den letzten zeitpunkt der kleiener ist als der angegebene
+			boi=time;//legt boi immer auf den letzten zeitpunkt der kleiner ist als der angegebene
 			time+=inc;
 		}while(time<=CP.get_BOI(index));
 
@@ -65,54 +61,8 @@ public abstract class Einspritzung extends ModulPrototyp {
 
 		mKrst_fluesssig = new VektorBuffer(cp);
 		mKrst_dampf=new VektorBuffer(cp);
-	}
-	
-	
-	protected static Einspritzung get_Instance(CasePara cp, int index){
-		String modulFlag=EINSPRITZ_MODELL_FLAG+index;
-		return get_Instance(cp, index,modulFlag);
-	}
-	
-	
-	protected static Einspritzung get_Instance_LWA(CasePara cp, int index){
-		isLWA=true;
-		String modulFlag=EINSPRITZ_MODELL_FLAG+index;  		
-		return get_Instance(cp, index,modulFlag);
-	}
-	
-	
-	private static Einspritzung get_Instance(CasePara cp, int index,String modulFlag){
-		Einspritzung einspritzung=null;	
-		
-		 String einspritzungsModellVorgabe=
-			get_ModulWahl(modulFlag, MOEGLICHE_EINSPRITZ_MODELLE, cp);
-
-		if(einspritzungsModellVorgabe.equals(SaugrohrEinspritzungHomogen.FLAG)|| 
-				einspritzungsModellVorgabe.equals(SaugrohrEinspritzungHomogen.FLAG2)){
-			
-			einspritzung=(Einspritzung) new SaugrohrEinspritzungHomogen(cp, index);
-
-		}else if(einspritzungsModellVorgabe.equals(Spray.FLAG)){
-			einspritzung=new Spray(cp, index);	
-			
-		}else if(einspritzungsModellVorgabe.equals(SimpleDirektEinspritzung.FLAG)){			
-			einspritzung=new SimpleDirektEinspritzung(cp, index);			
-		}
-
-		if(einspritzung==null){
-			try {
-				throw new BirdBrainedProgrammerException(
-						"Das Einspritzungsmodell \"" +einspritzungsModellVorgabe + 
-						" \" wurde im InputFile " +
-						"zwar als valide akzeptiert ist im Programm aber nicht richtig eingepflegt worden. \n" +
-				"Es fehlt der entsprechende else-if-Block oder das  Modell wurde noch nicht implementiert");
-			} catch (BirdBrainedProgrammerException e) {
-				e.stopBremo();
-			}
-		}
-
-		return einspritzung;		
 	}	
+	
 	
 
 	/**
@@ -222,7 +172,7 @@ public abstract class Einspritzung extends ModulPrototyp {
 	}
 	
 	public double get_T_Krst_fl(){
-		return CP.get_T_Krst_fl(this.INDEX);		
+		return 	T_krst_fl;
 	}
 
 

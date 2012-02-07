@@ -51,7 +51,7 @@ public class IndizierDaten {
 		File indiFile= CP.SYS.INDIZIER_FILE;		
 		String fileName=indiFile.getName();
 		L_Interp = new LinInterp(CP);
-		motor=Motor.get_Instance(cp);
+		motor=CP.MOTOR;
 
 		double dauerASP=CP.SYS.DAUER_ASP_KW;
 		int pZylNr=CP.SYS.KANAL_SPALTEN_NR_PZYL;
@@ -61,9 +61,9 @@ public class IndizierDaten {
 		IndizierFileReader indiReader = null;
 
 		if (fileName.endsWith("txt") || fileName.endsWith("TXT"))
-			indiReader=new IndizierFileReader_txt(indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr,dauerASP);
+			indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr,dauerASP);
 		if(fileName.endsWith("adv")||fileName.endsWith("ADV"))
-			indiReader=new IndizierFileReader_adv(indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr);
+			indiReader=new IndizierFileReader_adv(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr);
 		if(indiReader==null){
 			try{
 				throw new ParameterFileWrongInputException("Der Dateityp des Indizierdatenfiles \""+fileName +"\"" +
@@ -284,10 +284,11 @@ public class IndizierDaten {
 		double pZyl_temp_2=MatLibBase.mw_aus_1DArray(pZyl_temp_2_);
 		
 		//Frischgemisch als Spezies Objekt erstellen
-		Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuft();		
-		Spezies krst=MasterEinspritzung.get_Instance(CP).get_spezKrstALL();	
+		Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuft();	
+		MasterEinspritzung me=CP.MASTER_EINSPRITZUNG;
+		Spezies krst=me.get_spezKrstALL();	
 		Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
-		double mKrst=MasterEinspritzung.get_Instance(CP).get_mKrst_Sum_ASP();
+		double mKrst=me.get_mKrst_Sum_ASP();
 		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
 		double mGes= mVerbrennungsLuft+mKrst;
 		frischGemisch_MassenbruchHash.put(verbrennungsLuft, mVerbrennungsLuft/mGes);

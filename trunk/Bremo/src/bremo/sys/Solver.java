@@ -50,7 +50,7 @@ public class Solver implements DglSysFunction {
 	
 	public Zone[] solveRK(Zone [] znIN){	
 		
-		int numOfValues=3+Spezies.get_NmbrOfAllSpez(); //p,T,V + Speziesmassen
+		int numOfValues=3+CP.SPEZIES_FABRIK.get_NmbrOfAllSpez(); //p,T,V + Speziesmassen
 		double p_V_T_mi_znIN[],p_V_T_mi_RK[] ;
 		double p_V_T_mi_INIT[]=new double[(znIN.length*numOfValues)];
 
@@ -58,7 +58,7 @@ public class Solver implements DglSysFunction {
 			znSOL=new Zone[znIN.length];
 			for(int idx=0;idx<znIN.length;idx++){
 				p_V_T_mi_znIN=znIN[idx].get_p_V_T_mi();
-				znSOL[idx]=new Zone(p_V_T_mi_znIN,znIN[idx].isBurnt(),znIN[idx].getID());
+				znSOL[idx]=new Zone(CP,p_V_T_mi_znIN,znIN[idx].isBurnt(),znIN[idx].getID());
 				for(int i=0;i<numOfValues;i++) p_V_T_mi_INIT[idx*numOfValues+i]=p_V_T_mi_znIN[i];
 			}		
 		}else{	
@@ -83,7 +83,7 @@ public class Solver implements DglSysFunction {
 			znOut=new Zone[znIN.length];//wird jedesmal neu erzeugt da es sonst nicht funktioniert!
 			for(int idx=0;idx<znIN.length;idx++){
 				for(int i=0;i<numOfValues;i++) p_V_T_mi[i]=p_V_T_mi_RK[idx*numOfValues+i];				
-				znOut[idx]=new Zone(p_V_T_mi,znIN[idx].isBurnt(),znIN[idx].getID());				
+				znOut[idx]=new Zone(CP,p_V_T_mi,znIN[idx].isBurnt(),znIN[idx].getID());				
 			}
 			znIN=null;
 		return znOut;
@@ -92,7 +92,7 @@ public class Solver implements DglSysFunction {
 	private double[] get_dp_dV_dT_dmi(Zone [] zonen, double time){	
 		
 		
-		int numOfValues=3+Spezies.get_NmbrOfAllSpez();
+		int numOfValues=3+CP.SPEZIES_FABRIK.get_NmbrOfAllSpez();
 		
 		double []dp_dV_dT_dmi=new double [zonen.length*numOfValues];
 
@@ -105,7 +105,7 @@ public class Solver implements DglSysFunction {
 			}
 		}
 
-		double dVSys=Motor.get_Instance(CP).get_dV(time);
+		double dVSys=CP.MOTOR.get_dV(time);
 
 		double dp=(sumXsi-dVSys)/sumEta;
 		 
@@ -119,7 +119,7 @@ public class Solver implements DglSysFunction {
 //			dmdT=zonen[i].get_dmi_dT();
 			
 			//ueberpruefen ob die Anzahl der Spezies uebereinstimmt
-			if(dmi.length!=Spezies.get_NmbrOfAllSpez()){
+			if(dmi.length!=CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()){
 				try{
 					throw new BirdBrainedProgrammerException("NmbrOfAllSpez " +
 							"entspricht nicht der Anzahl der Spezies in einer Zone");
@@ -166,7 +166,7 @@ public class Solver implements DglSysFunction {
 	
 	public double[] derivn(double time, double[] y) {	
 //		umrechnen der vektoriellen Daten auf die Zonen		
-		int numOfValues=3+Spezies.get_NmbrOfAllSpez();
+		int numOfValues=3+CP.SPEZIES_FABRIK.get_NmbrOfAllSpez();
 		double [] p_V_T_mi=new double [numOfValues];		
 		
 		for(int idx=0;idx<znSOL.length;idx++){

@@ -2,9 +2,9 @@ package berechnungsModule.motor;
 
 import bremo.parameter.CasePara;
 
-class Motor_VolumenFunktionAusDatei extends Motor{
+public class Motor_VolumenFunktionAusDatei extends Motor{
 	
-	public Motor_VolumenFunktionAusDatei(CasePara cp){
+	protected Motor_VolumenFunktionAusDatei(CasePara cp){
 		super(cp);
 	
 	}

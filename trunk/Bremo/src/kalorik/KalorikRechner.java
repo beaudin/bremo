@@ -17,12 +17,9 @@ public class KalorikRechner {
 
 	private GleichGewichtsRechner GGsolver;
 	
-	public KalorikRechner() {
-		GGsolver=GleichGewichtsRechner.get_Instance(Bremo.get_casePara());
-	}
 	
 	public KalorikRechner(CasePara cp) {
-		GGsolver=GleichGewichtsRechner.get_Instance(cp);
+		GGsolver=cp.OHC_SOLVER;
 	}
 	
 	

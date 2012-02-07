@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.ScrollPaneConstants;
 
 import bremo.main.Bremo;
+import bremoswing.*;
 
 /*
  * SwingBremo.java
@@ -34,7 +35,7 @@ import bremo.main.Bremo;
 /**
  * 
  * @author Ngueneko Steve
- */
+ */ 
 public class SwingBremo extends javax.swing.JFrame {
 
 	/** Creates new form SwingBremo */

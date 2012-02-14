@@ -11,7 +11,7 @@ public abstract class StopBremoException extends Exception {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	String Separator ="\n**************************************************";
+	String Separator  ="\n**************************************************";
 	public StopBremoException(String message){
 		super(message);
 	}
@@ -29,11 +29,11 @@ public abstract class StopBremoException extends Exception {
 	
 	public void log_Message(){
 		//TODO hier kann irgendwann mal ein eintrag is das logFile stehen		
-		System.err.println(super.getMessage());		
+		System.err.println(super.getMessage()+ Separator);		
 	}
 	
 	public void log_Warning(){
-		log_Warning( super.getMessage());		
+		log_Warning( super.getMessage()+ Separator);		
 	}
 	
 	public void log_Warning(String message){
@@ -45,7 +45,7 @@ public abstract class StopBremoException extends Exception {
 //		else
 //			System.err.println("WARNING: " 
 //					+cp.get_aktuelle_Rechenzeit()+ "KW " + message);	
-		System.err.println("WARNING: " + message);
+		System.err.println("WARNING: " + message+ Separator);
 			
 	}
 	

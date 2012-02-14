@@ -6,6 +6,7 @@ import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
 import bremoExceptions.CaseParaNotInstantiatedException;
 import bremoExceptions.ParameterFileWrongInputException;
+import bremoswing.SwingBremo;
 import funktionenTests.FunktionsTester;
 
 /**
@@ -31,6 +32,7 @@ public class Bremo extends Thread {
 		System.out.println("I am the wright one");
 		try {
 			r.berechnungDurchfuehren();
+			SwingBremo.ActiveIcon();
 		} catch (Exception e) {
 			this.interrupt();
 			e.printStackTrace();

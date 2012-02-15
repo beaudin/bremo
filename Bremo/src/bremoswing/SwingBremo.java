@@ -337,7 +337,11 @@ public class SwingBremo extends JFrame {
 	
 	public static void StateBremoThread () {
 		
-		if (bremoThread.length == 1) {
+		if (Thread.currentThread().getThreadGroup().activeGroupCount() == 0) {
+			ActiveIcon();
+		}
+		
+		/*if (bremoThread.length == 1) {
 			ActiveIcon();
 		} else {
 			
@@ -350,7 +354,7 @@ public class SwingBremo extends JFrame {
 			if (i == bremoThread.length) {
 				ActiveIcon();
 			}
-		}
+		}*/
 	}
 	
 	//Button Setting To Stop Running of Bremo Thread

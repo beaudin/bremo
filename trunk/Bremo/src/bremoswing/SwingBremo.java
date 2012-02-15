@@ -56,7 +56,7 @@ public class SwingBremo extends JFrame {
 		private File [] files;
 		private String path = ".";
 		private Bremo bremo;
-		private Bremo [] bremoThread;
+		public static Bremo [] bremoThread;
 		public static JButton berechnen;
 		private JTextArea grosArea;
 		private JScrollPane jScrollPane1;
@@ -327,12 +327,32 @@ public class SwingBremo extends JFrame {
 		}
 	}
 
+	//
 	public static  void ActiveIcon() {
 		wahlFile.setVisible(true);
 		berechnen.setVisible(true);
 		stop.setVisible(false);
 	}
     
+	
+	public static void StateBremoThread () {
+		
+		if (bremoThread.length == 1) {
+			ActiveIcon();
+		} else {
+			
+			int i = 0 ;
+			
+			while (!bremoThread[i].getState().equals("TERMINATED") && i < bremoThread.length) {
+				i++;
+			}
+			
+			if (i == bremoThread.length) {
+				ActiveIcon();
+			}
+		}
+	}
+	
 	//Button Setting To Stop Running of Bremo Thread
 	@SuppressWarnings("static-access")
 	private void stopPush(MouseEvent evt) {

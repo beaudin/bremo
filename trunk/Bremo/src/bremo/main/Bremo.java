@@ -22,6 +22,7 @@ public class Bremo extends Thread {
 	public Bremo(File inputFile) {
 		try {
 			casePara = new CasePara(inputFile);
+			this.setName(casePara.get_CaseName());
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {				
 			e.stopBremo();
@@ -34,6 +35,7 @@ public class Bremo extends Thread {
 			r.berechnungDurchfuehren();
 			//SwingBremo.ActiveIcon();
 			SwingBremo.StateBremoThread();
+			System.err.println("Thread : "+this.getName()+"   is Fertig !!!");
 		} catch (Exception e) {
 			this.interrupt();
 			e.printStackTrace();

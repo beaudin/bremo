@@ -32,7 +32,8 @@ public class Bremo extends Thread {
 		System.out.println("I am the wright one");
 		try {
 			r.berechnungDurchfuehren();
-			SwingBremo.ActiveIcon();
+			//SwingBremo.ActiveIcon();
+			SwingBremo.StateBremoThread();
 		} catch (Exception e) {
 			this.interrupt();
 			e.printStackTrace();

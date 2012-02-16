@@ -19,10 +19,10 @@ public class Bremo extends Thread {
 	private Rechnung r;
 
 	
-	public Bremo(File inputFile) {
+	public Bremo( ThreadGroup group , File inputFile) {
+		super(group,inputFile.getName());
 		try {
 			casePara = new CasePara(inputFile);
-			this.setName(casePara.get_CaseName());
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {				
 			e.stopBremo();
@@ -116,8 +116,8 @@ public class Bremo extends Thread {
 		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo4//src//_Export//20111110_11_DVAParameter.txt");
 		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo4//src//_Export//20101020_40_DVAParameter.txt");
 
-		Bremo bremo=new Bremo(file);
-		bremo.run();
+		//Bremo bremo=new Bremo(file);
+		//bremo.run();
 		
 		// FunktionsTester.test_Vektor();
 

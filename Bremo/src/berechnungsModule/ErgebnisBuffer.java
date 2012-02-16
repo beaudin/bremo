@@ -15,14 +15,14 @@ public class ErgebnisBuffer {
 	private Hashtable<String, Vector<Double>> ergebnisHash=new Hashtable<String, Vector<Double>>();
 	private Hashtable<String, Integer> ergebnisSpalteHash=new Hashtable<String, Integer>();
 	private String praefix;
-	private static Vector<ErgebnisBuffer> alleErgBuffers=new Vector<ErgebnisBuffer>(); //TODO mach mich zum Vector
+	
 	private CasePara cp;
 
 
 	public ErgebnisBuffer(CasePara cp,String praefix){	
 		this.cp=cp;
 		this.praefix=praefix;
-		alleErgBuffers.addElement(this);		
+		cp.ergBufferCheckIN(this);	
 	}	
 
 
@@ -96,21 +96,11 @@ public class ErgebnisBuffer {
 	public  void schreibeErgebnisFile(String name){
 		String pfadFinal=cp.get_workingDirectory()+this.praefix+name;
 		if(!ergebnisHash.isEmpty()&& !ergebnisSpalteHash.isEmpty()) //Verhindert einen Fehler wenn die Ergebnisse schon geschrieben wurden (siehe LWA)
-			this.schreibeErgebnisFiles(this.ergebnisHash, this.ergebnisSpalteHash, pfadFinal);		
-	}
-
-	/**
-	 * Diese Funktion ermoeglicht das gleichzeitige schreiben aller ErgebnisBuffer
-	 * @param name
-	 */
-	public static void schreibeAlleErgebnisFiles(String name){		
-		Iterator<ErgebnisBuffer> itr = alleErgBuffers.iterator();		
-		while(itr.hasNext())
-			itr.next().schreibeErgebnisFile( name);	
+			this.schreibeErgebnisFile(this.ergebnisHash, this.ergebnisSpalteHash, pfadFinal);		
 	}
 	
 
-	public  void schreibeErgebnisFiles(Hashtable<String, Vector<Double>> ergebnisHashIN, 
+	public  void schreibeErgebnisFile(Hashtable<String, Vector<Double>> ergebnisHashIN, 
 			Hashtable<String, Integer> ergebnisSpalteHashIN, String pfad){
 
 		FileWriter_txt txtW=new FileWriter_txt(pfad);

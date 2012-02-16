@@ -38,7 +38,7 @@ public class LWA extends InternesRestgas {
 		Solver LW_SOL= new Solver(cp,dglSys_LW);
 		x0_LW=cp.get_Auslassoeffnet(); //initial value of x in [s]
 		LW_SOL.setInitialValueOfX(x0_LW);
-		xn_LW = cp.get_Einlassschluss()+cp.SYS.UMD_ASP/cp.get_DrehzahlInUproSec(); //final value of x in [s]
+		xn_LW = cp.get_Einlassschluss()+cp.SYS.DAUER_ASP_SEC; //final value of x in [s]
 		LW_SOL.setFinalValueOfX(xn_LW);
 		schrittweite_LW = cp.SYS.WRITE_INTERVAL_SEC; //in [s]
 		LW_SOL.setStepSize(schrittweite_LW);
@@ -76,7 +76,6 @@ public class LWA extends InternesRestgas {
 					znTemp=null;	
 					dglSys_LW.bufferErgebnisse(time,zn_LW);		
 					LW_SOL.setInitialValueOfX(time);
-
 					if(cp.SYS.DUBUGGING_MODE){						
 						if(Math.abs(time-cp.SYS.DUBUGGING_TIME_SEC)<0.5*cp.SYS.WRITE_INTERVAL_SEC){ //Rechnet bis KW und schreibt dann alle Werte ins txt-file
 							dglSys_LW.schreibeErgebnisFile("DEBUG_"+cp.get_CaseName()+".txt");	
@@ -91,7 +90,7 @@ public class LWA extends InternesRestgas {
 				m_neu=zn_LW[0].get_m();
 
 				f_mInit=Math.abs(m_neu-m_alt)/(m_alt);
-				System.out.println(f_mInit);
+				System.out.println("Relative Abweichung der Gesamtmasse: " + f_mInit);
 
 				m_alt=m_neu;					
 				idx++;

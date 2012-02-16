@@ -116,8 +116,9 @@ public abstract class DVA extends BerechnungsModell{
 	}
 
 	public void schreibe_DUBUGGING_Ergebnisse(String name) {
-		ergBuffDebug.schreibeErgebnisFile(name);	
-
+		ergBuffDebug.schreibeErgebnisFile(name);
+		dQIters=0;
+		this.reset();
 	}
 
 

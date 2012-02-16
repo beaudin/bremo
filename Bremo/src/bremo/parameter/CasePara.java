@@ -3,12 +3,16 @@ package bremo.parameter;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
+
 import misc.LittleHelpers;
 import misc.PhysKonst;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 import io.InputFileReader;
+import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.BerechnungsModellFabrik;
 import berechnungsModule.Berechnung.DVA;
@@ -40,6 +44,7 @@ public class CasePara {
 	
 	private final Hashtable<String,String[]> INPUTFILE_PARAMETER;
 	public final Hashtable<String,String> MODUL_VORGABEN;	
+	private  Vector<ErgebnisBuffer> alleErgBuffers=new Vector<ErgebnisBuffer>();
 	private double aktuelle_RZ;	//Aktuelle Rechenzeit
 //	public final BerechnungsModule MODULE;
 	public final SysPara SYS; //SystemParameter	
@@ -72,7 +77,7 @@ public class CasePara {
 		MODUL_VORGABEN=ifr.get_berechnungsModule();
 		
 		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
-		
+		System.out.println("Inputfile wurde eingelesen!");
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));
 		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 		
@@ -116,6 +121,28 @@ public class CasePara {
 		private MakeMeUnique (){
 			
 		}
+	}
+	
+	/**
+	 * Für einen BerechnungsCase sind alle ErgebnisBuffer in einem Vector gespeichert. Hiermit wird dem 
+	 * Vector der ErgebnisBuffer ergB hinzugefuegt und kann damit spaeter in ein txt-file geschreiben werden.
+	 * Der checkIn erfolgt automatisch bei der Erzeugung eines {@link ErgebnisBuffer}
+	 * @param ergB
+	 */
+	public void ergBufferCheckIN(ErgebnisBuffer ergB){
+		if(!alleErgBuffers.contains(ergB))//nur wenn der ErgebnisBuffer noch nich tim Vector steht wird er eingecheckt
+			this.alleErgBuffers.add(ergB);		
+	}
+	
+	/**
+	 * Diese Funktion ermoeglicht das einfache schreiben aller ErgebnisBuffer, die 
+	 * zuvor  mittels {@link ergBufferCheckIN} eingecheckt wurden.
+	 * @param name
+	 */
+	public  void schreibeAlleErgebnisFiles(String name){		
+		Iterator<ErgebnisBuffer> itr = alleErgBuffers.iterator();		
+		while(itr.hasNext())
+			itr.next().schreibeErgebnisFile(name);	
 	}
 
 	

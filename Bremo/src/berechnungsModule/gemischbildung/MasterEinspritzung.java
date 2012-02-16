@@ -71,9 +71,6 @@ public class MasterEinspritzung extends ModulFabrik{
 	
 
 
-
-
-
 	/**
 	 * Liefert ein Objekt vom Typ Einspritzung. 
 	 * 
@@ -82,7 +79,7 @@ public class MasterEinspritzung extends ModulFabrik{
 	 * @return Objekt vom Typ Einspritzung
 	 */
 	public Einspritzung get_Einspritzung(int index){
-		return einspritzungen[index];
+		return einspritzungen[index]; //TODO IndexOutOfBounds abfangen
 	}
 
 
@@ -128,14 +125,22 @@ public class MasterEinspritzung extends ModulFabrik{
 					posZn=x;
 			}
 			if(posZn==-1){
-//				if(einspritzungen[index].isLWA==false){
+				if(this.isLWA(time)==false){
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ " wurde die ID der Zone in die eingespritzt wrid "
 								+"nicht richtig definiert --> Programmierfehler im Berechnungsmodell");
 					}catch(BirdBrainedProgrammerException bbpE){					
 						bbpE.stopBremo();				
 					}				
-//				}
+				}else if(einspritzungen[index].IS_LWA_EINSPRITZUNG){
+					try{
+						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ " wurde die ID der Zone in die eingespritzt wrid "
+								+"fuer die LWA nicht richtig definiert.");
+					}catch(BirdBrainedProgrammerException bbpE){					
+						bbpE.stopBremo();				
+					}	
+				}
+					
 			}else{
 				double dmKrst=einspritzungen[index].get_diff_mKrst_dampf(time, zn[posZn]);
 				if(dmKrst>0)
@@ -161,7 +166,7 @@ public class MasterEinspritzung extends ModulFabrik{
 					posZn=x;
 			}
 			if(posZn==-1){
-//				if(einspritzungen[index].isLWA==false){
+				if(this.isLWA(time)==false){
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ 
 								" wurde die ID der Zone in die eingespritzt wrid "
@@ -169,7 +174,14 @@ public class MasterEinspritzung extends ModulFabrik{
 					}catch(BirdBrainedProgrammerException bbpE){					
 						bbpE.stopBremo();				
 					}
-//				}
+				}else if(einspritzungen[index].IS_LWA_EINSPRITZUNG){
+					try{
+						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ " wurde die ID der Zone in die eingespritzt wrid "
+								+"fuer die LWA nicht richtig definiert.");
+					}catch(BirdBrainedProgrammerException bbpE){					
+						bbpE.stopBremo();				
+					}	
+				}
 			}else{			
 				dQ=einspritzungen[index].get_dQ_krstDampf(time, zn[posZn]);
 				zn[posZn].set_dQ_ein_aus(-1*dQ);
@@ -195,7 +207,7 @@ public class MasterEinspritzung extends ModulFabrik{
 					posZn=x;
 			}
 			if(posZn==-1){
-//				if(einspritzungen[index].isLWA==false){
+				if(this.isLWA(time)==false){
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ 
 								" wurde die ID der Zone in die eingespritzt wrid "
@@ -203,7 +215,14 @@ public class MasterEinspritzung extends ModulFabrik{
 					}catch(BirdBrainedProgrammerException bbpE){					
 						bbpE.stopBremo();				
 					}
-//				}
+			}else if(einspritzungen[index].IS_LWA_EINSPRITZUNG){
+					try{
+						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ " wurde die ID der Zone in die eingespritzt wrid "
+								+"fuer die LWA nicht richtig definiert.");
+					}catch(BirdBrainedProgrammerException bbpE){					
+						bbpE.stopBremo();				
+					}	
+				}
 			}else{			
 				dQ=dQ+einspritzungen[index].get_dQ_krstDampf(time, zn[posZn]);
 			}
@@ -223,12 +242,21 @@ public class MasterEinspritzung extends ModulFabrik{
 					posZn=x;
 			}
 			if(posZn==-1){
+				if(this.isLWA(time)==false){
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +(index+1)+ " wurde die ID der Zone in die eingespritzt wrid "
 								+"nicht richtig definiert --> Programmierfehler im Berechnungsmodell");
 					}catch(BirdBrainedProgrammerException bbpE){					
 						bbpE.stopBremo();				
-					}				
+					}	
+				}else if(einspritzungen[index].IS_LWA_EINSPRITZUNG){
+					try{
+						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ " wurde die ID der Zone in die eingespritzt wrid "
+								+"fuer die LWA nicht richtig definiert.");
+					}catch(BirdBrainedProgrammerException bbpE){					
+						bbpE.stopBremo();				
+					}	
+				}
 			}else{				
 				einspritzungen[index].berechneIntegraleGroessen(time,zn[posZn]);
 			}
@@ -318,5 +346,14 @@ public class MasterEinspritzung extends ModulFabrik{
 
 		return mixKrst;
 	}	
+	
+	
+	private boolean isLWA(double time){
+		boolean a=false;		
+		if(time>=CP.get_Auslassoeffnet()&&time<=CP.get_Einlassschluss()+CP.SYS.DAUER_ASP_SEC)
+			a=true;
+
+		return a; 
+	}
 
 }

@@ -26,6 +26,7 @@ public abstract class Einspritzung{
 	//TODO Checken ob die buffer ueberhaupt gebraucht werden --> Bei LWA kann die bisherige (20111012) implementierung falsch sein
 	protected VektorBuffer mKrst_fluesssig;
 	protected VektorBuffer mKrst_dampf;
+	public final boolean IS_LWA_EINSPRITZUNG;
 	
 	
 	protected Einspritzung(CasePara cp, int index){
@@ -38,7 +39,8 @@ public abstract class Einspritzung{
 		CP.SPEZIES_FABRIK.integrierMich(krst); //Diese Anweisung sorgt dafür, dass nur verwendete Kraftstoffe integriert werden
 
 		boi=CP.get_BOI(index);
-		eoi=CP.get_EOI(index);		
+		eoi=CP.get_EOI(index);	
+		
 	
 		T_krst_fl=CP.get_T_Krst_fl(index);
 
@@ -58,6 +60,20 @@ public abstract class Einspritzung{
 
 		if(eoi==boi)//Dass eoi groesser ist als boi wird in CasePara gecheckt
 			eoi=boi+inc;
+		
+		if(boi<CP.get_Einlassschluss()&& eoi<=CP.get_Einlassschluss())
+			IS_LWA_EINSPRITZUNG=true;
+		else if(boi<CP.get_Einlassschluss()&& eoi>CP.get_Einlassschluss()){
+			try{
+				throw new BirdBrainedProgrammerException("Fuer Einspritzung " +(index+1)+ " lag BOI vor Einlassschluss wohingegen EOI " +
+						"nach Einlassschluss lag. Das ist mir zu dumm! EOI wird auf Einlassschluss gelegt. !");
+			}catch(BirdBrainedProgrammerException bbpE){
+				IS_LWA_EINSPRITZUNG=true;
+				eoi=CP.get_Einlassschluss();
+				bbpE.log_Message();				
+			}
+		}else
+			IS_LWA_EINSPRITZUNG=false;
 
 		mKrst_fluesssig = new VektorBuffer(cp);
 		mKrst_dampf=new VektorBuffer(cp);

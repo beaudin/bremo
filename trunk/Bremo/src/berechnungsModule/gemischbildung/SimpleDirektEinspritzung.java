@@ -18,21 +18,22 @@ public class SimpleDirektEinspritzung extends Einspritzung {
 		String vergleichsKraftstoff=CP.get_vergleichsKrstVerdampfung(index);
 		krstProp =new Kraftstoff_Eigenschaften(vergleichsKraftstoff);
 		
-		if(super.boi<super.CP.get_Auslassoeffnet()+CP.SYS.DAUER_ASP_SEC){ //TODO &&!super.isLWA --> war das noetig?
+//		if(super.boi<super.CP.get_Auslassoeffnet()+CP.SYS.DAUER_ASP_SEC){ //TODO &&!super.isLWA --> war das noetig?
+//			try {
+//				throw new ParameterFileWrongInputException("" +
+//						"Fuer das gewaehlte Einspritzmodell" +this.FLAG+ " der " +index+
+//						"en Einspritzung lag der Einspritzbeginn vor dem Rechenbeginn der LWA. \n"+
+//				"Der Eingespritzte Kraftstoff wird als vollkommen homogen angenommen");
+//			} catch (ParameterFileWrongInputException e) {				
+//				e.log_Warning();
+//			}
+//			dm_krst=0;
+//			mKrst_verdampft=super.mKrst;								
+//		}else 
+		if(super.boi<super.CP.SYS.RECHNUNGS_BEGINN_DVA_SEC&&!super.IS_LWA_EINSPRITZUNG){	
 			try {
 				throw new ParameterFileWrongInputException("" +
-						"Fuer das gewaehlte Einspritzmodell" +this.FLAG+ " der " +index+
-						"en Einspritzung lag der Einspritzbeginn vor dem Rechenbeginn der LWA. \n"+
-				"Der Eingespritzte Kraftstoff wird als vollkommen homogen angenommen");
-			} catch (ParameterFileWrongInputException e) {				
-				e.log_Warning();
-			}
-			dm_krst=0;
-			mKrst_verdampft=super.mKrst;								
-		}else if(super.boi<super.CP.SYS.RECHNUNGS_BEGINN_DVA_SEC){	
-			try {
-				throw new ParameterFileWrongInputException("" +
-						"Fuer das gewaehlte Einspritzmodell" +this.FLAG+ " der " +index+
+						"Fuer das gewaehlte Einspritzmodell " +this.FLAG+ " der " +index+
 						"en Einspritzung lag der Einspritzbeginn vor dem Rechenbeginn. \n"+
 				"Die Einspritzung wird wie eine Saugrohreinspritzung behandelt");
 			} catch (ParameterFileWrongInputException e) {				

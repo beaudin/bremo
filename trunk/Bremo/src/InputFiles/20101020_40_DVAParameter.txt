@@ -41,7 +41,7 @@ p_Abgas	[Pa] 	:=	274900
 mAGR_extern	[kg/h]	:=	27.78845203
 
   RestgasVorgabe  LWA    			
-[internesRestgasModell: RestgasVorgabe ]			
+[internesRestgasModell: LWA ]			
 mAGR_intern_ASP	[kg] 	:=	2.90E-04
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
@@ -56,6 +56,8 @@ Hu_Diesel	[MJ/mol] 	:=	8.36745
 mKrst_1	[kg/h] 	:=	0.196696399
 BOI_1 	[KWnZOT] 	:=	-50
 EOI_1	[KWnZOT] 	:=	-47.093456
+_BOI_1 	[KWnZOT] 	:=	-300
+_EOI_1	[KWnZOT] 	:=	-295
 T_Krst_fluessig_1	[K] 	:=	360
 anzAxialPakete_1	[-]	:=	15
 anzRadialPakete_1	[-]	:=	10
@@ -89,8 +91,8 @@ drallgeschwindigkeit	[m/s] 	:=	0
 nullLinienMethode	[-] 	:= 	abgleichSaugrohr
 KW_Beginn_Druckabgleich	[KWnZOT]	:= 	
 KW_Ende_Druckabgleich 	[KWnZOT]	:=	
-
-[berechnungsModell: DVA_DualFuel]			
+DVA_DualFuel			
+[berechnungsModell: DVA_DualFuel ]			
 
 [OHC_Solver: Grill ]			
 standardBildungsEnthalpien	[-] 	:=	ChemieStandard
@@ -103,7 +105,7 @@ polynomKoeffizienten	[-] 	:=	Janaf
 zeit_oder_KW_Basiert	[-]	:=	KW
 rechnungsSchrittweite 	[KW]	:=	0.2
 rechnungsBeginn 	[KWnZOT]	:=	-130
-rechnungsEnde	[KWnZOT]	:=	84
+rechnungsEnde	[KWnZOT]	:=	86
 relaxFaktor 	[-]	:=	0.7
 gleichGewichtsKonstanten	[-] 	:=	Burcat
 T_freeze	[K]	:=	1609

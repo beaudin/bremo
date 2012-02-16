@@ -28,9 +28,20 @@ public class Bremo extends Thread {
 			e.stopBremo();
 		}		
 	}
+	
+	
+	public Bremo(  File inputFile) {		
+		try {
+			casePara = new CasePara(inputFile);
+			r = new Rechnung(casePara);
+		} catch (ParameterFileWrongInputException e) {				
+			e.stopBremo();
+		}		
+	}
+	
+	
 
 	public void run() {
-		System.out.println("I am the wright one");
 		try {
 			r.berechnungDurchfuehren();
 			//SwingBremo.ActiveIcon();
@@ -61,7 +72,6 @@ public class Bremo extends Thread {
 		// String test []=BerechnungsModell.get_benoetigteModelle();
 
 		// System.out.println(get_casePara().get_rechenBeginn());
-
 		File file;
 
 		// file = new
@@ -114,10 +124,10 @@ public class Bremo extends Thread {
 //		file = new File("//Users//juwe//Documents//Transfer//VergleichAGRVerdünnungTEMP//" 
 //					+ "//20101213//Export//AGR_LAM//20111220_103_DVAParameter.txt");
 		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo4//src//_Export//20111110_11_DVAParameter.txt");
-		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo4//src//_Export//20101020_40_DVAParameter.txt");
+		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//bin//InputFiles//20101020_40_DVAParameter.txt");
 
-		//Bremo bremo=new Bremo(file);
-		//bremo.run();
+		Bremo bremo=new Bremo(file);
+		bremo.run();
 		
 		// FunktionsTester.test_Vektor();
 

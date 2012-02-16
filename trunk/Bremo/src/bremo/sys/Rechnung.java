@@ -53,8 +53,7 @@ public class Rechnung {
 			
 			System.out.println("berechne Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");			
 
-			sol.setFinalValueOfX(time);
-		
+			sol.setFinalValueOfX(time);		
 
 			if(dglSys.isDVA()==true){				
 				double pIst=Double.NaN;
@@ -67,11 +66,11 @@ public class Rechnung {
 					// wenn nicht muss set_dQ aufgerufen werden und die Rechnung erneut durchgeführt werden				  
 					isConverged=((DVA) dglSys).is_pSoll_Gleich_pIst(pIst,zn,time);	
 					idx++;						
-				}while (isConverged==false&& idx<1100);	
+				}while (isConverged==false&& idx<100);	
 				
 				if(isConverged==false){
 					System.out.println("mangelnde Knvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
-					((DVA) dglSys).schreibe_DUBUGGING_Ergebnisse("DEBUG_NO_KON_"+
+					((DVA) dglSys).schreibe_DUBUGGING_Ergebnisse("NO_KON_"+
 							CP.get_CaseName()+"_"+CP.convert_SEC2KW(time)+".txt");
 				}
 				else
@@ -101,13 +100,13 @@ public class Rechnung {
 			
 			if(CP.SYS.DUBUGGING_MODE){					
 				if(Math.abs(time-CP.SYS.DUBUGGING_TIME_SEC)<0.5*CP.SYS.WRITE_INTERVAL_SEC){ //Rechnet bis KW und schreibt dann alle Werte ins txt-file
-					ErgebnisBuffer.schreibeAlleErgebnisFiles("DEBUG_"+CP.get_CaseName()+".txt");	
+					CP.schreibeAlleErgebnisFiles("DEBUG_"+CP.get_CaseName()+".txt");	
 					System.out.println("I am plotting...");
 				}
 			}
 		}
 		if(CP.SYS.DUBUGGING_MODE)
-			ErgebnisBuffer.schreibeAlleErgebnisFiles(CP.get_CaseName()+".txt");
+			CP.schreibeAlleErgebnisFiles(CP.get_CaseName()+".txt");
 		else
 			dglSys.schreibeErgebnisFile(CP.get_CaseName()+".txt");
 		

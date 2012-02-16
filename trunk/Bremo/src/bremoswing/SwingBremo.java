@@ -17,6 +17,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.PrintStream;
+import java.lang.ThreadGroup;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -56,6 +57,7 @@ public class SwingBremo extends JFrame {
 		private File [] files;
 		private String path = ".";
 		private Bremo bremo;
+		public static ThreadGroup group ;
 		public static Bremo [] bremoThread;
 		public static JButton berechnen;
 		private JTextArea grosArea;
@@ -199,9 +201,9 @@ public class SwingBremo extends JFrame {
 		stop.setMinimumSize(null);
 		stop.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent evt) {
-				wahlFile.setVisible(true);
-				berechnen.setVisible(true);
-				stop.setVisible(false);
+				//wahlFile.setVisible(true);
+				//berechnen.setVisible(true);
+				//stop.setVisible(false);
 				stopPush(evt);
 			}
 		});
@@ -314,13 +316,17 @@ public class SwingBremo extends JFrame {
 			stop.setVisible(true);
 			control = true;
 			t1 = System.currentTimeMillis();
+			group = new ThreadGroup("BremoFamily");
+			for (int i = 0 ; i < files.length ; i++) {
+				new Bremo(group,files[i]).start();
+			}
 			//bremo = new Bremo(file);
 			//bremo.start();
-			bremoThread = new Bremo [files.length];
+			/*bremoThread = new Bremo [files.length];
 			for (int i = 0 ; i < files.length ; i++) {
 				bremoThread[i] = new Bremo(files[i]);
 				bremoThread[i].start();
-				}
+				}*/
 			t2 = System.currentTimeMillis();
 			// play();
 
@@ -337,9 +343,17 @@ public class SwingBremo extends JFrame {
 	
 	public static void StateBremoThread () {
 		
-		if (Thread.currentThread().getThreadGroup().activeGroupCount() == 0) {
+		if (group.activeCount() <= 1) {
 			ActiveIcon();
 		}
+	}
+		
+	public  void Alert() {
+		
+		JOptionPane.showMessageDialog(this,
+				"Überprüfen Sie Bitte die InputDatei !!!", "Information",
+				JOptionPane.INFORMATION_MESSAGE);
+	}
 		
 		/*if (bremoThread.length == 1) {
 			ActiveIcon();
@@ -355,7 +369,7 @@ public class SwingBremo extends JFrame {
 				ActiveIcon();
 			}
 		}*/
-	}
+	
 	
 	//Button Setting To Stop Running of Bremo Thread
 	@SuppressWarnings("static-access")
@@ -371,12 +385,14 @@ public class SwingBremo extends JFrame {
 				control = false;
 			    kleinArea.append(new Timer(t2-t1).toString());
 			}*/
-			for (int i = 0 ; i < bremoThread.length; i++) {
+			/*for (int i = 0 ; i < bremoThread.length; i++) {
 				if (bremoThread[i].isAlive()) {
 					bremoThread[i].interrupt();
 				}
-			}
+			}*/
+			group.interrupt();
 			control = false;
+			ActiveIcon();
 		}
 	}
     

@@ -9,16 +9,17 @@ import bremo.sys.Rechnung;
 import bremo.sys.Solver;
 
 public class LWA extends InternesRestgas {
-	private double mAGRint;
+	private double mAGRint=-5.55;
 
 	protected LWA(CasePara cp) {
-		super(cp);
-		//Aufruf im Konstruktor damit nur einmal gerechnet wird
-		mAGRint=ladungswechselAnalyseDurchfuehren(super.CP);
+		super(cp);		
 	}
 
 	@Override
 	public double get_mInternesRestgas_ASP() {		
+		if(mAGRint==-5.55)
+			mAGRint=ladungswechselAnalyseDurchfuehren(super.CP);
+		
 		return mAGRint;
 	}	
 	

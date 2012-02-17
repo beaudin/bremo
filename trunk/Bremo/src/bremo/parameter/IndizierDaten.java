@@ -7,6 +7,7 @@ import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 
 import matLib.MatLibBase;
+import matLib.filter.SavitzkyGolayFilter;
 import misc.LinInterp;
 
 import berechnungsModule.gemischbildung.MasterEinspritzung;
@@ -24,15 +25,17 @@ public class IndizierDaten {
 
 
 	private double [] zeitAchse;
-	private double [] pZyl;
-	private double [] pEin;
-	private double [] pAus;
+	private double [] pZyl,pZylRoh;
+	private double [] pEin,pEinRoh;
+	private double [] pAus,pAusRoh;
 	double [] zeitAchse_LW;
 	private final CasePara CP;
 	private final double PZYL_MAX;
 	private  double pmi=0;
 	private Motor motor;
 	private LinInterp L_Interp;
+	private SavitzkyGolayFilter sgol;
+	private final boolean filternBitte;
 	
 	
 	
@@ -52,7 +55,12 @@ public class IndizierDaten {
 		String fileName=indiFile.getName();
 		L_Interp = new LinInterp(CP);
 		motor=CP.MOTOR;
-
+		
+		//TODO Parameter aus InputFile hohlen
+		filternBitte=true;
+		//TODO Parameter aus InputFile hohlen
+		sgol=new SavitzkyGolayFilter(30,30,6);
+		
 		double dauerASP=CP.SYS.DAUER_ASP_KW;
 		int pZylNr=CP.SYS.KANAL_SPALTEN_NR_PZYL;
 		int pEinNr=CP.SYS.KANAL_SPALTEN_NR_PEIN;
@@ -88,40 +96,51 @@ public class IndizierDaten {
 		
 		////////////////////////////////////
 		//Definieren des Einlassdrucks
-		///////////////////////////////////	
-		pEin=indiReader.get_pEin();
+		///////////////////////////////////		
+		
+		pEinRoh=indiReader.get_pEin();
 		//Anpassendes Mittelwertes von Saugrohrdrucksensor und Piezo
 		if(CP.SYS.SHIFT_pEIN){
-			double offset=CP.get_p_LadeLuft()-matLib.MatLibBase.mw_aus_1DArray(pEin);
-			pEin=this.shiftMe(pEin, offset);
+			double offset=CP.get_p_LadeLuft()-matLib.MatLibBase.mw_aus_1DArray(pEinRoh);
+			pEinRoh=this.shiftMe(pEinRoh, offset);
 		}
+		//Filtern
+		if(this.filternBitte)
+			pEin=sgol.filterData(pEinRoh);
+		else
+			pEin=pEinRoh;
+		
 		//Anpassen fuer die LWA (doppelte laenge fuer zweites ASP)
 		pEin=misc.LittleHelpers.concat(pEin, pEin);	
 		
 		////////////////////////////////////
 		//Definieren des Auslassdrucks
 		///////////////////////////////////	
-		pAus=indiReader.get_pAbg();
+		pAusRoh=indiReader.get_pAbg();
 		if(CP.SYS.SHIFT_pAUS){
-			double offset=CP.get_p_Abgas()-matLib.MatLibBase.mw_aus_1DArray(pAus);
-			pAus=this.shiftMe(pAus, offset);
+			double offset=CP.get_p_Abgas()-matLib.MatLibBase.mw_aus_1DArray(pAusRoh);
+			pAusRoh=this.shiftMe(pAusRoh, offset);
 		}
-		pAus=misc.LittleHelpers.concat(pAus,pAus);
-		
+		//Filtern
+		if(this.filternBitte)
+			pAus=sgol.filterData(pAusRoh);
+		else
+			pAus=pAusRoh;
+		pAus=misc.LittleHelpers.concat(pAus,pAus);		
 		
 		////////////////////////////////////
 		//Definieren des Zylidnerdrucks
 		///////////////////////////////////
-		pZyl=indiReader.get_pZyl();
+		pZylRoh=indiReader.get_pZyl();
 		//Abgleich der Zylinderdruckkorrektur
 		if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("polytropenMethode")){
-			pZyl=this.polytropenMethode(pZyl);	
+			pZylRoh=this.polytropenMethode(pZylRoh);	
 		}else if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("abgleichSaugrohr")){
-			pZyl=this.kanalMethode(pZyl,pEin);	
+			pZylRoh=this.kanalMethode(pZylRoh,pEinRoh);	
 		}else if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("abgleichKruemmer")){
-			pZyl=this.kanalMethode(pZyl,pAus);	
+			pZylRoh=this.kanalMethode(pZylRoh,pAusRoh);	
 		}else if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("referenzWert")){
-			pZyl=this.referenzWertMethode();	
+			pZylRoh=this.referenzWertMethode();	
 		}else if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("ohne")){
 			
 		}else{
@@ -136,22 +155,28 @@ public class IndizierDaten {
 			}
 		}		
 		
+		
 		/////////////////////////////////
 		//pmi-Berechnung
 		////////////////////////////////
 		if(motor.isHubKolbenMotor()){
 			//Schleife über Wert 0 bis n-2
-			int pktProAS = pZyl.length;
+			int pktProAS = pZylRoh.length;
 			double kw=0.0;
 			pmi=0;
 			for(int i=0; i < pktProAS-1; i++){
 				kw = i*CP.SYS.DAUER_ASP_KW/pktProAS-360;
-				pmi+=0.5*(pZyl[i]+pZyl[i+1])*(motor.get_V(CP.convert_KW2SEC(kw+CP.SYS.DAUER_ASP_KW/pktProAS))
+				pmi+=0.5*(pZylRoh[i]+pZylRoh[i+1])*(motor.get_V(CP.convert_KW2SEC(kw+CP.SYS.DAUER_ASP_KW/pktProAS))
 						-motor.get_V(CP.convert_KW2SEC(kw)));
 			}
 			pmi=pmi/((Motor_HubKolbenMotor) motor).get_Hubvolumen();	// Wert wird in [Pa] ausgegeben	
 		}
 		
+		//Filtern
+		if(this.filternBitte)
+			pZyl=sgol.filterData(pZylRoh);
+		else
+			pZyl=pZylRoh;
 		//Verdoppeln des Zylinderdrucks damit dieser fuer die LWA das naechste ASP umfasst
 		pZyl=misc.LittleHelpers.concat(pZyl, pZyl);
 		PZYL_MAX=indiReader.get_pZylMAX();		
@@ -176,6 +201,16 @@ public class IndizierDaten {
 	 */
 	public double get_pZyl(double time){
 		return L_Interp.linInterPol(time, zeitAchse, pZyl);
+	}	
+	
+	/**
+	 * Liefert den ungefilterten des Zylinderdrucks in [Pa] zum Zeitpunkt time in [s nach Rechenbeginn].
+	 * Trifft die Zeit nicht exakt einen gemesenen Wert wird linear interpoliert.
+	 * @param time in [s nach Rechenbeginn]
+	 * @return Zylinderdruck in [Pa]
+	 */
+	public double get_pZylRoh(double time){
+		return L_Interp.linInterPol(time, zeitAchse, pZylRoh);
 	}	
 
 	/**

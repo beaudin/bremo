@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
@@ -121,7 +122,7 @@ public class SwingBremo extends JFrame {
 
 		manager = new JLayeredPane();
 		berechnen = new JButton();
-		wahlFile = new JButton();
+		wahlFile = new JButton();		
 		stop = new JButton();
 		textFile = new JTextField();
         konsole2 = new JPanel();
@@ -154,15 +155,16 @@ public class SwingBremo extends JFrame {
 				TitledBorder.DEFAULT_POSITION,
 				new Font("Tahoma", 1, 12))); // NOI18N
 
-		berechnen.setIcon(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/play.png"))); // NOI18N
-		berechnen.setToolTipText("berechnung ausführen");
-		berechnen.setBorder(BorderFactory.createEmptyBorder(0, 0,
-				0, 0));
-		berechnen.setBorderPainted(false);
+		ImageIcon beri=new ImageIcon(getClass().getResource(
+		"/bremoswing/bild/play.png"));
+		berechnen.setIcon(beri); // NOI18N		
+		berechnen.setRolloverIcon(new RolloverIcon(beri));
+		berechnen.setToolTipText("Berechnung ausführen");
+//		berechnen.setBorder(BorderFactory.createEmptyBorder(0, 0,
+//				0, 0));
+//		berechnen.setBorderPainted(false);
 		berechnen.setContentAreaFilled(false);
-		berechnen
-				.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		berechnen.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		berechnen.setVerifyInputWhenFocusTarget(false);
 		berechnen.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent evt) {
@@ -173,15 +175,23 @@ public class SwingBremo extends JFrame {
 
 			}
 		});
+		
 		berechnen.setBounds(10, 18, 33, 33);
 		manager.add(berechnen, JLayeredPane.DEFAULT_LAYER);
-
-		wahlFile.setIcon(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/folder_smart.png"))); // NOI18N
+		
+		ImageIcon wfi=new ImageIcon(getClass().getResource(
+		"/bremoswing/bild/folder_smart.png"));
+		wahlFile.setIcon(wfi); // NOI18N
+		wahlFile.setRolloverEnabled(true);
+		ImageIcon wfiRO=new ImageIcon(getClass().getResource(
+		"/bremoswing/bild/folder_smart_Rollover.png"));
+		wahlFile.setRolloverIcon(new RolloverIcon(wfi)); //sieht scheisse aus!!
+		wahlFile.setRolloverIcon(wfiRO);
+		wahlFile.setPressedIcon(wfi);
 		wahlFile.setToolTipText("InputFile auswählen");
 		wahlFile.setBorder(BorderFactory.createEmptyBorder(0, 0, 0,
-				0));
-		wahlFile.setBorderPainted(false);
+				0));		
+		wahlFile.setBorderPainted(true);
 		wahlFile.setContentAreaFilled(false);
 		wahlFile.setOpaque(false);
 		wahlFile.addMouseListener(new MouseAdapter() {
@@ -318,6 +328,7 @@ public class SwingBremo extends JFrame {
 			t1 = System.currentTimeMillis();
 			group = new ThreadGroup("BremoFamily");
 			for (int i = 0 ; i < files.length ; i++) {
+				System.out.println("Nicht einmal ich werde auf der Konsole ausgegeben. Warum nicht?");
 				new Bremo(group,files[i]).start();
 			}
 			//bremo = new Bremo(file);
@@ -513,4 +524,5 @@ public class SwingBremo extends JFrame {
 			}
 		});
 	}
+	
 }

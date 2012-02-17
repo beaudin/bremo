@@ -445,6 +445,9 @@ public class DVA_DualFuel extends DVA {
 		double pSoll=indiD.get_pZyl(time);
 		i+=1;
 		super.buffer_EinzelErgebnis("p_soll [bar]", pSoll*1E-5,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("p_soll_roh [bar]", indiD.get_pZylRoh(time)*1E-5,i);
 
 		i+=1;
 		super.buffer_EinzelErgebnis("p [bar]",zn[0].get_p()*1e-5,i);

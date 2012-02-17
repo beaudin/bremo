@@ -1,5 +1,6 @@
 package io;
 
+import matLib.filter.SavitzkyGolayFilter;
 import bremo.parameter.CasePara;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -19,6 +20,7 @@ public abstract class IndizierFileReader {
 	protected double pZylMAX=-5.55;
 	protected double dauerASP;
 	protected final CasePara CP;
+
 	
 	public IndizierFileReader(CasePara cp){
 		CP=cp;

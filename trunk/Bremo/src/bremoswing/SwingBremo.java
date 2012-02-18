@@ -251,6 +251,7 @@ public class SwingBremo extends JFrame {
 		
 		/************ CHECKBOX KONSOLE ************************************/
         konsole.setBounds(200, 18, 100, 40);
+        konsole.setFont(new Font("Tahoma", 3, 13));
 		konsole.setText("Konsole");
 		konsole.setToolTipText("Konsole Panel Aktivieren/deaktivien");
 		konsole.setSelected(true);
@@ -265,10 +266,10 @@ public class SwingBremo extends JFrame {
 				} else {
 					if (evt.getStateChange() == ItemEvent.DESELECTED) {
 						konsole2.setVisible(false);
-						setSize(700, 115);
+						setSize(710, 115);
 					} else {
 						konsole2.setVisible(true);
-						setSize(700, 750);
+						setSize(710, 750);
 					}
 				}
 			}

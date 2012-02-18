@@ -11,6 +11,7 @@ import funktionenTests.FunktionsTester;
 
 /**
  * @author eichmeier
+ * @author Ngueneko
  * 
  */
 public class Bremo extends Thread {
@@ -30,7 +31,7 @@ public class Bremo extends Thread {
 	}
 	
 	
-	public Bremo(  File inputFile) {		
+	public Bremo( File inputFile) {		
 		try {
 			casePara = new CasePara(inputFile);
 			r = new Rechnung(casePara);

@@ -138,7 +138,7 @@ public class SwingBremo extends JFrame {
 	/***
 	 * This method is called from within the constructor to initialize the form.
 	 ***********************/
-	private void initComponents() {
+	private void initComponents() {		
 
 		System.setOut(outStream);
 		System.setErr(errStream);
@@ -209,7 +209,7 @@ public class SwingBremo extends JFrame {
 
 		/************ BUTTON WAHLFILE ************************************/
 		ImageIcon wfi = new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/folder_smart.png"));
+				"/bremoswing/bild/waitbar.gif")); //folder_smart.png
 		wahlFile.setIcon(wfi); // NOI18N
 		wahlFile.setRolloverEnabled(true);
 		ImageIcon wfiRO = new ImageIcon(getClass().getResource(
@@ -254,6 +254,7 @@ public class SwingBremo extends JFrame {
         konsole.setFont(new Font("Tahoma", 3, 13));
 		konsole.setText("Konsole");
 		konsole.setToolTipText("Konsole Panel Aktivieren/deaktivien");
+		
 		konsole.setSelected(true);
 		konsole.addItemListener(new ItemListener() {
 			@Override
@@ -405,10 +406,18 @@ public class SwingBremo extends JFrame {
 			control = true;
 
 			group = new ThreadGroup("BremoFamily");
+			bremoThread=new Bremo[files.length];
+			
 			for (int i = 0; i < files.length; i++) {
 				System.out
-						.println("Nicht einmal ich werde auf der Konsole ausgegeben. Warum nicht?");
-				new Bremo(group, files[i]).start();
+						.println("Nicht einmal ich werde auf der Konsole ausgegeben. Warum nicht?");				
+				bremoThread[i]=new Bremo(group, files[i]);
+				bremoThread[i].get_myCase().get_aktuelle_Rechenzeit();
+				double dauer=bremoThread[i].get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC;
+				double progress=bremoThread[i].get_myCase().get_aktuelle_Rechenzeit()/
+									bremoThread[i].get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC;
+				bremoThread[i].start();
+				
 			}
 			timer.start();
 		}

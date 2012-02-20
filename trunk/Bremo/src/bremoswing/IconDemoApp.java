@@ -133,7 +133,7 @@ public class IconDemoApp extends JFrame {
         // We add two glue components. Later in process() we will add thumbnail buttons
         // to the toolbar inbetween thease glue compoents. This will center the
         // buttons in the toolbar.
-        //buttonBar.add(Box.createGlue());
+        buttonBar.add(Box.createGlue());
         //buttonBar.add(Box.createGlue());
         
         add(buttonBar, BorderLayout.SOUTH);

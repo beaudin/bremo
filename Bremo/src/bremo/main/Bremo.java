@@ -31,7 +31,8 @@ public class Bremo extends Thread {
 	}
 	
 	
-	public Bremo( File inputFile) {		
+	public Bremo( File inputFile) {	
+		super(inputFile.getName());
 		try {
 			casePara = new CasePara(inputFile);
 			r = new Rechnung(casePara);
@@ -174,6 +175,12 @@ public class Bremo extends Thread {
 		// FunktionsTester.testSpeziesInputFuerOHCsolver();
 
 
+	}
+
+
+	public CasePara get_myCase() {
+		// TODO Auto-generated method stub
+		return casePara;
 	}
 
 }

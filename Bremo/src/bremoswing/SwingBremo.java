@@ -327,7 +327,7 @@ public class SwingBremo extends JFrame {
 //		//pb.setStringPainted(true);
 		
 		pb.setIcon(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/progressbar.gif")));
+				"/bremoswing/bild/progressbar4.gif")));
 		//pb.setToolTipText("Stop Bremo");
 		//stop.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		//pb.setSize(new Dimension (33,33));
@@ -473,6 +473,7 @@ public class SwingBremo extends JFrame {
 			//group.enumerate(bremoThread);
 			//bremoThread=new Bremo[files.length];
 			
+
 			for (int i = 0; i < files.length; i++) {
 				
 				bremoThread[i].start();
@@ -482,11 +483,12 @@ public class SwingBremo extends JFrame {
 //				double dauer=bremoThread[i].get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC;
 //				double progress=bremoThread[i].get_myCase().get_aktuelle_Rechenzeit()/
 //									bremoThread[i].get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC;
-				
-				
 			}
+	
+			pb.setIcon(new ImageIcon(getClass().getResource(
+					"/bremoswing/bild/progressbar3.gif")));
 			pb.setVisible(true);
-			label.setForeground(new Color(0, 180, 0));
+			label.setForeground(new Color(0,150,60));
 			label.setText("Operation gestartet ....");
 		}
 	}
@@ -505,6 +507,11 @@ public class SwingBremo extends JFrame {
 
 		fileChooser.addChoosableFileFilter(txtFilter);
 		try {
+			label.setForeground(new Color (165,42,42));
+			label.setText("Datei Werden geladen ...");
+			pb.setIcon(new ImageIcon(getClass().getResource(
+					"/bremoswing/bild/loadFile.gif")));
+			pb.setVisible(true);
 			int status = fileChooser.showOpenDialog(null);
 
 			if (status == JFileChooser.APPROVE_OPTION) {
@@ -517,14 +524,19 @@ public class SwingBremo extends JFrame {
 					for (int i = 0; i < bremoThread.length; i++) {
 						bremoThread[i] = new Bremo(group, files[i]);
 					}
-					label.setForeground(new Color(0,0,0));
-					label.setText("Calcul can Start !");
+					label.setForeground(new Color(0,0,255));
+					label.setText("Datei mit Erfolg Importiert !");
 					pb.setVisible(false);
 				}
 			} else if (status == JFileChooser.CANCEL_OPTION) {
+				label.setForeground(new Color (165,42,42));
+				label.setText(" Import von Datei Unterbrechen !");
+				pb.setVisible(false);
 				fileChooser.cancelSelection();
 			}
 		} catch (Exception e) {
+			label.setForeground(new Color (255,0,0));
+			label.setText("Fehler aufgetreten !!!");
 			e.printStackTrace();
 		}
 		berechnen.setEnabled(true);

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+           <project basedir="." default="all" name="Sign">
+  <property name="keyStorePath"      value=".keystore"/>
+  <property name="keyStoreKeyAlias"      value="Bremo"/>
+  <property name="keyStorePassword"      value="signer"/>
+  <property name="keyStoreKeyPassword"      value="signer"/>
+  <target name="keystore">
+    <genkey keystore="${keyStorePath}"
+            storepass="${keyStorePassword}"
+            alias="${keyStoreKeyAlias}"
+            keypass="${keyStoreKeyPassword}"
+            keyalg="RSA" validity="365"
+            dname="cn=test">
+    </genkey>
+  </target>
+  <target name="all">
+    <signjar jar="Bremo.jar" keystore="${keyStorePath}" lazy="true"
+           alias="${keyStoreKeyAlias}" storepass="${keyStorePassword}"/>
+  </target>
+</project>

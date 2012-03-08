@@ -1,35 +1,25 @@
 package bremoExceptions;
 
-import berechnungsModule.ErgebnisBuffer;
-import bremo.main.Bremo;
-import bremo.parameter.CasePara;
 
 //@SuppressWarnings("serial")
 public abstract class StopBremoException extends Exception {
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-	String Separator  ="\n**************************************************";
+	private static String Separator  ="\n**************************************************\n";
+	
 	public StopBremoException(String message){
 		super(message);
 	}
 
 	public void stopBremo() {
-//		super.getMessage();
-		super.printStackTrace();
-		System.err.println(super.getMessage()+ Separator);	
-//		CasePara cp=Bremo.get_casePara();
-//		String name=cp.get_CaseName()+"_Excep.txt";
-//		ErgebnisBuffer.schreibeAlleErgebnisFiles(name);
-	
-		//System.exit(0);		
+		System.err.println(Separator+super.getMessage()+Separator);	
+		 //Dieser Befehl wird benoetigt um das Programm zu stoppen wenn es nicht als swing app laeuft		
+		throw new NullPointerException();
 	}
 	
 	public void log_Message(){
 		//TODO hier kann irgendwann mal ein eintrag is das logFile stehen		
-		System.err.println(super.getMessage()+ Separator);		
+		System.err.println(super.getMessage()+Separator);		
 	}
 	
 	public void log_Warning(){
@@ -37,14 +27,7 @@ public abstract class StopBremoException extends Exception {
 	}
 	
 	public void log_Warning(String message){
-		//TODO hier kann irgendwann mal ein eintrag is das logFile stehen	
-//		CasePara cp=Bremo.get_casePara();
-//		if(cp.SYS.IS_KW_BASIERT)
-//			System.err.println("WARNING: " 
-//					+cp.convert_SEC2KW(cp.get_aktuelle_Rechenzeit())+ "KW " + message);	
-//		else
-//			System.err.println("WARNING: " 
-//					+cp.get_aktuelle_Rechenzeit()+ "KW " + message);	
+		//TODO hier kann irgendwann mal ein eintrag is das logFile stehen		
 		System.err.println("WARNING: " + message+ Separator);
 			
 	}

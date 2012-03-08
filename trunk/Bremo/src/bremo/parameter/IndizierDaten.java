@@ -14,7 +14,6 @@ import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremoExceptions.BirdBrainedProgrammerException;
-import bremoExceptions.MiscException;
 import bremoExceptions.ParameterFileWrongInputException;
 
 import io.IndizierFileReader;
@@ -54,12 +53,13 @@ public class IndizierDaten {
 		File indiFile= CP.SYS.INDIZIER_FILE;		
 		String fileName=indiFile.getName();
 		L_Interp = new LinInterp(CP);
-		motor=CP.MOTOR;
+		motor=CP.MOTOR;		
 		
-		//TODO Parameter aus InputFile hohlen
-		filternBitte=true;
-		//TODO Parameter aus InputFile hohlen
-		sgol=new SavitzkyGolayFilter(30,30,6);
+		filternBitte=CP.SYS.FILTERN;
+		if(filternBitte){
+			int halbeBreite=(CP.SYS.SGOLAY_BREITE-1)/2;
+			sgol=new SavitzkyGolayFilter(halbeBreite,halbeBreite,CP.SYS.SGOLAY_ORDNUNG);
+		}
 		
 		double dauerASP=CP.SYS.DAUER_ASP_KW;
 		int pZylNr=CP.SYS.KANAL_SPALTEN_NR_PZYL;

@@ -15,17 +15,12 @@ import io.InputFileReader;
 import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.BerechnungsModellFabrik;
-import berechnungsModule.Berechnung.DVA;
-import berechnungsModule.Berechnung.DVA_DualFuel;
-import berechnungsModule.Berechnung.DVA_Homogen_EinZonig;
-import berechnungsModule.Berechnung.DVA_homogen_ZweiZonig;
 import berechnungsModule.gemischbildung.Kraftstoff_Eigenschaften;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.internesRestgas.InternesRestgas;
 import berechnungsModule.internesRestgas.InternesRestgasFabrik;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.motor.MotorFabrik;
-import berechnungsModule.motor.Motor_HubKolbenMotor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechnerFabrik;
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
@@ -111,9 +106,7 @@ public class CasePara {
 		
 		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG
 		BerechnungsModellFabrik bmf=new BerechnungsModellFabrik(this);
-		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;
-	
-		
+		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;	
 		
 	}		
 	
@@ -1241,17 +1234,6 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}	
-						
-						
-	
-	
-	////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////
-	private void xxx_AB_HIER_STRING_PARAMETER(){}
-	////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////	
 	
 	
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -1655,7 +1637,7 @@ public class CasePara {
 
 		String einheit;
 
-		//Zuerst wird geprüft ob der Wert überhaupt im Inputfile ist...
+		//Zuerst wird geprueft ob der Wert ueberhaupt im Inputfile ist...
 		try{
 			String s=parameterInHash.get(paraNameToSet)[0];	
 			einheit=parameterInHash.get(paraNameToSet)[1];
@@ -1663,14 +1645,14 @@ public class CasePara {
 			temp=temp.doubleValue();
 
 		}catch(NumberFormatException e){
-			throw new ParameterFileWrongInputException ("Der Wert für " + paraNameToSet + " wurde nicht als double eingegeben!");			
+			throw new ParameterFileWrongInputException ("Der Wert fuer " + paraNameToSet + " wurde nicht als double eingegeben!");			
 
 		}catch(NullPointerException e){
 			throw new ParameterFileWrongInputException ("Es wurde versucht, den Parameter \"" +  paraNameToSet + "\" zu setzen. \n " +
 			"Dieser ist im Parameterfile aber nicht vorhanden.");	
 		}
 
-		//...und dann wird +überprüft ob der Wert die richtige Einheit hat...
+		//...und dann wird ueberprüft ob der Wert die richtige Einheit hat...
 		for( int i=0;i<moeglicheEinheiten.length;i++){		
 			if(einheit.equalsIgnoreCase(moeglicheEinheiten[i]))
 				found=true;			
@@ -1686,10 +1668,10 @@ public class CasePara {
 			throw new ParameterFileWrongInputException (message);
 		}
 
-		//...zum Schluss wird überprüft ob der Wert innerhalb der zulässigen Grenzen liegt.
+		//...zum Schluss wird ueberprueft ob der Wert innerhalb der zulaessigen Grenzen liegt.
 		if(!checkMinMax(temp,min,max)){
 			throw new ParameterFileWrongInputException ("Der eingegebene Wert für \""	+ paraNameToSet + 
-					"\" liegt nicht innerhalb der zulässigen Grenzen \n" + min + "<" + paraNameToSet + "<" + max);					
+					"\" liegt nicht innerhalb der zulaessigen Grenzen \n" + min + "<" + paraNameToSet + "<" + max);					
 		}		
 
 		return temp;
@@ -1754,7 +1736,6 @@ public class CasePara {
 	private String set_FileName(Hashtable<String, String[]> parameterInHash, 
 			String paraNameToSet) throws ParameterFileWrongInputException{
 		String temp = null;
-		boolean found=false;
 		try{
 			temp=parameterInHash.get(paraNameToSet)[0];			
 		}catch(NullPointerException e){
@@ -1840,8 +1821,9 @@ public class CasePara {
 		public final double RECHENGENAUIGKEIT_DVA;
 		public final double MINIMALE_ZONENMASSE;
 		public final double T_FREEZE;
-		public final double RELAX; //Relaxationsfaktor für Iteration
-//		public final double VERBRENNUGSBEGINN_SEC;
+		public final double RELAX; //Relaxationsfaktor fuer Iteration
+		public final int SGOLAY_ORDNUNG;
+		public final int SGOLAY_BREITE;
 		
 		public final double WRITE_INTERVAL_SEC;
 		public final int ANZ_BERECHNETER_WERTE;
@@ -1863,9 +1845,8 @@ public class CasePara {
 		public final boolean IS_KW_BASIERT;	
 		public final boolean IS_ZEIT_BASIERT;
 		public final boolean IS_ZEIT_BASIERT_START_IN_KW;
-//		public final boolean VERBRENNUGSBEGINN_AUTO_DETECT;
 		public final boolean SHIFT_pEIN,SHIFT_pAUS;
-		
+		public final boolean FILTERN;
 
 		//vielleicht besser als get methode	
 		public final File INDIZIER_FILE;
@@ -1929,10 +1910,49 @@ public class CasePara {
 			MINIMALE_ZONENMASSE=set_doublePara(PARAMETER, "minimaleZonenMasse","[kg]",0,0.5); 
 
 			//sollten sinnvolle Grenzen sein...Grill gibt 1600K an das alte Bremo verwendet 1700K
-			T_FREEZE=set_doublePara(PARAMETER, "T_freeze","[K]",1000,1900);	
+			T_FREEZE=set_doublePara(PARAMETER, "T_freeze","[K]",1400,1900);	
 			
-			RELAX=set_doublePara(PARAMETER, "relaxFaktor","[-]",0.1,1);			
+			double tmpRELAX;
+			try{				
+				tmpRELAX=set_doublePara(PARAMETER, "relaxFaktor","[-]",0.1,1);	
+			}catch(ParameterFileWrongInputException e){
+				e.log_Warning("Es wurde kein Relaxationsfaktor angegeben. " +
+						"Es wird mit 0.7 gerechnet. \n" +
+						"Der Relaxationsfaktor kann über den Parameter \"relaxFaktor\" definiert werden.");
+				tmpRELAX=0.7;
+			}
 			
+			RELAX=tmpRELAX;	
+			
+			if(set_StringPara(PARAMETER,"filtern",yesno ).equalsIgnoreCase("ja"))
+				FILTERN=true;
+			else
+				FILTERN=false;
+			
+			double tmpSGOLAY_ORDNUNG=5;
+			double tmpSGOLAY_BREITE=2*tmpSGOLAY_ORDNUNG+1;
+			if(FILTERN){
+				try{				
+					tmpSGOLAY_ORDNUNG=set_doublePara(PARAMETER,"sgolayOrdnung","[-]", 2,12);
+				}catch(ParameterFileWrongInputException e){
+					e.log_Warning("Die Ordnung fuer den SavitzkyGolay-Filter wurde nicht angegeben. \n" +
+					"Es wird mit einem Polynom 5ter Ordnung gerechnet.\n" +
+					"Eine hoehere Ordnung kann mittles der Vorgabe des Parameters \"sgolayOrdnung\" erfolgen.");
+					tmpSGOLAY_ORDNUNG=5;
+				}
+				
+				try{				
+					tmpSGOLAY_BREITE=set_doublePara(PARAMETER,"sgolayBreite","[-]", 2*tmpSGOLAY_ORDNUNG+1,50);
+				}catch(ParameterFileWrongInputException e){
+					e.log_Warning("Die Breite fuer den SavitzkyGolay-Filter wurde nicht angegeben. \n" +
+					"Es wird mit einer Breite von " + (2*tmpSGOLAY_ORDNUNG+1) + " gerechnet. \n" +
+					"Eine andere Breite kann mittles der Vorgabe des Parameters \"sgolayBreite\" erfolgen.");
+					tmpSGOLAY_BREITE=(2*tmpSGOLAY_ORDNUNG+1)*2; //zweifache Mindestbreite
+				}
+			}
+			
+			SGOLAY_ORDNUNG=(int)tmpSGOLAY_ORDNUNG;
+			SGOLAY_BREITE=(int)tmpSGOLAY_BREITE;
 			
 			//Einlesen von PUBLIC FINAL StringDaten
 			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","abgleichKruemmer","ohne"};			
@@ -1946,9 +1966,6 @@ public class CasePara {
 			String [] s3 ={"Janaf" , "Burcat","Olikara"};	
 			GLEICHGEWICHTSKONSTANTEN_VORGABE=set_StringPara(PARAMETER,"gleichGewichtsKonstanten", s3);			
 			
-
-//			String [] s6 ={"bar" , "Pa"};	
-//			EINHEIT_DRUCKEINGABE=set_StringPara(PARAMETER,"einheitDerDruckEingaben", s6);			
 			
 			String temp;
 			String []sDeltaHf={"ChemieStandard", "CO2_H2O_NULL"};
@@ -1969,7 +1986,7 @@ public class CasePara {
 				STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD=false;
 			
 			////////////////////////////////////////////////////////////////
-			//Einlesen von Daten die Abhängig von anderen Eingaben sind/////			
+			//Einlesen von Daten die Abhaengig von anderen Eingaben sind////			
 			////////////////////////////////////////////////////////////////
 			String []s0 ={"2T","4T"};	
 			if(set_StringPara(PARAMETER,"arbeitsverfahren",s0).equalsIgnoreCase("4T")){

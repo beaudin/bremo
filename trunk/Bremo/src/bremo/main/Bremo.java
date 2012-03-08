@@ -4,10 +4,11 @@ import java.io.File;
 
 import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
-import bremoExceptions.CaseParaNotInstantiatedException;
+import bremoExceptions.BirdBrainedProgrammerException;
+import bremoExceptions.MiscException;
 import bremoExceptions.ParameterFileWrongInputException;
 import bremoswing.SwingBremo;
-import funktionenTests.FunktionsTester;
+
 
 /**
  * @author eichmeier
@@ -16,34 +17,46 @@ import funktionenTests.FunktionsTester;
  */
 public class Bremo extends Thread {
 
-	private  CasePara casePara;
+	private  CasePara casePara; //TODO Make me final
 	private Rechnung r;
+	private File inputFile;
+	private boolean caseParaerzeugt=false;
 
 	
 	public Bremo( ThreadGroup group , File inputFile) {
 		super(group,inputFile.getName());
-		try {
-			casePara = new CasePara(inputFile);
-			r = new Rechnung(casePara);
-		} catch (ParameterFileWrongInputException e) {				
-			e.stopBremo();
-		}		
+		this.inputFile=inputFile;
+//		try {
+//			casePara = new CasePara(inputFile);
+//			r = new Rechnung(casePara);
+//		} catch (ParameterFileWrongInputException e) {				
+//			e.stopBremo();
+//		}		
 	}
 	
 	
 	public Bremo( File inputFile) {	
 		super(inputFile.getName());
-		try {
-			casePara = new CasePara(inputFile);
-			r = new Rechnung(casePara);
-		} catch (ParameterFileWrongInputException e) {				
-			e.stopBremo();
-		}		
+		this.inputFile=inputFile;
+		
+//		try {
+//			casePara = new CasePara(inputFile);
+//			r = new Rechnung(casePara);
+//		} catch (ParameterFileWrongInputException e) {				
+//			e.stopBremo();
+//		}		
 	}
 	
 	
 
 	public void run() {
+		try {
+			casePara = new CasePara(inputFile);
+			caseParaerzeugt=true;
+			r = new Rechnung(casePara);
+		} catch (ParameterFileWrongInputException e) {				
+			e.stopBremo();
+		}		
 		try {
 			r.berechnungDurchfuehren();
 			//SwingBremo.ActiveIcon();
@@ -52,6 +65,20 @@ public class Bremo extends Thread {
 		} catch (Exception e) {
 			this.interrupt();
 			e.printStackTrace();
+		}
+	}	
+
+	public CasePara get_myCase() {
+		if(caseParaerzeugt)
+			return casePara;
+		else{
+			try {
+				throw new BirdBrainedProgrammerException("Es wurde versucht auf die CasePara zuzugreifen. " +
+						"Diese wurden aber noch nicht erzeugt. Volldeppprogrammierer");
+			} catch (BirdBrainedProgrammerException e) {
+				e.stopBremo();
+			}			
+			return null;
 		}
 	}
 
@@ -125,7 +152,7 @@ public class Bremo extends Thread {
 //		 File("D://Daten//IFKM//__Projekte//Dual Fuel//AbgleichAnalyseModell//AbgleichDieselPeakMethode//20111110_11_DVAParameter.txt");
 //		file = new File("//Users//juwe//Documents//Transfer//VergleichAGRVerdünnungTEMP//" 
 //					+ "//20101213//Export//AGR_LAM//20111220_103_DVAParameter.txt");
-		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo4//src//_Export//20111110_11_DVAParameter.txt");
+//		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo4//src//_Export//20111110_11_DVAParameter.txt");
 		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//bin//InputFiles//20101020_40_DVAParameter.txt");
 
 		Bremo bremo=new Bremo(file);
@@ -175,12 +202,6 @@ public class Bremo extends Thread {
 		// FunktionsTester.testSpeziesInputFuerOHCsolver();
 
 
-	}
-
-
-	public CasePara get_myCase() {
-		// TODO Auto-generated method stub
-		return casePara;
 	}
 
 }

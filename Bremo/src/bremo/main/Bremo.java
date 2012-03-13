@@ -1,6 +1,7 @@
 package bremo.main; 
 
 import java.io.File;
+import java.net.Inet4Address;
 
 import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
@@ -52,17 +53,18 @@ public class Bremo extends Thread {
 	public void run() {
 		try {
 			casePara = new CasePara(inputFile);
+			SwingBremo.SetMode(casePara.SYS.DUBUGGING_MODE) ; 
 			caseParaerzeugt=true;
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {				
+			SwingBremo.ActiveIcon();
 			e.stopBremo();
-		}		
+		}
 		try {
 			r.berechnungDurchfuehren();
-			//SwingBremo.ActiveIcon();
 			SwingBremo.StateBremoThread();
 			System.err.println("Thread : "+this.getName()+"   is Fertig !!!");
-		} catch (Exception e) {
+		} catch (Exception  e) {
 			this.interrupt();
 			e.printStackTrace();
 		}

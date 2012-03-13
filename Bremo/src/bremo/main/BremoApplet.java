@@ -3,8 +3,6 @@
  */
 package bremo.main;
 
-import java.io.IOException;
-
 import javax.swing.JApplet;
 
 
@@ -16,6 +14,7 @@ import bremoswing.SwingBremo;
  */
 public class BremoApplet extends JApplet {
 
+	private static final long serialVersionUID = 1L;
 
 	public void init() {
 		try {

@@ -1,4 +1,5 @@
 package bremoExceptions;
+import java.security.InvalidParameterException;
 
 
 //@SuppressWarnings("serial")
@@ -12,9 +13,9 @@ public abstract class StopBremoException extends Exception {
 	}
 
 	public void stopBremo() {
-		System.err.println(Separator+super.getMessage()+Separator);	
+		//System.err.println(Separator+super.getMessage()+Separator);	
 		 //Dieser Befehl wird benoetigt um das Programm zu stoppen wenn es nicht als swing app laeuft		
-		throw new NullPointerException();
+		throw new InvalidParameterException(Separator+super.getMessage()+Separator);
 	}
 	
 	public void log_Message(){

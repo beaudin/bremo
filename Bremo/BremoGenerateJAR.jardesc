@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
+<jardesc>
+    <jar path="Bremo/Bremo.jar"/>
+    <options buildIfNeeded="true" compress="false" descriptionLocation="/Bremo/BremoGenerateJAR.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="false" manifestLocation="/Bremo/Manifest.MF" manifestVersion="1.0" reuseManifest="false" saveManifest="true" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <folder path="/Bremo/Librairies/"/>
+        <javaElement handleIdentifier="=Bremo/src"/>
+        <file path="/Bremo/.classpath"/>
+        <file path="/Bremo/Manifest.MF"/>
+        <file path="/Bremo/.project"/>
+        <folder path="/Bremo/.settings"/>
+    </selectedElements>
+</jardesc>

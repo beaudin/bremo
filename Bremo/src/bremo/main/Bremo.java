@@ -53,11 +53,11 @@ public class Bremo extends Thread {
 	public void run() {
 		try {
 			casePara = new CasePara(inputFile);
-			SwingBremo.SetMode(casePara.SYS.DUBUGGING_MODE) ; 
+			SwingBremo.SetDebbugingMode(casePara.SYS.DUBUGGING_MODE) ; 
 			caseParaerzeugt=true;
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {				
-			SwingBremo.ActiveIcon();
+			SwingBremo.StateBremoThread();
 			e.stopBremo();
 		}
 		try {

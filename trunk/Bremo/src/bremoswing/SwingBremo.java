@@ -81,8 +81,7 @@ public class SwingBremo extends JFrame {
 	public static JButton stop;
 	private JTextField textFile;
 	public static JButton wahlFile;
-	public static boolean  Mode ;
-	public static  boolean ConsloseModeChange;
+	public static boolean  DebuggingMode ;
 	public static int NrOfFile ; 
 	//public static JProgressBar pb;
 	public static JButton pb;
@@ -94,42 +93,42 @@ public class SwingBremo extends JFrame {
 
 		@Override
 		public void println(String s) {
-			if (Mode) {
-				outStream.flush();
-				if (!ConsloseModeChange) {
-					ConsoleMode();
-					
-				}
-			} else {
+			if (DebuggingMode) {
+				ActiveConsole();
 				grosArea.append(s + "\n");
 				grosArea.setCaretPosition(grosArea.getDocument().getLength());
+			} else {
+				outStream.flush();
+				ActiveConsole();
 			}
 		}
 
 		@Override
 		public void print(String s) {
-			if (Mode) {
-				outStream.flush();
-			} else {
+			if (DebuggingMode) {
+				ActiveConsole();
 				grosArea.append(s);
 				grosArea.setCaretPosition(grosArea.getDocument().getLength());
+			} else {
+				outStream.flush();
+                ActiveConsole();
 			}
-
 		}
 	};
+	
 	PrintStream errStream = new PrintStream(System.err) {
 
 		@Override
 		public void println(String s) {
-				kleinArea.append(s + "\n");
-				kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
-	
+			kleinArea.append(s + "\n");
+			kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
+
 		}
 
 		@Override
 		public void print(String s) {
-				kleinArea.append(s);
-				kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
+			kleinArea.append(s);
+			kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
 		}
 	};
 
@@ -171,8 +170,7 @@ public class SwingBremo extends JFrame {
 		label = new JLabel();
 		percent = 0;
 		path = ".";
-        Mode = false ;
-        ConsloseModeChange = false;
+        DebuggingMode = false ;
 		NrOfFile = 0;
         /****** HAUPT FRAME ****************************************************************/
 		setTitle("Bremo 1.0");
@@ -405,7 +403,7 @@ public class SwingBremo extends JFrame {
 
 		jScrollPane1.setViewportView(grosArea);
 		jScrollPane1.setBounds(13, 20, 660, 420);
-		jScrollPane1.setPreferredSize(new Dimension(800, 600));
+		jScrollPane1.setVisible(false);
 		konsole2.add(jScrollPane1, c);
 
 		/************ TEXTAREA KLEINAREA OUTPUT ************************************/
@@ -452,10 +450,11 @@ public class SwingBremo extends JFrame {
 								.addPreferredGap(
 										LayoutStyle.ComponentPlacement.RELATED)
 								.addComponent(konsole2,
-										GroupLayout.DEFAULT_SIZE, 644,
+										GroupLayout.DEFAULT_SIZE, 180,
 										Short.MAX_VALUE).addContainerGap()));
 		/*****************************************************************************************/
 		pack();
+		
 	}
 
 	/** Warning Massage **********/
@@ -518,7 +517,8 @@ public class SwingBremo extends JFrame {
 		kleinArea.setText("");
 		berechnen.setEnabled(false);
 		label.setText("");
-		Mode = false;
+		DebuggingMode = false;
+		ActiveConsole();
 		JFileChooser fileChooser = new JFileChooser(path);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(true);
@@ -545,10 +545,11 @@ public class SwingBremo extends JFrame {
 						bremoThread[i] = new Bremo(group, files[i]);
 					}
 					NrOfFile = files.length;
+					if (NrOfFile == 1) SetDebbugingMode(true);
 					label.setForeground(new Color(0,0,255));
 					label.setText("Datei mit Erfolg Importiert !");
 					pb.setVisible(false);
-					ConsoleMode();
+					ActiveConsole();
 				}
 			} else if (status == JFileChooser.CANCEL_OPTION) {
 				label.setForeground(new Color (165,42,42));
@@ -590,27 +591,25 @@ public class SwingBremo extends JFrame {
 	}
 	
 	/****** Change the Mode of The Console When DebbugMode is  Active ***********/
-	public  void ConsoleMode () {
-		
-		if (files.length > 1 || Mode == true ) {
-			//konsole2.setVisible(false);
+	public  void ActiveConsole () {
+
+		if (NrOfFile > 1) {
 			jScrollPane1.setVisible(false);
 			setSize(710, 320);
-			if (files.length > 1) kleinArea.setText("Mehr Als 1 InputFile wurde Importiert !!! \n");
-			if (Mode == true )  kleinArea.setText("DEBBUG MODE IST AKTIVIERT !!! \n \n");
-			Mode = true ;
-			ConsloseModeChange = true;
-		} else {
-			//konsole2.setVisible(true);
-			ConsloseModeChange = false;
-			jScrollPane1.setVisible(true);
-			setSize(710, 750);
-			Mode = false ;
-		}		
+			DebuggingMode = false;
+		} else if (NrOfFile == 1) {
+			if (!DebuggingMode) {
+				jScrollPane1.setVisible(false);
+				setSize(710, 320);
+			} else {
+				jScrollPane1.setVisible(true);
+				setSize(710, 750);
+			}
+		}
 	}
 	
-	public static void SetMode (Boolean mode) {
-		if (NrOfFile == 1)  { Mode = mode ;}
+	public static void SetDebbugingMode (Boolean mode) {
+		if (NrOfFile == 1)  { DebuggingMode = mode ;}
 	}
 
 	/****** SEE IF THE RUNNING OPERATION ARE FINISHED *******************************/
@@ -704,6 +703,7 @@ public class SwingBremo extends JFrame {
 
 			public void run() {
 				new SwingBremo().setVisible(true);
+				
 			}
 		});
 	}

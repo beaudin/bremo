@@ -83,6 +83,11 @@ public class Bremo extends Thread {
 			return null;
 		}
 	}
+	
+	public boolean get_myCaseState () {
+		
+		return caseParaerzeugt;
+	}
 
 	public static void main(String[] args)
 			throws ParameterFileWrongInputException {

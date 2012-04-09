@@ -83,7 +83,7 @@ public class SwingBremo extends JFrame {
 	public static JButton wahlFile;
 	public static boolean  DebuggingMode ;
 	public static int NrOfFile ; 
-	//public static JProgressBar pb;
+	public static JProgressBar progressBar;
 	public static JButton pb;
 	public static JLabel label;
 	public static Timer timerUpdate;
@@ -166,7 +166,7 @@ public class SwingBremo extends JFrame {
 		jScrollPane1 = new JScrollPane();
 		jScrollPane2 = new JScrollPane();
 	
-		//pb = new JProgressBar(0, 100);
+		progressBar = new JProgressBar(0, 100);
 		label = new JLabel();
 		percent = 0;
 		path = ".";
@@ -259,6 +259,8 @@ public class SwingBremo extends JFrame {
 				"/bremoswing/bild/stop 2.png")));
 		stop.setToolTipText("Stop Bremo");
 		//stop.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		stop.setRolloverIcon(new ImageIcon(getClass().getResource(
+				"/bremoswing/bild/stop_alt.png")));
 		stop.setContentAreaFilled(false);
 		stop.setMaximumSize(null);
 		stop.setMinimumSize(null);
@@ -319,7 +321,7 @@ public class SwingBremo extends JFrame {
 		//manager.add(konsole, gc);
 
 		/************ LABEL ************************************/
-		label.setBounds(330, 27, 160, 20);
+		//label.setBounds(330, 27, 160, 20);
 		label.setFont(new Font("Tahoma", 3, 13)); // NOI18N
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		gc.insets = new Insets(0,30,0,27);
@@ -329,11 +331,51 @@ public class SwingBremo extends JFrame {
 		manager.add(label, gc);
 
 		/************ PROGESSBAR ************************************/
-		//pb.setBounds(520, 21, 150, 30);
-		//pb.setIndeterminate(true);
-//		pb.setValue(0);
-//		//pb.setStringPainted(true);
+		//progressBar.setBounds(520, 21, 100, 30);
+		//progressBar.setIndeterminate(true);
+		progressBar.setValue(0);
+		progressBar.setStringPainted(true);
 		
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		gc.insets = new Insets(0,0,0,0);
+		gc.weightx = 0.5;
+		gc.ipadx = 0;
+		gc.ipady = 0;
+		gc.gridx = 3;
+		gc.gridy = 0;
+		gc.anchor = GridBagConstraints.CENTER;
+		manager.add(progressBar, gc);
+		
+	
+		timerCalcul = new Timer(1000, new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				if (bremoThread[0].get_myCaseState()) {
+					double Sum = 0;
+					pb.setVisible(false);
+					for (int i = 0; i < bremoThread.length; i++) {
+
+						Sum = Sum
+								+ (bremoThread[i].get_myCase()
+										.get_aktuelle_Rechenzeit() / bremoThread[i]
+										.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
+
+					}
+					percent = (int) ((Sum / NrOfFile) * 100);
+					progressBar.setValue(percent);
+					progressBar.repaint();
+				}
+			}
+		});
+
+//		timerUpdate = new Timer(1, new ActionListener() {
+//			public void actionPerformed(ActionEvent evt) {
+//				label.setText("Loading File...");
+//				pb.setVisible(true);
+//			}
+//		});
+		
+		
+		/***********************************************************/
 		pb.setIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/progressbar4.gif")));
 		//pb.setToolTipText("Stop Bremo");
@@ -349,7 +391,7 @@ public class SwingBremo extends JFrame {
 		gc.gridy = 0;
 		gc.ipadx = -15;
 		gc.ipady = -15;
-		gc.anchor = GridBagConstraints.FIRST_LINE_START;
+		//gc.anchor = GridBagConstraints.FIRST_LINE_START;
 		manager.add(pb, gc);
 		
 //		timerCalcul = new Timer(1000, new ActionListener() {
@@ -495,6 +537,7 @@ public class SwingBremo extends JFrame {
 			pb.setVisible(true);
 			label.setForeground(new Color(0,150,60));
 			label.setText("Operation gestartet ....");
+			timerCalcul.start();
 			
 			} catch (IllegalThreadStateException e) {
 				e.printStackTrace();
@@ -616,6 +659,7 @@ public class SwingBremo extends JFrame {
 	public static void StateBremoThread() {
 
 		if (group.activeCount() <= 1) {
+			timerCalcul.stop();
 			pb.setVisible(false);
 			JFrame popup = new JFrame();
 			JOptionPane.showMessageDialog(popup,
@@ -676,6 +720,7 @@ public class SwingBremo extends JFrame {
 		 * /tutorial/uiswing/lookandfeel/plaf.html
 		 */
 		UIManager.put("nimbusOrange", new Color(0,180,0));
+		
 		try {
 			for (UIManager.LookAndFeelInfo info : UIManager
 					.getInstalledLookAndFeels()) {

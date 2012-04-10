@@ -3,6 +3,9 @@ package bremo.main;
 import java.io.File;
 import java.net.Inet4Address;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
 import bremoExceptions.BirdBrainedProgrammerException;
@@ -56,14 +59,25 @@ public class Bremo extends Thread {
 			SwingBremo.SetDebbugingMode(casePara.SYS.DUBUGGING_MODE) ; 
 			caseParaerzeugt=true;
 			r = new Rechnung(casePara);
-		} catch (ParameterFileWrongInputException e) {				
+		} catch (ParameterFileWrongInputException e) {
+			SwingBremo.setNrOfBremoAlive();
+			JFrame popup = new JFrame();
+			JOptionPane.showMessageDialog(popup,
+					"Thread : Eine Fehler ist in der File "+this.getName()+" \n aufgetreten !!!", this.getName(),
+					JOptionPane.ERROR_MESSAGE);
+			//SwingBremo.NrOfFile--;
 			SwingBremo.StateBremoThread();
 			e.stopBremo();
 		}
 		try {
 			r.berechnungDurchfuehren();
+			//SwingBremo.StateBremoThread();
+			//System.err.println("Thread : "+this.getName()+"   is Fertig !!!");
+			JFrame popup = new JFrame();
+			JOptionPane.showMessageDialog(popup,
+					"Thread : "+this.getName()+"   is Fertig !!!", this.getName(),
+					JOptionPane.INFORMATION_MESSAGE);
 			SwingBremo.StateBremoThread();
-			System.err.println("Thread : "+this.getName()+"   is Fertig !!!");
 		} catch (Exception  e) {
 			this.interrupt();
 			e.printStackTrace();

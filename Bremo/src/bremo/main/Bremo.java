@@ -63,7 +63,8 @@ public class Bremo extends Thread {
 			SwingBremo.setNrOfBremoAlive();
 			JFrame popup = new JFrame();
 			JOptionPane.showMessageDialog(popup,
-					"Thread : Eine Fehler ist in der File "+this.getName()+" \n aufgetreten !!!", this.getName(),
+					"Thread : Eine Fehler ist in der File "+this.getName()+" \n aufgetreten !!!" +
+							"\n"+e.getMessage(), this.getName(),
 					JOptionPane.ERROR_MESSAGE);
 			//SwingBremo.NrOfFile--;
 			SwingBremo.StateBremoThread();
@@ -77,6 +78,7 @@ public class Bremo extends Thread {
 			JOptionPane.showMessageDialog(popup,
 					"Thread : "+this.getName()+"   is Fertig !!!", this.getName(),
 					JOptionPane.INFORMATION_MESSAGE);
+			SwingBremo.PutInBremoThreadFertig("Thread : "+this.getName()+"   is Fertig !!!");
 			SwingBremo.StateBremoThread();
 		} catch (Exception  e) {
 			this.interrupt();

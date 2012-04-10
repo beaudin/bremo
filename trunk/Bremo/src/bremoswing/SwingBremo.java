@@ -588,7 +588,7 @@ public class SwingBremo extends JFrame {
 					for (int i = 0; i < bremoThread.length; i++) {
 						bremoThread[i] = new Bremo(group, files[i]);
 					}
-					
+					bremoThreadFertig  = new String [files.length];
 					NrOfFile = files.length;
 					NrBremoAlive = files.length;
 					if (NrOfFile == 1) SetDebbugingMode(true);
@@ -661,6 +661,17 @@ public class SwingBremo extends JFrame {
 	public static   void  setNrOfBremoAlive() {
         NrBremoAlive--;
 	}
+	
+	public static void PutInBremoThreadFertig (String s ) {
+		for ( int i = 0;i < bremoThreadFertig.length; i++){
+			if (bremoThreadFertig[i] !=null) 
+				continue;
+			else
+				bremoThreadFertig[i] = s;
+			    break;
+			
+		}
+	}
 
 	/****** SEE IF THE RUNNING OPERATION ARE FINISHED *******************************/
 	public static void StateBremoThread() {
@@ -670,9 +681,15 @@ public class SwingBremo extends JFrame {
 			pb.setVisible(false);
 			stop.setEnabled(false);
 			JFrame popup = new JFrame();
-			JOptionPane.showMessageDialog(popup,
-					"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
-					JOptionPane.INFORMATION_MESSAGE);
+			if (bremoThreadFertig[0] != null) {
+				JOptionPane.showMessageDialog(popup,
+						"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+			for (String str : bremoThreadFertig) {
+				if (str != null )
+					System.err.println(str);
+			}
 			ActiveIcon();
 			progressBar.setVisible(false);
 		}

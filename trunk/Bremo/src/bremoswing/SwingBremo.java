@@ -70,6 +70,7 @@ public class SwingBremo extends JFrame {
 	private String path;
 	public static ThreadGroup group;
 	public static Bremo[] bremoThread;
+	public static String [] bremoThreadFertig;
 	public static JButton berechnen;
 	//public JCheckBox konsole;
 	private JTextArea grosArea;
@@ -82,7 +83,8 @@ public class SwingBremo extends JFrame {
 	private JTextField textFile;
 	public static JButton wahlFile;
 	public static boolean  DebuggingMode ;
-	public static int NrOfFile ; 
+	public static int NrOfFile ;
+    public static int NrBremoAlive;
 	public static JProgressBar progressBar;
 	public static JButton pb;
 	public static JLabel label;
@@ -172,6 +174,7 @@ public class SwingBremo extends JFrame {
 		path = ".";
         DebuggingMode = false ;
 		NrOfFile = 0;
+		NrBremoAlive = 0;
         /****** HAUPT FRAME ****************************************************************/
 		setTitle("Bremo 1.0");
 		setBackground(new Color(255, 255, 255));
@@ -264,6 +267,7 @@ public class SwingBremo extends JFrame {
 		stop.setContentAreaFilled(false);
 		stop.setMaximumSize(null);
 		stop.setMinimumSize(null);
+		stop.setEnabled(false);
 		stop.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent evt) {
 
@@ -330,51 +334,6 @@ public class SwingBremo extends JFrame {
 		gc.gridy = 0;
 		manager.add(label, gc);
 
-		/************ PROGESSBAR ************************************/
-		//progressBar.setBounds(520, 21, 100, 30);
-		//progressBar.setIndeterminate(true);
-		progressBar.setValue(0);
-		progressBar.setStringPainted(true);
-		
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.insets = new Insets(0,0,0,0);
-		gc.weightx = 0.5;
-		gc.ipadx = 0;
-		gc.ipady = 0;
-		gc.gridx = 3;
-		gc.gridy = 0;
-		gc.anchor = GridBagConstraints.CENTER;
-		manager.add(progressBar, gc);
-		
-	
-		timerCalcul = new Timer(1000, new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				if (bremoThread[0].get_myCaseState()) {
-					double Sum = 0;
-					pb.setVisible(false);
-					for (int i = 0; i < bremoThread.length; i++) {
-
-						Sum = Sum
-								+ (bremoThread[i].get_myCase()
-										.get_aktuelle_Rechenzeit() / bremoThread[i]
-										.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
-
-					}
-					percent = (int) ((Sum / NrOfFile) * 100);
-					progressBar.setValue(percent);
-					progressBar.repaint();
-				}
-			}
-		});
-
-//		timerUpdate = new Timer(1, new ActionListener() {
-//			public void actionPerformed(ActionEvent evt) {
-//				label.setText("Loading File...");
-//				pb.setVisible(true);
-//			}
-//		});
-		
-		
 		/***********************************************************/
 		pb.setIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/progressbar4.gif")));
@@ -393,6 +352,47 @@ public class SwingBremo extends JFrame {
 		gc.ipady = -15;
 		//gc.anchor = GridBagConstraints.FIRST_LINE_START;
 		manager.add(pb, gc);
+		
+		/************ PROGESSBAR ************************************/
+		//progressBar.setBounds(520, 21, 100, 30);
+		//progressBar.setIndeterminate(true);
+		progressBar.setValue(0);
+		progressBar.setStringPainted(true);
+		progressBar.setVisible(false);
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		gc.insets = new Insets(0,0,0,0);
+		gc.weightx = 0.6;
+		gc.ipadx = 0;
+		gc.ipady = 0;
+		gc.gridx = 3;
+		gc.gridy = 0;
+		gc.anchor = GridBagConstraints.CENTER;
+		manager.add(progressBar, gc);
+		
+	
+		timerCalcul = new Timer(1000, new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				if (bremoThread[0].get_myCaseState()) {
+					progressBar.setVisible(true);
+					double Sum = 0;
+					pb.setVisible(false);
+					stop.setEnabled(true);
+					for (int i = 0; i < bremoThread.length; i++) {
+						try {
+						Sum = Sum
+								+ (bremoThread[i].get_myCase()
+										.get_aktuelle_Rechenzeit() / bremoThread[i]
+										.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
+						} catch (Exception e) {
+							
+						}
+                    }
+					percent = (int) ((Sum /NrBremoAlive) * 100);
+					progressBar.setValue(percent);
+					progressBar.repaint();
+				}
+			}
+		});
 		
 //		timerCalcul = new Timer(1000, new ActionListener() {
 //			public void actionPerformed(ActionEvent evt) {
@@ -562,6 +562,7 @@ public class SwingBremo extends JFrame {
 		label.setText("");
 		DebuggingMode = false;
 		ActiveConsole();
+		progressBar.setValue(0);
 		JFileChooser fileChooser = new JFileChooser(path);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(true);
@@ -587,7 +588,9 @@ public class SwingBremo extends JFrame {
 					for (int i = 0; i < bremoThread.length; i++) {
 						bremoThread[i] = new Bremo(group, files[i]);
 					}
+					
 					NrOfFile = files.length;
+					NrBremoAlive = files.length;
 					if (NrOfFile == 1) SetDebbugingMode(true);
 					label.setForeground(new Color(0,0,255));
 					label.setText("Datei mit Erfolg Importiert !");
@@ -631,6 +634,7 @@ public class SwingBremo extends JFrame {
 		label.setForeground(new Color(255, 0, 0));
 		label.setText("Operation beendet.");
 		pb.setVisible(false);
+		progressBar.setValue(0);
 	}
 	
 	/****** Change the Mode of The Console When DebbugMode is  Active ***********/
@@ -654,6 +658,9 @@ public class SwingBremo extends JFrame {
 	public static void SetDebbugingMode (Boolean mode) {
 		if (NrOfFile == 1)  { DebuggingMode = mode ;}
 	}
+	public static   void  setNrOfBremoAlive() {
+        NrBremoAlive--;
+	}
 
 	/****** SEE IF THE RUNNING OPERATION ARE FINISHED *******************************/
 	public static void StateBremoThread() {
@@ -661,11 +668,13 @@ public class SwingBremo extends JFrame {
 		if (group.activeCount() <= 1) {
 			timerCalcul.stop();
 			pb.setVisible(false);
+			stop.setEnabled(false);
 			JFrame popup = new JFrame();
 			JOptionPane.showMessageDialog(popup,
 					"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
 					JOptionPane.INFORMATION_MESSAGE);
 			ActiveIcon();
+			progressBar.setVisible(false);
 		}
 	}
 

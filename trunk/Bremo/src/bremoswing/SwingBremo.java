@@ -623,6 +623,7 @@ public class SwingBremo extends JFrame {
 			control = false;
 			pb.setVisible(false);
 			ActiveIcon();
+			bremoThread[0].stopMe();
 		}
 	}
 
@@ -745,7 +746,7 @@ public class SwingBremo extends JFrame {
 		 * http://download.oracle.com/javase
 		 * /tutorial/uiswing/lookandfeel/plaf.html
 		 */
-		UIManager.put("nimbusOrange", new Color(0,180,0));
+		UIManager.put("nimbusOrange", new Color(110,170,0));
 		
 		try {
 			for (UIManager.LookAndFeelInfo info : UIManager

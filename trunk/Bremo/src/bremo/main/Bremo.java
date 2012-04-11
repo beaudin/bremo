@@ -104,6 +104,10 @@ public class Bremo extends Thread {
 		
 		return caseParaerzeugt;
 	}
+	
+	public void stopMe() {		
+		throw new NullPointerException();
+	}
 
 	public static void main(String[] args)
 			throws ParameterFileWrongInputException {

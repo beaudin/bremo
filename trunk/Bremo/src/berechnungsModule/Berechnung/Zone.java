@@ -8,7 +8,6 @@ import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.MiscException;
 import bremoExceptions.NegativeMassException;
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 
 
@@ -246,7 +245,6 @@ public class Zone {
 			}else{
 				einzelMassenHash_aus.put(spez,dm_a);
 			}
-
 			//Hinzufügen der Änderung der Grundspeziesmassen
 			Enumeration<Spezies> e=einzelMassenHash_aus.keys();			
 			Spezies spez1;
@@ -265,8 +263,14 @@ public class Zone {
 						einzelMassenHash_aus.get(spez1)>0) //Es kann sein, dass Spezies mit einem Massenbruch von 0 in der Hashtable stehen
 					throw new NegativeMassException("Aus Zone " +this.ID + " soll eine Spezies" +
 							"("+ spez1.get_name()+ ") entnommen werden " +
-					"die in der Zone nicht vorhanden ist");				
-
+					"die in der Zone nicht vorhanden ist");		
+			}
+			
+			e=null;
+			e=einzelMassenHash_aus.keys();	
+			while(e.hasMoreElements()){
+				spez1=e.nextElement();	
+				
 				if(this.dm_aus.containsKey(spez1)){
 					this.dm_aus.put(spez1, einzelMassenHash_aus.get(spez1)+dm_aus.get(spez1));			
 				}else{				

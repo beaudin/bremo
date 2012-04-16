@@ -33,6 +33,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 	private Motor motor;
 	private GleichGewichtsRechner gg;
 	private MasterEinspritzung masterEinspritzung;
+	private boolean krstVerbrannt=false;
 	
 	
 	private final int ANZAHL_ZONEN;
@@ -188,30 +189,26 @@ public class DVA_Homogen_EinZonig extends DVA{
 		//Verhindert das Aufsummieren des Fehlers wenn der Brennverlauf 
 		//vor der eigentlichen Verbrennung etwas schwingt		
 		dmZoneBurn=0;		
-		if(esBrennt&&dQburn>0) 
+		if(esBrennt&&dQburn>0&&!krstVerbrannt) 
 			dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,frischGemisch,T,p);
-
-		//Verbrennungswaerme zufuehren
-		zonen_IN[0].set_dQ_ein_aus(dQburn);
 		
 		//Verbrennendes Masseelement entnehmen
 		if(dmZoneBurn>0){
 			try {
 				zonen_IN[0].set_dm_aus(dmZoneBurn,frischGemisch);
+				GasGemisch rauchgas;	
+				rauchgas=new GasGemisch("Rauchgas");
+				rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche
+						(p, T, frischGemisch));
+				
+				//Massenelement wieder zumischen
+				zonen_IN[0].set_dm_ein(dmZoneBurn, T, rauchgas);
+				
 			} catch (NegativeMassException nmE) {					
 				nmE.log_Warning();
-				dmZoneBurn=0;
-			}
-		
-			GasGemisch rauchgas;	
-			rauchgas=new GasGemisch("Rauchgas");
-			rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche
-					(p, T, frischGemisch));
-			
-			//Massenelement wieder zumischen
-			zonen_IN[0].set_dm_ein(dmZoneBurn, T, rauchgas);
-
-		}		
+				krstVerbrannt=true;
+			}	
+		}				
 
 		return zonen_IN;			
 	}

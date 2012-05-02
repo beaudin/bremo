@@ -11,6 +11,7 @@ import bremo.sys.Rechnung;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.MiscException;
 import bremoExceptions.ParameterFileWrongInputException;
+import bremoExceptions.StopBremoException;
 import bremoswing.SwingBremo;
 
 
@@ -78,7 +79,7 @@ public class Bremo extends Thread {
 			JOptionPane.showMessageDialog(popup,
 					"Thread : "+this.getName()+"   is Fertig !!!", this.getName(),
 					JOptionPane.INFORMATION_MESSAGE);
-			SwingBremo.PutInBremoThreadFertig("Thread : "+this.getName()+"   is Fertig !!!");
+			SwingBremo.PutInBremoThreadFertig("Thread : "+this.getName()+"   ist Fertig !!!");
 			SwingBremo.StateBremoThread();
 		} catch (Exception  e) {
 			this.interrupt();
@@ -105,8 +106,10 @@ public class Bremo extends Thread {
 		return caseParaerzeugt;
 	}
 	
-	public void stopMe() {		
-		throw new NullPointerException();
+	public void stopMe() {
+		if (isAlive()) {
+		 this.interrupt();
+		}
 	}
 
 	public static void main(String[] args)

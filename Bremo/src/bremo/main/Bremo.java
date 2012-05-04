@@ -108,7 +108,7 @@ public class Bremo extends Thread {
 	
 	public void stopMe() {
 		if (isAlive()) {
-		 this.interrupt();
+		   r = null ;
 		}
 	}
 

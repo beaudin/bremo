@@ -46,6 +46,8 @@ import javax.swing.Timer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import bremo.main.Bremo;
@@ -200,7 +202,7 @@ public class SwingBremo extends JFrame {
 		
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.fill = GridBagConstraints.BOTH;
-		gc.insets = new Insets(0,0,0,27);
+		gc.insets = new Insets(0,0,3,27);
 		gc.anchor = GridBagConstraints.FIRST_LINE_START;
 		gc.ipadx = -28;
 		gc.ipady = -12 ;
@@ -267,7 +269,7 @@ public class SwingBremo extends JFrame {
 		});
 		//wahlFile.setBounds(70, 18, 33, 33);
 		gc.fill = GridBagConstraints.BOTH;
-		gc.insets = new Insets(0,0,0,80);
+		gc.insets = new Insets(0,0,3,80);
 		gc.weightx = 0.0001;
 		gc.gridx = 1;
 		gc.gridy = 0;
@@ -301,7 +303,7 @@ public class SwingBremo extends JFrame {
 		stop.setVisible(false);
 		//stop.setBounds(130, 18, 33, 33);
 		gc.fill = GridBagConstraints.BOTH;
-		gc.insets = new Insets(0,0,0,140);
+		gc.insets = new Insets(0,0,3,140);
 		gc.weightx = 0.0001;
 		gc.gridx = 2;
 		gc.gridy = 0;
@@ -349,11 +351,21 @@ public class SwingBremo extends JFrame {
 
 		/************ LABEL ************************************/
 		//label.setBounds(330, 27, 160, 20);
-		label.setFont(new Font("comic sans ms", 3, 14)); // NOI18N
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.insets = new Insets(0,30,0,27);
-		gc.weightx = 0.5;
-		gc.gridx = 4;
+		label.setFont(new Font("comic sans ms", 3, 14));
+		label.setOpaque(true);
+		label.setBackground(new Color(255,255,255));
+		//Border border = LineBorder.createGrayLineBorder();
+		Border border = new LineBorder(Color.GRAY,2,true);
+		label.setBorder(border);
+		
+//		label.setIcon(new ImageIcon(getClass().getResource(
+//				"/bremoswing/bild/label_blue.png")));
+//		label.setHorizontalTextPosition(JLabel.LEFT);
+//		label.setEnabled(false);
+		gc.fill = GridBagConstraints.CENTER;
+		gc.insets = new Insets(0,30,2,27);
+		gc.weightx = 0.4;
+		gc.gridx = 3;
 		gc.gridy = 0;
 		manager.add(label, gc);
 
@@ -367,7 +379,7 @@ public class SwingBremo extends JFrame {
 		pb.setVisible(false);
 		
 		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.insets = new Insets(0,0,0,0);
+		gc.insets = new Insets(0,0,1,0);
 		gc.weightx = 0.5;
 		gc.gridx = 5;
 		gc.gridy = 0;
@@ -378,7 +390,7 @@ public class SwingBremo extends JFrame {
 		
 		/************ PROGESSBAR ************************************/
 		//progressBar.setBounds(520, 21, 100, 30);
-		
+		progressBarInd.setValue(100);
 		progressBarInd.setIndeterminate(true);
 		progressBarInd.setVisible(false);
 		gc.fill = GridBagConstraints.HORIZONTAL;
@@ -407,9 +419,14 @@ public class SwingBremo extends JFrame {
 	
 		timerCalcul = new Timer(1000, new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				if (bremoThread[0].get_myCaseState()) {
+				boolean bremoActiv = false ;
+				for (Bremo bremo : bremoThread) {
+					if (bremo.get_myCaseState())
+						bremoActiv = true;
+				}
+				if (bremoActiv) {
 					label.setForeground(new Color(25,49,187));
-					label.setText("Berechnung gestartet");
+					label.setText(" Berechnung gestartet ");
 					progressBar.setVisible(true);
 					double Sum = 0;
 					//pb.setVisible(false);
@@ -431,7 +448,7 @@ public class SwingBremo extends JFrame {
 				}
 				else {
 					label.setForeground(new Color(255,0,0));
-					label.setText("Initialization...");
+					label.setText(" Initialization läuft... ");
 				}
 			}
 		});
@@ -463,8 +480,7 @@ public class SwingBremo extends JFrame {
 		textFile.setMinimumSize(new Dimension(0, 0));
 		textFile.setPreferredSize(new Dimension(0, 0));
 		textFile.setBounds(180, 20, 0, 0);
-		//manager.add(textFile, JLayeredPane.DEFAULT_LAYER);
-
+		
 		/************ PANEL KONSOLE ************************************/
 		konsole2.setBorder(BorderFactory.createTitledBorder(null, "Konsole",
 				TitledBorder.DEFAULT_JUSTIFICATION,
@@ -582,14 +598,14 @@ public class SwingBremo extends JFrame {
 			progressBarInd.setVisible(true);
 			
 			label.setForeground(new Color(110,170,0));
-			label.setText("Operation gestartet ....");
+			label.setText(" Operation gestartet .... ");
 			timerCalcul.start();
 			
 			} catch (IllegalThreadStateException e) {
 				e.printStackTrace();
 				ActiveIcon();
 				label.setForeground(new Color(255,0,0));
-				label.setText("Bitte InputFile Neu Auswälen !!! ");
+				label.setText(" Bitte InputFile Neu Auswählen ! ");
 			}
 //				bremoThread[i]=new Bremo(group, files[i]);
 //				bremoThread[i].get_myCase().get_aktuelle_Rechenzeit();
@@ -606,6 +622,7 @@ public class SwingBremo extends JFrame {
 		kleinArea.setText("");
 		berechnen.setEnabled(false);
 		label.setText("");
+		
 		DebuggingMode = false;
 		ActiveConsole();
 		progressBar.setValue(0);
@@ -618,7 +635,8 @@ public class SwingBremo extends JFrame {
 		fileChooser.addChoosableFileFilter(txtFilter);
 		try {
 			label.setForeground(new Color (165,42,42));
-			label.setText("Datei Werden geladen ...");
+			label.setText(" Datei Werden geladen ... ");
+//			label.setEnabled(true);
 			pb.setIcon(new ImageIcon(getClass().getResource(
 					"/bremoswing/bild/loadFile.gif")));
 			pb.setVisible(true);
@@ -639,19 +657,19 @@ public class SwingBremo extends JFrame {
 					NrBremoAlive = files.length;
 					if (NrOfFile == 1) SetDebbugingMode(true);
 					label.setForeground(new Color(0,0,255));
-					label.setText("Datei mit Erfolg Importiert !");
+					label.setText(" Datei mit Erfolg Importiert ! ");
 					pb.setVisible(false);
 					ActiveConsole();
 				}
 			} else if (status == JFileChooser.CANCEL_OPTION) {
 				label.setForeground(new Color (165,42,42));
-				label.setText(" Import von Datei Unterbrechen !");
+				label.setText(" Import von Datei Unterbrechen ! ");
 				pb.setVisible(false);
 				fileChooser.cancelSelection();
 			}
 		} catch (Exception e) {
 			label.setForeground(new Color (255,0,0));
-			label.setText("Fehler aufgetreten !!!");
+			label.setText(" Fehler aufgetreten ! ");
 			e.printStackTrace();
 		}
 		berechnen.setEnabled(true);
@@ -665,11 +683,11 @@ public class SwingBremo extends JFrame {
 					JOptionPane.WARNING_MESSAGE);
 		} else {
 
-			group.interrupt();
+			//group.interrupt();
 			control = false;
 			pb.setVisible(false);
 			ActiveIcon();
-			bremoThread[0].stopMe();
+			//bremoThread[0].stopMe();
 		}
 	}
 
@@ -680,7 +698,7 @@ public class SwingBremo extends JFrame {
 		berechnen.setVisible(true);
 		stop.setVisible(false);
 		label.setForeground(new Color(255, 0, 0));
-		label.setText("Operation beendet.");
+		label.setText(" Operation beendet. ");
 		pb.setVisible(false);
 		progressBar.setValue(0);
 		progressBar.setVisible(false);
@@ -729,11 +747,11 @@ public class SwingBremo extends JFrame {
 		if (group.activeCount() <= 1) {
 			timerCalcul.stop();
 			pb.setVisible(false);
-			stop.setEnabled(false);
+			//stop.setEnabled(false);
 			JFrame popup = new JFrame();
 			if (bremoThreadFertig[0] != null) {
 				label.setForeground(new Color(25,49,187));
-				label.setText("Berechnung Fertig !");
+				label.setText(" Berechnung Fertig ! ");
 				JOptionPane.showMessageDialog(popup,
 						"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
 						JOptionPane.INFORMATION_MESSAGE);
@@ -798,8 +816,7 @@ public class SwingBremo extends JFrame {
 		 * http://download.oracle.com/javase
 		 * /tutorial/uiswing/lookandfeel/plaf.html
 		 */
-		UIManager.put("nimbusOrange", new Color(110,170,0));
-		
+		UIManager.put("nimbusOrange", new Color(28,138,224)); //(25,49,187));//Color(110,170,0));
 		try {
 			for (UIManager.LookAndFeelInfo info : UIManager
 					.getInstalledLookAndFeels()) {

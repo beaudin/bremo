@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Insets;
 
 import java.awt.GridBagConstraints;
@@ -15,6 +16,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -75,10 +79,10 @@ public class SwingBremo extends JFrame {
 	public static String [] bremoThreadFertig;
 	public static JButton berechnen;
 	//public JCheckBox konsole;
-	private JTextArea grosArea;
+	public JTextArea grosArea;
 	private JScrollPane jScrollPane1;
 	private JScrollPane jScrollPane2;
-	private JTextArea kleinArea;
+	public JTextArea kleinArea;
 	private JPanel konsole2;
 	private JPanel manager;
 	public static JButton stop;
@@ -151,7 +155,7 @@ public class SwingBremo extends JFrame {
 	private void initComponents() {		
 
 		System.setOut(outStream);
-		System.setErr(errStream);
+	    System.setErr(errStream);
 
 		manager = new JPanel();
 
@@ -493,7 +497,16 @@ public class SwingBremo extends JFrame {
 		grosArea.setRows(5);
 		grosArea.setText("Programm läuft... \nWählen Sie die Input Datei Und Dann Einfach die Berechnung Ausführen .");
 		grosArea.setMinimumSize(new Dimension(76, 22));
-
+        grosArea.addKeyListener(new KeyAdapter() {			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) {
+					//search(grosArea);
+					new SucheBremo((JTextArea) e.getSource());
+				}
+			}
+		});
 		konsole2.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
@@ -512,6 +525,16 @@ public class SwingBremo extends JFrame {
 		kleinArea.setFont(new Font("comic sans ms", 3, 13)); // NOI18N
 		kleinArea.setForeground(new Color(255, 0, 0));
 		kleinArea.setRows(5);
+		kleinArea.addKeyListener(new KeyAdapter() {			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) {
+					//search(grosArea);
+					new SucheBremo((JTextArea) e.getSource());
+				}
+			}
+		});
 
 		jScrollPane2.setViewportView(kleinArea);
 		c.gridwidth = 1;
@@ -765,6 +788,8 @@ public class SwingBremo extends JFrame {
 			progressBarInd.setVisible(false);
 		}
 	}
+	
+
 
 	/************************ place Frame to the center ************************/
 	private void placeFrame() {

@@ -24,7 +24,7 @@ public abstract class StopBremoException extends Exception {
 	}
 	
 	public void log_Warning(){
-		log_Warning( super.getMessage()+ Separator);		
+		log_Warning(super.getMessage()+ Separator);		
 	}
 	
 	public void log_Warning(String message){

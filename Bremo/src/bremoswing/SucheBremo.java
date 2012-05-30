@@ -1,6 +1,8 @@
 package bremoswing;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +10,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -27,25 +30,35 @@ public class SucheBremo extends JFrame{
 	
 	//Components
 	
-	JLabel label1 = new JLabel("Geben sie den zu suchenden Begrif unten ein:"); 
+	JLabel label1 = new JLabel("Suche :"); 
 	JButton button1 = new JButton("Suchen");  
 	JButton button2 = new JButton("next"); 
-	JTextField field1 = new JTextField();
+	JTextField field1 = new JTextField(20);
+	FlowLayout experimentLayout = new FlowLayout();
 	int Occur = 0;	
 	String  text = "";
 	int start = 0;
 	int end = 0;
 	
-	SucheBremo( final JTextArea area) {
+	public SucheBremo() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public SucheBremo( final JTextArea area) {
 		
-		setSize(280,140);
+		setSize(370,70);
 	    setTitle("Text Suchen im Bremo");
+	    setIconImage(new ImageIcon(getClass().getResource(
+				"/bremoswing/bild/search_blue.png")).getImage());
 	    setLocationRelativeTo(null);
 	    setResizable(false);
-	    setLayout(new GridLayout(3,1));
-	    add(label1);
-	    add(field1);
-	    add(button1);
+	   
+	    setLayout(experimentLayout);
+	    experimentLayout.setAlignment(FlowLayout.LEADING);
+	   
+	    getContentPane().add(label1);
+	    getContentPane().add(field1);
+	    getContentPane().add(button1);
 	    field1.addKeyListener(new KeyAdapter() {			
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -83,11 +96,18 @@ public class SucheBremo extends JFrame{
    	     else if (end < area.getText().length()){
    	    	start = area.getText().toLowerCase().indexOf(field1.getText().toLowerCase(), end+1);
      	    end = start + field1.getText().length();
+     	    if (start == -1) {
+     	    	start = 0;
+     	    	end   = 0;
+     	    	text="";
+     	    	Occur = 0;
+     	    	java.awt.Toolkit.getDefaultToolkit().beep();
+     	    }
+     	    else {
      	    area.select(start, end);
      	    Occur++;
-     	   }
-        	
-        	System.err.println("JA! <<"+field1.getText()+ ">> Kommt für das "+Occur+". Mal Vor");
+     	    }
+     	  }
         }
         else
         {
@@ -95,6 +115,10 @@ public class SucheBremo extends JFrame{
             text = null;
             Occur = 0;
         }
+		
+	}
+	
+	void setTextArea(JTextArea area) {
 		
 	}
  

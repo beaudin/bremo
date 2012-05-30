@@ -446,6 +446,7 @@ public class SwingBremo extends JFrame {
 
 		/************ TEXTAREA KLEINAREA OUTPUT ************************************/
 		kleinArea.setColumns(20);
+		kleinArea.setLineWrap(true);
 		kleinArea.setEditable(false);
 		// kleinArea.setFont(new Font("comic sans ms", 3, 13)); // NOI18N
 		kleinArea.setForeground(new Color(255, 0, 0));

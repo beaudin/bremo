@@ -1,0 +1,69 @@
++++++++++++++++++++++++++++++++++++++++++++++
++    Wed May 30 23:48:02 CEST 2012          +
++++++++++++++++++++++++++++++++++++++++++++++
+
+Item1 : WARNING: Die Ordnung fuer den SavitzkyGolay-Filter wurde nicht angegeben. 
+Es wird mit einem Polynom 5ter Ordnung gerechnet.
+Eine hoehere Ordnung kann mittles der Vorgabe des Parameters "sgolayOrdnung" erfolgen.
+
+Item2 : WARNING: Die Breite fuer den SavitzkyGolay-Filter wurde nicht angegeben. 
+Es wird mit einer Breite von 11.0 gerechnet. 
+Eine andere Breite kann mittles der Vorgabe des Parameters "sgolayBreite" erfolgen.
+
+Item3 : WARNING: Fuer den ausgewaehlten Kraftstoff "RON_91" wurde kein Heizwert angegeben. 
+Es wird mit dem Standardwert gerechnet: 4581231.2590484[J/mol]
+
+Item4 : WARNING: Fuer den ausgewaehlten Kraftatoff "RON_98" wurde kein Heizwert angegeben. 
+Es wird mit dem Standardwert gerechnet: 4108620.6027614996[J/mol]
+
+Item5 : WARNING: Bei der Interpolation wurde versucht einen Wert zu einem Zeitpunkt abzufragen, der nach dem Beginn des angegebenen Bereichs liegt
+**************************************************
+
+
+Item6 : WARNING: Der Wert fuer "RefFlaecheEinlass" wurde im Inputfile nicht angegeben. 
+ Es wird mit "Kolbenflaeche" gerechnet!
+
+Item7 : WARNING: Der Wert fuer "RefFlaecheAuslass" wurde im Inputfile nicht angegeben. 
+ Es wird mit "Kolbenflaeche" gerechnet!
+
+Item8 : WARNING: AGR_extern_LWA in Zone 0 hatte eine negative Masse (-7.029653224942607E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item9 : WARNING: feuchteLuft_LWA in Zone 0 hatte eine negative Masse (-2.817836243202775E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item10 : WARNING: RON_95 in Zone 0 hatte eine negative Masse (-9.031039939163212E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item11 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "ndodecan" ist fuer Temperaturen ueber 540K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1904.8097147698568K
+**************************************************
+
+
+Item12 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "ndodecan" ist fuer Temperaturen ueber 659K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1904.8097147698568K
+**************************************************
+
+
+Item13 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "ndodecan" ist fuer Temperaturen ueber 540K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 799.6411579915161K
+**************************************************
+
+
+Item14 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "ndodecan" ist fuer Temperaturen ueber 659K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 799.6411579915161K
+**************************************************
+
+
+Item15 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "ndodecan" ist fuer Temperaturen ueber 540K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 5557.704947395656K
+**************************************************
+
+
+Item16 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "ndodecan" ist fuer Temperaturen ueber 659K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 5557.704947395656K
+**************************************************
+

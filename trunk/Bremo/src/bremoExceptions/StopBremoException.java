@@ -1,5 +1,6 @@
 package bremoExceptions;
 import java.security.InvalidParameterException;
+import BremoLogFile.LogFileWriter;
 
 
 //@SuppressWarnings("serial")
@@ -14,23 +15,26 @@ public abstract class StopBremoException extends Exception {
 
 	public void stopBremo() {
 		//System.err.println(Separator+super.getMessage()+Separator);	
-		 //Dieser Befehl wird benoetigt um das Programm zu stoppen wenn es nicht als swing app laeuft		
+		 //Dieser Befehl wird benoetigt um das Programm zu stoppen wenn es nicht als swing app laeuft
+		LogFileWriter.addItemToLog(super.getMessage());
 		throw new InvalidParameterException(Separator+super.getMessage()+Separator);
+		
 	}
 	
 	public void log_Message(){
 		//TODO hier kann irgendwann mal ein eintrag is das logFile stehen		
-		System.err.println(super.getMessage()+Separator);		
+		System.err.println(super.getMessage()+Separator);
+		LogFileWriter.addItemToLog(super.getMessage());	
 	}
 	
 	public void log_Warning(){
-		log_Warning(super.getMessage()+ Separator);		
+		log_Warning(super.getMessage()+ Separator);
 	}
 	
 	public void log_Warning(String message){
 		//TODO hier kann irgendwann mal ein eintrag is das logFile stehen		
 		System.err.println("WARNING: " + message+ Separator);
-			
+		LogFileWriter.addItemToLog("WARNING: " + message);	
 	}
 	
 }

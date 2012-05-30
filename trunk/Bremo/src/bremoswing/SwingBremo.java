@@ -1,9 +1,11 @@
 package bremoswing;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Insets;
@@ -45,6 +47,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JToolBar;
 import javax.swing.LayoutStyle;
 import javax.swing.Timer;
 import javax.swing.UIDefaults;
@@ -54,6 +57,7 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
+import BremoLogFile.LogFileWriter;
 import bremo.main.Bremo;
 
 /*
@@ -68,17 +72,18 @@ import bremo.main.Bremo;
 public class SwingBremo extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	public static  boolean ConsloseModeActive = false;
+	public static boolean ConsloseModeActive = false;
 	/************************** Variables declaration ****************************************/
 	private boolean control = false;
 	private File[] files;
-	public Double [] percentBremo;
+	public Double[] percentBremo;
 	private String path;
+	private static SucheBremo suche;
 	public static ThreadGroup group;
 	public static Bremo[] bremoThread;
-	public static String [] bremoThreadFertig;
+	public static String[] bremoThreadFertig;
 	public static JButton berechnen;
-	//public JCheckBox konsole;
+	// public JCheckBox konsole;
 	public JTextArea grosArea;
 	private JScrollPane jScrollPane1;
 	private JScrollPane jScrollPane2;
@@ -88,12 +93,12 @@ public class SwingBremo extends JFrame {
 	public static JButton stop;
 	private JTextField textFile;
 	public static JButton wahlFile;
-	public static boolean  DebuggingMode ;
-	public static int NrOfFile ;
-    public static int NrBremoAlive;
+	public static boolean DebuggingMode;
+	public static int NrOfFile;
+	public static int NrBremoAlive;
 	public static JProgressBar progressBar;
 	public static JProgressBar progressBarInd;
-	public static JButton pb;
+	// public static JButton pb;
 	public static JLabel label;
 	public static Timer timerUpdate;
 	public static Timer timerCalcul;
@@ -120,11 +125,11 @@ public class SwingBremo extends JFrame {
 				grosArea.setCaretPosition(grosArea.getDocument().getLength());
 			} else {
 				outStream.flush();
-                ActiveConsole();
+				ActiveConsole();
 			}
 		}
 	};
-	
+
 	PrintStream errStream = new PrintStream(System.err) {
 
 		@Override
@@ -152,21 +157,20 @@ public class SwingBremo extends JFrame {
 	/***
 	 * This method is called from within the constructor to initialize the form.
 	 ***********************/
-	private void initComponents() {		
+	private void initComponents() {
 
 		System.setOut(outStream);
-	    System.setErr(errStream);
+		System.setErr(errStream);
 
 		manager = new JPanel();
 
 		berechnen = new JButton();
 		wahlFile = new JButton();
 		stop = new JButton();
-		pb= new JButton();
-		
+
 		textFile = new JTextField();
 
-		//konsole = new JCheckBox();
+		// konsole = new JCheckBox();
 		konsole2 = new JPanel();
 
 		kleinArea = new JTextArea();
@@ -174,18 +178,19 @@ public class SwingBremo extends JFrame {
 
 		jScrollPane1 = new JScrollPane();
 		jScrollPane2 = new JScrollPane();
-	
+
 		progressBar = new JProgressBar(0, 100);
 		progressBarInd = new JProgressBar(0, 100);
-		
+
 		label = new JLabel();
 		percent = 0;
 		path = ".";
-        DebuggingMode = false ;
+		DebuggingMode = false;
 		NrOfFile = 0;
 		NrBremoAlive = 0;
-        /****** HAUPT FRAME ****************************************************************/
-		setTitle("Bremo 1.0");
+
+		/****** HAUPT FRAME ****************************************************************/
+		setTitle("Bremo 3.5");
 		setBackground(new Color(255, 255, 255));
 		setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo1.png")).getImage());
@@ -199,282 +204,194 @@ public class SwingBremo extends JFrame {
 			}
 		});
 
-		manager.setBorder(BorderFactory.createTitledBorder(null, "Manager",
-				TitledBorder.DEFAULT_JUSTIFICATION,
-				TitledBorder.DEFAULT_POSITION, new Font("comic sans ms", 1, 14)));
+		// manager.setBorder(BorderFactory.createTitledBorder(null, "Manager",
+		// TitledBorder.DEFAULT_JUSTIFICATION,
+		// TitledBorder.DEFAULT_POSITION, new Font("comic sans ms", 1, 14)));
+
+		// manager.setLayout(new GridBagLayout());
+		// FlowLayout experimentLayout = new FlowLayout();
+		// experimentLayout.setAlignment(FlowLayout.LEADING);
+		// manager.setLayout(experimentLayout);
 		manager.setLayout(new GridBagLayout());
-		
+        //manager.setLayout(new BorderLayout());
 		GridBagConstraints gc = new GridBagConstraints();
-		gc.fill = GridBagConstraints.BOTH;
-		gc.insets = new Insets(0,0,3,27);
-		gc.anchor = GridBagConstraints.FIRST_LINE_START;
-		gc.ipadx = -28;
-		gc.ipady = -12 ;
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(0, 0, 0, 0);
+		// gc.anchor = GridBagConstraints.FIRST_LINE_START;
+		gc.ipadx = 0;
+		gc.ipady = 0;
 		gc.weightx = 0;
 		gc.gridx = 0;
 		gc.gridy = 0;
-		
-		
+
 		/************ BUTTON BERECHNEN ************************************/
 		ImageIcon beri = new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/play_blue.png"));
 		berechnen.setIcon(beri); // NOI18N
 		berechnen.setRolloverIcon(new ImageIcon(getClass().getResource(
-	            "/bremoswing/bild/play_blue2.png")));
+				"/bremoswing/bild/play_blue2.png")));
 		berechnen.setToolTipText("Berechnung ausführen");
-		berechnen.setContentAreaFilled(false);
-//		berechnen.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-//		berechnen.setVerifyInputWhenFocusTarget(false);
-		berechnen.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent evt) {
-				wahlFile.setVisible(false);
-				berechnen.setVisible(false);
+		// berechnen.setContentAreaFilled(false);
+		// berechnen.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		// berechnen.setVerifyInputWhenFocusTarget(false);
+		berechnen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// wahlFile.setVisible(false);
+				// berechnen.setVisible(false);
 				stop.setVisible(true);
 				percent = 0;
-				BerechnungPush(evt);
-				
-			}
-			public void mouseEntered(MouseEvent evt) {
-			    //berechnen.setContentAreaFilled(true);
-			}
-			public void mouseExited(MouseEvent evt) {
-				//berechnen.setContentAreaFilled(false);
+				BerechnungPush(e);
+
 			}
 		});
-		//berechnen.setBounds(10, 18, 33, 33);
-//		berechnen.setSize(20, 25);
+		//berechnen.setMargin(new Insets(0, 0, 0, ));
+		
+		// berechnen.setBounds(10, 18, 33, 33);
+		// berechnen.setSize(20, 25);
+		// manager.add(berechnen, gc);
 		manager.add(berechnen, gc);
 
 		/************ BUTTON WAHLFILE ************************************/
 		ImageIcon wfi = new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/folder_blue.png")); //folder_smart.png
+				"/bremoswing/bild/folder_blue.png")); // folder_smart.png
 		wahlFile.setIcon(wfi); // NOI18N
-//		wahlFile.setRolloverEnabled(true);
-//		ImageIcon wfiRO = new ImageIcon(getClass().getResource(
-//			"/bremoswing/bild/folder_smart_Rollover.png"));
+		// wahlFile.setRolloverEnabled(true);
+		// ImageIcon wfiRO = new ImageIcon(getClass().getResource(
+		// "/bremoswing/bild/folder_smart_Rollover.png"));
 		wahlFile.setRolloverIcon(new ImageIcon(getClass().getResource(
-	             "/bremoswing/bild/folder_blue2.png")));
-//		wahlFile.setPressedIcon(wfi);
-//		wahlFile.setToolTipText("InputFile auswählen");
-		//wahlFile.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		//wahlFile.setBorderPainted(true);
-		wahlFile.setContentAreaFilled(false);
-//		wahlFile.setOpaque(false);
-		wahlFile.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent evt) {
-				wahlPush(evt);
+				"/bremoswing/bild/folder_blue2.png")));
+		// wahlFile.setPressedIcon(wfi);
+		// wahlFile.setToolTipText("InputFile auswählen");
+		// wahlFile.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		// wahlFile.setBorderPainted(true);
+		// wahlFile.setContentAreaFilled(false);
+		// wahlFile.setOpaque(false);
+		wahlFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				wahlPush(e);
 			}
-			public void mouseEntered(MouseEvent evt) {
-			   // wahlFile.setContentAreaFilled(true);
-			}
-			public void mouseExited(MouseEvent evt) {
-				//wahlFile.setContentAreaFilled(false);
-			}
+
 		});
-		//wahlFile.setBounds(70, 18, 33, 33);
-		gc.fill = GridBagConstraints.BOTH;
-		gc.insets = new Insets(0,0,3,80);
-		gc.weightx = 0.0001;
+		//wahlFile.setMargin(new Insets(0, 0, 0, 10));
+		// wahlFile.setBounds(70, 18, 33, 33);
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.weightx = 0;
 		gc.gridx = 1;
 		gc.gridy = 0;
-		gc.ipadx = -28;
+		gc.ipadx = 0;
 		manager.add(wahlFile, gc);
-      
+
 		/************ BUTTON STOP ************************************/
 		stop.setIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/stop_blue.png")));
 		stop.setToolTipText("Stop Bremo");
-		//stop.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		stop.setRolloverIcon(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/stop_red.png")));
-		stop.setContentAreaFilled(false);
-//		stop.setMaximumSize(null);
-//		stop.setMinimumSize(null);
-//		stop.setEnabled(false);
-		stop.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent evt) {
+		// stop.setRolloverIcon(new ImageIcon(getClass().getResource(
+		// "/bremoswing/bild/stop_red.png")));
+		// stop.setContentAreaFilled(false);
+		// stop.setMaximumSize(null);
+		// stop.setMinimumSize(null);
+		stop.setEnabled(false);
+		stop.setMargin(new Insets(0, 0, 0, 0));
+		stop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 
-				stopPush(evt);
-
-			}
-			public void mouseEntered(MouseEvent evt) {
-			    //stop.setContentAreaFilled(true);
-			}
-			public void mouseExited(MouseEvent evt) {
-				//stop.setContentAreaFilled(false);
+				stopPush(e);
 			}
 		});
-		stop.setVisible(false);
-		//stop.setBounds(130, 18, 33, 33);
-		gc.fill = GridBagConstraints.BOTH;
-		gc.insets = new Insets(0,0,3,140);
-		gc.weightx = 0.0001;
+		//stop.setMargin(new Insets(0, 0, 0, 10));
+		// ////stop.setVisible(false);
+		// stop.setBounds(130, 18, 33, 33);
+
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.weightx = 0;
 		gc.gridx = 2;
 		gc.gridy = 0;
-		gc.ipadx = -28;
+		gc.ipadx = 0;
 		manager.add(stop, gc);
 
-		
-		/************ CHECKBOX KONSOLE ************************************/
-//        konsole.setBounds(200, 18, 100, 40);
-//        konsole.setFont(new Font("Tahoma", 3, 13));
-//		konsole.setText("Konsole");
-//		konsole.setToolTipText("Konsole Panel Aktivieren/deaktivien");
-//		
-//		konsole.setSelected(true);
-//		konsole.addItemListener(new ItemListener() {
-//			@Override
-//			public void itemStateChanged(ItemEvent evt) {
-//
-//				if (!berechnen.isVisible()) {
-//
-//					messsage();
-//
-//				} else {
-//					if (evt.getStateChange() == ItemEvent.DESELECTED) {
-//						//konsole2.setVisible(false);
-//						jScrollPane1.setVisible(false);
-//						setSize(710, 320);
-//					} else {
-//						//konsole2.setVisible(true);
-//						jScrollPane1.setVisible(true);
-//						setSize(710, 750);
-//					}
-//				}
-//			}
-//		});
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.insets = new Insets(0,0,0,27);
-		gc.weightx = 0.005;
+		/************ LABEL ************************************/
+		// label.setBounds(330, 27, 160, 20);
+		// label.setFont(new Font(null, 0, 14));
+		label.setOpaque(true);
+		label.setBackground(new Color(255, 255, 255));
+		// Border border = LineBorder.createGrayLineBorder();
+		// Border border = new LineBorder(Color.GRAY,2,true);
+		// label.setBorder(border);
+
+		// label.setIcon(new ImageIcon(getClass().getResource(
+		// "/bremoswing/bild/label_blue.png")));
+		// label.setHorizontalTextPosition(JLabel.LEFT);
+		// label.setEnabled(false);
+		// label.setSize(new Dimension(getSize().width/2,20));
+
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(5, 10, 0, 155);
+		gc.weightx = 0.5;
+		gc.gridx = 4;
+		gc.gridy = 0;
 		gc.ipadx = 0;
 		gc.ipady = 0;
-		gc.gridx = 3;
-		gc.gridy = 0;
-		gc.anchor = GridBagConstraints.CENTER;
-		//manager.add(konsole, gc);
-
-		/************ LABEL ************************************/
-		//label.setBounds(330, 27, 160, 20);
-		label.setFont(new Font("comic sans ms", 3, 14));
-		label.setOpaque(true);
-		label.setBackground(new Color(255,255,255));
-		//Border border = LineBorder.createGrayLineBorder();
-		Border border = new LineBorder(Color.GRAY,2,true);
-		label.setBorder(border);
-		
-//		label.setIcon(new ImageIcon(getClass().getResource(
-//				"/bremoswing/bild/label_blue.png")));
-//		label.setHorizontalTextPosition(JLabel.LEFT);
-//		label.setEnabled(false);
-		gc.fill = GridBagConstraints.CENTER;
-		gc.insets = new Insets(0,30,2,27);
-		gc.weightx = 0.4;
-		gc.gridx = 3;
-		gc.gridy = 0;
 		manager.add(label, gc);
 
-		/***********************************************************/
-		pb.setIcon(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/progressbar4.gif")));
-		 pb.setToolTipText("Stop Bremo");
-		//stop.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		//pb.setSize(new Dimension (33,33));
-		pb.setContentAreaFilled(false);
-		pb.setVisible(false);
-		
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.insets = new Insets(0,0,1,0);
-		gc.weightx = 0.5;
-		gc.gridx = 5;
-		gc.gridy = 0;
-		gc.ipadx = -15;
-		gc.ipady = -15;
-		//gc.anchor = GridBagConstraints.FIRST_LINE_START;
-		manager.add(pb, gc);
-		
 		/************ PROGESSBAR ************************************/
-		//progressBar.setBounds(520, 21, 100, 30);
+		// progressBar.setBounds(520, 21, 100, 30);
 		progressBarInd.setValue(100);
 		progressBarInd.setIndeterminate(true);
 		progressBarInd.setVisible(false);
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.insets = new Insets(0,0,0,0);
-		gc.weightx = 0.6;
+       
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(10, 0, 5, 0);
+		gc.weightx = 0.1;
 		gc.ipadx = 0;
 		gc.ipady = 0;
-		gc.gridx = -1;
+		gc.gridx = 9;
 		gc.gridy = 0;
 		gc.anchor = GridBagConstraints.CENTER;
 		manager.add(progressBarInd, gc);
-		
+
 		progressBar.setValue(0);
 		progressBar.setStringPainted(true);
 		progressBar.setVisible(false);
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.insets = new Insets(0,0,0,0);
-		gc.weightx = 0.6;
-		gc.ipadx = 0;
-		gc.ipady = 0;
-		gc.gridx = -1;
-		gc.gridy = 0;
-		gc.anchor = GridBagConstraints.CENTER;
-		manager.add(progressBar, gc);
 		
-	
+
+		manager.add(progressBar, gc);
+
 		timerCalcul = new Timer(1000, new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				boolean bremoActiv = false ;
+				boolean bremoActiv = false;
 				for (Bremo bremo : bremoThread) {
 					if (bremo.get_myCaseState())
 						bremoActiv = true;
 				}
 				if (bremoActiv) {
-					label.setForeground(new Color(25,49,187));
+					// label.setForeground(new Color(25,49,187));
 					label.setText(" Berechnung gestartet ");
 					progressBar.setVisible(true);
 					double Sum = 0;
-					//pb.setVisible(false);
+					// pb.setVisible(false);
 					progressBarInd.setVisible(false);
 					stop.setEnabled(true);
 					for (int i = 0; i < bremoThread.length; i++) {
 						try {
-						Sum = Sum
-								+ (bremoThread[i].get_myCase()
-										.get_aktuelle_Rechenzeit() / bremoThread[i]
-										.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
+							Sum = Sum
+									+ (bremoThread[i].get_myCase()
+											.get_aktuelle_Rechenzeit() / bremoThread[i]
+											.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
 						} catch (Exception e) {
-							
+
 						}
-                    }
-					percent = (int) ((Sum /NrBremoAlive) * 100);
+					}
+					percent = (int) ((Sum / NrBremoAlive) * 100);
 					progressBar.setValue(percent);
 					progressBar.repaint();
-				}
-				else {
-					label.setForeground(new Color(255,0,0));
-					label.setText(" Initialization läuft... ");
+				} else {
+					// label.setForeground(new Color(255,0,0));
+					label.setText(" Initialization läuft ... ");
 				}
 			}
 		});
-		
-//		timerCalcul = new Timer(1000, new ActionListener() {
-//			public void actionPerformed(ActionEvent evt) {
-//				double Sum = 0;
-//				for (int i = 0; i < bremoThread.length ; i++) {
-//					Sum = bremoThread[0].get_myCase().get_aktuelle_Rechenzeit()/
-//							bremoThread[0].get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC;
-//				}
-//				percent = (int) (Sum/bremoThread.length)*100;
-//				
-//			}
-//		});
-//
-//		timerUpdate = new Timer(1, new ActionListener() {
-//			public void actionPerformed(ActionEvent evt) {
-//				label.setText("Loading File...");
-//				pb.setVisible(true);
-//			}
-//		});
 
 		/************ TEXTFIELD TEXTFILE ************************************/
 		textFile.setEditable(false);
@@ -484,26 +401,34 @@ public class SwingBremo extends JFrame {
 		textFile.setMinimumSize(new Dimension(0, 0));
 		textFile.setPreferredSize(new Dimension(0, 0));
 		textFile.setBounds(180, 20, 0, 0);
-		
+		gc.fill = GridBagConstraints.LAST_LINE_END;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.weightx = 0.5;
+		gc.gridx = 4;
+		gc.gridy = 0;
+		gc.ipadx = 0;
+		gc.ipady = 0;
+
 		/************ PANEL KONSOLE ************************************/
-		konsole2.setBorder(BorderFactory.createTitledBorder(null, "Konsole",
-				TitledBorder.DEFAULT_JUSTIFICATION,
-				TitledBorder.DEFAULT_POSITION, new Font("comic sans ms", 1, 14))); // NOI18N
+		// konsole2.setBorder(BorderFactory.createTitledBorder(null, "Konsole",
+		// TitledBorder.DEFAULT_JUSTIFICATION,
+		// TitledBorder.DEFAULT_POSITION, new Font("comic sans ms", 1, 14))); //
+		// NOI18N
 
 		/************ TEXTAREA GROSAREA OUTPUT ************************************/
 		grosArea.setColumns(20);
 		grosArea.setEditable(false);
-		grosArea.setFont(new Font("comic sans ms", 3, 16)); // NOI18N
+		// grosArea.setFont(new Font("comic sans ms", 3, 16)); // NOI18N
 		grosArea.setRows(5);
 		grosArea.setText("Programm läuft... \nWählen Sie die Input Datei Und Dann Einfach die Berechnung Ausführen .");
 		grosArea.setMinimumSize(new Dimension(76, 22));
-        grosArea.addKeyListener(new KeyAdapter() {			
+		grosArea.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
 				if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) {
-					//search(grosArea);
-					new SucheBremo((JTextArea) e.getSource());
+					
+					suche = new SucheBremo(grosArea);
 				}
 			}
 		});
@@ -522,16 +447,16 @@ public class SwingBremo extends JFrame {
 		/************ TEXTAREA KLEINAREA OUTPUT ************************************/
 		kleinArea.setColumns(20);
 		kleinArea.setEditable(false);
-		kleinArea.setFont(new Font("comic sans ms", 3, 13)); // NOI18N
+		// kleinArea.setFont(new Font("comic sans ms", 3, 13)); // NOI18N
 		kleinArea.setForeground(new Color(255, 0, 0));
 		kleinArea.setRows(5);
-		kleinArea.addKeyListener(new KeyAdapter() {			
+		kleinArea.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
 				if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) {
-					//search(grosArea);
-					new SucheBremo((JTextArea) e.getSource());
+					
+					suche = new SucheBremo(kleinArea);
 				}
 			}
 		});
@@ -541,8 +466,26 @@ public class SwingBremo extends JFrame {
 		c.weighty = 180;
 		jScrollPane2.setBounds(13, 450, 660, 180);
 		konsole2.add(jScrollPane2, c);
-
-		/************ LAYOUT EINSTELUNG ************************************/
+		
+//		 JToolBar toolBar = new JToolBar("BremoManager");
+//	     toolBar.setFloatable(true);
+//	     toolBar.setRollover( true);
+//	     toolBar.setMargin(new Insets(5,10 , 5, 10));
+//	     
+//	     toolBar.add(berechnen);
+//	     toolBar.add(wahlFile);
+//	     toolBar.add(stop);
+//	     toolBar.addSeparator(new Dimension(100,0));
+//	     toolBar.add(label);
+//	     toolBar.addSeparator(new Dimension(100,0));
+//	     
+//	     toolBar.add(progressBarInd);
+//	     toolBar.add(progressBar);
+	     
+	     
+         
+	   //  manager.add(toolBar, BorderLayout.PAGE_START);
+		/************ FRAME LAYOUT EINSTELUNG ************************************/
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(layout.createParallelGroup(
@@ -568,7 +511,7 @@ public class SwingBremo extends JFrame {
 						layout.createSequentialGroup()
 								.addContainerGap()
 								.addComponent(manager,
-										GroupLayout.PREFERRED_SIZE, 70,
+										GroupLayout.PREFERRED_SIZE, 38,
 										GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(
 										LayoutStyle.ComponentPlacement.RELATED)
@@ -577,7 +520,7 @@ public class SwingBremo extends JFrame {
 										Short.MAX_VALUE).addContainerGap()));
 		/*****************************************************************************************/
 		pack();
-		
+
 	}
 
 	/** Warning Massage **********/
@@ -588,7 +531,7 @@ public class SwingBremo extends JFrame {
 	}
 
 	/**** Button Setting To Run Bremo Thread / to Run the calcul ***********/
-	private void BerechnungPush(MouseEvent evt) {
+	private void BerechnungPush(ActionEvent e) {
 		grosArea.setText("");
 		kleinArea.setText("");
 		if (textFile.getText().equals("")) {
@@ -597,55 +540,42 @@ public class SwingBremo extends JFrame {
 					JOptionPane.WARNING_MESSAGE);
 			wahlFile.setVisible(true);
 			berechnen.setVisible(true);
-			stop.setVisible(false);
 		} else {
-			stop.setVisible(true);
+			LogFileWriter.reinitialisierung();
+			berechnen.setEnabled(false);
+			wahlFile.setEnabled(false);
 			stop.setEnabled(false);
 			control = true;
 
-			//group.enumerate(bremoThread);
-			//bremoThread=new Bremo[files.length];
-			
-
 			try {
-			for (int i = 0; i < files.length; i++) {
+				for (int i = 0; i < files.length; i++) {
 
-				bremoThread[i].start();
-					
+					bremoThread[i].start();
+
 				}
-			
-//			pb.setIcon(new ImageIcon(getClass().getResource(
-//					"/bremoswing/bild/progressbar3.gif")));
-//			pb.setVisible(true);
-			
-			progressBarInd.setVisible(true);
-			
-			label.setForeground(new Color(110,170,0));
-			label.setText(" Operation gestartet .... ");
-			timerCalcul.start();
-			
-			} catch (IllegalThreadStateException e) {
-				e.printStackTrace();
+
+				progressBarInd.setVisible(true);
+
+				label.setText(" Operation gestartet .... ");
+				timerCalcul.start();
+
+			} catch (IllegalThreadStateException e1) {
+				e1.printStackTrace();
 				ActiveIcon();
-				label.setForeground(new Color(255,0,0));
+
 				label.setText(" Bitte InputFile Neu Auswählen ! ");
 			}
-//				bremoThread[i]=new Bremo(group, files[i]);
-//				bremoThread[i].get_myCase().get_aktuelle_Rechenzeit();
-//				double dauer=bremoThread[i].get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC;
-//				double progress=bremoThread[i].get_myCase().get_aktuelle_Rechenzeit()/
-//									bremoThread[i].get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC;
-			}
-	    
+		}
+
 	}
 
 	/*********** Button Setting To Choose a File *****************************************/
-	private void wahlPush(MouseEvent evt) {
+	private void wahlPush(ActionEvent e2) {
 		grosArea.setText("");
 		kleinArea.setText("");
 		berechnen.setEnabled(false);
 		label.setText("");
-		
+
 		DebuggingMode = false;
 		ActiveConsole();
 		progressBar.setValue(0);
@@ -657,13 +587,11 @@ public class SwingBremo extends JFrame {
 
 		fileChooser.addChoosableFileFilter(txtFilter);
 		try {
-			label.setForeground(new Color (165,42,42));
+			// label.setForeground(new Color (165,42,42));
 			label.setText(" Datei Werden geladen ... ");
-//			label.setEnabled(true);
-			pb.setIcon(new ImageIcon(getClass().getResource(
-					"/bremoswing/bild/loadFile.gif")));
-			pb.setVisible(true);
-			int status = fileChooser.showOpenDialog(null);
+			// label.setEnabled(true);
+
+			int status = fileChooser.showOpenDialog(getRootPane());
 
 			if (status == JFileChooser.APPROVE_OPTION) {
 				if (fileChooser.getSelectedFile() != null) {
@@ -675,23 +603,24 @@ public class SwingBremo extends JFrame {
 					for (int i = 0; i < bremoThread.length; i++) {
 						bremoThread[i] = new Bremo(group, files[i]);
 					}
-					bremoThreadFertig  = new String [files.length];
+					bremoThreadFertig = new String[files.length];
 					NrOfFile = files.length;
 					NrBremoAlive = files.length;
-					if (NrOfFile == 1) SetDebbugingMode(true);
-					label.setForeground(new Color(0,0,255));
+					if (NrOfFile == 1)
+						SetDebbugingMode(true);
+					// label.setForeground(new Color(0,0,255));
 					label.setText(" Datei mit Erfolg Importiert ! ");
-					pb.setVisible(false);
+
 					ActiveConsole();
 				}
 			} else if (status == JFileChooser.CANCEL_OPTION) {
-				label.setForeground(new Color (165,42,42));
+				// label.setForeground(new Color (165,42,42));
 				label.setText(" Import von Datei Unterbrechen ! ");
-				pb.setVisible(false);
+
 				fileChooser.cancelSelection();
 			}
 		} catch (Exception e) {
-			label.setForeground(new Color (255,0,0));
+			// label.setForeground(new Color (255,0,0));
 			label.setText(" Fehler aufgetreten ! ");
 			e.printStackTrace();
 		}
@@ -699,37 +628,36 @@ public class SwingBremo extends JFrame {
 	}
 
 	/********** Button Setting To Stop Running of Bremo Thread **************/
-	private void stopPush(MouseEvent evt) {
+	private void stopPush(ActionEvent e) {
 		if (!control) {
 			JOptionPane.showMessageDialog(this,
 					"Starten Sie Zu erst die Berechnung.", "Achtung",
 					JOptionPane.WARNING_MESSAGE);
 		} else {
-
-			//group.interrupt();
+			errStream.flush();
+			group.interrupt();
+			errStream.close();
+			outStream.close();
 			control = false;
-			pb.setVisible(false);
 			ActiveIcon();
-			//bremoThread[0].stopMe();
+			// bremoThread[0].stopMe();
 		}
 	}
 
 	/****** Active Icon *********************************/
 	public static void ActiveIcon() {
 		timerCalcul.stop();
-		wahlFile.setVisible(true);
-		berechnen.setVisible(true);
-		stop.setVisible(false);
-		label.setForeground(new Color(255, 0, 0));
+		wahlFile.setEnabled(true);
+		berechnen.setEnabled(true);
+		stop.setEnabled(false);
 		label.setText(" Operation beendet. ");
-		pb.setVisible(false);
 		progressBar.setValue(0);
 		progressBar.setVisible(false);
 		progressBarInd.setVisible(false);
 	}
-	
-	/****** Change the Mode of The Console When DebbugMode is  Active ***********/
-	public  void ActiveConsole () {
+
+	/****** Change the Mode of The Console When DebbugMode is Active ***********/
+	public void ActiveConsole() {
 
 		if (NrOfFile > 1) {
 			jScrollPane1.setVisible(false);
@@ -745,22 +673,25 @@ public class SwingBremo extends JFrame {
 			}
 		}
 	}
-	
-	public static void SetDebbugingMode (Boolean mode) {
-		if (NrOfFile == 1)  { DebuggingMode = mode ;}
+
+	public static void SetDebbugingMode(Boolean mode) {
+		if (NrOfFile == 1) {
+			DebuggingMode = mode;
+		}
 	}
-	public static   void  setNrOfBremoAlive() {
-        NrBremoAlive--;
+
+	public static void setNrOfBremoAlive() {
+		NrBremoAlive--;
 	}
-	
-	public static void PutInBremoThreadFertig (String s ) {
-		for ( int i = 0;i < bremoThreadFertig.length; i++){
-			if (bremoThreadFertig[i] !=null) 
+
+	public static void PutInBremoThreadFertig(String s) {
+		for (int i = 0; i < bremoThreadFertig.length; i++) {
+			if (bremoThreadFertig[i] != null)
 				continue;
 			else
 				bremoThreadFertig[i] = s;
-			    break;
-			
+			break;
+
 		}
 	}
 
@@ -769,18 +700,17 @@ public class SwingBremo extends JFrame {
 
 		if (group.activeCount() <= 1) {
 			timerCalcul.stop();
-			pb.setVisible(false);
-			//stop.setEnabled(false);
+			// stop.setEnabled(false);
 			JFrame popup = new JFrame();
 			if (bremoThreadFertig[0] != null) {
-				label.setForeground(new Color(25,49,187));
+				// label.setForeground(new Color(25,49,187));
 				label.setText(" Berechnung Fertig ! ");
 				JOptionPane.showMessageDialog(popup,
 						"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 			for (String str : bremoThreadFertig) {
-				if (str != null )
+				if (str != null)
 					System.err.println(str);
 			}
 			ActiveIcon();
@@ -788,8 +718,6 @@ public class SwingBremo extends JFrame {
 			progressBarInd.setVisible(false);
 		}
 	}
-	
-
 
 	/************************ place Frame to the center ************************/
 	private void placeFrame() {
@@ -841,7 +769,7 @@ public class SwingBremo extends JFrame {
 		 * http://download.oracle.com/javase
 		 * /tutorial/uiswing/lookandfeel/plaf.html
 		 */
-		UIManager.put("nimbusOrange", new Color(28,138,224)); //(25,49,187));//Color(110,170,0));
+		UIManager.put("nimbusOrange", new Color(28, 138, 224)); // (25,49,187));//Color(110,170,0));
 		try {
 			for (UIManager.LookAndFeelInfo info : UIManager
 					.getInstalledLookAndFeels()) {
@@ -869,7 +797,7 @@ public class SwingBremo extends JFrame {
 
 			public void run() {
 				new SwingBremo().setVisible(true);
-				
+
 			}
 		});
 	}

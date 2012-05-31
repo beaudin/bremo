@@ -121,5 +121,8 @@ public class SucheBremo extends JFrame{
 	void setTextArea(JTextArea area) {
 		
 	}
- 
+	
+	void FrameClose () {
+		 
+	}
 }

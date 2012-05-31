@@ -106,11 +106,6 @@ public class Bremo extends Thread {
 		return caseParaerzeugt;
 	}
 	
-	public void stopMe() {
-		if (isAlive()) {
-		   r = null ;
-		}
-	}
 
 	public static void main(String[] args)
 			throws ParameterFileWrongInputException {

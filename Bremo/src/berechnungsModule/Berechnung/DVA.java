@@ -4,7 +4,6 @@
 package berechnungsModule.Berechnung;
 
 import java.util.Hashtable;
-import java.util.Vector;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 import berechnungsModule.ErgebnisBuffer;
@@ -56,6 +55,7 @@ public abstract class DVA extends BerechnungsModell{
 			//Berechnung des Startwerts
 			if(this.dQIters==0){
 				dQburn=0;
+				dQburn_alt=0;
 				for(int znIdx=0;znIdx<zonen.length;znIdx++){
 					if(zonen[znIdx].get_m()>CP.SYS.MINIMALE_ZONENMASSE){
 						Spezies gg=zonen[znIdx].get_ggZone();
@@ -79,8 +79,6 @@ public abstract class DVA extends BerechnungsModell{
 			}
 			dQIters+=1;
 		}	
-
-		
 
 		if(CP.SYS.DUBUGGING_MODE){	
 

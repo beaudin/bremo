@@ -18,10 +18,10 @@ public class InternesRestgasFabrik extends ModulFabrik {
 		String internesRestgas_ModellVorgabe=
 			get_ModulWahl(INTERNES_RESTGAS_MODELL_FLAG, INTERNES_RESTGAS_MODELLE);
 		
-		if(internesRestgas_ModellVorgabe.equals("RestgasVorgabe")){
+		if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[0])){
 			RESTGAS_MODELL=(InternesRestgas) new RestgasVorgabe(cp);
 			
-		}else if(internesRestgas_ModellVorgabe.equals("MuellerBertling")){
+		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[1])){
 //			restgasModell=(InternesRestgas) new MuellerBertling(cp);
 			RESTGAS_MODELL=null;
 			try {
@@ -34,7 +34,7 @@ public class InternesRestgasFabrik extends ModulFabrik {
 				e.stopBremo();
 			}
 			
-		}else if(internesRestgas_ModellVorgabe.equals("LWA")){
+		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[2])){
 			RESTGAS_MODELL=(InternesRestgas) new LWA(cp);
 		}else{
 			RESTGAS_MODELL=null;

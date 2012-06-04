@@ -7,6 +7,7 @@ import bremo.parameter.CasePara;
 import bremoExceptions.ParameterFileWrongInputException;
 
 public class Spray extends Einspritzung {
+	
 	private Paket_Hiroyasu [][] pakete;
 	//	private Paket_Stiesch_Thoma[][] pakete;
 	private double mfl_gesamt;

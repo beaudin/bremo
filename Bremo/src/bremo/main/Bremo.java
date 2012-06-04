@@ -69,7 +69,7 @@ public class Bremo extends Thread {
 					JOptionPane.ERROR_MESSAGE);
 			//SwingBremo.NrOfFile--;
 			SwingBremo.StateBremoThread();
-			e.stopBremo();
+			e.stopBremo();			
 		}
 		try {
 			r.berechnungDurchfuehren();
@@ -178,7 +178,7 @@ public class Bremo extends Thread {
 //		file = new File("//Users//juwe//Documents//Transfer//VergleichAGRVerdünnungTEMP//" 
 //					+ "//20101213//Export//AGR_LAM//20111220_103_DVAParameter.txt");
 //		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo4//src//_Export//20111110_11_DVAParameter.txt");
-		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//bin//InputFiles//20101020_40_DVAParameter.txt");
+		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//20101020_40_DVAParameter.txt");
 
 		Bremo bremo=new Bremo(file);
 		bremo.run();

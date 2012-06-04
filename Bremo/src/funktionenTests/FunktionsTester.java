@@ -7,7 +7,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.gemischbildung.Kraftstoff_Eigenschaften;
-import berechnungsModule.gemischbildung.Verdampfung_Hiroyasu;
+import berechnungsModule.gemischbildung.Verdampfung;
+import berechnungsModule.gemischbildung.Verdampfung_2;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
 import bremo.main.Bremo;
@@ -27,7 +28,11 @@ import misc.PhysKonst;
 
 
 public class FunktionsTester {
+	private final CasePara CP;
 	
+	public FunktionsTester(CasePara cp){
+		CP=cp;
+	}
 	
 //	public static void test_Vektor(){
 //		double v []=new double [15];
@@ -114,66 +119,97 @@ public class FunktionsTester {
 //	}
 //	
 //	
-//	public static void testVerdampfung(){
-//		String krstFlag="ndodecan";
-//		Kraftstoff_Eigenschaften krstProp =new Kraftstoff_Eigenschaften(krstFlag);
-//		Verdampfung_Hiroyasu verdampf=new Verdampfung_Hiroyasu(krstProp);
-//		double []m_D_T=new double [3];
-//		double []m_D_T_0=new double [3];
-//		double p=1.5e5;
-//		double T=293;
-//		double V=1;
-//		double m=p*V/PhysKonst.get_R_Luft()/T;
-//		Spezies luft=SpeziesFabrik.get_spezLuft_trocken();
-//		Zone zn =new Zone(p,V,T,m,luft,false,0);	
-//		double pInj=1200*1e5;
-//		double deltaP=pInj-p;
-//		double rhoZyl_0=p/zn.get_T()/zn.get_ggZone().get_R();
-//		
-//		double rhoK_fl=krstProp.get_rhoK(T);
-//		double viskositaet_krst=krstProp.get_mue_krst();
-//		double kin_viskositaet_krst=viskositaet_krst/rhoK_fl;
-//		
-//		double smd=0.5*6156e-6*Math.pow(kin_viskositaet_krst,0.385)*Math.pow(rhoK_fl,0.737)*
-//					Math.pow(rhoZyl_0,0.06)*Math.pow(deltaP/1000,-0.54);
-//
-//		double T0=293;
-//		double D0=smd;
-//		double V0=Math.PI*D0*D0*D0/6;
-//		double m0=krstProp.get_rhoK(T0)*V0;
-//		m_D_T[0]=m0;
-//		m_D_T[1]=D0;
-//		m_D_T[2]=T0;
-//		m_D_T_0[0]=m0;
-//		m_D_T_0[1]=D0;
-//		m_D_T_0[2]=1;
-//		double v_relativ=6.7;
-//
-//		double erg []=new double[m_D_T.length+1];
-//		FileWriter_txt txtFile=new FileWriter_txt("m_D_T.txt");
-//		String [] header={"t","m/m0","D/D0","T"};
-//		txtFile.writeTextLineToFile(header, false);
-//
-//		for(int t=0;t<600;t++){
-//			double delta_time=1/1e6d;
-//			double time=delta_time+t*delta_time;
-//			System.out.println("time:" +time);
-//		
-//
-//			double []temp=verdampf.get_m_D_T(zn,0,delta_time,v_relativ,m_D_T);
-//			m_D_T[0]=temp[0];
-//			m_D_T[1]=temp[1];
-//			m_D_T[2]=temp[2];
-//			
-//			erg[0]=time*1e3;
-//			for(int i=0;i<m_D_T.length;i++)	
-//				erg[1+i]=m_D_T[i]/m_D_T_0[i];
-//			
-//			txtFile.writeLineToFile(erg,true);
-//
-//		}
-//		
-//	}
+	public void testKrstProps2(){		
+		String krstFlag="tetradecan";
+		Kraftstoff_Eigenschaften krstProp =new Kraftstoff_Eigenschaften(krstFlag);
+		
+		double erg [][]=new double[71][10];
+		FileWriter_txt txtFile=new FileWriter_txt("krst_props.txt");
+		String [] header={"t","L","rho","pS","cpl","cpd","waermeLeit","dynVis","waermeLeitLuft","dynVisLuft"};
+		txtFile.writeTextLineToFile(header, false);
+		
+		double T=300;
+		double deltaT=10;
+		for(int i=0;i<71;i++){			
+			erg [i][0]=T;
+			erg [i][1]=krstProp.get_L(T);
+			erg [i][2]=krstProp.get_rhoK(T);
+			erg [i][3]=krstProp.get_pS(T);
+			erg [i][4]=krstProp.get_cpl(T);
+			erg [i][5]=krstProp.get_cp(T);
+			erg [i][6]=krstProp.get_waermeLeit(T);
+			erg [i][7]=krstProp.get_dynVis_krst(T);	
+			erg [i][8]=krstProp.get_waermeLeitLuft(T);
+			erg [i][9]=krstProp.get_dynVisLuft(T);	
+			T=T+deltaT;
+		}	
+		txtFile.writeMatrixToFile(erg, true);
+	}
+		
+
+	public  void testVerdampfung(){
+		String krstFlag="tetradecan";
+		Kraftstoff_Eigenschaften krstProp =new Kraftstoff_Eigenschaften(krstFlag);
+		Verdampfung_2 verdampf=new Verdampfung_2(krstProp);
+//		Verdampfung verdampf=new Verdampfung(krstProp);
+		double []m_D_T=new double [3];
+		double []m_D_T_0=new double [3];
+		double p=50e5;
+		double T=693;
+		double V=1;
+		double m=p*V/PhysKonst.get_R_Luft()/T;
+		
+		Spezies luft=this.CP.SPEZIES_FABRIK.get_spezLuft_trocken();
+		Zone zn =new Zone(CP,p,V,T,m,luft,false,0);	
+		double pInj=1200*1e5;
+		double deltaP=pInj-p;
+		double rhoZyl_0=p/zn.get_T()/zn.get_ggZone().get_R();
+		
+		double T0=293;
+		double rhoK_fl=krstProp.get_rhoK(T);
+		double viskositaet_krst=krstProp.get_dynVis_krst(T0);
+		double kin_viskositaet_krst=viskositaet_krst/rhoK_fl;
+		
+		double smd=0.5*6156e-6*Math.pow(kin_viskositaet_krst,0.385)*Math.pow(rhoK_fl,0.737)*
+					Math.pow(rhoZyl_0,0.06)*Math.pow(deltaP/1000,-0.54);
+		smd=5.544838362252949E-6;
+	
+		double D0=smd;
+		double V0=Math.PI*D0*D0*D0/6;
+		double m0=krstProp.get_rhoK(T0)*V0;
+		m_D_T[0]=m0;
+		m_D_T[1]=D0;
+		m_D_T[2]=T0;
+		m_D_T_0[0]=m0;
+		m_D_T_0[1]=D0;
+		m_D_T_0[2]=1;
+		double v_relativ=6.7;
+
+		double erg []=new double[m_D_T.length+1];
+		FileWriter_txt txtFile=new FileWriter_txt("m_D_T.txt");
+		String [] header={"t","m/m0","D/D0","T"};
+		txtFile.writeTextLineToFile(header, false);
+
+		for(int t=0;t<600;t++){
+			double delta_time=1/1e6d;
+			double time=delta_time+t*delta_time;
+			double a=time-0.048e-3;
+			System.out.println(a);
+			if(a>=0)
+				System.out.println("Jetzt aber");
+				
+			System.out.println("time:" +time);
+			double []temp=verdampf.get_m_D_T(zn,0,delta_time,v_relativ,m_D_T);
+			m_D_T[0]=temp[0];
+			m_D_T[1]=temp[1];
+			m_D_T[2]=temp[2];
+			
+			erg[0]=time*1e3;
+			for(int i=0;i<m_D_T.length;i++)	
+				erg[1+i]=m_D_T[i]/m_D_T_0[i];			
+			txtFile.writeLineToFile(erg,true);
+		}		
+	}
 //
 //	public static void calc_cp_Dilution(){		
 //		

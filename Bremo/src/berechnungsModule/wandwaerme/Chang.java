@@ -3,7 +3,6 @@ package berechnungsModule.wandwaerme;
 import matLib.MatLibBase;
 
 import berechnungsModule.Berechnung.Zone;
-import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.parameter.*;
 
@@ -12,13 +11,12 @@ public class Chang extends WandWaermeUebergang {
 	private CasePara cp;
 	protected final IndizierDaten indiD;
 	private double vDrall;
-	private double Bohrungsdurchmesser;
-	private double Hubvolumen;
-	private double Kompressionsvolumen;
+	private double bohrungsdurchmesser;
+	private double hubvolumen;
 	private double mittlereKolbengeschwindigkeit;
-	private double Temperatur_1;
-	private double Druck_1;
-	private double Volumen_1;
+	private double temperatur_1;
+	private double druck_1;
+	private double volumen_1;
 	private double refPunkt;
 	private double p_mi;
 	private double n;
@@ -34,13 +32,12 @@ public class Chang extends WandWaermeUebergang {
 		this.cp=super.cp;
 		indiD=new IndizierDaten(cp);	//TODO: umprogrammieren, so dass die Indizierdatei nur ein einziges Mal eingelesen wird
 		this.motor=(Motor_HubKolbenMotor) super.motor;
-		Bohrungsdurchmesser = motor.get_Bohrung(); //[m]
-		Hubvolumen = motor.get_Hubvolumen();  //[m^3]
-		Kompressionsvolumen = motor.get_Kompressionsvolumen();	//[m^3]
+		bohrungsdurchmesser = motor.get_Bohrung(); //[m]
+		hubvolumen = motor.get_Hubvolumen();  //[m^3]
 		mittlereKolbengeschwindigkeit= 2*motor.get_Hub()*cp.get_DrehzahlInUproSec(); //[m/s]
-		Temperatur_1=cp.get_T_EinlassSchluss(); //[K]
-		Druck_1=indiD.get_pZyl(cp.get_Einlassschluss()); //[bar]
-		Volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]
+		temperatur_1=cp.get_T_EinlassSchluss(); //[K]
+		druck_1=indiD.get_pZyl(cp.get_Einlassschluss()); //[bar]
+		volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]
 		brennraumdachhoehe = cp.get_BrennraumdachHoehe();
 		vDrall=cp.get_DrallGeschwindigkeit();
 		p_mi=indiD.get_pmi();				//[bar]
@@ -75,12 +72,12 @@ public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN,doubl
 	double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
 
 	double L_char = s_alpha + brennraumdachhoehe;
-	if (L_char >= Bohrungsdurchmesser)
+	if (L_char >= bohrungsdurchmesser)
 		{	
-			L_char = Bohrungsdurchmesser;
+			L_char = bohrungsdurchmesser;
 		}
 	
-	double v_tuned =  mittlereKolbengeschwindigkeit* C_1 + C_2 / 6 * Hubvolumen * Temperatur_1 / (Druck_1 * Volumen_1) * (p - Schleppdruck*1E5);  
+	double v_tuned =  mittlereKolbengeschwindigkeit* C_1 + C_2 / 6 * hubvolumen * temperatur_1 / (druck_1 * volumen_1) * (p - Schleppdruck*1E5);  
 	double alpha = alpha_scaling * 130 *Math.pow( (L_char ),-0.2)*Math.pow(p*1E-5,0.8)*Math.pow(T,-0.73)*Math.pow((v_tuned ),0.8) ;
 		
 	return alpha;

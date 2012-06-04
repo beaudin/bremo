@@ -10,7 +10,6 @@ public class Hohenberg extends WandWaermeUebergang{
 
 	
 	private Motor_HubKolbenMotor motor;
-	private CasePara cp;
 	private double C_1;
 	private double C_2;
 	private double mittlereKolbengeschwindigkeit;

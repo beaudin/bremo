@@ -516,7 +516,7 @@ public class SpeziesFabrik {
 					PhysKonst.get_M_Ar(),								
 					hf,-10e10,0,0,0,0,0,"Ar");
 			
-			this.integrierMich(spezAr);
+//			this.integrierMich(spezAr);
 		}
 		return spezAr;
 	}

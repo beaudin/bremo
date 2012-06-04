@@ -1,5 +1,5 @@
 +++++++++++++++++++++++++++++++++++++++++++++
-+    Wed May 30 23:48:02 CEST 2012          +
++    Mon Jun 04 13:14:42 CEST 2012          +
 +++++++++++++++++++++++++++++++++++++++++++++
 
 Item1 : WARNING: Die Ordnung fuer den SavitzkyGolay-Filter wurde nicht angegeben. 
@@ -7,7 +7,7 @@ Es wird mit einem Polynom 5ter Ordnung gerechnet.
 Eine hoehere Ordnung kann mittles der Vorgabe des Parameters "sgolayOrdnung" erfolgen.
 
 Item2 : WARNING: Die Breite fuer den SavitzkyGolay-Filter wurde nicht angegeben. 
-Es wird mit einer Breite von 11.0 gerechnet. 
+Es wird mit einer Breite von 22.0 gerechnet. 
 Eine andere Breite kann mittles der Vorgabe des Parameters "sgolayBreite" erfolgen.
 
 Item3 : WARNING: Fuer den ausgewaehlten Kraftstoff "RON_91" wurde kein Heizwert angegeben. 
@@ -26,44 +26,2279 @@ Item6 : WARNING: Der Wert fuer "RefFlaecheEinlass" wurde im Inputfile nicht ange
 Item7 : WARNING: Der Wert fuer "RefFlaecheAuslass" wurde im Inputfile nicht angegeben. 
  Es wird mit "Kolbenflaeche" gerechnet!
 
-Item8 : WARNING: AGR_extern_LWA in Zone 0 hatte eine negative Masse (-7.029653224942607E-13kg). Die Masse wurde auf null gesetzt!
+Item8 : WARNING: feuchteLuft_LWA in Zone 0 hatte eine negative Masse (-2.8178362432027527E-12kg). Die Masse wurde auf null gesetzt!
 **************************************************
 
 
-Item9 : WARNING: feuchteLuft_LWA in Zone 0 hatte eine negative Masse (-2.817836243202775E-12kg). Die Masse wurde auf null gesetzt!
+Item9 : WARNING: RON_95 in Zone 0 hatte eine negative Masse (-9.031039939163142E-14kg). Die Masse wurde auf null gesetzt!
 **************************************************
 
 
-Item10 : WARNING: RON_95 in Zone 0 hatte eine negative Masse (-9.031039939163212E-14kg). Die Masse wurde auf null gesetzt!
+Item10 : WARNING: AGR_extern_LWA in Zone 0 hatte eine negative Masse (-7.029653224942554E-13kg). Die Masse wurde auf null gesetzt!
 **************************************************
 
 
-Item11 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "ndodecan" ist fuer Temperaturen ueber 540K nicht zulaessig. 
-Die Tropefentemperatur betraegt aber 1904.8097147698568K
+Item11 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 2632.4499020981157K
 **************************************************
 
 
-Item12 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "ndodecan" ist fuer Temperaturen ueber 659K nicht zulaessig. 
-Die Tropefentemperatur betraegt aber 1904.8097147698568K
+Item12 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1945.1119894311396K
 **************************************************
 
 
-Item13 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "ndodecan" ist fuer Temperaturen ueber 540K nicht zulaessig. 
-Die Tropefentemperatur betraegt aber 799.6411579915161K
+Item13 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 2632.4499020981157K
 **************************************************
 
 
-Item14 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "ndodecan" ist fuer Temperaturen ueber 659K nicht zulaessig. 
-Die Tropefentemperatur betraegt aber 799.6411579915161K
+Item14 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 824.7567149418892K
 **************************************************
 
 
-Item15 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "ndodecan" ist fuer Temperaturen ueber 540K nicht zulaessig. 
-Die Tropefentemperatur betraegt aber 5557.704947395656K
+Item15 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 740.4337297286885K
 **************************************************
 
 
-Item16 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "ndodecan" ist fuer Temperaturen ueber 659K nicht zulaessig. 
-Die Tropefentemperatur betraegt aber 5557.704947395656K
+Item16 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 824.7567149418892K
+**************************************************
+
+
+Item17 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 2001.363654752635K
+**************************************************
+
+
+Item18 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1525.28690357363K
+**************************************************
+
+
+Item19 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 2001.363654752635K
+**************************************************
+
+
+Item20 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1357.951660995098K
+**************************************************
+
+
+Item21 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1096.7885755479128K
+**************************************************
+
+
+Item22 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1357.951660995098K
+**************************************************
+
+
+Item23 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 696.4160820868857K
+**************************************************
+
+
+Item24 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 696.4160820868857K
+**************************************************
+
+
+Item25 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 822.4742041519835K
+**************************************************
+
+
+Item26 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 739.8036043191696K
+**************************************************
+
+
+Item27 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 822.4742041519835K
+**************************************************
+
+
+Item28 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 722.9701118701432K
+**************************************************
+
+
+Item29 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 722.9701118701432K
+**************************************************
+
+
+Item30 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 889.2954112424202K
+**************************************************
+
+
+Item31 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 784.7944792385517K
+**************************************************
+
+
+Item32 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 889.2954112424202K
+**************************************************
+
+
+Item33 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 922.4158484691122K
+**************************************************
+
+
+Item34 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 806.8747707230131K
+**************************************************
+
+
+Item35 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 922.4158484691122K
+**************************************************
+
+
+Item36 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 775.2016994183148K
+**************************************************
+
+
+Item37 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 708.7320046891481K
+**************************************************
+
+
+Item38 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 775.2016994183148K
+**************************************************
+
+
+Item39 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 15173.858122806621K
+**************************************************
+
+
+Item40 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 10308.280587570449K
+**************************************************
+
+
+Item41 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 15173.858122806621K
+**************************************************
+
+
+Item42 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 789.8980128939019K
+**************************************************
+
+
+Item43 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 719.4306044654408K
+**************************************************
+
+
+Item44 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 789.8980128939019K
+**************************************************
+
+
+Item45 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 2156.9013917955335K
+**************************************************
+
+
+Item46 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1631.6716796631506K
+**************************************************
+
+
+Item47 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 2156.9013917955335K
+**************************************************
+
+
+Item48 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1604.3579100766547K
+**************************************************
+
+
+Item49 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1263.76201627468K
+**************************************************
+
+
+Item50 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1604.3579100766547K
+**************************************************
+
+
+Item51 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 722.4591487367618K
+**************************************************
+
+
+Item52 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 722.4591487367618K
+**************************************************
+
+
+Item53 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1099.3632717784385K
+**************************************************
+
+
+Item54 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 927.0989240758693K
+**************************************************
+
+
+Item55 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1099.3632717784385K
+**************************************************
+
+
+Item56 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 923.9050857652369K
+**************************************************
+
+
+Item57 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 810.5679540648994K
+**************************************************
+
+
+Item58 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 923.9050857652369K
+**************************************************
+
+
+Item59 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1444.3156512407504K
+**************************************************
+
+
+Item60 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1157.508331048575K
+**************************************************
+
+
+Item61 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1444.3156512407504K
+**************************************************
+
+
+Item62 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 3832.6558110103515K
+**************************************************
+
+
+Item63 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 2749.735104228309K
+**************************************************
+
+
+Item64 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 3832.6558110103515K
+**************************************************
+
+
+Item65 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1049.322622609239K
+**************************************************
+
+
+Item66 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 894.1796452942341K
+**************************************************
+
+
+Item67 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1049.322622609239K
+**************************************************
+
+
+Item68 : WARNING: Die Formel zur Berechnung der  Verdampfungsenthalpie fuer "tetratdecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1429.0267003976605K
+**************************************************
+
+
+Item69 : WARNING: Die Formel zur Berechnung der Waermeleitfaehigkeit fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1147.7466950056446K
+**************************************************
+
+
+Item70 : WARNING: Die Formel zur Berechnung des Saettigungsdampfdruckes fuer "tetradecan" ist fuer Temperaturen ueber 693K nicht zulaessig. 
+Die Tropefentemperatur betraegt aber 1429.0267003976605K
+**************************************************
+
+
+Item71 : WARNING: Falsche Werte in Zone 1
+ V= -6.61473430395981E-7
+ p= 7645244.741012411
+ T= 841.3584130429404
+**************************************************
+
+
+Item72 : WARNING: N in Zone 1 hatte eine negative Masse (-1.860848024682926E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item73 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.3601861360415845E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item74 : WARNING: O2 in Zone 1 hatte eine negative Masse (-4.186121456701789E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item75 : WARNING: O in Zone 1 hatte eine negative Masse (-1.5402149460140257E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item76 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-5.692143255654023E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item77 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.578039966484602E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item78 : WARNING: NO in Zone 1 hatte eine negative Masse (-7.740691474886984E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item79 : WARNING: CO in Zone 1 hatte eine negative Masse (-2.4960553891528297E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item80 : WARNING: H2 in Zone 1 hatte eine negative Masse (-5.265618375617041E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item81 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.0512789552893102E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item82 : WARNING: H in Zone 1 hatte eine negative Masse (-1.3268608574775505E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item83 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-4.929441742104448E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item84 : WARNING: OH in Zone 1 hatte eine negative Masse (-4.570809363590114E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item85 : WARNING: Falsche Werte in Zone 1
+ V= -8.216112735766723E-8
+ p= 7584229.2626945
+ T= 839.4921763018455
+**************************************************
+
+
+Item86 : WARNING: N in Zone 1 hatte eine negative Masse (-9.578835806644431E-20kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item87 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.0699596906708139E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item88 : WARNING: O2 in Zone 1 hatte eine negative Masse (-2.154833149646868E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item89 : WARNING: O in Zone 1 hatte eine negative Masse (-7.928356254305951E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item90 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-2.930067631025228E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item91 : WARNING: N2 in Zone 1 hatte eine negative Masse (-8.123062998577766E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item92 : WARNING: NO in Zone 1 hatte eine negative Masse (-3.9845711032993715E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item93 : WARNING: CO in Zone 1 hatte eine negative Masse (-1.284860688236935E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item94 : WARNING: H2 in Zone 1 hatte eine negative Masse (-2.7105111847636294E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item95 : WARNING: H2O in Zone 1 hatte eine negative Masse (-1.05590913635675E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item96 : WARNING: H in Zone 1 hatte eine negative Masse (-6.830102256312055E-16kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item97 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-2.537462083937921E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item98 : WARNING: OH in Zone 1 hatte eine negative Masse (-2.3528537428392184E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item99 : WARNING: Falsche Werte in Zone 1
+ V= -2.6225581752989214E-6
+ p= 7760634.235174494
+ T= 844.2722752992867
+**************************************************
+
+
+Item100 : WARNING: N in Zone 1 hatte eine negative Masse (-7.280766795019988E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item101 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-4.674243596901966E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item102 : WARNING: O2 in Zone 1 hatte eine negative Masse (-1.637864763677747E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item103 : WARNING: O in Zone 1 hatte eine negative Masse (-6.026255603567194E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item104 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-2.2271118897699484E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item105 : WARNING: N2 in Zone 1 hatte eine negative Masse (-6.174250039120332E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item106 : WARNING: NO in Zone 1 hatte eine negative Masse (-3.028628276640383E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item107 : WARNING: CO in Zone 1 hatte eine negative Masse (-9.766083503230339E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item108 : WARNING: H2 in Zone 1 hatte eine negative Masse (-2.0602294715051757E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item109 : WARNING: H2O in Zone 1 hatte eine negative Masse (-8.025848165402169E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item110 : WARNING: H in Zone 1 hatte eine negative Masse (-5.191484927620773E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item111 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-1.928696770388592E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item112 : WARNING: OH in Zone 1 hatte eine negative Masse (-1.7883780190197852E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item113 : WARNING: Falsche Werte in Zone 1
+ V= -4.310617634191842E-8
+ p= 7763793.490904309
+ T= 839.4719538118535
+**************************************************
+
+
+Item114 : WARNING: N in Zone 1 hatte eine negative Masse (-3.531362853557887E-20kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item115 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-8.279322939719363E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item116 : WARNING: O2 in Zone 1 hatte eine negative Masse (-7.944073678556885E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item117 : WARNING: O in Zone 1 hatte eine negative Masse (-2.922892022724684E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item118 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-1.0802076786238723E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item119 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.994673205525741E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item120 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.4689641482101325E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item121 : WARNING: CO in Zone 1 hatte eine negative Masse (-4.736806641251329E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item122 : WARNING: H2 in Zone 1 hatte eine negative Masse (-9.992653288188293E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item123 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.892746859985165E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item124 : WARNING: H in Zone 1 hatte eine negative Masse (-2.518006350752074E-16kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item125 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-9.354685189733172E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item126 : WARNING: OH in Zone 1 hatte eine negative Masse (-8.674102443173681E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item127 : WARNING: Falsche Werte in Zone 1
+ V= -1.957453165365483E-8
+ p= 7554764.599757161
+ T= 839.1237547683123
+**************************************************
+
+
+Item128 : WARNING: N in Zone 1 hatte eine negative Masse (-4.3135098302668764E-20kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item129 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-7.096182177815586E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item130 : WARNING: O2 in Zone 1 hatte eine negative Masse (-9.703573754901925E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item131 : WARNING: O in Zone 1 hatte eine negative Masse (-3.5702713076139183E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item132 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-1.3194584169620551E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item133 : WARNING: N2 in Zone 1 hatte eine negative Masse (-3.657951008194404E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item134 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.7943189517412559E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item135 : WARNING: CO in Zone 1 hatte eine negative Masse (-5.785942384970397E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item136 : WARNING: H2 in Zone 1 hatte eine negative Masse (-1.2205884803262213E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item137 : WARNING: H2O in Zone 1 hatte eine negative Masse (-4.754935288048477E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item138 : WARNING: H in Zone 1 hatte eine negative Masse (-3.07570918001272E-16kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item139 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-1.1426615784982483E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item140 : WARNING: OH in Zone 1 hatte eine negative Masse (-1.0595293576154029E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item141 : WARNING: Falsche Werte in Zone 1
+ V= -8.799735336235546E-7
+ p= 7603491.908755573
+ T= 840.656918004069
+**************************************************
+
+
+Item142 : WARNING: N in Zone 1 hatte eine negative Masse (-2.4455863373291726E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item143 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.522440180522495E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item144 : WARNING: O2 in Zone 1 hatte eine negative Masse (-5.501535485497138E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item145 : WARNING: O in Zone 1 hatte eine negative Masse (-2.0242000306091165E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item146 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-7.480797782247584E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item147 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.073910889338592E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item148 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.0173065753550459E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item149 : WARNING: CO in Zone 1 hatte eine negative Masse (-3.2803962902715623E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item150 : WARNING: H2 in Zone 1 hatte eine negative Masse (-6.920245063641167E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item151 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.69585679247567E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item152 : WARNING: H in Zone 1 hatte eine negative Masse (-1.7438032238752442E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item153 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-6.478430917110964E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item154 : WARNING: OH in Zone 1 hatte eine negative Masse (-6.007104708100443E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item155 : WARNING: Falsche Werte in Zone 1
+ V= -1.938514207773589E-8
+ p= 7603675.760574248
+ T= 839.1113452911651
+**************************************************
+
+
+Item156 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-4.716394654955654E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item157 : WARNING: Falsche Werte in Zone 1
+ V= -1.9425168906467263E-6
+ p= 7694968.641527545
+ T= 842.8424547037918
+**************************************************
+
+
+Item158 : WARNING: N in Zone 1 hatte eine negative Masse (-5.332771584658838E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item159 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-3.368522551464177E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item160 : WARNING: O2 in Zone 1 hatte eine negative Masse (-1.1996481850275602E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item161 : WARNING: O in Zone 1 hatte eine negative Masse (-4.413909351769863E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item162 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-1.6312401339024644E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item163 : WARNING: N2 in Zone 1 hatte eine negative Masse (-4.522307346490043E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item164 : WARNING: NO in Zone 1 hatte eine negative Masse (-2.2183079432250594E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item165 : WARNING: CO in Zone 1 hatte eine negative Masse (-7.153132913837439E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item166 : WARNING: H2 in Zone 1 hatte eine negative Masse (-1.5090077038361354E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item167 : WARNING: H2O in Zone 1 hatte eine negative Masse (-5.878503768108323E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item168 : WARNING: H in Zone 1 hatte eine negative Masse (-3.80248455741463E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item169 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-1.4126670475954058E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item170 : WARNING: OH in Zone 1 hatte eine negative Masse (-1.309891080288472E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item171 : WARNING: Falsche Werte in Zone 1
+ V= -4.621613566753289E-6
+ p= 7882441.823703954
+ T= 848.0580535054465
+**************************************************
+
+
+Item172 : WARNING: N in Zone 1 hatte eine negative Masse (-1.3090175472216282E-17kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item173 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-7.962958186378999E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item174 : WARNING: O2 in Zone 1 hatte eine negative Masse (-2.9447361466056825E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item175 : WARNING: O in Zone 1 hatte eine negative Masse (-1.083467518078975E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item176 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-4.004150421805644E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item177 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.1100756101226219E-4kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item178 : WARNING: NO in Zone 1 hatte eine negative Masse (-5.445206074785388E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item179 : WARNING: CO in Zone 1 hatte eine negative Masse (-1.7558555346264302E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item180 : WARNING: H2 in Zone 1 hatte eine negative Masse (-3.704110577127764E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item181 : WARNING: H2O in Zone 1 hatte eine negative Masse (-1.4429765951347313E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item182 : WARNING: H in Zone 1 hatte eine negative Masse (-9.33383125392844E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item183 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-3.4676264008829837E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item184 : WARNING: OH in Zone 1 hatte eine negative Masse (-3.2153456824954176E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item185 : WARNING: Falsche Werte in Zone 1
+ V= -1.907579272785338E-6
+ p= 7883402.188454872
+ T= 842.8179571034507
+**************************************************
+
+
+Item186 : WARNING: N in Zone 1 hatte eine negative Masse (-5.294032011171818E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item187 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-3.2931901917303986E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item188 : WARNING: O2 in Zone 1 hatte eine negative Masse (-1.1909334185530047E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item189 : WARNING: O in Zone 1 hatte eine negative Masse (-4.381844793409659E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item190 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-1.6193900956926738E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item191 : WARNING: N2 in Zone 1 hatte eine negative Masse (-4.489455337923946E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item192 : WARNING: NO in Zone 1 hatte eine negative Masse (-2.2021931889703246E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item193 : WARNING: CO in Zone 1 hatte eine negative Masse (-7.101169443477071E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item194 : WARNING: H2 in Zone 1 hatte eine negative Masse (-1.4980456151910091E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item195 : WARNING: H2O in Zone 1 hatte eine negative Masse (-5.835799758550987E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item196 : WARNING: H in Zone 1 hatte eine negative Masse (-3.774861654838229E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item197 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-1.402404819402387E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item198 : WARNING: OH in Zone 1 hatte eine negative Masse (-1.3003754614476406E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item199 : WARNING: Falsche Werte in Zone 1
+ V= -2.559159549900424E-7
+ p= 7571996.537383663
+ T= 839.5808058242642
+**************************************************
+
+
+Item200 : WARNING: N in Zone 1 hatte eine negative Masse (-6.93263902356961E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item201 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-4.762522834227107E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item202 : WARNING: O2 in Zone 1 hatte eine negative Masse (-1.5595507308060671E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item203 : WARNING: O in Zone 1 hatte eine negative Masse (-5.7381119241273915E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item204 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-2.120623174943019E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item205 : WARNING: N2 in Zone 1 hatte eine negative Masse (-5.879030048285504E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item206 : WARNING: NO in Zone 1 hatte eine negative Masse (-2.8838152861708126E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item207 : WARNING: CO in Zone 1 hatte eine negative Masse (-9.299121027780188E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item208 : WARNING: H2 in Zone 1 hatte eine negative Masse (-1.9617201915372928E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item209 : WARNING: H2O in Zone 1 hatte eine negative Masse (-7.642094542400313E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item210 : WARNING: H in Zone 1 hatte eine negative Masse (-4.9432555680968555E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item211 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-1.8364766887155756E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item212 : WARNING: OH in Zone 1 hatte eine negative Masse (-1.7028672381089006E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item213 : WARNING: Falsche Werte in Zone 1
+ V= -1.3473099054341012E-6
+ p= 7637812.554321855
+ T= 841.568153288469
+**************************************************
+
+
+Item214 : WARNING: N in Zone 1 hatte eine negative Masse (-3.753873000215586E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item215 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-2.3140201750500362E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item216 : WARNING: O2 in Zone 1 hatte eine negative Masse (-8.444627451300612E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item217 : WARNING: O in Zone 1 hatte eine negative Masse (-3.107062599244626E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item218 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-1.1482712503832589E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item219 : WARNING: N2 in Zone 1 hatte eine negative Masse (-3.183366693503635E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item220 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.5615231520869744E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item221 : WARNING: CO in Zone 1 hatte eine negative Masse (-5.035271450488281E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item222 : WARNING: H2 in Zone 1 hatte eine negative Masse (-1.0622287466509179E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item223 : WARNING: H2O in Zone 1 hatte eine negative Masse (-4.13802770781512E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item224 : WARNING: H in Zone 1 hatte eine negative Masse (-2.6766651988018076E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item225 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-9.9441211836601E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item226 : WARNING: OH in Zone 1 hatte eine negative Masse (-9.220655116119501E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item227 : WARNING: Falsche Werte in Zone 1
+ V= -2.5394440712671386E-7
+ p= 7638323.427308325
+ T= 839.567440737949
+**************************************************
+
+
+Item228 : WARNING: N in Zone 1 hatte eine negative Masse (-6.354286264042928E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item229 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-4.461207652735889E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item230 : WARNING: O2 in Zone 1 hatte eine negative Masse (-1.4294458074547983E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item231 : WARNING: O in Zone 1 hatte eine negative Masse (-5.259412131089089E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item232 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-1.9437109974915784E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item233 : WARNING: N2 in Zone 1 hatte eine negative Masse (-5.38857421462586E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item234 : WARNING: NO in Zone 1 hatte eine negative Masse (-2.6432340986819368E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item235 : WARNING: CO in Zone 1 hatte eine negative Masse (-8.523345411985885E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item236 : WARNING: H2 in Zone 1 hatte eine negative Masse (-1.798064434712583E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item237 : WARNING: H2O in Zone 1 hatte eine negative Masse (-7.004555727508252E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item238 : WARNING: H in Zone 1 hatte eine negative Masse (-4.5308663626103684E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item239 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-1.683269323221132E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item240 : WARNING: OH in Zone 1 hatte eine negative Masse (-1.5608061899395772E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item241 : WARNING: Falsche Werte in Zone 1
+ V= -1.4541196202392815E-7
+ p= 7563939.558258335
+ T= 839.3671066514358
+**************************************************
+
+
+Item242 : WARNING: N in Zone 1 hatte eine negative Masse (-3.8928913662987784E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item243 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-2.8675433722874904E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item244 : WARNING: O2 in Zone 1 hatte eine negative Masse (-8.757360010551727E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item245 : WARNING: O in Zone 1 hatte eine negative Masse (-3.2221274311769735E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item246 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-1.1907955427712578E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item247 : WARNING: N2 in Zone 1 hatte eine negative Masse (-3.3012573190919657E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item248 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.6193515328531215E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item249 : WARNING: CO in Zone 1 hatte eine negative Masse (-5.221744250658138E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item250 : WARNING: H2 in Zone 1 hatte eine negative Masse (-1.1015665997848743E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item251 : WARNING: H2O in Zone 1 hatte eine negative Masse (-4.2912725966844054E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item252 : WARNING: H in Zone 1 hatte eine negative Masse (-2.7757909876784714E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item253 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-1.0312384968558066E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item254 : WARNING: OH in Zone 1 hatte eine negative Masse (-9.562126553322076E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item255 : WARNING: Falsche Werte in Zone 1
+ V= -1.1290699603031205E-6
+ p= 7621766.897925851
+ T= 841.1421531192299
+**************************************************
+
+
+Item256 : WARNING: N in Zone 1 hatte eine negative Masse (-3.1421694435344943E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item257 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.9439084007835305E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item258 : WARNING: O2 in Zone 1 hatte eine negative Masse (-7.068553021901775E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item259 : WARNING: O in Zone 1 hatte eine negative Masse (-2.6007585120579835E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item260 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-9.611574061339346E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item261 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.6646286518798333E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item262 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.3070688149486073E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item263 : WARNING: CO in Zone 1 hatte eine negative Masse (-4.214760619423525E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item264 : WARNING: H2 in Zone 1 hatte eine negative Masse (-8.89135756478382E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item265 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.463725123159208E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item266 : WARNING: H in Zone 1 hatte eine negative Masse (-2.240495508975451E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item267 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-8.323700275503825E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item268 : WARNING: OH in Zone 1 hatte eine negative Masse (-7.718124921534848E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item269 : WARNING: Falsche Werte in Zone 1
+ V= -1.4436309442768219E-7
+ p= 7622133.145330328
+ T= 839.3542076239265
+**************************************************
+
+
+Item270 : WARNING: N in Zone 1 hatte eine negative Masse (-3.302025189349011E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item271 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-2.595841917867661E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item272 : WARNING: O2 in Zone 1 hatte eine negative Masse (-7.428160877382209E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item273 : WARNING: O in Zone 1 hatte eine negative Masse (-2.7330703428168088E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item274 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-1.0100556392699108E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item275 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.800189832815344E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item276 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.3735650571148161E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item277 : WARNING: CO in Zone 1 hatte eine negative Masse (-4.429183716062686E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item278 : WARNING: H2 in Zone 1 hatte eine negative Masse (-9.343699368866578E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item279 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.63993979674991E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item280 : WARNING: H in Zone 1 hatte eine negative Masse (-2.3544792030497194E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item281 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-8.74716289882451E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item282 : WARNING: OH in Zone 1 hatte eine negative Masse (-8.110779308191275E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item283 : WARNING: Falsche Werte in Zone 1
+ V= -1.0211831607983126E-7
+ p= 7560782.966426058
+ T= 839.2833828322449
+**************************************************
+
+
+Item284 : WARNING: N in Zone 1 hatte eine negative Masse (-2.70196825754164E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item285 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-2.1251216036758635E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item286 : WARNING: O2 in Zone 1 hatte eine negative Masse (-6.078286430805903E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item287 : WARNING: O in Zone 1 hatte eine negative Masse (-2.2364061109344067E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item288 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-8.265043781196214E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item289 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.2913283847024555E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item290 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.123955442848781E-9kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item291 : WARNING: CO in Zone 1 hatte eine negative Masse (-3.6242951284030273E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item292 : WARNING: H2 in Zone 1 hatte eine negative Masse (-7.64572577584321E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item293 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.9784757008833697E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item294 : WARNING: H in Zone 1 hatte eine negative Masse (-1.926614033776189E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item295 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-7.157594246223547E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item296 : WARNING: OH in Zone 1 hatte eine negative Masse (-6.63685677061079E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item297 : WARNING: Falsche Werte in Zone 1
+ V= -1.0434388758889985E-6
+ p= 7615479.837242388
+ T= 840.9752256596615
+**************************************************
+
+
+Item298 : WARNING: N in Zone 1 hatte eine negative Masse (-2.9025140343212675E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item299 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.7989046849350782E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item300 : WARNING: O2 in Zone 1 hatte eine negative Masse (-6.5294296558799455E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item301 : WARNING: O in Zone 1 hatte eine negative Masse (-2.4023968843123686E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item302 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-8.878492744036977E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item303 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.46139560495375E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item304 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.20737778384877E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item305 : WARNING: CO in Zone 1 hatte eine negative Masse (-3.8932979487638774E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item306 : WARNING: H2 in Zone 1 hatte eine negative Masse (-8.213207651502102E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item307 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.1995444426739727E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item308 : WARNING: H in Zone 1 hatte eine negative Masse (-2.0696113864948002E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item309 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-7.688845971322754E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item310 : WARNING: OH in Zone 1 hatte eine negative Masse (-7.129458263142104E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item311 : WARNING: Falsche Werte in Zone 1
+ V= -1.0138818430827585E-7
+ p= 7615785.464081014
+ T= 839.2706571976735
+**************************************************
+
+
+Item312 : WARNING: N in Zone 1 hatte eine negative Masse (-2.1061994557192143E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item313 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.8650222755022785E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item314 : WARNING: O2 in Zone 1 hatte eine negative Masse (-4.738058464060844E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item315 : WARNING: O in Zone 1 hatte eine negative Masse (-1.743291143583906E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item316 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-6.442648119519101E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item317 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.7861033649318917E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item318 : WARNING: NO in Zone 1 hatte eine negative Masse (-8.761295901139102E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item319 : WARNING: CO in Zone 1 hatte eine negative Masse (-2.82515843977882E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item320 : WARNING: H2 in Zone 1 hatte eine negative Masse (-5.959886250592337E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item321 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.3217385631987808E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item322 : WARNING: H in Zone 1 hatte eine negative Masse (-1.501806476813456E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item323 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-5.57938497744277E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item324 : WARNING: OH in Zone 1 hatte eine negative Masse (-5.173467185978368E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item325 : WARNING: Falsche Werte in Zone 1
+ V= -8.483219877692057E-8
+ p= 7559522.614808626
+ T= 839.2499539137968
+**************************************************
+
+
+Item326 : WARNING: N in Zone 1 hatte eine negative Masse (-2.2264611454054823E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item327 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.82869034914428E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item328 : WARNING: O2 in Zone 1 hatte eine negative Masse (-5.008596430051203E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item329 : WARNING: O in Zone 1 hatte eine negative Masse (-1.8428311648165637E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item330 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-6.810516294018668E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item331 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.888087917267514E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item332 : WARNING: NO in Zone 1 hatte eine negative Masse (-9.261556332814394E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item333 : WARNING: CO in Zone 1 hatte eine negative Masse (-2.9864719026024166E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item334 : WARNING: H2 in Zone 1 hatte eine negative Masse (-6.30018924938379E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item335 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.4543073006286E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item336 : WARNING: H in Zone 1 hatte eine negative Masse (-1.5875579871905686E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item337 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-5.897961768912086E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item338 : WARNING: OH in Zone 1 hatte eine negative Masse (-5.4688665146757446E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item339 : WARNING: Falsche Werte in Zone 1
+ V= -1.0092282019845868E-6
+ p= 7612969.463573988
+ T= 840.9085711589148
+**************************************************
+
+
+Item340 : WARNING: N in Zone 1 hatte eine negative Masse (-2.806825358147434E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item341 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.7410081673668885E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item342 : WARNING: O2 in Zone 1 hatte eine negative Masse (-6.314170583037105E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item343 : WARNING: O in Zone 1 hatte eine negative Masse (-2.323195827991636E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item344 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-8.58579089762039E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item345 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.3802495074007045E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item346 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.1675735381458882E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item347 : WARNING: CO in Zone 1 hatte eine negative Masse (-3.764945588615984E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item348 : WARNING: H2 in Zone 1 hatte eine negative Masse (-7.942438601630196E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item349 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.0940634119335266E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item350 : WARNING: H in Zone 1 hatte eine negative Masse (-2.0013814412038408E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item351 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-7.435363823226115E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item352 : WARNING: OH in Zone 1 hatte eine negative Masse (-6.894417737938854E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item353 : WARNING: Falsche Werte in Zone 1
+ V= -8.42225872391685E-8
+ p= 7613250.262010978
+ T= 839.2372960579419
+**************************************************
+
+
+Item354 : WARNING: N in Zone 1 hatte eine negative Masse (-1.6287348310943834E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item355 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.5732234654311194E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item356 : WARNING: O2 in Zone 1 hatte eine negative Masse (-3.6639648876664737E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item357 : WARNING: O in Zone 1 hatte eine negative Masse (-1.3480959738088478E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item358 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-4.982132802404632E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item359 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.3812028839434261E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item360 : WARNING: NO in Zone 1 hatte eine negative Masse (-6.775155012485238E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item361 : WARNING: CO in Zone 1 hatte eine negative Masse (-2.184709497352305E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item362 : WARNING: H2 in Zone 1 hatte eine negative Masse (-4.60881057553285E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item363 : WARNING: H2O in Zone 1 hatte eine negative Masse (-1.795412327312371E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item364 : WARNING: H in Zone 1 hatte eine negative Masse (-1.1613546436483844E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item365 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-4.314566991350145E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item366 : WARNING: OH in Zone 1 hatte eine negative Masse (-4.000668683322525E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item367 : WARNING: Falsche Werte in Zone 1
+ V= -7.792269368695428E-8
+ p= 7559018.834476514
+ T= 839.2365919032238
+**************************************************
+
+
+Item368 : WARNING: N in Zone 1 hatte eine negative Masse (-2.0363942406143913E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item369 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.710202592401694E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item370 : WARNING: O2 in Zone 1 hatte eine negative Masse (-4.5810262374287054E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item371 : WARNING: O in Zone 1 hatte eine negative Masse (-1.6855137033050335E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item372 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-6.229121125859271E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item373 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.726907010450863E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item374 : WARNING: NO in Zone 1 hatte eine negative Masse (-8.470922573335167E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item375 : WARNING: CO in Zone 1 hatte eine negative Masse (-2.7315249559895983E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item376 : WARNING: H2 in Zone 1 hatte eine negative Masse (-5.762359306696698E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item377 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.24478979209301E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item378 : WARNING: H in Zone 1 hatte eine negative Masse (-1.4520324993892824E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item379 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-5.3944688872569856E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item380 : WARNING: OH in Zone 1 hatte eine negative Masse (-5.002004322490142E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item381 : WARNING: Falsche Werte in Zone 1
+ V= -9.955504794316508E-7
+ p= 7611966.015666278
+ T= 840.8819277171181
+**************************************************
+
+
+Item382 : WARNING: N in Zone 1 hatte eine negative Masse (-2.768577243019236E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item383 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.7178661117129168E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item384 : WARNING: O2 in Zone 1 hatte eine negative Masse (-6.228128491854606E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item385 : WARNING: O in Zone 1 hatte eine negative Masse (-2.2915380473475926E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item386 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-8.468793836237293E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item387 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.3478142663093295E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item388 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.1516632190453385E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item389 : WARNING: CO in Zone 1 hatte eine negative Masse (-3.713641337745233E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item390 : WARNING: H2 in Zone 1 hatte eine negative Masse (-7.83420838874859E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item391 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.0519011544029465E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item392 : WARNING: H in Zone 1 hatte eine negative Masse (-1.9741089685662395E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item393 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-7.334043429099961E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item394 : WARNING: OH in Zone 1 hatte eine negative Masse (-6.800468720905387E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item395 : WARNING: Falsche Werte in Zone 1
+ V= -7.736017802486768E-8
+ p= 7612236.790118535
+ T= 839.2239609071519
+**************************************************
+
+
+Item396 : WARNING: N in Zone 1 hatte eine negative Masse (-1.4378854790700257E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item397 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.456587361003685E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item398 : WARNING: O2 in Zone 1 hatte eine negative Masse (-3.2346345195173134E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item399 : WARNING: O in Zone 1 hatte eine negative Masse (-1.190130884491526E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item400 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-4.398344208407828E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item401 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.2193584446999602E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item402 : WARNING: NO in Zone 1 hatte eine negative Masse (-5.981266455973838E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item403 : WARNING: CO in Zone 1 hatte eine negative Masse (-1.9287130122455304E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item404 : WARNING: H2 in Zone 1 hatte eine negative Masse (-4.068766551698464E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item405 : WARNING: H2O in Zone 1 hatte eine negative Masse (-1.585032299365242E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item406 : WARNING: H in Zone 1 hatte eine negative Masse (-1.0252712389226203E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item407 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-3.8090013837112696E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item408 : WARNING: OH in Zone 1 hatte eine negative Masse (-3.531884562482428E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item409 : WARNING: Falsche Werte in Zone 1
+ V= -7.515968140264378E-8
+ p= 7558817.379925414
+ T= 839.2312486262632
+**************************************************
+
+
+Item410 : WARNING: N in Zone 1 hatte eine negative Masse (-1.9603892032143532E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item411 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.6628210327737034E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item412 : WARNING: O2 in Zone 1 hatte eine negative Masse (-4.410047031358424E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item413 : WARNING: O in Zone 1 hatte eine negative Masse (-1.6226046999779935E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item414 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-5.996629511663049E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item415 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.6624530705909139E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item416 : WARNING: NO in Zone 1 hatte eine negative Masse (-8.154759438438023E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item417 : WARNING: CO in Zone 1 hatte eine negative Masse (-2.6295753176049935E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item418 : WARNING: H2 in Zone 1 hatte eine negative Masse (-5.54728880321413E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item419 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.1610067363857903E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item420 : WARNING: H in Zone 1 hatte eine negative Masse (-1.397837794738746E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item421 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-5.1931292834847734E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item422 : WARNING: OH in Zone 1 hatte eine negative Masse (-4.8153128076431365E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item423 : WARNING: Falsche Werte in Zone 1
+ V= -9.900804366602982E-7
+ p= 7611564.748617742
+ T= 840.8712732742376
+**************************************************
+
+
+Item424 : WARNING: N in Zone 1 hatte eine negative Masse (-2.753282368611954E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item425 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.7086119345183678E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item426 : WARNING: O2 in Zone 1 hatte eine negative Masse (-6.19372148973266E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item427 : WARNING: O in Zone 1 hatte eine negative Masse (-2.2788785534786518E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item428 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-8.422008384094675E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item429 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.334843877122837E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item430 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.1453009099065204E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item431 : WARNING: CO in Zone 1 hatte eine negative Masse (-3.693125501317796E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item432 : WARNING: H2 in Zone 1 hatte eine negative Masse (-7.790928673982272E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item433 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.03504107040936E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item434 : WARNING: H in Zone 1 hatte eine negative Masse (-1.963203096672421E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item435 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-7.293526852064419E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item436 : WARNING: OH in Zone 1 hatte eine negative Masse (-6.762899852180786E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item437 : WARNING: Falsche Werte in Zone 1
+ V= -7.461582633964667E-8
+ p= 7611831.498674293
+ T= 839.2186283338715
+**************************************************
+
+
+Item438 : WARNING: N in Zone 1 hatte eine negative Masse (-1.3615675519124057E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item439 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.4099462504791913E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item440 : WARNING: O2 in Zone 1 hatte eine negative Masse (-3.0629514437540595E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item441 : WARNING: O in Zone 1 hatte eine negative Masse (-1.1269629038193788E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item442 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-4.164895496533695E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item443 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.1546391674583365E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item444 : WARNING: NO in Zone 1 hatte eine negative Masse (-5.663801773047534E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item445 : WARNING: CO in Zone 1 hatte eine negative Masse (-1.8263436780258705E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item446 : WARNING: H2 in Zone 1 hatte eine negative Masse (-3.852810667983216E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item447 : WARNING: H2O in Zone 1 hatte eine negative Masse (-1.5009043341508804E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item448 : WARNING: H in Zone 1 hatte eine negative Masse (-9.708534310597121E-16kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item449 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-3.606832925668725E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item450 : WARNING: OH in Zone 1 hatte eine negative Masse (-3.344424495118097E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item451 : WARNING: Falsche Werte in Zone 1
+ V= -7.405460278984321E-8
+ p= 7558736.807313726
+ T= 839.2291115597271
+**************************************************
+
+
+Item452 : WARNING: N in Zone 1 hatte eine negative Masse (-1.929990662544512E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item453 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.643870574795886E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item454 : WARNING: O2 in Zone 1 hatte eine negative Masse (-4.3416631646145953E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item455 : WARNING: O in Zone 1 hatte eine negative Masse (-1.5974439743004168E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item456 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-5.9036434934818925E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item457 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.6366744409212554E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item458 : WARNING: NO in Zone 1 hatte eine negative Masse (-8.028308636711668E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item459 : WARNING: CO in Zone 1 hatte eine negative Masse (-2.5888001225031478E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item460 : WARNING: H2 in Zone 1 hatte eine negative Masse (-5.461270432976549E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item461 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.127497343936522E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item462 : WARNING: H in Zone 1 hatte eine negative Masse (-1.3761623901897252E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item463 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-5.112602645473863E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item464 : WARNING: OH in Zone 1 hatte eine negative Masse (-4.7406447356189056E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item465 : WARNING: Falsche Werte in Zone 1
+ V= -9.878925868720586E-7
+ p= 7611404.259728147
+ T= 840.8670119662777
+**************************************************
+
+
+Item466 : WARNING: N in Zone 1 hatte eine negative Masse (-2.747165117983584E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item467 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.7049106866525173E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item468 : WARNING: O2 in Zone 1 hatte eine negative Masse (-6.179960261641072E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item469 : WARNING: O in Zone 1 hatte eine negative Masse (-2.2738153346013686E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item470 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-8.403296341818491E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item471 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.329656314329676E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item472 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.142756277074571E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item473 : WARNING: CO in Zone 1 hatte eine negative Masse (-3.6849201045335306E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item474 : WARNING: H2 in Zone 1 hatte eine negative Masse (-7.773618766408017E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item475 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.028297807492797E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item476 : WARNING: H in Zone 1 hatte eine negative Masse (-1.9588412464264573E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item477 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-7.277322073278392E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item478 : WARNING: OH in Zone 1 hatte eine negative Masse (-6.747874021978265E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item479 : WARNING: Falsche Werte in Zone 1
+ V= -7.351818353929996E-8
+ p= 7611669.397659324
+ T= 839.2164955423729
+**************************************************
+
+
+Item480 : WARNING: N in Zone 1 hatte eine negative Masse (-1.3310438695945572E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item481 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.3912919382670822E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item482 : WARNING: O2 in Zone 1 hatte eine negative Masse (-2.99428606120082E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item483 : WARNING: O in Zone 1 hatte eine negative Masse (-1.101698599002575E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item484 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-4.0715266828860375E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item485 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.1287544149245772E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item486 : WARNING: NO in Zone 1 hatte eine negative Masse (-5.536830411407089E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item487 : WARNING: CO in Zone 1 hatte eine negative Masse (-1.7854006237110373E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item488 : WARNING: H2 in Zone 1 hatte eine negative Masse (-3.766438185989835E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item489 : WARNING: H2O in Zone 1 hatte eine negative Masse (-1.4672569936125792E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item490 : WARNING: H in Zone 1 hatte eine negative Masse (-9.490887953901572E-16kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item491 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-3.525974783711673E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item492 : WARNING: OH in Zone 1 hatte eine negative Masse (-3.269449037101611E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item493 : WARNING: Falsche Werte in Zone 1
+ V= -7.361259154876656E-8
+ p= 7558704.579742152
+ T= 839.2282567721845
+**************************************************
+
+
+Item494 : WARNING: N in Zone 1 hatte eine negative Masse (-1.9178318020500997E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item495 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.636290738074113E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item496 : WARNING: O2 in Zone 1 hatte eine negative Masse (-4.314310868172556E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item497 : WARNING: O in Zone 1 hatte eine negative Masse (-1.5873801440404538E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item498 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-5.866450786263621E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item499 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.6263634603615368E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item500 : WARNING: NO in Zone 1 hatte eine negative Masse (-7.977730627908671E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item501 : WARNING: CO in Zone 1 hatte eine negative Masse (-2.5724907899512812E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item502 : WARNING: H2 in Zone 1 hatte eine negative Masse (-5.426864657546889E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item503 : WARNING: H2O in Zone 1 hatte eine negative Masse (-2.1140941996057292E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item504 : WARNING: H in Zone 1 hatte eine negative Masse (-1.367492624659399E-15kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item505 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-5.0803934625300773E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item506 : WARNING: OH in Zone 1 hatte eine negative Masse (-4.710778871958204E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item507 : WARNING: Falsche Werte in Zone 1
+ V= -9.87017473722316E-7
+ p= 7611340.067040459
+ T= 840.865307518148
+**************************************************
+
+
+Item508 : WARNING: N in Zone 1 hatte eine negative Masse (-2.744718329571042E-18kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item509 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.7034302551743458E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item510 : WARNING: O2 in Zone 1 hatte eine negative Masse (-6.1744560219944755E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item511 : WARNING: O in Zone 1 hatte eine negative Masse (-2.271790139618897E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item512 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-8.395811867011455E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item513 : WARNING: N2 in Zone 1 hatte eine negative Masse (-2.3275813840541748E-5kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item514 : WARNING: NO in Zone 1 hatte eine negative Masse (-1.1417384704641123E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item515 : WARNING: CO in Zone 1 hatte eine negative Masse (-3.681638095835221E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item516 : WARNING: H2 in Zone 1 hatte eine negative Masse (-7.766695119847185E-13kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item517 : WARNING: H2O in Zone 1 hatte eine negative Masse (-3.0256006256100643E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item518 : WARNING: H in Zone 1 hatte eine negative Masse (-1.9570965860737214E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item519 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-7.270840458028305E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item520 : WARNING: OH in Zone 1 hatte eine negative Masse (-6.741863964607422E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item521 : WARNING: Falsche Werte in Zone 1
+ V= -7.307914207569354E-8
+ p= 7611604.559742809
+ T= 839.2156424638155
+**************************************************
+
+
+Item522 : WARNING: N in Zone 1 hatte eine negative Masse (-1.3188349547212793E-19kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item523 : WARNING: Diesel in Zone 1 hatte eine negative Masse (-1.383830554432586E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item524 : WARNING: O2 in Zone 1 hatte eine negative Masse (-2.9668211635648227E-7kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item525 : WARNING: O in Zone 1 hatte eine negative Masse (-1.0915933389743482E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item526 : WARNING: CO2 in Zone 1 hatte eine negative Masse (-4.034180864456486E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item527 : WARNING: N2 in Zone 1 hatte eine negative Masse (-1.1184009871530026E-6kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item528 : WARNING: NO in Zone 1 hatte eine negative Masse (-5.486044188124133E-10kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item529 : WARNING: CO in Zone 1 hatte eine negative Masse (-1.7690241505327153E-12kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item530 : WARNING: H2 in Zone 1 hatte eine negative Masse (-3.7318907723105133E-14kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item531 : WARNING: H2O in Zone 1 hatte eine negative Masse (-1.4537986725598727E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item532 : WARNING: H in Zone 1 hatte eine negative Masse (-9.403833390375967E-16kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item533 : WARNING: RON_95 in Zone 1 hatte eine negative Masse (-3.4936330052301156E-8kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item534 : WARNING: OH in Zone 1 hatte eine negative Masse (-3.23946022464524E-11kg). Die Masse wurde auf null gesetzt!
+**************************************************
+
+
+Item535 : WARNING: Falsche Werte in Zone 0
+ V= -1.1025775498223549E-9
+ p= 1175899.4941948175
+ T= 515.2996416909743
 **************************************************
 

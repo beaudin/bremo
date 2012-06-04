@@ -40,8 +40,8 @@ p_Ladeluft	[Pa] 	:=	223800
 p_Abgas	[Pa] 	:=	274900
 mAGR_extern	[kg/h]	:=	27.78845203
 
-  RestgasVorgabe  LWA    			
-[internesRestgasModell: LWA ]			
+  LWA    			
+[internesRestgasModell:   RestgasVorgabe]			
 mAGR_intern_ASP	[kg] 	:=	2.90E-04
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
@@ -61,7 +61,7 @@ _EOI_1	[KWnZOT] 	:=	-295
 T_Krst_fluessig_1	[K] 	:=	360
 anzAxialPakete_1	[-]	:=	15
 anzRadialPakete_1	[-]	:=	10
-vergleichsKrstVerdampfung_1	[-]	:=	ndodecan
+vergleichsKrstVerdampfung_1	[-]	:=	tetradecan
 einspritzDruck_1	[Pa]	:=	1.20E+08
 anzSpritzloecher_1	[-]	:=	8
 durchmSpritzloch_1	[m]	:=	0.0001
@@ -88,6 +88,7 @@ drallgeschwindigkeit	[m/s] 	:=	0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
 %%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+filtern	[-] 	:= 	ja
 nullLinienMethode	[-] 	:= 	abgleichSaugrohr
 KW_Beginn_Druckabgleich	[KWnZOT]	:= 	
 KW_Ende_Druckabgleich 	[KWnZOT]	:=	
@@ -105,8 +106,8 @@ polynomKoeffizienten	[-] 	:=	Janaf
 zeit_oder_KW_Basiert	[-]	:=	KW
 rechnungsSchrittweite 	[KW]	:=	0.2
 rechnungsBeginn 	[KWnZOT]	:=	-130
-rechnungsEnde	[KWnZOT]	:=	86
-relaxFaktor 	[-]	:=	0.7
+rechnungsEnde	[KWnZOT]	:=	100
+relaxFaktor 	[-]	:=	0.6
 gleichGewichtsKonstanten	[-] 	:=	Burcat
 T_freeze	[K]	:=	1609
 debuggingMode	[-]	:=	ja
@@ -126,6 +127,6 @@ RefDurchmesserAV	[m]	:=	0.122
 spalte_alphaVor	[-] 	:= 	2
 spalte_alphaRueck	[-] 	:= 	3
 VentilhubEinFileName 	[-] 	:= 	Ventilhub_EV.txt
-VentilhubAusFileName	[-] 	:= 	Ventilhub_AV.txt
+_VentilhubAusFileName	[-] 	:= 	Ventilhub_AV.txt
 
-[Bremo::Input::Stop]
+[Bremo::Input::Stop]			

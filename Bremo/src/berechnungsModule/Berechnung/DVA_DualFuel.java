@@ -2,7 +2,6 @@ package berechnungsModule.Berechnung;
 
 import java.util.Hashtable;
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 import misc.HeizwertRechner;
 import misc.LittleHelpers;
@@ -54,7 +53,7 @@ public class DVA_DualFuel extends DVA {
 	private VektorBuffer dQb_buffer;
 	private VektorBuffer dmb_buffer;
 	private VektorBuffer dQw_buffer;
-	private boolean dieselIsBurnt=false,ottoIsBurnt=false;
+	private boolean dieselIsBurnt=false;
 	private boolean holzHammerOttoZoneNochNichtLeer=true,dieselZoneIstLeer=false; //Wenn die V0 bei Berechnung von reinem Dieselbetrieb zu null wird 
 
 
@@ -104,8 +103,6 @@ public class DVA_DualFuel extends DVA {
 		frischGemisch_MassenbruchHash.put(krst, mKrstDampfINIT/mGesInit);	
 		GasGemisch gemischINIT=new GasGemisch("GemischINIT");	
 		gemischINIT.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);	
-
-
 
 		//Anfangsbedingungen Setzen
 		//p Init
@@ -178,12 +175,12 @@ public class DVA_DualFuel extends DVA {
 		//Wenn V0 einmal kleienr null wird, wird keine Masse mehr aus der Zone entnommen --> Holzhammer
 		if(esBrennt&&V0<=0||esBrennt&&zonen_IN[0].get_m()<=0 ){
 			holzHammerOttoZoneNochNichtLeer=false; 
-			V0=0;
+			V0=1E-55;
 		}
 		//Wenn V1 einmal kleiner null wird, wird keine Masse mehr aus der Zone entnommen --> Holzhammer
 		if(V1<=0 ||zonen_IN[1].get_m()<=0 ){
 			dieselZoneIstLeer=true;
-			V1=0;
+			V1=1E-55;
 		}
 
 
@@ -352,24 +349,19 @@ public class DVA_DualFuel extends DVA {
 			this.initBurnedZone(time, zn);
 			initialiseZonesWhileRunning=true;
 		}
-		//Wenn die Dieselzone zu wenig Masse beinhaltet soll wird sie der OttoZone zugemischt
+		//Wenn die Dieselzone zu wenig Masse beinhaltet, wird sie der OttoZone zugemischt
 		//zunaechst Bestimmung der maximalen Masse der DieselZone
 		if(zn[1].get_m()>mDieselZoneMAX)
 			mDieselZoneMAX=zn[1].get_m();
-		//if(zn[1].get_m()<=0.005*mDieselZoneMAX&&this.dieselIsBurnt==false||
-		if(dieselZoneIstLeer==true&&burntZonesAlreadyInitialised==true&&dieselZoneAusgeblendet==false||
+		
+//		dieselZoneIstLeer==true&&burntZonesAlreadyInitialised==true&&dieselZoneAusgeblendet==false||
+		if(zn[1].get_m()<=0.005*mDieselZoneMAX&&this.dieselIsBurnt==false||
 				this.dieselIsBurnt==true&&burntZonesAlreadyInitialised==true&&dieselZoneAusgeblendet==false||
-				zn[1].get_m()<=1.5*CP.SYS.MINIMALE_ZONENMASSE &&burntZonesAlreadyInitialised==true&&dieselZoneAusgeblendet==false){
+				zn[1].get_m()<=1.05*CP.SYS.MINIMALE_ZONENMASSE &&burntZonesAlreadyInitialised==true&&dieselZoneAusgeblendet==false){
 			dieselZoneAusblenden(zn[0],zn[1],zn[2]);
 			this.initialiseZonesWhileRunning=true;	
 			dieselZoneAusgeblendet=true;
 		}
-	//Funktioniert irgendwie nicht --> nochmal anschauen bis dahin ist es ok wie es ist!!!	
-//		if(holzHammerOttoZoneNochNichtLeer==false&&this.ottoIsBurnt==false){
-//			ottoZoneAusblenden(zn[0],zn[1],zn[2]);
-//			this.initialiseZonesWhileRunning=true;		
-//		}
-
 
 		//Berechnen integraler Werte
 //		zonenMasseVerbrannt=zonenMasseVerbrannt+dmZoneBurn*super.CP.SYS.WRITE_INTERVAL_SEC;
@@ -498,32 +490,7 @@ public class DVA_DualFuel extends DVA {
 		i+=1;
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);
 		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
-
-		//
-		//		//Polytropenexponent für die Schleppdruckberechnung ermitteln.
-		//		//Dies wird in den 10°KW vorm Referenzpunkt gemacht...
-		//		double refPunkt=CP.get_refPunkt_WoschniHuber();
-		//		double[] n_array = new double[10]; 
-		//		double pZyl_a = indiD.get_pZyl(refPunkt);
-		//		double Vol_a = motor.get_V(refPunkt);
-		//		double pZyl_b = 0;
-		//		double Vol_b = 0;
-		//		int cnt=0;
-		//
-		//		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
-		//			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
-		//			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
-		//			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
-		//			cnt++;
-		//		}
-		//
-		//		double n=MatLibBase.mw_aus_1DArray(n_array); //Polytropenexponent
-		//		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
-		//		i+=1;
-		//		super.buffer_EinzelErgebnis("pSchlepp [bar]",Schleppdruck,i);
-
-		///////////////////////////		
-
+		
 		i+=1;
 		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt, T_buffer);
 		super.buffer_EinzelErgebnis("Wandwärmestromdichte [MW/m^2]",HeatFlux*1E-6,i);
@@ -601,6 +568,7 @@ public class DVA_DualFuel extends DVA {
 				T_KRstVap=es.get_Tkrst_dampf(time,zn[es.get_ID_Zone()]);
 			}
 		}
+		
 		i+=1;
 		super.buffer_EinzelErgebnis("TKrstVap [K]", T_KRstVap,i);
 		i+=1;
@@ -663,7 +631,7 @@ double sumdma=0;
 		double T0=p*V0/m0/R0;
 		//Berechnen der Einzelmassen in der OttoZone
 		Hashtable<Spezies,Double> ht3=new Hashtable<Spezies,Double>();	
-		Hashtable<Spezies,Double> ht4=zonen_IN[0].get_ggZone().get_speziesMassenBruecheDetailToIntegrate();
+//		Hashtable<Spezies,Double> ht4=zonen_IN[0].get_ggZone().get_speziesMassenBruecheDetailToIntegrate();
 		ht3=LittleHelpers.addiereHashs(ht3, 
 				zonen_IN[0].get_ggZone().get_speziesMassenBruecheDetailToIntegrate(), m0);		
 		initialZonesWhileRunning[0]=new Zone(CP,zonen_IN[0].get_p_V_T_mi(),zonen_IN[0].isBurnt(),zonen_IN[0].getID());		
@@ -680,16 +648,6 @@ double sumdma=0;
 		this.initialZonesWhileRunning[2]=zBurnt;
 		this.dieselIsBurnt=true;
 	}
-	
-//funktioniert irgendwie nicht so richtig!!
-//	private void ottoZoneAusblenden( Zone zOtto ,Zone zDiesel,Zone zBurnt){		
-//		this.initialZonesWhileRunning[0]=new Zone(zOtto.get_p(), 1e-55, 1, 1e-55, 
-//				zOtto.get_ggZone(), false, 1);
-//		this.initialZonesWhileRunning[1]=zDiesel;
-//		this.initialZonesWhileRunning[2]=zBurnt;
-//		this.ottoIsBurnt=true;
-//	}
-
 
 
 	public Zone[] get_initialZonesWhileRunning() {	

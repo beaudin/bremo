@@ -71,7 +71,7 @@ public class CasePara {
 		INPUTFILE_PARAMETER=ifr.get_eingabeParameter();
 		MODUL_VORGABEN=ifr.get_berechnungsModule();
 		
-		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
+//		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
 		System.out.println("Inputfile wurde eingelesen!");
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));
@@ -104,7 +104,7 @@ public class CasePara {
 		InternesRestgasFabrik irgf=new InternesRestgasFabrik(this);
 		RESTGASMODELL=irgf.RESTGAS_MODELL;
 		
-		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG
+		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG und RESTGAS_MODELL
 		BerechnungsModellFabrik bmf=new BerechnungsModellFabrik(this);
 		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;	
 		
@@ -1944,10 +1944,11 @@ public class CasePara {
 				try{				
 					tmpSGOLAY_BREITE=set_doublePara(PARAMETER,"sgolayBreite","[-]", 2*tmpSGOLAY_ORDNUNG+1,50);
 				}catch(ParameterFileWrongInputException e){
-					e.log_Warning("Die Breite fuer den SavitzkyGolay-Filter wurde nicht angegeben. \n" +
-					"Es wird mit einer Breite von " + (2*tmpSGOLAY_ORDNUNG+1) + " gerechnet. \n" +
-					"Eine andere Breite kann mittles der Vorgabe des Parameters \"sgolayBreite\" erfolgen.");
 					tmpSGOLAY_BREITE=(2*tmpSGOLAY_ORDNUNG+1)*2; //zweifache Mindestbreite
+					e.log_Warning("Die Breite fuer den SavitzkyGolay-Filter wurde nicht angegeben. \n" +
+					"Es wird mit einer Breite von " + tmpSGOLAY_BREITE + " gerechnet. \n" +
+					"Eine andere Breite kann mittles der Vorgabe des Parameters \"sgolayBreite\" erfolgen.");
+					
 				}
 			}
 			
@@ -2146,9 +2147,11 @@ public class CasePara {
 		
 			
 			DAUER_ASP_SEC=(DAUER_ASP_KW)/(360*get_DrehzahlInUproSec());
-			
+
+		
 			String durchflusskennzahlEinFileName=set_FileName(PARAMETER,"durchflusskennzahlEinFileName");
-			String durchflusskennzahlAusFileName=set_FileName(PARAMETER,"durchflusskennzahlAusFileName");
+			String durchflusskennzahlAusFileName=set_FileName(PARAMETER,"durchflusskennzahlAusFileName");		
+	
 			indexOf=durchflusskennzahlEinFileName.indexOf(".");
 			DFKENNZAHLDATEI_EIN_FORMAT=durchflusskennzahlEinFileName.substring(indexOf+1); //Dateiendung
 			indexOf=durchflusskennzahlAusFileName.indexOf(".");
@@ -2157,10 +2160,7 @@ public class CasePara {
 			DFKENNZAHL_EIN_FILE=new File(WD+durchflusskennzahlAusFileName);
 			KANAL_SPALTEN_NR_ALPHA_VOR=(int)set_doublePara(PARAMETER, "spalte_alphaVor","",1,3);
 			KANAL_SPALTEN_NR_ALPHA_RUECK=(int)set_doublePara(PARAMETER, "spalte_alphaRueck","",1,3);
-			
-			
-			
-			
+
 			if (DFKENNZAHLDATEI_EIN_FORMAT.equalsIgnoreCase("txt")){
 				if(KANAL_SPALTEN_NR_PZYL==1|| KANAL_SPALTEN_NR_PABG==1 || KANAL_SPALTEN_NR_PEIN==1){
 					String kanal=null;
@@ -2173,17 +2173,16 @@ public class CasePara {
 			if(KANAL_SPALTEN_NR_ALPHA_VOR==KANAL_SPALTEN_NR_ALPHA_RUECK)
 				throw new ParameterFileWrongInputException("Die angegebenen Kanalnummern bzw Spaltennummern " +
 				"für alpha_Ein und alpha_Aus sind identisch");
+
+			String ventilhubEinFileName=set_FileName(PARAMETER,"VentilhubEinFileName");
+			String ventilhubAusFileName=set_FileName(PARAMETER,"VentilhubAusFileName");				
 			
-			
-			String VentilhubEinFileName=set_FileName(PARAMETER,"VentilhubEinFileName");
-			String VentilhubAusFileName=set_FileName(PARAMETER,"VentilhubAusFileName");
-			VENTILHUB_EIN_FILE=new File(WD+VentilhubEinFileName);
-			VENTILHUB_AUS_FILE=new File(WD+VentilhubAusFileName);
-			indexOf=VentilhubEinFileName.indexOf(".");
-			VENTILHUB_EIN_FORMAT=VentilhubEinFileName.substring(indexOf+1); //Dateiendung;
-			indexOf=VentilhubAusFileName.indexOf(".");
-			VENTILHUB_AUS_FORMAT=VentilhubAusFileName.substring(indexOf+1); //Dateiendung;	
-			
+			VENTILHUB_EIN_FILE=new File(WD+ventilhubEinFileName);
+			VENTILHUB_AUS_FILE=new File(WD+ventilhubAusFileName);
+			indexOf=ventilhubEinFileName.indexOf(".");
+			VENTILHUB_EIN_FORMAT=ventilhubEinFileName.substring(indexOf+1); //Dateiendung;
+			indexOf=ventilhubAusFileName.indexOf(".");
+			VENTILHUB_AUS_FORMAT=ventilhubAusFileName.substring(indexOf+1); //Dateiendung;	
 			
 		}//Konstruktor SysPara	
 		

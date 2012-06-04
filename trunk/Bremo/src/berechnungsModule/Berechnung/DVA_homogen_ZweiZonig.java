@@ -3,7 +3,6 @@ package berechnungsModule.Berechnung;
 import java.util.Hashtable;
 
 import kalorik.spezies.GasGemisch;
-import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 import matLib.MatLibBase;
 import misc.HeizwertRechner;

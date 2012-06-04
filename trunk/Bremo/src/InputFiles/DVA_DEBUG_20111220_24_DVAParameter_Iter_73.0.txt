@@ -1,0 +1,2 @@
+Zeit	dQIters	relaxationsFaktor	pSoll	pIst	dQ
+73.0	 0.0	 0.7	 1418225.7055566213	 1418203.7234597183	 42497.82369795758	 

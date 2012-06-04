@@ -8,9 +8,8 @@ import bremo.parameter.CasePara;
 import misc.PhysKonst;
 import misc.VektorBuffer;
 
-public class Paket_Hiroyasu {
-	
-	private Verdampfung_Hiroyasu verdampf;
+public class Paket_Hiroyasu {	
+	private Verdampfung_2 verdampf;
 	private Kraftstoff_Eigenschaften krstEigenschaften;
 	private int radialPosIndex, axialPosIndex;
 	public double mfl_Paket_0; //Kraftstoffmasse eines Pakets
@@ -36,8 +35,6 @@ public class Paket_Hiroyasu {
 	private final double Cd;
 	private final double C1; //Frickelfaktor zur Anpassung des Modells
 	private VektorBuffer ma_buffer;
-	
-
 	
     public Paket_Hiroyasu(	int ax,
     						int rad,
@@ -72,8 +69,7 @@ public class Paket_Hiroyasu {
 	    //Berechnung der Dichte des fluessigen Kraftstoffs
 	    rhoK_fl=krstEigenschaften.get_rhoK(Tkrst_0);
 	  //Kraftstoffverdampfung
-		verdampf=new Verdampfung_Hiroyasu(krstEigenschaften);	    
-				
+		verdampf=new Verdampfung_2(krstEigenschaften);	 				
 	}
 	
     public void initialise(Zone zn){
@@ -85,7 +81,7 @@ public class Paket_Hiroyasu {
 		double smd=2.39e-3*Math.pow(deltaP,-0.135)*Math.pow(rhoZyl_0,0.12)*Math.pow(mfl_Paket_0*250/rhoK_fl,0.131);
 
 		//Formel nach Stiesch 
-		double viskositaet_krst=krstEigenschaften.get_mue_krst();
+		double viskositaet_krst=krstEigenschaften.get_dynVis_krst(Tkrst_0);
 		double kin_viskositaet_krst=viskositaet_krst/rhoK_fl;	
 		smd=0.5*6156e-6*Math.pow(kin_viskositaet_krst,0.385)*Math.pow(rhoK_fl,0.737)*Math.pow(rhoZyl_0,0.06)*
             Math.pow(deltaP/1000,-0.54);
@@ -369,7 +365,7 @@ public class Paket_Hiroyasu {
 					((Double)m_D_T[1]).isNaN()||
 						((Double)m_D_T[2]).isNaN()){
 				m_D_T[0]=m_D_T[1]=m_D_T[2]=0;
-				System.err.println("FUCK");
+//				System.err.println("FUCK");
 			}
 		}
 	}

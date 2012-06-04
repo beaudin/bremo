@@ -108,7 +108,7 @@ public class LWA extends InternesRestgas {
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + (idx2) );	
 		double agrInt=((LadungsWechselAnalyse)dglSys_LW).get_mAGRintern(zn_LW);
 		return agrInt;
-	}	
+	}
 	
 	
 }

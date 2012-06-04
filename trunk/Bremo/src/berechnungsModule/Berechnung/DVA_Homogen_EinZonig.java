@@ -83,6 +83,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 		
 		T_buffer = new misc.VektorBuffer(cp);
 		dQb_buffer = new misc.VektorBuffer(cp);
+		dQw_buffer = new misc.VektorBuffer(cp);
 		dmb_buffer = new misc.VektorBuffer(cp);
 
 		/////////////////////////////////////////////////////////////
@@ -176,7 +177,8 @@ public class DVA_Homogen_EinZonig extends DVA{
 		//Wandwaermestrom abfuehren
 		zonen_IN[0].set_dQ_ein_aus(-1*dQw);			
 	
-	
+		//Verbrennungswaerme zufuehren
+		zonen_IN[0].set_dQ_ein_aus(dQburn);
 		
 		//Verdampfungswaerme abfuehren
 		zonen_IN=masterEinspritzung.entnehme_dQ_krstDampf(time, zonen_IN);			

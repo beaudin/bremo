@@ -167,6 +167,7 @@ public class MasterEinspritzung extends ModulFabrik{
 			}
 			if(posZn==-1){
 				if(this.isLWA(time)==false){
+					System.out.println(CP.convert_SEC2KW(time));
 					try{
 						throw new BirdBrainedProgrammerException("Fuer Einspritzung " +index+ 
 								" wurde die ID der Zone in die eingespritzt wrid "
@@ -350,7 +351,7 @@ public class MasterEinspritzung extends ModulFabrik{
 	
 	private boolean isLWA(double time){
 		boolean a=false;		
-		if(time>=CP.get_Auslassoeffnet()&&time<=CP.get_Einlassschluss()+CP.SYS.DAUER_ASP_SEC)
+		if(time>=CP.get_Auslassoeffnet())// &&time<=CP.get_Einlassschluss()+CP.SYS.DAUER_ASP_SEC --> fuehrt aufgrund eines Rundungsfehlers zu einem Fahler grrrrrr
 			a=true;
 
 		return a; 

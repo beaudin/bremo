@@ -774,12 +774,7 @@ public class GasGemisch extends Spezies {
 //			
 //		}
 //		
-		
-		
-		
-		
-		
-		
+				
 	}	
 
 

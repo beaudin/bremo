@@ -229,7 +229,7 @@ public class SwingBremo extends JFrame {
 				"/bremoswing/bild/play_blue.png"));
 		berechnen.setIcon(beri); // NOI18N
 		berechnen.setRolloverIcon(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/play_blue2.png")));
+				"/bremoswing/bild/play_blue_2.png")));
 		berechnen.setToolTipText("Berechnung ausführen");
 		berechnen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -247,7 +247,7 @@ public class SwingBremo extends JFrame {
 				"/bremoswing/bild/folder_blue.png")); // folder_smart.png
 		wahlFile.setIcon(wfi); // NOI18N
 		wahlFile.setRolloverIcon(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/folder_blue2.png")));
+				"/bremoswing/bild/folder_blue_2.png")));
 		wahlFile.setToolTipText("InputFile auswählen");
 		wahlFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

@@ -3,7 +3,10 @@ package matLib.filter;
 
 import java.util.LinkedList;
 import java.util.List;
-import Jama.*;;
+
+import Jama.LUDecomposition;
+import Jama.Matrix;
+
 
 
 /** Class implements the Savitzy-Golay filter.  The algorithm is based on

@@ -26,9 +26,9 @@ public class LogFileWriter {
 	 * Die Methode schreibt jede Meldung in der Log File
 	 * @param Message
 	 */
-	private static   void LogWriter_txt (String Message){
+	private static   void LogWriter_txt (String path , String Message){
 		date = new Date();
-		file = new File ("src/OutputFiles/LogFile.txt"); 
+		file = new File (path); 
 		try {
 			fw = new FileWriter (file,fileIsCreate);
 			if (!fileIsCreate) {
@@ -50,14 +50,14 @@ public class LogFileWriter {
 	 * und ruft LogWriter_txt() wenn die Meldung neu ist .
 	 * @param Message
 	 */
-	public static  void addItemToLog (String Message) {
+	public static  void addItemToLog (String path , String Message) {
 		
 		if ( InfoListe.isEmpty()){
 			 InfoListe.add(Message);
 		}
 		else if (!InfoListe.contains(Message)) {
 			InfoListe.add(Message);
-			LogWriter_txt("Item"+ InfoListe.indexOf(Message) +" : "+Message);
+			LogWriter_txt(path , "Item"+ InfoListe.indexOf(Message) +" : "+Message);
 		}
 		
 	}

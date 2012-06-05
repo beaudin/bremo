@@ -3,7 +3,10 @@
  */
 package bremo.main;
 
+import java.awt.Color;
+
 import javax.swing.JApplet;
+import javax.swing.UIManager;
 
 
 import bremoswing.SwingBremo;
@@ -16,7 +19,9 @@ public class BremoApplet extends JApplet {
 
 	private static final long serialVersionUID = 1L;
 
-	public void init() {
+	public void start() {
+		
+		UIManager.put("nimbusOrange", new Color(28, 138, 224));
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
 					.getInstalledLookAndFeels()) {

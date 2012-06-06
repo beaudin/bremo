@@ -1,5 +1,7 @@
 package bremoExceptions;
 import java.security.InvalidParameterException;
+
+import bremoswing.SwingBremo;
 import BremoLogFile.LogFileWriter;
 
 
@@ -17,8 +19,12 @@ public abstract class StopBremoException extends Exception {
 		//System.err.println(Separator+super.getMessage()+Separator);	
 		 //Dieser Befehl wird benoetigt um das Programm zu stoppen wenn es nicht als swing app laeuft
 //		LogFileWriter.addItemToLog(super.getMessage());
+		try {
+		     SwingBremo.StateBremoThread();
+		} catch (Exception e) {
+			
+		}
 		throw new InvalidParameterException(Separator+super.getMessage()+Separator);
-		
 	}
 	
 	public void log_Message(){

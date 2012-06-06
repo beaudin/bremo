@@ -59,6 +59,7 @@ import javax.swing.border.TitledBorder;
 
 import BremoLogFile.LogFileWriter;
 import bremo.main.Bremo;
+import bremoExceptions.StopBremoException;
 
 /*
  * SwingBremo.java
@@ -534,7 +535,9 @@ public class SwingBremo extends JFrame {
 				ActiveIcon();
 
 				label.setText(" Bitte InputFile Neu Auswählen ! ");
-			}
+			} 
+				
+			
 		}
 
 	}

@@ -191,7 +191,7 @@ public class SwingBremo extends JFrame {
 		NrBremoAlive = 0;
 
 		/****** HAUPT FRAME ****************************************************************/
-		setTitle("Bremo 1.3.5 beta");
+		setTitle("Bremo 1.3.6 beta");
 		setBackground(new Color(255, 255, 255));
 		setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo1.png")).getImage());

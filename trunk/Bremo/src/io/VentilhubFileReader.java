@@ -48,7 +48,7 @@ public class VentilhubFileReader {
 					}
 		 }else if(typ.equalsIgnoreCase("Auslass")){
 				zeitEinheiten[0]="[KWnAO]";
-				zeitEinheiten[1]="[snEO]";
+				zeitEinheiten[1]="[snAO]";
 				offsetKW=cp.get_Auslassoeffnet_KW();
 				offsetSEC=cp.get_Auslassoeffnet();
 			 if( !CP.SYS.VENTILHUB_AUS_FORMAT.equalsIgnoreCase(ext))

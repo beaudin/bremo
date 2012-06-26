@@ -64,9 +64,7 @@ public class DurchflusskennzahlFileReader {
 			 throw new IllegalArgumentException("DurchflusskennzahlFileReader muss mit entweder \n" +
 			 		"\"Auslass\" oder \"Einlass\" aufgerufen werden");
 		 }
-		
-		
-		
+		 
 		datei_Einlesen();
 		
 	 }
@@ -101,7 +99,7 @@ public class DurchflusskennzahlFileReader {
 						if(abszisseEinheit.equals(abszisseEinheiten[0])||abszisseEinheit.equals(abszisseEinheiten[1])){}else{
 							throw new ParameterFileWrongInputException("Die Einheit in der ersten Spalte " +
 									"des Durchflusskennzahl-Textfiles muss "+ abszisseEinheiten[0]+ 
-									" oder " +abszisseEinheiten[1] +" sein. Eingegeben wurde aber "+ abszisseEinheit);}							
+									" oder " +abszisseEinheiten[1] +" (entspr. h/D) sein. Eingegeben wurde aber "+ abszisseEinheit);}							
 						if(einheit_alpha_Vor.equals(alphaEinheiten[0])){}else{
 							throw new ParameterFileWrongInputException("Die Einheit in der zweiten Spalte " +
 									"des Durchflusskennzahl-Textfiles muss "+ alphaEinheiten[0]+ 

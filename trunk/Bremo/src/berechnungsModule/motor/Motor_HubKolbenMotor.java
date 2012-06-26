@@ -7,7 +7,7 @@ import bremo.parameter.CasePara;
  * @author   hoenl, busch
  */
 public class Motor_HubKolbenMotor extends Motor{
-		
+
 	/**
 	 * @uml.property  name="Pleuellaenge"
 	 */
@@ -34,9 +34,10 @@ public class Motor_HubKolbenMotor extends Motor{
 	private final double EV_HUB;				//m
 	private final double EV_HUB_MAX;			//m
 	private final double QUETSCHSPALTHOEHE;		//m
+	private final double SMAX;
 	private final CasePara CP;	
-	
-	
+
+
 	protected Motor_HubKolbenMotor(CasePara cp){
 		super(cp);
 		CP=super.CP;
@@ -48,7 +49,7 @@ public class Motor_HubKolbenMotor extends Motor{
 		BRENNRAUM_DACH_FLAECHE =CP.get_Brennraumdachflaeche(); //m^2
 		FEUERSTEGHOEHE =CP.get_Feuersteghoehe();		//m
 		SCHRAENKUNG =CP.get_Schraenkung();			//m
-		DESACHSIERUNG =CP.get_Desachsierung();		//m	
+		DESACHSIERUNG =-1*CP.get_Desachsierung();		//m	
 		AUSLASSSCHLUSS =CP.get_Auslassoeffnet(); 		//°KWnZOT
 		AUSLASSOEFFNET =CP.get_Auslassschluss(); 		//°KWnZOT
 		EINLASSSCHLUSS =CP.get_Einlassschluss(); 		//°KWnZOT
@@ -56,46 +57,48 @@ public class Motor_HubKolbenMotor extends Motor{
 		EV_HUB=CP.get_EV_Hub();							//m
 		EV_HUB_MAX=CP.get_EV_Hub_max();					//m
 		QUETSCHSPALTHOEHE=CP.get_Quetschspalthoehe();	//m
-	
-		//Hub wird aus dem Kolbenweg berechnet
-		double sMin=0;
-		double sMax=0;
-		double toleranz=1E-8; //in °KW
-		double a0=0;
-		double a1=10;	//10° KW nOT
-		int idx=0;
-		//Minimum des Hubes suchen
-		while(Math.abs(a0-a1)>Math.PI/180*toleranz){ 
-			a0=a1;
-			a1=-get_dS_dKW(CP.convert_KW2SEC(a0))/get_d2S_dKW(CP.convert_KW2SEC(a0))+a0;
-			idx++;
-		}
-		if(get_d2S_dKW(CP.convert_KW2SEC(a1))<=0){
-			//zweite Ableitung negativ --> Maximum wurde gefunden (sollte nicht passieren können)
-			sMax=get_Kolbenweg(CP.convert_KW2SEC(a1));
+
+		if(SCHRAENKUNG!=0||DESACHSIERUNG!=0){
+			//Hub wird aus dem Kolbenweg berechnet
+			double sMin=0;
+			double toleranz=1E-8; //in °KW
+			double a0=0;
+			double a1=190;	//10° KW nUT
+			int idx=0;
+			//Minimum des Abstandes Kolbenbolzne zu KW-Mitte suchen
+			while(Math.abs(a0-a1)>Math.PI/180*toleranz){ 
+				a0=a1;
+				a1=-get_dS_dKW(CP.convert_KW2SEC(a0))/get_d2S_dKW(CP.convert_KW2SEC(a0))+a0;
+				idx++;
+			}
+			if(get_d2S_dKW(CP.convert_KW2SEC(a1))<=0){
+				//zweite Ableitung negativ --> Maximum wurde gefunden (sollte nicht passieren können)
+				sMin=get_S(CP.convert_KW2SEC(a1));
+			}else{
+				sMin=get_S(CP.convert_KW2SEC(a1));
+			}
+
+			a0=0;
+			a1=10;	//10° KW nOT
+			//Maximum des Abstandes Kolbenbolzne zu KW-Mitte suchen
+			while(Math.abs(a0-a1)>Math.PI/180*toleranz){
+				a0=a1;
+				a1=-get_dS_dKW(CP.convert_KW2SEC(a0))/get_d2S_dKW(CP.convert_KW2SEC(a0))+a0;
+			}
+			if(get_d2S_dKW(CP.convert_KW2SEC(a1))<=0){
+				//zweite Ableitung negativ --> Maximum wurde gefunden
+				SMAX=get_S(CP.convert_KW2SEC(a1));
+			}else{
+				SMAX=get_S(CP.convert_KW2SEC(a1));
+			}
+			HUB=SMAX-sMin;	
 		}else{
-			sMin=get_Kolbenweg(CP.convert_KW2SEC(a1));
+			HUB=2*KURBELRADIUS;
+			SMAX=KURBELRADIUS+PLEUELLAENGE;
 		}
-		
-		a0=0;
-		a1=190;	//190° KW nOT
-		//Maximum des Hubes suchen
-		while(Math.abs(a0-a1)>Math.PI/180*toleranz){
-			a0=a1;
-			a1=-get_dS_dKW(CP.convert_KW2SEC(a0))/get_d2S_dKW(CP.convert_KW2SEC(a0))+a0;
-		}
-		if(get_d2S_dKW(CP.convert_KW2SEC(a1))<=0){
-			//zweite Ableitung negativ --> Maximum wurde gefunden
-			sMax=get_Kolbenweg(CP.convert_KW2SEC(a1));
-		}else{
-			sMin=get_Kolbenweg(CP.convert_KW2SEC(a1));
-		}
-		HUB=sMax-sMin;
-		
-		
+
 	}
-	
-	
+
 	///////////////////////////////////////////////////////////////////////
 	//Get-Funktionen. Diese sind public, damit jeder beliebige Funktion darauf
 	//zugreifen kann
@@ -104,25 +107,25 @@ public class Motor_HubKolbenMotor extends Motor{
 	}
 
 	public double get_Desachsierung() {
-			return DESACHSIERUNG;
-		}
-	
+		return DESACHSIERUNG;
+	}
+
 	public double get_Kurbelradius() {
-			return KURBELRADIUS;
-		}
-	
+		return KURBELRADIUS;
+	}
+
 	public double get_Hub() {
 		return HUB;
 	}
-	
+
 	public double get_Pleuellaenge() {
-			return PLEUELLAENGE;
-		}
-	
+		return PLEUELLAENGE;
+	}
+
 	public double get_Bohrung() {
-			return BOHRUNG;
-		}
-	
+		return BOHRUNG;
+	}
+
 	public double get_Verdichtung() {
 		return EPS;
 	}
@@ -130,49 +133,49 @@ public class Motor_HubKolbenMotor extends Motor{
 	public double get_Brennraumdachflaeche() {
 		return BRENNRAUM_DACH_FLAECHE;
 	}
-	
+
 	public double get_Feuersteghoehe(){
 		return FEUERSTEGHOEHE;
 	}
-	
+
 	public double get_Quetschspalthoehe(){
 		return QUETSCHSPALTHOEHE;
 	}
-	
+
 	public double get_Kolbenflaeche() {
 		return KOLBENFLÄCHE;
 	}
-	
+
 	public double get_Einlass_oeffnet(){
 		return EINLASSOEFFNET;
 	}
-	
+
 	public double get_Einlass_schliesst(){
 		return EINLASSSCHLUSS;
 	}
-	
+
 	public double get_Auslass_oeffnet(){
 		return AUSLASSOEFFNET;
 	}
-	
+
 	public double get_Auslass_schliesst(){
 		return AUSLASSSCHLUSS;
 	}
-	
+
 	public double get_EV_Hub(){
 		return EV_HUB;
 	}
-	
+
 	public double get_EV_Hub_max(){
 		return EV_HUB_MAX;
 	}
-	
+
 	//Ab hier müssen die Ausgaben berechnet werden
 	public double get_Hubvolumen() {
 		double Hubvolumen = HUB * BOHRUNG / 2 * BOHRUNG / 2 *Math.PI; 
 		return Hubvolumen;
 	}
-	
+
 	public double get_Kompressionsvolumen() {
 		double V_c  = get_Hubvolumen() / (EPS - 1);
 		return V_c;
@@ -184,152 +187,180 @@ public class Motor_HubKolbenMotor extends Motor{
 
 
 	/**
-	 * @param time
-	 * @return liefert den aktuellen Kolbenweg in [m]
+	 * @param time in [s n. Rechenbeginn]
+	 * @return liefert ausgehend vom oberen Totpunkt den aktuellen Kolbenweg in [m]. 
 	 */	
-	public double get_Kolbenweg(double time) {
+	public double get_Kolbenweg(double time) {		
+		double w = 0;	//Kolbenweg
+		w=SMAX-this.get_S(time);	
+		return w;
+	}
+
+	/**
+	 * Liefert den Abstand zwischen Kolbenbolzenauge und Kurbelwellenmitte in [m]
+	 * @param time [in s n. Rechenbeginn]
+	 */
+	public double get_S(double time) {
 		//Kolbenweg
-		//S = r(1-cos(phi)) + [ L-sqrt(L^2-(d+s-r*sin(phi))^2) ]
+		//S = r(cos(phi)) + sqrt(L^2-(d+s-r*sin(phi))^2) 
 		//[m]
 		double phi=convertTime_TO_KW(time)* Math.PI / 180.0;
 		double l = PLEUELLAENGE;
-		double r = get_Kurbelradius();
+		double r = KURBELRADIUS;
 		double d = DESACHSIERUNG;
 		double s = SCHRAENKUNG;
 		double w = 0;	//Kolbenweg
-		w=r*(1-Math.cos(phi))+(l - Math.pow(Math.pow(l,2)-Math.pow(d+s-r*Math.sin(phi), 2), 0.5));	
+		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi), 2), 0.5);	
 		return w;
 	}
-		
+
 	/**
 	 * Liefert die momentane Kolbengeschwindigkeit in [m/s]
 	 * @param time
 	 * @return
 	 */	
 	public double get_Kolbengeschwindigkeit(double time) {
-		
-//		double kurbelwinkel=convertTime_TO_KW(time);
+
+		//		double kurbelwinkel=convertTime_TO_KW(time);
 		//Momentane Kolbengeschwindigkeit = erste Ableitung des Kolbenwegs
 		//Ausgabe in m/s
-		return convert_dKW_TO_dTime(get_dS_dKW(time));
+		return convert_dKW_TO_dTime(-1*get_dS_dKW(time));
 	}
 	/**
-	 * Liefert dS/dKW, die erste Ableitung vom Kolbenweg, in [m/KW]
+	 * Liefert dS/dKW, die erste Ableitung des Abstands Kolbenbolzen zu KW-Mitte, in [m/KW]
 	 * @param time
 	 * @return
 	 */	
-	public double get_dS_dKW(double time){
-		//dS = r*sin(phi)-r*cos(phi)*(d+s-r*sin(phi))/sqrt[L^2-(d+s-r*sin(phi))^2]
-		//oder: dS/dAlpha=4/(pi*B^2)*dV/dAlpha
-		double B = BOHRUNG;
-		double dS=4/(Math.pow(B,2)*Math.PI)*get_dV_dKW(time); //dKolbenweg [m/°KW]
-		return dS;
+	public double get_dS_dKW(double time){				
+		double kurbelwinkel=convertTime_TO_KW(time);
+		double l = PLEUELLAENGE;
+		double r = KURBELRADIUS;
+		double d = DESACHSIERUNG;
+		double s = SCHRAENKUNG;
+		double phi = kurbelwinkel * Math.PI / 180.0;
+
+		//dS = -r*sin(phi)+r*cos(phi)*(d+s-r*sin(phi))/sqrt[L^2-(d+s-r*sin(phi))^2]
+		double dS = -r*Math.sin(phi)-r*Math.cos(phi)*(d+s+r*Math.sin(phi))/
+				(Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi),2), 0.5));
+		
+		return dS*Math.PI/180;
 	}
+	
+	public double get_dS(double time){		
+		return convert_dKW_TO_dTime(this.get_dS_dKW(time));
+	}
+	
+	
+	
 	/**
 	 * @param time
-	 * @return liefert d2S/dKW, die zweite Ableitung vom Kolbenweg, in [m^2/KW]
+	 * @return liefert d2S/dKW, die zweite Ableitung von S, in [m^2/KW^2]
 	 */
 	public double get_d2S_dKW(double time){
-		double B=BOHRUNG;
-		double d2S=4/(Math.pow(B,2)*Math.PI)*get_d2V_dKW(time);
+		double kurbelwinkel=convertTime_TO_KW(time);
+		double l = PLEUELLAENGE;
+		double r = KURBELRADIUS;
+		double d = DESACHSIERUNG;
+		double s = SCHRAENKUNG;
+		double d2S = 0;
+		double phi = kurbelwinkel * Math.PI / 180.0;
+		
+		double wurzel=Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi),2), 0.5);
+		double a= Math.pow((d+s+r*Math.sin(phi))*r*Math.cos(phi),2)/(wurzel) 
+						+ wurzel*(r*Math.cos(phi)*r*Math.cos(phi)-(d+s+r*Math.sin(phi))*r*Math.sin(phi));
+		d2S=-r*Math.cos(phi)-a/(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi),2));
+		//Ausgabe in m/°KW^2
+		d2S=d2S*Math.pow(Math.PI/180, 2);
 		return d2S;
 	}
 	
+	public double get_d2S(double time){		
+		return convert_dKW2_TO_dTime2(this.get_d2S_dKW(time));
+	}
+
 	/**
 	 * @param time
 	 * @return liefert das aktuelle Zylindervolumen in [m^3]
 	 */	
- 	public double get_V(double time)
+	public double get_V(double time)
 	{
 		//Zylindervolumen		 		
 		double Vc = get_Kompressionsvolumen();
 		double B = BOHRUNG;
-		
+
 		double zylindervolumen = 0;
 		// V=Vc + pi*B^2/4 * (L+r-r*cos(phi)-sqrt(L^2-(d+s-r*sin(phi))^2);
 		//[m^3]
 		zylindervolumen = Vc + Math.PI*Math.pow(B, 2)/4*get_Kolbenweg(time);
 		return zylindervolumen;
 	}
-	
+
 	public double get_dV_dKW(double time) {
-		//Erste Ableitung von Zylindervolumen, dV/dAlpha
-		double kurbelwinkel=convertTime_TO_KW(time);
 		double B = BOHRUNG;
-		double l = PLEUELLAENGE;
-		double r = get_Kurbelradius();
-		double d = DESACHSIERUNG;
-		double s = SCHRAENKUNG;
-		double dif_Zylindervolumen = 0;
-		double phi = kurbelwinkel * Math.PI / 180.0;
-		
-		// dV/dAlpha = pi*B^2/4*(r*sin(phi)-r*cos(phi)*(d+s-r*sin(phi))/(sqrt(L^2-(d+s-r*sin(phi))^2)));
-		// [m^3/rad]
-		dif_Zylindervolumen = Math.PI*Math.pow(B,2)/4*(r*Math.sin(phi)-r*Math.cos(phi)*(d+s-r*Math.sin(phi))/
-				(Math.pow(Math.pow(l,2)-Math.pow(d+s-r*Math.sin(phi),2), 0.5)));
-		//Ausgabe in m^3/°KW
-		dif_Zylindervolumen=dif_Zylindervolumen*Math.PI/180;
-		return dif_Zylindervolumen;
+		double dif_Zylindervolumen = 0;	
+		// [m^3/°KW]
+		dif_Zylindervolumen = Math.PI*Math.pow(B,2)/4*this.get_dS_dKW(time);
+		return -1*dif_Zylindervolumen;
 	}
-	
+
 	/**
-	 * Liefert die erste ABleitung des Zylindervolumens in [m^3/s]
+	 * Liefert die erste Ableitung des Zylindervolumens in [m^3/s]
 	 * @param time
 	 * @return dV 
 	 */	
 	public double get_dV(double time){		
 		return convert_dKW_TO_dTime(get_dV_dKW(time));		
 	}
-	
+
 	public double get_d2V_dKW(double time) {
-		//Zweite Ableitung von Zylindervolumen, d^2V/dAlpha^2
-		double kurbelwinkel=convertTime_TO_KW(time);
 		double B = BOHRUNG;
-		double l = PLEUELLAENGE;
-		double r = get_Kurbelradius();
-		double d = DESACHSIERUNG;
-		double s = SCHRAENKUNG;
-		double dif2_Zylindervolumen = 0;
-		double phi = kurbelwinkel * Math.PI / 180.0;
-		
-		// d^2V/dAlpha^2 = pi*B^2/4*r*cos(phi)*[ 1 + (tan(phi)*(d+s-r*sin(phi))) / sqrt(L^2-(d+s-r*sin(phi))^2) +
-		//		r*L^2*cos(phi)/(L^2-(d+s-r*sin(phi))^2)^(3/2) ]
-		//[m^3/rad^2]
-		dif2_Zylindervolumen = Math.PI*Math.pow(B,2)/4*r*Math.cos(phi)*(1 + Math.tan(phi)*(d+s-r*Math.sin(phi))/
-				Math.pow(Math.pow(l,2)-Math.pow(d+s-r*Math.sin(phi),2), 0.5) + r*Math.cos(phi)*Math.pow(l,2)/
-				Math.pow(Math.pow(l,2)-Math.pow(d+s-r*Math.sin(phi),2), 1.5) );
-		//Ausgabe in m^3/°KW^2
-		dif2_Zylindervolumen=dif2_Zylindervolumen*Math.pow(Math.PI/180, 2);
-		return dif2_Zylindervolumen;
+		double dif_Zylindervolumen = 0;	
+		// [m^3/°KW]
+		dif_Zylindervolumen = Math.PI*Math.pow(B,2)/4*this.get_d2S_dKW(time);
+		return -1*dif_Zylindervolumen;
 
 	}
-	
+
 
 	public double get_d2V(double time){		
 		return convert_dKW2_TO_dTime2(get_d2V_dKW(time));		
 	}
 
-
-	public double get_BrennraumFlaeche(double time) {	
-		
-		// wie in Hohenberg und Bargende und Hensel -> "scheint ganz gut zu sein..."
-		// A = A_ZK + A_kolben + A_ZLB + 0.25*A_Fst
-		// A_Fst = 2 * d * pi * h_Fst
+/**
+ * 
+ */
+	/**
+	 * Liefert die Oberflaeche des Brennraums OHNE die Flaeche des Feuerstegs.
+	 * A = A_ZylKopf + A_Kolben + A_ZylLaufbahn
+	 */
+	public double get_BrennraumFlaeche(double time) {			
+		// A = A_ZK + A_kolben + A_ZLB + 0.25*A_Fst		
 		double brennraumFlaeche = 0;
 		double zylinderLaufflaeche = java.lang.Math.PI * get_Bohrung() * 
-				(get_Kolbenweg(time)+get_Quetschspalthoehe());	
-		double feuerstegFlaeche = 2*java.lang.Math.PI*get_Bohrung()*get_Feuersteghoehe();
-		
+		(get_Kolbenweg(time)+get_Quetschspalthoehe());			
+
 		brennraumFlaeche = get_Brennraumdachflaeche() + get_Kolbenflaeche() + 
-				zylinderLaufflaeche + 0.25*feuerstegFlaeche;
+		zylinderLaufflaeche;
 		return brennraumFlaeche;
 	}	
+	
+
+	/**
+	 * Liefert die Flaeche des Feuerstegs in [m^2]
+	 * A_Fst = 2 * d * pi * h_Fst
+	 * @param time
+	 * @param feuerstegMultiplikator
+	 * @return
+	 */
+	public double get_FeuerstegFlaeche() {
+		// A_Fst = 2 * d * pi * h_Fst
+		double feuerstegFlaeche = 2*java.lang.Math.PI*get_Bohrung()*get_Feuersteghoehe();		
+		return feuerstegFlaeche;
+	}
+	
 	
 	public boolean isHubKolbenMotor() {		
 		return true;
 	}
 
-
-	
-	
 }

@@ -58,11 +58,6 @@ public class CasePara {
 	public final BerechnungsModell BERECHNUNGS_MODELL;
 	public final SpeziesFabrik SPEZIES_FABRIK;
 	public final MasterEinspritzung MASTER_EINSPRITZUNG;
-	
-	
-	
-
-
 
 
 	public CasePara(File inputFile) throws ParameterFileWrongInputException {	
@@ -81,7 +76,10 @@ public class CasePara {
 		
 		//Erzeugung der verschiedenen BerechnungsModule 
 		//SpeziesFabrik
-		SPEZIES_FABRIK=new SpeziesFabrik(this, new MakeMeUnique());		
+		SPEZIES_FABRIK=new SpeziesFabrik(this, new MakeMeUnique());	 
+		//MakeMeUnique sorgt dafür, dass es nur eine Instanz der Speziesfabrik geben kann. 
+		//Ansonsten wuerde es Probleme mit der INtegration der einzelnen Speziesmassen geben. 
+		//CO2 ist zwar CO2 aber bei verschiedenen Objekt IDs weiss Bremo das nicht!
 		
 		//Motor
 		MotorFabrik mf=new MotorFabrik(this);
@@ -110,6 +108,11 @@ public class CasePara {
 		
 	}		
 	
+	/**
+	 * Dirty Trick damit die Klasse SpeziesFabrik nur ein einziges Mal erzeugt werden kann. 
+	 * @author eichmeier
+	 *
+	 */
 	public class MakeMeUnique{
 		private MakeMeUnique (){
 			
@@ -1398,7 +1401,7 @@ public class CasePara {
 	 * */
 	public double get_Schraenkung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Schraenkung","[m]",0,0.5); 
+			return set_doublePara(INPUTFILE_PARAMETER, "Schraenkung","[m]",-0.005,0.005); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -1412,7 +1415,7 @@ public class CasePara {
 	 * */
 	public double get_Desachsierung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Desachsierung","[m]",-0.5,0.5); 
+			return set_doublePara(INPUTFILE_PARAMETER, "Desachsierung","[m]",-0.005,0.005); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;

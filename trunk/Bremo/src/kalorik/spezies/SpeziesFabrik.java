@@ -21,9 +21,9 @@ import misc.PhysKonst;
  */
 public class SpeziesFabrik {		
 	// TODO Heizwerte recherchieren und eintragen
-	//damit der Vektor mit den zu integrierenden Spezies nicht ueberfluessiferweise mit 
-	//doppelten Grundspezies gefuellt ist wird jede Spezies nur einmal erzeugt!
 	
+	//damit der Vektor mit den zu integrierenden Spezies nicht ueberfluessiferweise mit 
+	//doppelten Grundspezies gefuellt ist wird jede Spezies nur einmal erzeugt!	
 	private Spezies spezH;
 	private Spezies spezO;
 	private Spezies spezN;
@@ -33,6 +33,7 @@ public class SpeziesFabrik {
 	private Spezies spezNO;
 	private Spezies spezO2;
 	private Spezies spezH2O;
+	private Spezies spezC2H5OH;
 	private Spezies spezCO2;
 	private Spezies spezN2;
 	private Spezies spezAr;
@@ -120,6 +121,7 @@ public class SpeziesFabrik {
 		krstHash.put(get_spezRON_95().get_name(), get_spezRON_95());
 		krstHash.put(get_spezRON_98().get_name(), get_spezRON_98());
 		krstHash.put(get_spezDiesel().get_name(), get_spezDiesel());
+		krstHash.put(get_spezC2H5OH().get_name(), get_spezC2H5OH());
 
 		return krstHash;
 	}
@@ -301,8 +303,7 @@ public class SpeziesFabrik {
 	 * Spezies CO wird automatisch integriert 
 	 * @return KoeffizientenSpezies spezCO
 	 */
-	public Spezies get_spezCO() {
-		
+	public Spezies get_spezCO() {		
 		if(spezCO==null){
 			double hf;	
 			//Hu gerechnet 
@@ -490,64 +491,93 @@ public class SpeziesFabrik {
 		}
 		return spezN2;
 	}
-
+	
 	/**
-	 * Ar wird NICHT automatisch integriert  
-	 * @return KoeffizientenSpezies spezAr
-	 */
-	public Spezies get_spezAr() {
-		
-		if(spezAr==null){
-			double hf=0; //keine Unterscheidung notwendig
-
-			double koeffs [][]=new double [3][];
-
-			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
-				koeffs[0] = Koeffs_Burcat.get_koeffs_Ar_l();
-				koeffs[1]= Koeffs_Burcat.get_koeffs_Ar_h();
-				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
-				koeffs[0] = Koeffs_NASA.get_koeffs_Ar_l();
-				koeffs[1]= Koeffs_NASA.get_koeffs_Ar_h();
-				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
-			}
-
-			spezAr=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_Ar(),								
-					hf,-10e10,0,0,0,0,0,"Ar");
+		 * Ar wird NICHT automatisch integriert  
+		 * @return KoeffizientenSpezies spezAr
+		 */
+		public Spezies get_spezAr() {
 			
-//			this.integrierMich(spezAr);
+			if(spezAr==null){
+				double hf=0; //keine Unterscheidung notwendig
+	
+				double koeffs [][]=new double [3][];
+	
+				if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
+					koeffs[0] = Koeffs_Burcat.get_koeffs_Ar_l();
+					koeffs[1]= Koeffs_Burcat.get_koeffs_Ar_h();
+					koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
+				}else{
+					koeffs[0] = Koeffs_NASA.get_koeffs_Ar_l();
+					koeffs[1]= Koeffs_NASA.get_koeffs_Ar_h();
+					koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+				}
+	
+				spezAr=new KoeffizientenSpezies(koeffs,
+						PhysKonst.get_M_Ar(),								
+						hf,-10e10,0,0,0,0,0,"Ar");			
+
+			}
+			return spezAr;
 		}
-		return spezAr;
-	}
+
 
 	/**
-	 * Gibt trockene Luft als Gasgemisch zurueck. 
-	 * Luft wird NICHT automatisch integriert
-	 * @return GasGemisch spezAir
-	 */
-	public Spezies get_spezLuft_trocken() {
-		if(spezLuftTr==null){
-			Hashtable<Spezies, Double> koeffSpeziesMolenBruchHash= new Hashtable<Spezies,Double>();
-
-
-
-			double vol_O2=PhysKonst.get_vol_O2_Luft();
-			koeffSpeziesMolenBruchHash.put((KoeffizientenSpezies) get_spezO2(),vol_O2 );
-			double vol_CO2=PhysKonst.get_vol_CO2_Luft();
-			koeffSpeziesMolenBruchHash.put((KoeffizientenSpezies) get_spezCO2(),vol_CO2 );
-			double vol_N2=1-vol_O2-vol_CO2;
-//			Ar wird nicht beruecksichtigt, da der Gleichgewichtssolver es nicht beruecksichtigt und die Beruecksichtigung
-//			von Ar dann zu unstimmigen Massenbruechen fuehren wuerde
-			koeffSpeziesMolenBruchHash.put((KoeffizientenSpezies) get_spezN2(), vol_N2);
-
-			spezLuftTr=new GasGemisch("Luft");
-			((GasGemisch)spezLuftTr).set_Gasmischung_molenBruch(koeffSpeziesMolenBruchHash);
+		 * Gibt trockene Luft als Gasgemisch von CO2, N2 und O2 zurueck. 
+		 * Luft wird NICHT automatisch integriert
+		 * @return GasGemisch spezAir
+		 */
+		public Spezies get_spezLuft_trocken() {
+			if(spezLuftTr==null){
+				Hashtable<Spezies, Double> koeffSpeziesMolenBruchHash= new Hashtable<Spezies,Double>();
+	
+				double vol_O2=PhysKonst.get_vol_O2_Luft();
+				koeffSpeziesMolenBruchHash.put((KoeffizientenSpezies) get_spezO2(),vol_O2 );
+				double vol_CO2=PhysKonst.get_vol_CO2_Luft();
+				koeffSpeziesMolenBruchHash.put((KoeffizientenSpezies) get_spezCO2(),vol_CO2 );
+				double vol_N2=1-vol_O2-vol_CO2;
+	//			Ar wird nicht beruecksichtigt, da der Gleichgewichtssolver es nicht beruecksichtigt und die Beruecksichtigung
+	//			von Ar dann zu unstimmigen Massenbruechen fuehren wuerde
+				koeffSpeziesMolenBruchHash.put((KoeffizientenSpezies) get_spezN2(), vol_N2);
+	
+				spezLuftTr=new GasGemisch("Luft");
+				((GasGemisch)spezLuftTr).set_Gasmischung_molenBruch(koeffSpeziesMolenBruchHash);
+			}
+			return spezLuftTr;
 		}
-		return spezLuftTr;
+
+
+	/**
+	 * Erzeugt Ethanol
+	 * spezC2H5OH wird NICHT automatisch integriert!
+	 * @return KoeffizientenSpezies spezC2H5OH
+	 */
+	public Spezies get_spezC2H5OH() {		
+		if(spezC2H5OH==null){
+				
+			
+			double hu;
+			//Hu gerechnet mit hf=-234950 J/mol (NASA-Wert)
+			hu=1277480.0;
+			//Hu aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
+			//hu=1234676; //J/mol --> Abweichung ca. 3.5% is ok	da es so auch funktioniert  
+			//wenn die Standardbildungsenthalpien nach de Jaegher verwendet werden!
+			double hf;		
+			hf=HeizwertRechner.deltaHf4Hu(CP,2,6,1,hu ); 
+			
+			double h_evap_mol =38929.15; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"		
+
+			double koeffs [][]=new double [3][];			
+				koeffs[0] = Koeffs_NASA.get_koeffs_C2H5OH_l();
+				koeffs[1]= Koeffs_NASA.get_koeffs_C2H5OH_h();
+				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+	
+			spezC2H5OH=new KoeffizientenSpezies(koeffs,
+					PhysKonst.get_M_C2H5OH(),								
+					hf,h_evap_mol,hu,1,2,6,0,"Ethanol");
+		}
+		return spezC2H5OH;
 	}
-
-
 
 	/**
 	 *	Gibt ein Objekt vom Typ KoeffizeintenSpezies mit den Koeffizeinten fuer 
@@ -563,8 +593,9 @@ public class SpeziesFabrik {
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-1.3939e+04
 			//else (also nach deJaegher und Grill etc.  hf=;
 			double hf; //-1.8314266E+05
-
 			hf=HeizwertRechner.deltaHf4Hu(CP,7.317412935,14.19104478,0,Hu );
+			
+			double h_evap_mol =41160; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
 			
 			double koeffs [][]=new double [3][];
 
@@ -573,7 +604,7 @@ public class SpeziesFabrik {
 			koeffs[2]=Koeffs_KrstFVV.get_TemperaturGrenze();
 
 			spezRON_91=new KoeffizientenSpezies(koeffs, 102.19e-3,								
-					hf,0,Hu,0,7.317412935,14.19104478,0,"RON_91"); 
+					hf,h_evap_mol,Hu,0,7.317412935,14.19104478,0,"RON_91"); 
 		}
 		return spezRON_91;
 	}
@@ -593,9 +624,10 @@ public class SpeziesFabrik {
 			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
 			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-3.5775e+04;
 			//else (also nach deJaegher und Grill etc.  hf=XXX;
-			hf=HeizwertRechner.deltaHf4Hu(CP,6.96292482,12.46549949,0,Hu );				
-
-		
+			hf=HeizwertRechner.deltaHf4Hu(CP,6.96292482,12.46549949,0,Hu );
+			
+			double h_evap_mol =41160; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
+			
 			double koeffs [][]=new double [3][];
 
 			koeffs[0] = Koeffs_KrstFVV.get_koeffs_RON_95_l();
@@ -604,7 +636,7 @@ public class SpeziesFabrik {
 
 			spezRON_95=new KoeffizientenSpezies(koeffs,
 					96.19e-3,								
-					hf,0,Hu,0,6.96292482,12.46549949,0,"RON_95");	
+					hf,h_evap_mol,Hu,0,6.96292482,12.46549949,0,"RON_95");	
 		}
 		return spezRON_95;
 	}
@@ -625,6 +657,8 @@ public class SpeziesFabrik {
 			//else (also nach deJaegher und Grill etc.  hf=XXX;
 			hf=HeizwertRechner.deltaHf4Hu(CP,6.895209581,11.9001996,0,Hu );		
 			
+			double h_evap_mol =41160; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
+			
 			double koeffs [][]=new double [3][];
 
 			koeffs[0] = Koeffs_KrstFVV.get_koeffs_RON_98_l();
@@ -633,7 +667,7 @@ public class SpeziesFabrik {
 
 			spezRON_98=new KoeffizientenSpezies(koeffs,
 					94.81e-3,								
-					hf,0,Hu,0,6.895209581,11.9001996,0,"RON_98");
+					hf,h_evap_mol,Hu,0,6.895209581,11.9001996,0,"RON_98");
 		}
 		return spezRON_98;
 	}
@@ -654,6 +688,8 @@ public class SpeziesFabrik {
 			//else (also nach deJaegher und Grill etc.  hf=8084899.999999999;
 			double hf;
 			hf=HeizwertRechner.deltaHf4Hu(CP,12.60179278,23.52813985,0,Hu );	
+			
+			double h_evap_mol =41160; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
 
 			double koeffs [][]=new double [3][];
 
@@ -663,7 +699,7 @@ public class SpeziesFabrik {
 
 			spezDiesel=new KoeffizientenSpezies(koeffs,
 					175.07e-3,								
-					hf,0,Hu,0,12.60179278,23.52813985,0,"Diesel");	
+					hf,h_evap_mol,Hu,0,12.60179278,23.52813985,0,"Diesel");	
 
 		}
 		return spezDiesel;
@@ -828,6 +864,8 @@ public class SpeziesFabrik {
 			return CO2_l;
 		}
 
+		
+
 		static double[] get_koeffs_CO2_h() {
 			double[] CO2_h = { 1.176962419E+05, -1.788791477E+03, 8.291523190E+00,
 					-9.223156780E-05, 4.863676880E-09, -1.891053312E-12,
@@ -866,12 +904,29 @@ public class SpeziesFabrik {
 					1.078576636E-19, -7.449939610E+02, 4.379180110E+00 };
 			return Ar_h;
 		}
+		
+		////////////////////////////////////////////////////////////////////////////
+
+		static double[] get_koeffs_C2H5OH_l() {
+			double[] C2H5OH_l = { -2.342791392E+05, 4.479180550E+03, -2.744817302E+01,
+						1.088679162E-01,-1.305309334E-04, 8.437346400E-08,
+						-2.234559017E-11, -5.022229000E+04, 1.764829211E+02 };
+			return C2H5OH_l;
+		}
+
+		static double[] get_koeffs_C2H5OH_h() {
+			double[] C2H5OH_h = {4.694817650E+06, -1.929798213E+04, 3.447584040E+01,
+					-3.236165980E-03, 5.784947720E-07, -5.564600270E-11,
+					2.226226400E-15, 8.601622710E+04, -2.034801732E+02};
+		return C2H5OH_h;
+		} 
 
 		static double [] get_TemperaturGrenze(){
 			double [] T=new double [1];
 			T[0]=1000;
 			return T;	
 		}
+		
 
 	}
 

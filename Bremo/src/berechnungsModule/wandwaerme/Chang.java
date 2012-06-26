@@ -26,7 +26,7 @@ public class Chang extends WandWaermeUebergang {
 	private double C_1;
 	private double C_2;
 	private double alpha_scaling;
-	
+
 	protected Chang(CasePara mp){
 		super(mp);
 		this.cp=super.cp;
@@ -56,7 +56,7 @@ public class Chang extends WandWaermeUebergang {
 		double pZyl_b = 0;
 		double Vol_b = 0;
 		int cnt=0;
-		
+
 		for(double kw=cp.convert_SEC2KW(refPunkt)-10; kw < cp.convert_SEC2KW(refPunkt); kw++){
 			pZyl_b=indiD.get_pZyl(cp.convert_KW2SEC(kw));
 			Vol_b=motor.get_V(cp.convert_KW2SEC(kw));
@@ -65,22 +65,27 @@ public class Chang extends WandWaermeUebergang {
 		}
 		n=MatLibBase.mw_aus_1DArray(n_array); //Polytropenexponent
 	}
-public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN,double fortschritt) { 
-	double p=zonen_IN[0].get_p();	//Zylinderdruck
-	double T=get_Tmb(zonen_IN);		//Mittlere Brennraumtemperatur
-	double s_alpha = motor.get_Kolbenweg(time);	
-	double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
+	public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN,double fortschritt) { 
+		double p=zonen_IN[0].get_p();	//Zylinderdruck
+		double T=get_Tmb(zonen_IN);		//Mittlere Brennraumtemperatur
+		double s_alpha = motor.get_Kolbenweg(time);	
+		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
 
-	double L_char = s_alpha + brennraumdachhoehe;
-	if (L_char >= bohrungsdurchmesser)
+		double L_char = s_alpha + brennraumdachhoehe;
+		if (L_char >= bohrungsdurchmesser)
 		{	
 			L_char = bohrungsdurchmesser;
 		}
+
+		double v_tuned =  mittlereKolbengeschwindigkeit* C_1 + C_2 / 6 * hubvolumen * temperatur_1 / (druck_1 * volumen_1) * (p - Schleppdruck*1E5);  
+		double alpha = alpha_scaling * 130 *Math.pow( (L_char ),-0.2)*Math.pow(p*1E-5,0.8)*Math.pow(T,-0.73)*Math.pow((v_tuned ),0.8) ;
+
+		return alpha;
+	}
 	
-	double v_tuned =  mittlereKolbengeschwindigkeit* C_1 + C_2 / 6 * hubvolumen * temperatur_1 / (druck_1 * volumen_1) * (p - Schleppdruck*1E5);  
-	double alpha = alpha_scaling * 130 *Math.pow( (L_char ),-0.2)*Math.pow(p*1E-5,0.8)*Math.pow(T,-0.73)*Math.pow((v_tuned ),0.8) ;
-		
-	return alpha;
-}
-	
+	@Override
+	public double get_BrennraumFlaeche(double time) {	
+		return motor.get_BrennraumFlaeche(time)+0.25*motor.get_FeuerstegFlaeche();
+	}
+
 }

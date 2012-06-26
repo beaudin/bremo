@@ -6,6 +6,7 @@ package berechnungsModule.wandwaerme;
 import berechnungsModule.Berechnung.Zone;
 import misc.VektorBuffer;
 import berechnungsModule.motor.Motor;
+import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.parameter.*;
 
 
@@ -13,14 +14,24 @@ public abstract class WandWaermeUebergang {
 //Abstrakte Klasse für alle Wandwärmemodelle
 	protected final double T_WAND;
 	protected Motor motor;
-	protected CasePara cp;	
+	protected CasePara cp;
 	
 	
 	protected WandWaermeUebergang(CasePara cp){				
 		motor=cp.MOTOR;
 		this.cp=cp;
-		T_WAND=cp.get_T_Wand();
+		T_WAND=cp.get_T_Wand();	
 	}
+	
+	//Hiermit bekommt der Benutzer den Alpha-Wert in W/(m^2K)
+	public abstract double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt);
+	
+	/**
+	 * Liefert die Flaeche die zur Berechznung des Wandwaermestroms verwendet wird. 
+	 * @param time
+	 * @return Oberflaeche des Brennraums in [m^2]
+	 */
+	public abstract double get_BrennraumFlaeche(double time);
 
 	
 	/**
@@ -65,14 +76,10 @@ public abstract class WandWaermeUebergang {
 		return R_mix;
 	}
 	
-	//Hiermit bekommt der Benutzer den Alpha-Wert in W/(m^2K)
-	public abstract double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt);
-	
-	
 	
 	//...und hiermit den Wandwärmestrom in W
 	public double get_WandWaermeStrom(double time, Zone[] zonen_IN, double fortschritt, VektorBuffer tBuffer){
-		double Brennraumflaeche = motor.get_BrennraumFlaeche(time);
+		double Brennraumflaeche = this.get_BrennraumFlaeche(time);
 		double WWSD=get_WandWaermeStromDichte(time,zonen_IN, fortschritt, tBuffer)*Brennraumflaeche;
 		return WWSD;
 	}	

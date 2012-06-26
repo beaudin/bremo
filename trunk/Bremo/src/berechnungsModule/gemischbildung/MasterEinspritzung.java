@@ -291,8 +291,10 @@ public class MasterEinspritzung extends ModulFabrik{
 			Hashtable<Spezies, Double> krstMassenbruchHash=new Hashtable<Spezies, Double>();		
 
 			for(int index=0;index<anzEinspr;index++){
-				krstMassenbruchHash.put(einspritzungen[index].get_Krst(), 
+				if(einspritzungen[index].get_ID_Zone()==zonenID){
+					krstMassenbruchHash.put(einspritzungen[index].get_Krst(), 
 						einspritzungen[index].get_mKrst_verdampft(time)/mKrstDampf_ges_t);
+				}
 			}	
 			GasGemisch mixKrst=new GasGemisch("KraftstoffMix");
 			mixKrst.set_Gasmischung_massenBruch(krstMassenbruchHash);

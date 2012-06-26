@@ -103,6 +103,12 @@ public class PhysKonst {
 		final double M_Ar=	0.0399480;	//kg/mol
 		return M_Ar;	
 	}
+	
+	//Molaremasse S	
+	public static double get_M_C2H5OH(){
+		final double M_C2H5OH=	0.04607;	//kg/mol
+		return M_C2H5OH;	
+	}
 		
 	
 	//////////////////////////////////////////////////////////

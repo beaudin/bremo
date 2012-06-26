@@ -42,6 +42,7 @@ public class HeizwertRechner {
 	/**
 	 * Berechnet die Standardbildungsenthalpie, so dass  bei perfekter Verbrennung (Produkte = CO2, H2O, O2) 
 	 * der vorgegebene Heizwert berechnet wird.
+	 * @param cp
 	 * @param c
 	 * @param h
 	 * @param o
@@ -57,8 +58,8 @@ public class HeizwertRechner {
 		double hf_CO2=cp.SPEZIES_FABRIK.get_spezCO2().get_delta_hf298_mol();
 		double hf_H2O=cp.SPEZIES_FABRIK.get_spezH2O().get_delta_hf298_mol();
 		
-		double o2min=x-0.25*y-0.5*z;		
-
+		double o2min=x+0.25*y-0.5*z;	
+		
 		return hu-o2min*hf_O2+x*hf_CO2+0.5*y*hf_H2O;		
 	}
 

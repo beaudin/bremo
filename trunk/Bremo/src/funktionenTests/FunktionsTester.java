@@ -10,6 +10,7 @@ import berechnungsModule.gemischbildung.Kraftstoff_Eigenschaften;
 import berechnungsModule.gemischbildung.Verdampfung;
 import berechnungsModule.gemischbildung.Verdampfung_2;
 import berechnungsModule.motor.Motor;
+import berechnungsModule.motor.Motor_HubKolbenMotor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
 import bremo.main.Bremo;
 import bremo.parameter.CasePara;
@@ -32,6 +33,31 @@ public class FunktionsTester {
 	
 	public FunktionsTester(CasePara cp){
 		CP=cp;
+	}
+	
+	public void test_Motor(){
+		Motor_HubKolbenMotor m= (Motor_HubKolbenMotor) CP.MOTOR;
+		FileWriter_txt txtFile=new FileWriter_txt(CP.get_workingDirectory()+"//motor.txt");
+		String [] header={"KW", "t", "s","s'","s''","dS_dt","d2S_d2t","V","dV","dV_dKW","V-Vc"};
+		txtFile.writeTextLineToFile(header, false);
+		double [][] erg=new double [3601][11];
+		double t=0;
+		for(int KWi=0;KWi<=3600;KWi++){
+			int KW=KWi/10;
+			t=CP.convert_KW2SEC(KW);
+			erg[KW][0]=KW;
+			erg[KW][1]=t;
+			erg[KW][2]=m.get_S(t);
+			erg[KW][3]=m.get_dS_dKW(t);
+			erg[KW][4]=m.get_d2S_dKW(t);	
+			erg[KW][5]=m.get_dS(t);
+			erg[KW][6]=m.get_d2S(t);
+			erg[KW][7]=m.get_V(t);
+			erg[KW][8]=m.get_dV(t);
+			erg[KW][9]=m.get_dV_dKW(t);
+			erg[KW][10]=m.get_V(t)-m.get_Kompressionsvolumen();
+		}			
+		txtFile.writeMatrixToFile(erg, true);		
 	}
 	
 //	public static void test_Vektor(){
@@ -145,9 +171,34 @@ public class FunktionsTester {
 		}	
 		txtFile.writeMatrixToFile(erg, true);
 	}
+	
+	public void testSpeziesProp(){			
+		
+		Spezies spez=CP.SPEZIES_FABRIK.get_spezC2H5OH();
+		double T_start=300;
+		double T=T_start;
+		double T_End=3000;		
+		double deltaT=100;
+		int anzT= (int) ((T_End-T_start)/deltaT)+1;	
+		
+		double erg [][]=new double[anzT][4];
+		FileWriter_txt txtFile=new FileWriter_txt(CP.get_workingDirectory()+"//spezProps.txt");
+		String [] header={"T","cp_mol","h_h298_mol","h_mol"};
+		txtFile.writeTextLineToFile(header, false);
+		
+		for(int i=0;i<anzT;i++){			
+			erg [i][0]=T;
+			erg [i][1]=spez.get_cp_mol(T);	
+			erg [i][2]=spez.get_h_h298_mol(T);	
+			erg [i][3]=spez.get_h_mol(T);	
+			T=T+deltaT;
+		}	
+		txtFile.writeMatrixToFile(erg, true);
+	}
 		
 
 	public  void testVerdampfung(){
+		
 		String krstFlag="tetradecan";
 		Kraftstoff_Eigenschaften krstProp =new Kraftstoff_Eigenschaften(krstFlag);
 		Verdampfung_2 verdampf=new Verdampfung_2(krstProp);

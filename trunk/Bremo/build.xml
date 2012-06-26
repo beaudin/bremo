@@ -17,4 +17,4 @@
     <signjar jar="Bremo.jar" keystore="${keyStorePath}" lazy="true"
            alias="${keyStoreKeyAlias}" storepass="${keyStorePassword}"/>
   </target>
-</project>
+</project> 

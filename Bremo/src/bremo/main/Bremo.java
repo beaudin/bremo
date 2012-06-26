@@ -1,17 +1,14 @@
 package bremo.main; 
 
 import java.io.File;
-import java.net.Inet4Address;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import funktionenTests.FunktionsTester;
 import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
 import bremoExceptions.BirdBrainedProgrammerException;
-import bremoExceptions.MiscException;
 import bremoExceptions.ParameterFileWrongInputException;
-import bremoExceptions.StopBremoException;
 import bremoswing.SwingBremo;
 
 
@@ -27,45 +24,48 @@ public class Bremo extends Thread {
 	private File inputFile;
 	private boolean caseParaerzeugt=false;
 
-	
+
 	public Bremo( ThreadGroup group , File inputFile) {
 		super(group,inputFile.getName());
 		this.inputFile=inputFile;
-//		try {
-//			casePara = new CasePara(inputFile);
-//			r = new Rechnung(casePara);
-//		} catch (ParameterFileWrongInputException e) {				
-//			e.stopBremo();
-//		}		
+		//		try {
+		//			casePara = new CasePara(inputFile);
+		//			r = new Rechnung(casePara);
+		//		} catch (ParameterFileWrongInputException e) {				
+		//			e.stopBremo();
+		//		}		
 	}
-	
-	
+
+
 	public Bremo( File inputFile) {	
 		super(inputFile.getName());
 		this.inputFile=inputFile;
-		
-//		try {
-//			casePara = new CasePara(inputFile);
-//			r = new Rechnung(casePara);
-//		} catch (ParameterFileWrongInputException e) {				
-//			e.stopBremo();
-//		}		
-	}
-	
-	
 
+		//		try {
+		//			casePara = new CasePara(inputFile);
+		//			r = new Rechnung(casePara);
+		//		} catch (ParameterFileWrongInputException e) {				
+		//			e.stopBremo();
+		//		}		
+	}
+
+
+	/**
+	 * Erzeugt eine Instanz vom Typ CasePara und startet die Berechnung
+	 * @see CasePara
+	 */
 	public void run() {
 		try {
 			casePara = new CasePara(inputFile);
-			SwingBremo.SetDebbugingMode(casePara.SYS.DUBUGGING_MODE) ; 
 			caseParaerzeugt=true;
+			SwingBremo.SetDebbugingMode(casePara.SYS.DUBUGGING_MODE) ; 
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {
 			SwingBremo.setNrOfBremoAlive();
 			JFrame popup = new JFrame();
 			JOptionPane.showMessageDialog(popup,
 					"Thread : Eine Fehler ist in der File "+this.getName()+" \n aufgetreten !!!" +
-							"\n"+e.getMessage(), this.getName(),
+					"\n"+e.getMessage(), this.getName(),
 					JOptionPane.ERROR_MESSAGE);
 			//SwingBremo.NrOfFile--;
 			SwingBremo.StateBremoThread();
@@ -77,9 +77,9 @@ public class Bremo extends Thread {
 			//System.err.println("Thread : "+this.getName()+"   is Fertig !!!");
 			JFrame popup = new JFrame();
 			JOptionPane.showMessageDialog(popup,
-					"Thread : "+this.getName()+"   is Fertig !!!", this.getName(),
+					"Thread "+this.getName()+" ist fertig!", this.getName(),
 					JOptionPane.INFORMATION_MESSAGE);
-			SwingBremo.PutInBremoThreadFertig("Thread : "+this.getName()+"   ist Fertig !!!");
+			SwingBremo.PutInBremoThreadFertig("Thread "+this.getName()+" ist fertig!");
 			SwingBremo.StateBremoThread();
 		} catch (Exception  e) {
 			this.interrupt();
@@ -87,146 +87,62 @@ public class Bremo extends Thread {
 		}
 	}	
 
+	/**
+	 * Gibt ein Objekt vom Typ CasePara zurueck. 
+	 * Wenn diese noch nicht erzeugt sind wird ein Fehler ausgegeben. 
+	 * @return CasePara
+	 * @see CasePara
+	 */
 	public CasePara get_myCase() {
 		if(caseParaerzeugt)
 			return casePara;
 		else{
 			try {
-				throw new BirdBrainedProgrammerException("Es wurde versucht auf die CasePara zuzugreifen. " +
-						"Diese wurden aber noch nicht erzeugt. Volldeppprogrammierer");
+				throw new BirdBrainedProgrammerException("Es wurde versucht auf die Klasse CasePara zuzugreifen. " +
+				"Diese wurde aber noch nicht erzeugt. Volldeppprogrammierer");
 			} catch (BirdBrainedProgrammerException e) {
 				e.stopBremo();
 			}			
 			return null;
 		}
 	}
-	
+
+	/**
+	 * Gibt an ob eine Instanz vom Typ CasePara bereits erzeugt wurde
+	 * @return 
+	 * @see CasePara
+	 */
 	public boolean get_myCaseState () {
-		
+
 		return caseParaerzeugt;
 	}
-	
 
+
+	/**
+	 * Main-Methode um Bremo ohne das GUI aufzurufen. 
+	 * @param args Pfad der auf das InputFile verweist
+	 * @throws ParameterFileWrongInputException
+	 */
 	public static void main(String[] args)
-			throws ParameterFileWrongInputException {
+	throws ParameterFileWrongInputException {		
+		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
+		//Hier einige Beisspile wie Funktionen getestet werden können
+		File fileCP 
+		= new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//funktionsTester.txt");
+		CasePara privateCP = new CasePara(fileCP);
+		FunktionsTester ft=new FunktionsTester(privateCP);
+		ft.test_Motor();
 
-		// TestKlasse tt=new TestKlasse("original");
-		// TestKlasse tt_1=TestKlasse.getInstance(1);
-		// tt_1.tellMessage();
-		// System.out.println("Nachricht der originalklasse: ");
-		// tt.tellMessage();
-		// TestKlasse tt_2=TestKlasse.getInstance(2);
-		// tt_2.tellMessage();
-
-		// OhneModifierTest om=new OhneModifierTest();
-		// ProtectedKonstruktorTest pk= new ProtectedKonstruktorTest();
-		//		
-		// File inputFile=new File(args[0]);
-		// Bremo bremo=new Bremo(inputFile);
-		// String test []=BerechnungsModell.get_benoetigteModelle();
-
-		// System.out.println(get_casePara().get_rechenBeginn());
-		File file;
-
-		// file = new
-		// File("//Volumes//Cruzer//_DISS//Bremo//BremoXP//Bremo//src//InputDatei_DVA.txt");
-		// file = new
-		// File("//Volumes//Cruzer//_DISS//Bremo//BremoXP//Bremo//src//InputDatei_DVA_VGL_Kuni.txt");
-		// file = new
-		// File("//Users//juwe//Dropbox//Bremo//Bremo//src//InputDatei_DVA_VGL_Kuni.txt");
-		// file = new
-		// File("L://_DISS//Bremo//BremoXP//Bremo//src//InputDatei_ZonenTester.txt");
-		// file = new
-		// File("L://_DISS//Bremo//BremoXP//Bremo//src//InputDatei_DVA.txt");
-		// file = new
-		// File("L://_DISS//Bremo//BremoXP//Bremo//src//InputDatei_DVA_VGL_Kuni.txt");
-		// file = new
-		// File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo//src//InputDatei_DualFuel_20101213_100.txt");
-		// file = new
-		// File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo//src//InputDatei_DVA_Dahnz.txt");
-		// file = new
-		// File("//Users//juwe//Dropbox//Eclipse//Bremo//src//InputDatei_DVA_VGL_Kuni.txt");
-		// file = new
-		// File("//Users//juwe/Dropbox//Eclipse//Bremo//src//InputDatei_DualFuel_20101213_100_DF.txt");
-		// file = new
-		// File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo//src//InputDatei_DualFuel_20101213_100_DF.txt");
-
-		// file=new
-		// File("D://Daten//IFKM//__Projekte//Dual Fuel//Diss//Bremo//BremoXP//Bremo//src//InputDatei_2.txt");
-
-		// file = new
-		// File("D://Daten//IFKM//__Projekte//Dual Fuel//AbgleichAnalyseModell//DVA//20111110_8_DVAParameter.txt");
-		// file = new
-		// File("D://Daten//IFKM//__Projekte//Dual Fuel//AbgleichAnalyseModell//DVA//20111110_12_DVAParameter.txt");
-		// file = new
-		// File("//Users//juwe/Dropbox//Eclipse//Bremo//src//InputDatei_DualFuel_20101213_100_DF.txt");
-		// file = new
-		// File("D://Daten//IFKM//__Projekte//Dual Fuel//MTU EinzylBR2000//experimentelle Untersuchungen"
-		// +
-		// "//DualFuel//Basisuntersuchungen//20080110//Export//20111107_20_DVAParameter.txt");
-
-		// file = new
-		// File("J://optische Untersuchungen BR1600//ZweiFarbenMethode//20101020//Export//20101020_69_DVAParameter.txt");
-
-		// file = new
-		// File("D://Daten//IFKM//__Projekte//Dual Fuel//MTU EinzylBR2000//" +
-		// "experimentelle Untersuchungen//DualFuel//Einspritzdüsenvergleich//"
-		// +
-		// "200804-Charge A//20080416 - 6loch//Export//20111211_10_DVAParameter.txt");
-		// file = new
-//		 File("D://Daten//IFKM//__Projekte//Dual Fuel//AbgleichAnalyseModell//AbgleichDieselPeakMethode//20111110_11_DVAParameter.txt");
-//		file = new File("//Users//juwe//Documents//Transfer//VergleichAGRVerdŸnnungTEMP//" 
-//					+ "//20101213//Export//AGR_LAM//20111220_103_DVAParameter.txt");
-//		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//Bremo4//src//_Export//20111110_11_DVAParameter.txt");
-		file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//20101020_40_DVAParameter.txt");
+		//Bremo kann auch ohne GUI ausgefuehrt werden!
+		//Das InputFile muss dann manuell erzeugt oder mittels "args" uebergeben werden
+		File file;	
+		if(args.length>0)
+			file = new File(args[0]);
+		else
+			file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//DF_LWA.txt");
 
 		Bremo bremo=new Bremo(file);
-		bremo.run();
-		
-		// FunktionsTester.test_Vektor();
-
-		// FunktionsTester.test_get_lambda();
-		// FunktionsTester.test_HashAdd();
-		// FunktionsTester.test_neueSpezies();
-		// FunktionsTester.calc_cp_Dilution();
-		// FunktionsTester.testHeizwertRechner();
-		// FunktionsTester.testHeizwertRechner();
-		// FunktionsTester.testAdiabateVerbrennungsTemp();
-		// FunktionsTester.kalorikAbgleichJanaf();
-		// FunktionsTester.testVerdampfung();
-
-		// FunktionsTester.test_HUbKolbenMotor();
-
-		// FunktionsTester.testAdiabateVerbrennungsTemp();
-		// FunktionsTester.test_IndizierDaten();
-		// FunktionsTester.test_ErgebnisHash();
-		// System.out.println(casePara.get_rechenBeginn());
-		// FunktionsTester.test_pZylReader();
-		// String a="5.55";
-		// Double.parseDouble(a);
-		// double b=Double.parseDouble(a);
-		// FunktionsTester.test_Xialings_HiroYasu();
-
-		// BetriebsParameter betriebsPara=new BetriebsParameter();
-		// Motor motor= new Motor();
-		// SysPara sysPara=new SysPara();
-		//		
-		// ParameterFile F = new ParameterFile();
-		//	
-		// CasePara.erzeuge_EINZIGE_Instanz(betriebsPara, sysPara, motor, F);
-
-		// FunktionsTester.testGleichgewichtsRechner_A();
-		// FunktionsTester.testGleichgewichtsRechner_B();
-		// FunktionsTester.testKalorikRechner();
-		// FunktionsTester.testKalorikRechner_Luft();
-		// FunktionsTester.testSpezies();
-		// testJanafKoeffs();
-		// // test_Gg();
-		// FunktionsTester.testGasGemisch();
-		// FunktionsTester.testObjektKopie();
-		// FunktionsTester.testSpeziesInputFuerOHCsolver();
-
-
+		bremo.run();	
 	}
 
 }

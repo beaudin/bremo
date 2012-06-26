@@ -105,5 +105,10 @@ public class WoschniHuber extends WandWaermeUebergang {
 		double alpha = 130 *Math.pow( (Bohrungsdurchmesser),-0.2)*Math.pow(p*1E-5,0.8)*Math.pow(T,-0.53)*Math.pow((C_1 * v ),0.8) ;
 		return alpha;
 	}
+	
+	@Override
+	public double get_BrennraumFlaeche(double time) {	
+		return motor.get_BrennraumFlaeche(time)+0*motor.get_FeuerstegFlaeche();
+	}
 }
 

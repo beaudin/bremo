@@ -20,8 +20,8 @@ public class Hensel extends WandWaermeUebergang {
     private VentilhubFileReader VH_Datei_Ein;
 	private VentilhubFileReader VH_Datei_Aus;
 	
-	protected Hensel(CasePara mp) {
-		super(mp);
+	protected Hensel(CasePara cp) {
+		super(cp);
 		this.cp=super.cp;
 		indiD=new IndizierDaten(cp);	//TODO: umprogrammieren, so dass die Indizierdatei nur ein einziges Mal eingelesen wird
 		this.motor=(Motor_HubKolbenMotor) super.motor;
@@ -193,5 +193,10 @@ public class Hensel extends WandWaermeUebergang {
 		
 		return this.get_WaermeUebergangsKoeffizient(time,zonen_IN, fortschritt) * (T- T_WAND);
 	}	
+	
+	@Override
+	public double get_BrennraumFlaeche(double time) {	
+		return motor.get_BrennraumFlaeche(time)+0.25*motor.get_FeuerstegFlaeche();
+	}
 	
 }

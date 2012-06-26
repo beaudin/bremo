@@ -103,4 +103,11 @@ public class Woschni extends WandWaermeUebergang {
 		}
 		return alpha;
 	}
+
+
+
+	@Override
+	public double get_BrennraumFlaeche(double time) {	
+		return motor.get_BrennraumFlaeche(time)+0*motor.get_FeuerstegFlaeche();
+	}
 }

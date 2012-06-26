@@ -36,4 +36,9 @@ public class Hohenberg extends WandWaermeUebergang{
 	}
 
 	
+	@Override
+	public double get_BrennraumFlaeche(double time) {	
+		return motor.get_BrennraumFlaeche(time)+0.3*motor.get_FeuerstegFlaeche();
+	}
+	
 }

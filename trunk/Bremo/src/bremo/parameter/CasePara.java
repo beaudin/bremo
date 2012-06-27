@@ -883,7 +883,8 @@ public class CasePara {
 		else{
 			double sumKrstASP=0;
 			for(int i=0;i<get_AnzahlEinspritzungen();i++){
-				sumKrstASP+=get_mKrst_ASP(i);
+				//Bie mehreren Einspritzungen laeuft die Nummerierung im Inputfile ab 1
+				sumKrstASP+=get_mKrst_ASP(i+1); 
 			}
 			return sumKrstASP;
 		}			

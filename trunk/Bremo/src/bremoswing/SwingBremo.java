@@ -115,6 +115,7 @@ public class SwingBremo extends JFrame {
 			} else {
 				outStream.flush();
 				ActiveConsole();
+		
 			}
 		}
 

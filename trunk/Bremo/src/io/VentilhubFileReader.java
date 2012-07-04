@@ -228,4 +228,26 @@ public class VentilhubFileReader {
 			return 0;
 		}
 	}
+
+	public double get_integral(double drehzahl, double time1, double time2) {
+		/** Integral der Hubkurve in [°KW*m] berechnen, dabei bedeuten time1 und time2 die untere und obere Grenze.
+		 * Die Zeit zählt ab Rechnung Start!
+		 * Berechnung erfolgt nach der Trapezmethode.
+		 * **/
+		
+		double t_schritt = 0.5 / drehzahl / 360; //[s]
+		double time_ges = time2-time1;
+		double schrittweite = ((time_ges)/(Math.ceil(time_ges/t_schritt))); //[s]
+		double integral = 0;
+		
+		double i;
+		for(i = time1 ; i < time2 ; i += schrittweite) {
+			//[°KW*m]
+			integral += 0.5 * schrittweite * 360 * drehzahl * (get_Hub(i) + get_Hub(i+schrittweite)); //[s] * [°KW/s] * ([m] + [m])
+		}
+		
+		return integral;
+	}
 }
+
+

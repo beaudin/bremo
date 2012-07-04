@@ -1398,7 +1398,7 @@ public class CasePara {
 	}	
 	
 	/** 
-	 * @return Gibt die Feuersteghoehe in [m]zurück.
+	 * @return Gibt die Schränkung in [m]zurück.
 	 * */
 	public double get_Schraenkung(){		
 		try {
@@ -1412,7 +1412,7 @@ public class CasePara {
 	
 	
 	/** 
-	 * @return Gibt die Feuersteghoehe in [m]zurück.
+	 * @return Gibt die Desachsierung in [m]zurück.
 	 * */
 	public double get_Desachsierung(){		
 		try {

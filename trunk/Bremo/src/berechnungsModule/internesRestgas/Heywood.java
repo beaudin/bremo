@@ -1,6 +1,5 @@
 package berechnungsModule.internesRestgas;
 
-import kalorik.spezies.Spezies;
 import io.VentilhubFileReader;
 import bremo.parameter.CasePara;
 
@@ -36,10 +35,9 @@ public class Heywood extends InternesRestgas {
 		cp.get_spezAbgas().get_R();
 		
 		// Größen aus der Input-Datei:
-		double drehzahl,mLuftFeucht,pIntake,pExhaust,epsilon;
+		double drehzahl,pIntake,pExhaust,epsilon;
 		
 		drehzahl = cp.get_DrehzahlInUproSec(); //[U/sec]
-		mLuftFeucht = cp.get_mLuft_feucht_ASP(); //[kg]
 		pIntake = cp.get_p_LadeLuft() / Math.pow(10,5); //[Pa] -> [bar]
 		pExhaust = cp.get_p_Abgas() / Math.pow(10,5); //[Pa] -> [bar]
 		epsilon = cp.get_Verdichtung();

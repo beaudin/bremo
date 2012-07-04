@@ -1552,6 +1552,62 @@ public class CasePara {
 	}
 	
 	/** 
+	 * @return Gibt den maximalen erlaubten Auslassventilhub in [m]
+	 * */	
+	public double get_AV_Hub_max(){
+		double AV_Hub_max;
+		try{
+			AV_Hub_max =set_doublePara(INPUTFILE_PARAMETER, "AV_Hub_max","[m]",0,0.3);
+			return AV_Hub_max;				
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	/** 
+	 * @return Gibt den inneren Sitzdurchmesser des Auslassventils in [m]
+	 * */
+	public double get_AV_durchmesser(){
+		double AV_durchmesser;
+		try{
+			AV_durchmesser =set_doublePara(INPUTFILE_PARAMETER, "AV_durchmesser","[m]",0,0.3);
+			return AV_durchmesser;				
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	/** 
+	 * @return Gibt den inneren Sitzdurchmesser des Einlassventils in [m]
+	 * */
+	public double get_EV_durchmesser(){		
+		double EV_durchmesser;		
+		try {
+			EV_durchmesser =set_doublePara(INPUTFILE_PARAMETER, "EV_durchmesser","[m]",0,0.3);
+			return EV_durchmesser;				
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	/** 
+	 * @return Gibt die Ventilüberschneidung von Einlass öffnet (Hub 0,15mm) bis Auslass schließt (Hub 0,15mm) in [KW]
+	 * */
+	public double get_Ventilueberschneidung(){		
+		double ventilueberschneidung;		
+		try {
+			ventilueberschneidung =set_doublePara(INPUTFILE_PARAMETER, "Ventilueberschneidung","[KW]",0,100);
+			return ventilueberschneidung;				
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	/** 
 	 * @return Gibt die Referenzfläche zurück, die für die
 	 * Durchflusskennzahlen des Auslassventils verwendet werden soll.
 	 * Wenn nichts angegeben wird, dann wird mit der Kolbenfläche gerechnet.

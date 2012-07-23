@@ -60,6 +60,7 @@ import javax.swing.border.TitledBorder;
 import BremoLogFile.LogFileWriter;
 import bremo.main.Bremo;
 import bremoExceptions.StopBremoException;
+import bremoGraphik.SelectItemToPlotten;
 
 /*
  * SwingBremo.java
@@ -84,6 +85,7 @@ public class SwingBremo extends JFrame {
 	public static Bremo[] bremoThread;
 	public static String[] bremoThreadFertig;
 	public static JButton berechnen;
+	public static JButton test ;
 	// public JCheckBox konsole;
 	public JTextArea grosArea;
 	private JScrollPane jScrollPane1;
@@ -153,7 +155,7 @@ public class SwingBremo extends JFrame {
 	/***** Creates new form SwingBremo *************************************************************/
 	public SwingBremo() {
 		initComponents();
-		placeFrame();
+		placeFrame(this);
 	}
 
 	/***
@@ -169,6 +171,7 @@ public class SwingBremo extends JFrame {
 		berechnen = new JButton();
 		wahlFile = new JButton();
 		stop = new JButton();
+		test = new JButton();
 
 		textFile = new JTextField();
 
@@ -196,7 +199,7 @@ public class SwingBremo extends JFrame {
 		setBackground(new Color(255, 255, 255));
 		setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo1.png")).getImage());
-		setName("BremoGraphik");
+		setName("BremoSwing");
 		setResizable(true);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
@@ -236,6 +239,7 @@ public class SwingBremo extends JFrame {
 		berechnen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				stop.setVisible(true);
+				test.setEnabled(false);
 				percent = 0;
 				BerechnungPush(e);
 
@@ -286,6 +290,26 @@ public class SwingBremo extends JFrame {
 		gc.ipadx = 0;
 		
 		manager.add(stop, gc);
+		
+		test.setIcon(new ImageIcon(getClass().getResource(
+				"/bremoswing/bild/see_graphik.png")));
+		test.setToolTipText("Schauen Sie Ergebniss als Graphik");
+		test.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				new SelectItemToPlotten().setVisible(true);
+			}
+		});
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.weightx = 0;
+		gc.gridx = 3;
+		gc.gridy = 0;
+		gc.ipadx = 0;
+		test.setEnabled(false);
+		manager.add(test, gc);
 
 		/************ LABEL ************************************/
 //		label.setOpaque(true);
@@ -306,7 +330,9 @@ public class SwingBremo extends JFrame {
 		progressBarInd.setValue(100);
 		progressBarInd.setIndeterminate(true);
 		progressBarInd.setVisible(false);
+		
        
+		
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(10, 0, 5, 0);
 		gc.weightx = 0.1;
@@ -681,24 +707,25 @@ public class SwingBremo extends JFrame {
 			}
 			for (String str : bremoThreadFertig) {
 				if (str != null)
-					System.err.println(str);
+					System.err.println("Thread "+str+" ist fertig!");
 			}
 			ActiveIcon();
 			progressBar.setVisible(false);
 			progressBarInd.setVisible(false);
+			test.setEnabled(true);
 		}
 	}
 
 	/************************ place Frame to the center ************************/
-	private void placeFrame() {
+	public static void placeFrame(JFrame frame) {
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-		Rectangle window = getBounds();
-		this.setLocation((screen.width - window.width) / 2,
+		Rectangle window = frame.getBounds();
+		frame.setLocation((screen.width - window.width) / 2,
 				(screen.height - window.height) / 2);
 	}
 
 	/************************* close the Frame ********************************/
-	public void closeFrame() {
+	public   void closeFrame() {
 		final JOptionPane optionPane = new JOptionPane(
 				"Wollen Sie Wirklich das Program beendet ?",
 				JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION);

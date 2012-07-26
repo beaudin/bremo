@@ -1,11 +1,17 @@
 package bremoGraphik;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -21,11 +27,18 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
+
+import com.itextpdf.awt.DefaultFontMapper;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfTemplate;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import bremoswing.SwingBremo;
 
@@ -139,7 +152,7 @@ public class PlottSelectedItem extends ApplicationFrame {
 	}
 	
 	/**
-     * Panel für  Teil ( Auswahl durch freq)  der Input Signal
+     * Panel für Normal Eingang
      */
 	static class NormalPanel extends JPanel {
 
@@ -171,7 +184,15 @@ public class PlottSelectedItem extends ApplicationFrame {
 			final JFreeChart chart = ChartFactory.createXYLineChart(
 					"Verlauf von "+Titel, Xlabel , Ylabel , normalData,
 					PlotOrientation.VERTICAL, true, true, false);
-
+			
+			//chart.setTitle(new TextTitle("XY Chart Sample, non default font", new java.awt.Font("Serif", Font.BOLD, 12)));
+			chart.setBackgroundPaint(Color.white);
+			chart.setBorderPaint(Color.black);
+			chart.setBorderStroke(new BasicStroke(1));
+			chart.setBorderVisible(true);
+			
+			writeChartToPDF(chart, 600, 400, "src/bremoGraphik/pdf/Verlauf von "+Titel+".pdf");
+			
 			final ChartPanel chartPanel = new ChartPanel(chart);
 			// chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
 			return chartPanel;
@@ -186,7 +207,7 @@ public class PlottSelectedItem extends ApplicationFrame {
 	
 	/**
 	 * Panel Zur Signal Vergleich
-	 * @uml.dependency   supplier="Test.PlottFIRFilter.InputSignalPanel"
+	 * 
 	 */
 	static class VergleichPanel extends JPanel {
 
@@ -227,6 +248,14 @@ public class PlottSelectedItem extends ApplicationFrame {
 					"Vergleich "+Vergleich1+" und "+Vergleich2 , Xlabel, Ylabel, VergleichData,
 					PlotOrientation.VERTICAL, true, true, false);
 
+			//chart.setTitle(new TextTitle("XY Chart Sample, non default font", new java.awt.Font("Serif", Font.BOLD, 12)));
+			chart.setBackgroundPaint(Color.white);
+			chart.setBorderPaint(Color.black);
+			chart.setBorderStroke(new BasicStroke(1));
+			chart.setBorderVisible(true);
+			
+			writeChartToPDF(chart, 500, 400, "src/bremoGraphik/pdf/Vergleich "+Vergleich1+" und "+Vergleich2+".pdf");
+			
 			final ChartPanel chartPanel = new ChartPanel(chart);
 			
 			return chartPanel;
@@ -240,36 +269,39 @@ public class PlottSelectedItem extends ApplicationFrame {
 			add(createChartPanel(Selected));
 
 		}
+		
 	}
-	/************************* close the Frame ********************************/
-	public   void closeFrame() {
-		final JOptionPane optionPane = new JOptionPane(
-				"Wollen Sie Wirklich das Program beendet ?",
-				JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION);
-
-		final JDialog dialog = optionPane.createDialog(this, "Exit");
-
-		optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent e) {
-				String prop = e.getPropertyName();
-
-				if (dialog.isVisible() && (e.getSource() == optionPane)
-						&& (prop.equals(JOptionPane.VALUE_PROPERTY))) {
-					dialog.setVisible(false);
-				}
-			}
-		});
-		dialog.setContentPane(optionPane);
-		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dialog.setVisible(true);
-
-		int value = ((Integer) optionPane.getValue()).intValue();
-		if (value == JOptionPane.YES_OPTION) {
-			System.exit(0);
-		} else if (value == JOptionPane.NO_OPTION) {
-
-		}
+	/**
+	 *  schreibt chart in pdf datei
+	 */
+	@SuppressWarnings("deprecation")
+	public static void writeChartToPDF(JFreeChart chart, int width, int height, String fileName) {
+	    PdfWriter writer = null;
+	 
+	    Document document = new Document();
+	 
+	    try {
+	        writer = PdfWriter.getInstance(document, new FileOutputStream(
+	                fileName));
+	        document.open();
+	        PdfContentByte contentByte = writer.getDirectContent();
+	        PdfTemplate template = contentByte.createTemplate(width, height);
+	        Graphics2D graphics2d = template.createGraphics(width, height,
+	                new DefaultFontMapper());
+	        Rectangle2D rectangle2d = new Rectangle2D.Double(0, 0, width,
+	                height);
+	 
+	        chart.draw(graphics2d, rectangle2d);
+	         
+	        graphics2d.dispose();
+	        contentByte.addTemplate(template, 0, 200);
+	 
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    document.close();
 	}
+	
 	public static void BremoGrafik() throws  IOException
 	{
 		PlottSelectedItem demo = new PlottSelectedItem("Bremo_Ablauf_Grafik");

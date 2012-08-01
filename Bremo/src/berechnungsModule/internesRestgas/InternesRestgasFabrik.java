@@ -9,7 +9,8 @@ public class InternesRestgasFabrik extends ModulFabrik {
 	public static final String INTERNES_RESTGAS_MODELL_FLAG="internesRestgasModell";
 	public  final static String[] INTERNES_RESTGAS_MODELLE={"RestgasVorgabe", 
 															"MuellerBertling",
-															"LWA"};	
+															"LWA",
+															"Heywood"};	
 	public final InternesRestgas RESTGAS_MODELL;
 	
 	public InternesRestgasFabrik(CasePara cp){
@@ -18,10 +19,10 @@ public class InternesRestgasFabrik extends ModulFabrik {
 		String internesRestgas_ModellVorgabe=
 			get_ModulWahl(INTERNES_RESTGAS_MODELL_FLAG, INTERNES_RESTGAS_MODELLE);
 		
-		if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[0])){
+		if(internesRestgas_ModellVorgabe.equals("RestgasVorgabe")){
 			RESTGAS_MODELL=(InternesRestgas) new RestgasVorgabe(cp);
 			
-		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[1])){
+		}else if(internesRestgas_ModellVorgabe.equals("MuellerBertling")){
 //			restgasModell=(InternesRestgas) new MuellerBertling(cp);
 			RESTGAS_MODELL=null;
 			try {
@@ -34,8 +35,10 @@ public class InternesRestgasFabrik extends ModulFabrik {
 				e.stopBremo();
 			}
 			
-		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[2])){
+		}else if(internesRestgas_ModellVorgabe.equals("LWA")){
 			RESTGAS_MODELL=(InternesRestgas) new LWA(cp);
+		}else if(internesRestgas_ModellVorgabe.equals("Heywood")){
+			RESTGAS_MODELL=(InternesRestgas) new Heywood(cp);
 		}else{
 			RESTGAS_MODELL=null;
 			try {

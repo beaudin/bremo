@@ -4,7 +4,7 @@ import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import funktionenTests.FunktionsTester;
+
 import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
 import bremoExceptions.BirdBrainedProgrammerException;
@@ -79,11 +79,12 @@ public class Bremo extends Thread {
 			JOptionPane.showMessageDialog(popup,
 					"Thread "+this.getName()+" ist fertig!", this.getName(),
 					JOptionPane.INFORMATION_MESSAGE);
-			SwingBremo.PutInBremoThreadFertig("DVA_"+this.getName());
-			SwingBremo.StateBremoThread();
+			SwingBremo.PutInBremoThreadFertig(this.getName());
+	        SwingBremo.StateBremoThread();
 		} catch (Exception  e) {
 			this.interrupt();
 			e.printStackTrace();
+			SwingBremo.StateBremoThread();
 		}
 	}	
 
@@ -116,6 +117,14 @@ public class Bremo extends Thread {
 
 		return caseParaerzeugt;
 	}
+	/**
+	 * Gibt die InputFile Von Bremo
+	 * @return inpuFile
+	 */
+	public File get_myFile() {
+		
+		return inputFile;
+	}
 
 
 	/**
@@ -130,8 +139,8 @@ public class Bremo extends Thread {
 		File fileCP 
 		= new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//funktionsTester.txt");
 		CasePara privateCP = new CasePara(fileCP);
-		FunktionsTester ft=new FunktionsTester(privateCP);
-		ft.test_Motor();
+		//FunktionsTester ft=new FunktionsTester(privateCP);
+		//ft.test_Motor();
 
 		//Bremo kann auch ohne GUI ausgefuehrt werden!
 		//Das InputFile muss dann manuell erzeugt oder mittels "args" uebergeben werden

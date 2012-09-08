@@ -79,7 +79,7 @@ public class SwingBremo extends JFrame {
 	private boolean control = false;
 	private File[] files;
 	public Double[] percentBremo;
-	private String path;
+	public static  String path;
 	private static SucheBremo suche;
 	public static ThreadGroup group;
 	public static Bremo[] bremoThread;
@@ -164,7 +164,7 @@ public class SwingBremo extends JFrame {
 	private void initComponents() {
 
 		System.setOut(outStream);
-		System.setErr(errStream);
+		//System.setErr(errStream);
 
 		manager = new JPanel();
 

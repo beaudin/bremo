@@ -57,7 +57,7 @@ public class PlottSelectedItem extends ApplicationFrame {
 		List<Double> XList = new LinkedList<Double>();
 		List<Double> YList1 = new LinkedList<Double>();
 		List<Double> YList2 = new LinkedList<Double>();
-		String [] Selected  = SelectItemToPlotten.selectedItem;
+		String [] Selected  = SelectItemToPlotten_2.selectedItem;
 		
 		if (Selected[3].equals("")){
 			

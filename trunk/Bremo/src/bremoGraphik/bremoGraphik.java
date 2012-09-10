@@ -4,9 +4,15 @@
  */
 package bremoGraphik;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -15,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -35,6 +42,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+import javax.swing.border.Border;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -61,7 +69,7 @@ public class bremoGraphik extends JFrame {
      */
     public bremoGraphik(File file) throws IOException, ParameterFileWrongInputException {
     	// TODO Auto-generated constructor stub
-    	if (file == null ) throw new FileNotFoundException();
+    	if (file == null) throw new FileNotFoundException();
         
     	initComponents(file);
     }
@@ -74,7 +82,11 @@ public class bremoGraphik extends JFrame {
     @SuppressWarnings("unchecked")
    
     private void initComponents(File file) throws IOException, ParameterFileWrongInputException {
-
+        
+    	TitelPanel = new JPanel();
+    	GraphikPanel = new JPanel();
+    	TabellePanel = new JPanel();
+    	GroupPanel  = new JPanel();
         chartBremoPanel = new JPanel();
         TitelLabel = new JLabel();
         druckverlaufPanel = new JPanel();
@@ -93,16 +105,44 @@ public class bremoGraphik extends JFrame {
         inputfile = file;
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setSize(new java.awt.Dimension(800, 800));
+        setPreferredSize(new Dimension (1280,800));
+        setIconImage(new ImageIcon(getClass().getResource(
+				"/bremoswing/bild/bremo2.png")).getImage());
         
-        chartBremoPanel.setSize(1280, 800);
-        //chartBremoPanel.setBackground(Color.white);
-
+        TitelPanel.setPreferredSize(new Dimension(1280,50));
+        TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        GraphikPanel.setPreferredSize(new Dimension (1010,675));
+        GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        TabellePanel.setPreferredSize(new Dimension(270,675));
+        TabellePanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        GroupPanel.setPreferredSize(new Dimension (1280,75));
+        GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        
+       
+//        chartBremoPanel.setSize(1280, 800);
+//        //chartBremoPanel.setBackground(Color.white);
+//
         TitelLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         TitelLabel.setText(file.getName());
-        Image image = new ImageIcon(getClass().getResource("/bremoswing/bild/bremo2.png")).getImage();
-        Icon  icon = new ImageIcon(image);
-        //TitelLabel.setIcon(icon);
+        URL url = getClass().getResource("/bremoswing/bild/bremo2.png");
+        ImageIcon icon = new ImageIcon(url);
+        Image image = icon.getImage();
+        image  = image.getScaledInstance(40, 40,java.awt.Image.SCALE_SMOOTH);
+        icon = new ImageIcon(image);
+        TitelLabel.setIcon(icon);
+        TitelPanel.add(TitelLabel, BorderLayout.CENTER);
+        
+        GridLayout GraphikPanelLayout = new GridLayout();
+        GraphikPanelLayout.setColumns(2);
+        GraphikPanelLayout.setRows(2);
+        GraphikPanelLayout.setHgap(10); 
+        GraphikPanelLayout.setVgap(10); 
+        GraphikPanel.setLayout(GraphikPanelLayout);
+               
+        GridLayout TabellePanelLayout = new GridLayout();
+        TabellePanelLayout.setColumns(1);
+        TabellePanelLayout.setRows(3);
+        TabellePanel.setLayout(TabellePanelLayout);
         
         BufferedReader in = new BufferedReader(new FileReader(file));
         String zeile = null;
@@ -158,231 +198,250 @@ public class bremoGraphik extends JFrame {
 			chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
         }
 		br.close();
+		
+		//chartDruckVerlauf.setPreferredSize(new Dimension(500,300));
+		chartDruckVerlauf.setBorder(BorderFactory.createTitledBorder("Druckverlauf"));
+		GraphikPanel.add(chartDruckVerlauf);
+		GraphikPanel.add(new JPanel());
+		GraphikPanel.add(new JPanel());
+		GraphikPanel.add(new JPanel());
+		
+		JLabel TabellePostLabel = TabellePostFIle(file);
+		//TabellePostLabel.setBorder(BorderFactory.createTitledBorder("Tabelle Post File"));
+		JLabel TabelleInputLabel = TabelleInputFile(file);
+		//TabelleInputLabel.setBorder(BorderFactory.createTitledBorder("Tabelle Input File"));
+		TabellePanel.add(TabellePostLabel);
+		TabellePanel.add(TabelleInputLabel);
         
-        druckverlaufPanel.setBorder(BorderFactory.createTitledBorder(null, "Druckverlauf", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12))); // NOI18N
-//        druckverlaufPanel.setSize(460, 270);
-//        druckverlaufPanel.setLayout(new GridLayout(1, 1));
-//        druckverlaufPanel.add(chartDruckVerlauf);
+//        druckverlaufPanel.setBorder(BorderFactory.createTitledBorder(null, "Druckverlauf", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12))); // NOI18N
+////        druckverlaufPanel.setSize(460, 270);
+////        druckverlaufPanel.setLayout(new GridLayout(1, 1));
+////        druckverlaufPanel.add(chartDruckVerlauf);
+////        
+//        GroupLayout druckverlaufPanelLayout = new GroupLayout(druckverlaufPanel);
+//        druckverlaufPanel.setLayout(druckverlaufPanelLayout);
+//        druckverlaufPanelLayout.setHorizontalGroup(
+//            druckverlaufPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGap(0, 460, Short.MAX_VALUE)
+//            .addComponent(chartDruckVerlauf, 460, 460, 460)           
+//        );
+//        druckverlaufPanelLayout.setVerticalGroup(
+//            druckverlaufPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGap(0, 270, Short.MAX_VALUE)
+//            .addComponent(chartDruckVerlauf, 270, 270, 270)
+//        );
+//                                                                                                                                                                                                                                               
+//        graphik1Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 1", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
+//
+//        GroupLayout graphik1PanelLayout = new GroupLayout(graphik1Panel);
+//        graphik1Panel.setLayout(graphik1PanelLayout);
+//        graphik1PanelLayout.setHorizontalGroup(
+//            graphik1PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGap(0, 460, Short.MAX_VALUE)
+//        );
+//        graphik1PanelLayout.setVerticalGroup(
+//            graphik1PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGap(0, 270, Short.MAX_VALUE)
+//        );
+//
+//        graphik2Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 2", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
+//
+//        GroupLayout graphik2PanelLayout = new GroupLayout(graphik2Panel);
+//        graphik2Panel.setLayout(graphik2PanelLayout);
+//        graphik2PanelLayout.setHorizontalGroup(
+//            graphik2PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGap(0, 460, Short.MAX_VALUE)
+//        );
+//        graphik2PanelLayout.setVerticalGroup(
+//            graphik2PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGap(0, 270, Short.MAX_VALUE)
+//        );
+//
+//        graphik3Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 3", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
+//        graphik3Panel.setPreferredSize(new java.awt.Dimension(480, 300));
+//
+//        GroupLayout graphik3PanelLayout = new GroupLayout(graphik3Panel);
+//        graphik3Panel.setLayout(graphik3PanelLayout);
+//        graphik3PanelLayout.setHorizontalGroup(
+//            graphik3PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGap(0, 460, Short.MAX_VALUE)
+//        );
+//        graphik3PanelLayout.setVerticalGroup(
+//            graphik3PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGap(0, 270, Short.MAX_VALUE)
+//        );
+//
+//        tabelle_Post_File.setBorder(BorderFactory.createTitledBorder("Tabelle Post File"));
+//      //tabelle_Post_File.setPreferredSize(new java.awt.Dimension(250, 300));
+//        tabelle_Post_File.setRequestFocusEnabled(false);
+//        tabelle_Post_File.setVerifyInputWhenFocusTarget(false);
+//        tabelle_Post_File.setLayout(new GridLayout(1, 1));
+//        tabelle_Post_File.add(TabellePostFIle(file));
 //        
-        GroupLayout druckverlaufPanelLayout = new GroupLayout(druckverlaufPanel);
-        druckverlaufPanel.setLayout(druckverlaufPanelLayout);
-        druckverlaufPanelLayout.setHorizontalGroup(
-            druckverlaufPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 460, Short.MAX_VALUE)
-            .addComponent(chartDruckVerlauf, 460, 460, 460)           
-        );
-        druckverlaufPanelLayout.setVerticalGroup(
-            druckverlaufPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 270, Short.MAX_VALUE)
-            .addComponent(chartDruckVerlauf, 270, 270, 270)
-        );
-                                                                                                                                                                                                                                               
-        graphik1Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 1", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
+//        
+//
+////        GroupLayout tabelle_Post_FileLayout = new GroupLayout(tabelle_Post_File);
+////        tabelle_Post_File.setLayout(tabelle_Post_FileLayout);
+////        tabelle_Post_FileLayout.setHorizontalGroup(
+////            tabelle_Post_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+////            .addGap(0, 240, Short.MAX_VALUE)
+////        );
+////        tabelle_Post_FileLayout.setVerticalGroup(
+////            tabelle_Post_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+////            .addGap(0, 270, Short.MAX_VALUE)
+////        );
+//
+//        tabelle_Input_File.setBorder(BorderFactory.createTitledBorder("Tabelle Input File"));
+//        tabelle_Input_File.setLayout(new GridLayout(1, 1));
+//        tabelle_Input_File.add(TabelleInputFile(file));
+//
+////        GroupLayout tabelle_Input_FileLayout = new GroupLayout(tabelle_Input_File);
+////        tabelle_Input_File.setLayout(tabelle_Input_FileLayout);
+////        tabelle_Input_FileLayout.setHorizontalGroup(
+////            tabelle_Input_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+////            .addGap(0, 240, Short.MAX_VALUE)
+////        );
+////        tabelle_Input_FileLayout.setVerticalGroup(
+////            tabelle_Input_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+////            .addGap(0, 270, Short.MAX_VALUE)
+////        );
+//
+//        datumLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+//        Date dt = new Date();
+//        SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+//        datumLabel.setText(df.format( dt ));
+//        druckenButton.setText("Drucken");
+//        druckenButton.addActionListener(new ActionListener() {
+//            public void actionPerformed(java.awt.event.ActionEvent evt) {
+//                druckenButtonActionPerformed(evt);
+//            }
+//        });
+//        speichernButton.setText("Speichern");
+//        speichernButton.addActionListener(new ActionListener() {
+//            public void actionPerformed(java.awt.event.ActionEvent evt) {
+//                speichernButtonActionPerformed(evt);
+//            }
+//        });
+//
+//        pathLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+//        pathLabel.setText(file.getParent());
+//
+//        graphik3ComboBox1.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+//
+//        graphik2ComboBox1.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+//        graphik2ComboBox1.addActionListener(new java.awt.event.ActionListener() {
+//            public void actionPerformed(java.awt.event.ActionEvent evt) {
+//                graphik2ComboBox1ActionPerformed(evt);
+//            }
+//        });
+//
+//        graphik2ComboBox2.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        GroupLayout graphik1PanelLayout = new GroupLayout(graphik1Panel);
-        graphik1Panel.setLayout(graphik1PanelLayout);
-        graphik1PanelLayout.setHorizontalGroup(
-            graphik1PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 460, Short.MAX_VALUE)
-        );
-        graphik1PanelLayout.setVerticalGroup(
-            graphik1PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 270, Short.MAX_VALUE)
-        );
-
-        graphik2Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 2", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
-
-        GroupLayout graphik2PanelLayout = new GroupLayout(graphik2Panel);
-        graphik2Panel.setLayout(graphik2PanelLayout);
-        graphik2PanelLayout.setHorizontalGroup(
-            graphik2PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 460, Short.MAX_VALUE)
-        );
-        graphik2PanelLayout.setVerticalGroup(
-            graphik2PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 270, Short.MAX_VALUE)
-        );
-
-        graphik3Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 3", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
-        graphik3Panel.setPreferredSize(new java.awt.Dimension(480, 300));
-
-        GroupLayout graphik3PanelLayout = new GroupLayout(graphik3Panel);
-        graphik3Panel.setLayout(graphik3PanelLayout);
-        graphik3PanelLayout.setHorizontalGroup(
-            graphik3PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 460, Short.MAX_VALUE)
-        );
-        graphik3PanelLayout.setVerticalGroup(
-            graphik3PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 270, Short.MAX_VALUE)
-        );
-
-        tabelle_Post_File.setBorder(BorderFactory.createTitledBorder("Tabelle Post File"));
-      //tabelle_Post_File.setPreferredSize(new java.awt.Dimension(250, 300));
-        tabelle_Post_File.setRequestFocusEnabled(false);
-        tabelle_Post_File.setVerifyInputWhenFocusTarget(false);
-        tabelle_Post_File.setLayout(new GridLayout(1, 1));
-        tabelle_Post_File.add(TabellePostFIle(file));
-        
-        
-
-//        GroupLayout tabelle_Post_FileLayout = new GroupLayout(tabelle_Post_File);
-//        tabelle_Post_File.setLayout(tabelle_Post_FileLayout);
-//        tabelle_Post_FileLayout.setHorizontalGroup(
-//            tabelle_Post_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 240, Short.MAX_VALUE)
+//        GroupLayout chartBremoPanelLayout = new GroupLayout(chartBremoPanel);
+//        chartBremoPanel.setLayout(chartBremoPanelLayout);
+//        chartBremoPanelLayout.setHorizontalGroup(
+//            chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGroup(chartBremoPanelLayout.createSequentialGroup()
+//                .addContainerGap()
+//                .addComponent(graphik2ComboBox1, GroupLayout.PREFERRED_SIZE, 178, GroupLayout.PREFERRED_SIZE)
+//                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                .addComponent(graphik2ComboBox2, GroupLayout.PREFERRED_SIZE, 197, GroupLayout.PREFERRED_SIZE)
+//                .addGap(18, 18, 18)
+//                .addComponent(graphik3ComboBox1, GroupLayout.PREFERRED_SIZE, 234, GroupLayout.PREFERRED_SIZE)
+//                .addGap(1203, 1203, 1203))
+//            .addGroup(chartBremoPanelLayout.createSequentialGroup()
+//                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//                    .addGroup(chartBremoPanelLayout.createSequentialGroup()
+//                        .addGap(477, 477, 477)
+//                        .addComponent(TitelLabel, GroupLayout.PREFERRED_SIZE, 58, Short.MAX_VALUE))
+//                    .addGroup(chartBremoPanelLayout.createSequentialGroup()
+//                        .addContainerGap()
+//                        .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+//                            .addGroup(chartBremoPanelLayout.createSequentialGroup()
+//                                .addComponent(druckverlaufPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+//                                .addComponent(graphik1Panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+//                                .addComponent(tabelle_Post_File, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+//                            .addGroup(chartBremoPanelLayout.createSequentialGroup()
+//                                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//                                    .addGroup(chartBremoPanelLayout.createSequentialGroup()
+//                                        .addComponent(pathLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                                        .addGap(81, 81, 81)
+//                                        .addComponent(speichernButton)
+//                                        .addGap(186, 186, 186)
+//                                        .addComponent(druckenButton)
+//                                        .addGap(81, 81, 81))
+//                                    .addGroup(chartBremoPanelLayout.createSequentialGroup()
+//                                        .addComponent(graphik2Panel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,Short.MAX_VALUE)
+//                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+//                                        .addComponent(graphik3Panel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)))
+//                                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//                                    .addComponent(datumLabel, GroupLayout.PREFERRED_SIZE, 280, GroupLayout.PREFERRED_SIZE)
+//                                    .addComponent(tabelle_Input_File, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+//                .addContainerGap())
 //        );
-//        tabelle_Post_FileLayout.setVerticalGroup(
-//            tabelle_Post_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 270, Short.MAX_VALUE)
+//
+//        chartBremoPanelLayout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {graphik2ComboBox1, graphik2ComboBox2, graphik3ComboBox1});
+//
+//        chartBremoPanelLayout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {druckverlaufPanel, graphik1Panel, graphik2Panel, graphik3Panel});
+//
+//        chartBremoPanelLayout.setVerticalGroup(
+//            chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGroup(GroupLayout.Alignment.TRAILING, chartBremoPanelLayout.createSequentialGroup()
+//                .addContainerGap()
+//                .addComponent(TitelLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+//                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//                    .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+//                        .addComponent(graphik1Panel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+//                        .addComponent(tabelle_Post_File, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
+//                    .addComponent(druckverlaufPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
+//                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+//                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//                    .addComponent(graphik2Panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+//                    .addComponent(graphik3Panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+//                    .addComponent(tabelle_Input_File, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
+//                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+//                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//                    .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+//                        .addComponent(graphik3ComboBox1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+//                        .addComponent(graphik2ComboBox2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+//                    .addComponent(graphik2ComboBox1, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE))
+//                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+//                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+//                    .addComponent(pathLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                    .addComponent(speichernButton)
+//                    .addComponent(druckenButton)
+//                    .addComponent(datumLabel, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE))
+//                .addGap(93, 93, 93))
 //        );
 
-        tabelle_Input_File.setBorder(BorderFactory.createTitledBorder("Tabelle Input File"));
-        tabelle_Input_File.setLayout(new GridLayout(1, 1));
-        tabelle_Input_File.add(TabelleInputFile(file));
+//       chartBremoPanelLayout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {druckverlaufPanel, graphik1Panel, graphik2Panel, graphik3Panel});
 
-//        GroupLayout tabelle_Input_FileLayout = new GroupLayout(tabelle_Input_File);
-//        tabelle_Input_File.setLayout(tabelle_Input_FileLayout);
-//        tabelle_Input_FileLayout.setHorizontalGroup(
-//            tabelle_Input_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 240, Short.MAX_VALUE)
+//        chartBremoPanelLayout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {graphik2ComboBox1, graphik2ComboBox2, graphik3ComboBox1});
+
+//        GroupLayout layout = new GroupLayout(getContentPane());
+//        getContentPane().setLayout(layout);
+//        layout.setHorizontalGroup(
+//            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGroup(layout.createSequentialGroup()
+//                .addComponent(chartBremoPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+//                .addGap(0, 0, Short.MAX_VALUE))
 //        );
-//        tabelle_Input_FileLayout.setVerticalGroup(
-//            tabelle_Input_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 270, Short.MAX_VALUE)
+//        layout.setVerticalGroup(
+//            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//            .addGroup(layout.createSequentialGroup()
+//                .addComponent(chartBremoPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                .addContainerGap())
 //        );
-
-        datumLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        Date dt = new Date();
-        SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
-        datumLabel.setText(df.format( dt ));
-        druckenButton.setText("Drucken");
-        druckenButton.addActionListener(new ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                druckenButtonActionPerformed(evt);
-            }
-        });
-        speichernButton.setText("Speichern");
-        speichernButton.addActionListener(new ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                speichernButtonActionPerformed(evt);
-            }
-        });
-
-        pathLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        pathLabel.setText(file.getParent());
-
-        graphik3ComboBox1.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        graphik2ComboBox1.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        graphik2ComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                graphik2ComboBox1ActionPerformed(evt);
-            }
-        });
-
-        graphik2ComboBox2.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        GroupLayout chartBremoPanelLayout = new GroupLayout(chartBremoPanel);
-        chartBremoPanel.setLayout(chartBremoPanelLayout);
-        chartBremoPanelLayout.setHorizontalGroup(
-            chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(chartBremoPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(graphik2ComboBox1, GroupLayout.PREFERRED_SIZE, 178, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(graphik2ComboBox2, GroupLayout.PREFERRED_SIZE, 197, GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(graphik3ComboBox1, GroupLayout.PREFERRED_SIZE, 234, GroupLayout.PREFERRED_SIZE)
-                .addGap(1203, 1203, 1203))
-            .addGroup(chartBremoPanelLayout.createSequentialGroup()
-                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(chartBremoPanelLayout.createSequentialGroup()
-                        .addGap(477, 477, 477)
-                        .addComponent(TitelLabel, GroupLayout.PREFERRED_SIZE, 58, 800))
-                    .addGroup(chartBremoPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                            .addGroup(chartBremoPanelLayout.createSequentialGroup()
-                                .addComponent(druckverlaufPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(graphik1Panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(tabelle_Post_File, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
-                            .addGroup(chartBremoPanelLayout.createSequentialGroup()
-                                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                    .addGroup(chartBremoPanelLayout.createSequentialGroup()
-                                        .addComponent(pathLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGap(81, 81, 81)
-                                        .addComponent(speichernButton)
-                                        .addGap(186, 186, 186)
-                                        .addComponent(druckenButton)
-                                        .addGap(81, 81, 81))
-                                    .addGroup(chartBremoPanelLayout.createSequentialGroup()
-                                        .addComponent(graphik2Panel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(graphik3Panel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)))
-                                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                    .addComponent(datumLabel, GroupLayout.PREFERRED_SIZE, 280, GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(tabelle_Input_File, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))))
-                .addContainerGap())
-        );
-
-        chartBremoPanelLayout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {graphik2ComboBox1, graphik2ComboBox2, graphik3ComboBox1});
-
-        chartBremoPanelLayout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {druckverlaufPanel, graphik1Panel, graphik2Panel, graphik3Panel});
-
-        chartBremoPanelLayout.setVerticalGroup(
-            chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(GroupLayout.Alignment.TRAILING, chartBremoPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(TitelLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                        .addComponent(graphik1Panel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                        .addComponent(tabelle_Post_File, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
-                    .addComponent(druckverlaufPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(graphik2Panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                    .addComponent(graphik3Panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                    .addComponent(tabelle_Input_File, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(graphik3ComboBox1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(graphik2ComboBox2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addComponent(graphik2ComboBox1, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(chartBremoPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(pathLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(speichernButton)
-                    .addComponent(druckenButton)
-                    .addComponent(datumLabel, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE))
-                .addGap(93, 93, 93))
-        );
-
-        chartBremoPanelLayout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {druckverlaufPanel, graphik1Panel, graphik2Panel, graphik3Panel});
-
-        chartBremoPanelLayout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {graphik2ComboBox1, graphik2ComboBox2, graphik3ComboBox1});
-
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(chartBremoPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(chartBremoPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
+        Container pane = this.getContentPane();
+        pane.add(TitelPanel,BorderLayout.PAGE_START);
+        pane.add(GraphikPanel,BorderLayout.CENTER);
+        pane.add(TabellePanel,BorderLayout.LINE_END);
+        pane.add(GroupPanel,BorderLayout.PAGE_END);
+        setVisible(true);
         pack();
     }// </editor-fold>
 
@@ -395,7 +454,7 @@ public class bremoGraphik extends JFrame {
         // TODO add your handling code here:
     }
     
-    private void druckenButtonActionPerformed( ActionEvent evt){
+    private void druckenButtonActionPerformed(ActionEvent evt){
     	// TODO add your handling code here:
     	MyPrinter pr = new  MyPrinter(chartBremoPanel);
     	pr.setOrientation(0);
@@ -427,6 +486,9 @@ public class bremoGraphik extends JFrame {
 		
 		String tabelle ="<html>"+
 				        "<TABLE BORDER>"+
+				        "<TR>"+
+		                "<TH colspan=\"2\">Tabelle Post File</TH>"+
+		                "</TR>"+
 		                "<TR>"+
 		                "<TH>"+header1[0] +"</TH>"+
 		                "<TD>"+header2[0] +"</TD>"+
@@ -454,18 +516,6 @@ public class bremoGraphik extends JFrame {
 		                "<TR>"+
 		                "<TH>"+header1[22] +"</TH>"+
 		                "<TD>"+header2[22] +"</TD>"+
-		                "</TR>"+
-		                "<TR>"+
-		                "<TH></TH>"+
-		                "<TD></TD>"+
-		                "</TR>"+
-		                "<TR>"+
-		                "<TH></TH>"+
-		                "<TD></TD>"+
-		                "</TR>"+
-		                "<TR>"+
-		                "<TH></TH>"+
-		                "<TD></TD>"+
 		                "</TR>"+
 		                "</TABLE>"+
 		                "</html>";
@@ -526,6 +576,9 @@ public class bremoGraphik extends JFrame {
     	
     	String tabelle ="<html>"+
 		        "<TABLE BORDER>"+
+		        "<TR>"+
+                "<TH colspan=\"2\">Tabelle Input File</TH>"+
+                "</TR>"+
                 "<TR>"+
                 "<TH>"+header2[0]+"</TH>"+
                 "<TD>"+header2[1]+"</TD>"+
@@ -541,26 +594,7 @@ public class bremoGraphik extends JFrame {
                 	i = i+2;
                 }
                 
-     tabelle = tabelle + "<TR>"+
-                "<TH></TH>"+
-                "<TD></TD>"+
-                "</TR>"+
-                "<TR>"+
-                "<TH></TH>"+
-                "<TD></TD>"+
-                "</TR>"+
-                "<TR>"+
-                "<TH></TH>"+
-                "<TD></TD>"+
-                "</TR>"+
-                "<TR>"+
-                "<TH></TH>"+
-                "<TD></TD>"+
-                "</TR>"+
-                "<TR>"+
-                "<TH></TH>"+
-                "<TD></TD>"+
-                "</TR>"+
+      tabelle = tabelle +
                 "</TABLE>"+
                 "</html>";
 
@@ -676,5 +710,9 @@ private void saveImage(JPanel panel) {
     private JPanel tabelle_Input_File;
     private JPanel tabelle_Post_File;
     private File  inputfile ;
+    private JPanel TitelPanel;
+    private JPanel GraphikPanel;
+    private JPanel GroupPanel;
+    private JPanel TabellePanel;
     // End of variables declaration
 }

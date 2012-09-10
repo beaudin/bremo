@@ -33,6 +33,7 @@ public class SelectItemToPlotten extends JFrame {
      */
     public SelectItemToPlotten() {
         initComponents();
+        SwingBremo.placeFrame(this);
     }
 
     /**
@@ -47,6 +48,7 @@ public class SelectItemToPlotten extends JFrame {
         jPanel1 = new JPanel();
         fileComboBox = new JComboBox();
         
+        setResizable(false);
         setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo2.png")).getImage());
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -64,7 +66,7 @@ public class SelectItemToPlotten extends JFrame {
 				// TODO Auto-generated method stub
 			    File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
 			    try {
-					new bremoGraphik(input).setVisible(true);
+					new bremoGraphik(input);
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

@@ -40,7 +40,13 @@ public class Rechnung {
 		sol.setStepSize(schrittweite);
 		
 		int anzGesamtIterationen=0;
-		int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
+		//Anzahl simWerte muss für eine APR (minus 1) angepasst werden um einen
+		//Interpolationsfehler zu vermeiden
+		int anzSimWerte;
+		if(dglSys.isDVA()==true)
+		anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
+		else
+		anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE-1;
 		double time;
 		Zone[] zn=dglSys.get_initialZones();
 		dglSys.bufferErgebnisse(x0, zn);

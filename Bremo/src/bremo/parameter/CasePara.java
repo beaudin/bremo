@@ -245,7 +245,24 @@ public class CasePara {
 		return autodetect;		
 		
 	}
-	
+	/**
+	* Gibt an ob eine Verlustteilung durchgeführt werden soll.
+	* Die Auswahl erfolgt durch den Bnutzer
+	*
+	* @return
+	*/
+	public boolean is_Verlustteilung(){
+	boolean verlustteilung = false;
+	String s = null;
+	String s2 []= {"ja","nein"};
+	try {
+	s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2);
+	} catch (ParameterFileWrongInputException e) {
+	e.stopBremo();
+	}
+	if(s.equalsIgnoreCase("ja")) verlustteilung=true;
+	return verlustteilung;
+	}
 	
 	
 	
@@ -530,7 +547,18 @@ public class CasePara {
 					"Es wird versucht, pmi aus der Indizierdatei zu berechnen ");
 			return std_pmi;
 		}
-	}	
+	}
+	
+	public double get_pme(){
+		double std_pme=0;
+		try {
+		return set_doublePara(INPUTFILE_PARAMETER, "pme","[bar]",0,30);
+		} catch (ParameterFileWrongInputException e) {
+		e.log_Warning("Keiner oder der falsche pme-Wert wurde angegeben. "+
+		"Dieser wird nicht in der Verlustteilung angezeigt");
+		return std_pme;
+		}
+		}
 	
 	
 	/**
@@ -1915,6 +1943,10 @@ public class CasePara {
 		public final int KANAL_SPALTEN_NR_PABG;
 		public final String EINGABEDATEI_FORMAT;
 		public final String NULLLINIEN_METHODE;
+		// Brennverlaufsvariablen
+		public final File BRENNVERLAUF_FILE;
+		public final int KANAL_SPALTEN_NR_DQBURN;
+		public final String EINGABEDATEI_FORMAT_BURN;
 		
 		public final File DFKENNZAHL_AUS_FILE;
 		public final File DFKENNZAHL_EIN_FILE;
@@ -2203,7 +2235,14 @@ public class CasePara {
 
 			if(KANAL_SPALTEN_NR_PZYL==KANAL_SPALTEN_NR_PEIN || KANAL_SPALTEN_NR_PZYL==KANAL_SPALTEN_NR_PABG || KANAL_SPALTEN_NR_PEIN==KANAL_SPALTEN_NR_PABG)
 				throw new ParameterFileWrongInputException("Die angegebenen Kanalnummern bzw Spaltennummern " +
-				"für pZyl, pEin und pAbg sind teilweise identisch");			
+				"für pZyl, pEin und pAbg sind teilweise identisch");
+			String burnFileName=set_FileName(PARAMETER,"burnFileName");
+			int indexOf_burn=burnFileName.indexOf(".");
+			EINGABEDATEI_FORMAT_BURN=burnFileName.substring(indexOf_burn+1);
+			//Dateiendung
+			BRENNVERLAUF_FILE=new File(WD+burnFileName);
+			KANAL_SPALTEN_NR_DQBURN=(int)set_doublePara(PARAMETER,
+			"spalte_dQburn","",1,40); //bis zu fünf kaskadierte CombiWF
 		
 			
 			DAUER_ASP_SEC=(DAUER_ASP_KW)/(360*get_DrehzahlInUproSec());

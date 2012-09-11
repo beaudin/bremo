@@ -579,5 +579,11 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	public VektorBuffer get_dm_buffer() {
 		return this.dmb_buffer;
 	}
+	
+	@Override
+	public VektorBuffer get_p_buffer() {
+	// TODO Auto-generated method stub
+	return null;
+	}
 
 }

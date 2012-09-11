@@ -3,7 +3,8 @@ package bremo.main;
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-
+//import funktionenTests.FunktionsTester;
+import berechnungsModule.Berechnung.Verlustteilung;
 
 import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
@@ -84,8 +85,14 @@ public class Bremo extends Thread {
 		} catch (Exception  e) {
 			this.interrupt();
 			e.printStackTrace();
-			SwingBremo.StateBremoThread();
+			
 		}
+		if(casePara.is_Verlustteilung() == true){
+			Verlustteilung verl = new Verlustteilung(casePara);
+			verl.berechneVerluste();
+			System.out.println("Verlustteilung fertig");
+			}
+		SwingBremo.StateBremoThread();
 	}	
 
 	/**
@@ -136,9 +143,9 @@ public class Bremo extends Thread {
 	throws ParameterFileWrongInputException {		
 		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
 		//Hier einige Beisspile wie Funktionen getestet werden können
-		File fileCP 
-		= new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//funktionsTester.txt");
-		CasePara privateCP = new CasePara(fileCP);
+		//File fileCP 
+		//= new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//funktionsTester.txt");
+		//CasePara privateCP = new CasePara(fileCP);
 		//FunktionsTester ft=new FunktionsTester(privateCP);
 		//ft.test_Motor();
 
@@ -148,7 +155,7 @@ public class Bremo extends Thread {
 		if(args.length>0)
 			file = new File(args[0]);
 		else
-			file = new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//DF_LWA.txt");
+			file = new File("d://Daten//workspace//Bremo//src//InputFiles//Frank//120702_Einzonig.txt");
 
 		Bremo bremo=new Bremo(file);
 		bremo.run();	

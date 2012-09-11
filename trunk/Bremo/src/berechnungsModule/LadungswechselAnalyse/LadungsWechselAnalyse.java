@@ -49,12 +49,26 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	private DurchflusskennzahlFileReader DF_Datei_Aus;
 	private VentilhubFileReader VH_Datei_Ein;
 	private VentilhubFileReader VH_Datei_Aus;
+	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen
+	private misc.VektorBuffer p_buffer ;
 	
 	public LadungsWechselAnalyse(CasePara cp) {
-		super(cp,new ErgebnisBuffer(cp,"LWA_"));	
-		T_buffer = new VektorBuffer(CP);
-		m = CP.MOTOR;
+		super(cp,new ErgebnisBuffer(cp,"LWA_"));
 		indiD=new IndizierDaten(cp);
+		createMe(cp);
+		}
+		public LadungsWechselAnalyse(CasePara cp, boolean gemittelt){
+		super(cp,new ErgebnisBuffer(cp,"LWA_"));
+		if (gemittelt == true)
+		indiD=new IndizierDaten(cp,true);
+		else
+		indiD=new IndizierDaten(cp);
+		createMe(cp);
+		}
+		public void createMe(CasePara cp) {
+		T_buffer = new VektorBuffer(CP);
+		p_buffer = new misc.VektorBuffer(cp);
+		m = CP.MOTOR;
 		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		anzZonen=1;
 		gAbgasbehaelter =new GasGemisch("AGR_intern_LWA");
@@ -243,6 +257,8 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	}
 
 	public void bufferErgebnisse(double time, Zone [] zonen) {
+		double p = zonen[0].get_p();
+		p_buffer.addValue(time, p);
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zonen);
 		int i=0;
 		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",super.CP.convert_SEC2KW(time),i);
@@ -392,6 +408,10 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	@Override
 	public VektorBuffer get_dQb_buffer() {
 		return null;
+	}
+	@Override
+	public VektorBuffer get_p_buffer() {
+	return p_buffer;
 	}
 	
 //	/**

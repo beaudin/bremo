@@ -337,13 +337,20 @@ public class DVA_Homogen_EinZonig extends DVA{
 		double Vol_b = 0;
 		int cnt=0;
 		
-		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
-			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
-			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
+		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
+			pZyl_b=indiD.get_pZyl(kw);
+			Vol_b=motor.get_V(kw);
 			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
 			cnt++;
 		}
 		
+		/*for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
+			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
+			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
+			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
+			cnt++;
+		}*/
+	
 		double n=MatLibBase.mw_aus_1DArray(n_array); //Polytropenexponent
 		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
 		i+=1;
@@ -458,6 +465,12 @@ public class DVA_Homogen_EinZonig extends DVA{
 	@Override
 	public VektorBuffer get_dm_buffer() {
 		return this.dmb_buffer;
+	}
+	
+	@Override
+	public VektorBuffer get_p_buffer() {
+	// TODO Auto-generated method stub
+	return null;
 	}
 
 }

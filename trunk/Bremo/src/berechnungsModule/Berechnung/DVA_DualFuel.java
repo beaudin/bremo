@@ -722,5 +722,10 @@ double sumdma=0;
 	public VektorBuffer get_dm_buffer() {
 		return this.dmb_buffer;
 	}
+	
+	public VektorBuffer get_p_buffer() {
+		// TODO Auto-generated method stub
+		return null;
+		}
 
 }

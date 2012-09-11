@@ -41,6 +41,7 @@ public abstract class BerechnungsModell  {
 	public abstract VektorBuffer get_dm_buffer();
 	public abstract VektorBuffer get_dQw_buffer();
 	public abstract VektorBuffer get_dQb_buffer();
+	public abstract VektorBuffer get_p_buffer();
 	protected abstract void checkEinspritzungen(MasterEinspritzung me);
 	
 //	/**

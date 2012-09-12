@@ -9,6 +9,8 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
@@ -83,6 +85,7 @@ public class bremoGraphik extends JFrame {
    
     private void initComponents(File file) throws IOException, ParameterFileWrongInputException {
         
+    	/**  initialization of Variable ***********************************************/
     	TitelPanel = new JPanel();
     	GraphikPanel = new JPanel();
     	TabellePanel = new JPanel();
@@ -103,11 +106,16 @@ public class bremoGraphik extends JFrame {
         graphik2ComboBox1 = new JComboBox();
         graphik2ComboBox2 = new JComboBox();
         inputfile = file;
-
+        /********************************************************************************/
+        
+        
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setPreferredSize(new Dimension (1280,800));
         setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo2.png")).getImage());
+        
+        
+        /** Size and Border of All Panel of the Frame************************************/
         
         TitelPanel.setPreferredSize(new Dimension(1280,50));
         TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -117,11 +125,10 @@ public class bremoGraphik extends JFrame {
         TabellePanel.setBorder(BorderFactory.createLineBorder(Color.black));
         GroupPanel.setPreferredSize(new Dimension (1280,75));
         GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        /********************************************************************************/     
         
-       
-//        chartBremoPanel.setSize(1280, 800);
-//        //chartBremoPanel.setBackground(Color.white);
-//
+        /** TitelLabel Processing  ******************************************************/
+        
         TitelLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         TitelLabel.setText(file.getName());
         URL url = getClass().getResource("/bremoswing/bild/bremo2.png");
@@ -131,6 +138,9 @@ public class bremoGraphik extends JFrame {
         icon = new ImageIcon(image);
         TitelLabel.setIcon(icon);
         TitelPanel.add(TitelLabel, BorderLayout.CENTER);
+        /********************************************************************************/
+        
+        /**  Layout of GraphikPanel  ****************************************************/
         
         GridLayout GraphikPanelLayout = new GridLayout();
         GraphikPanelLayout.setColumns(2);
@@ -138,204 +148,121 @@ public class bremoGraphik extends JFrame {
         GraphikPanelLayout.setHgap(10); 
         GraphikPanelLayout.setVgap(10); 
         GraphikPanel.setLayout(GraphikPanelLayout);
-               
+        /********************************************************************************/
+        
+        /** Layout of TabellePanel  *****************************************************/ 
+        
         GridLayout TabellePanelLayout = new GridLayout();
         TabellePanelLayout.setColumns(1);
         TabellePanelLayout.setRows(3);
         TabellePanel.setLayout(TabellePanelLayout);
+        /********************************************************************************/
         
-        BufferedReader in = new BufferedReader(new FileReader(file));
-        String zeile = null;
-		String zeit_oder_KW = "";
-		String [] St = null;
-		while((zeile = in.readLine()) != null) {
-			zeile=zeile.replaceAll(" ", "");
-			zeile=zeile.replaceAll("\t", "");
-        	 St = zeile.split(":=");
-        	 if (St[0].equals("zeit_oder_KW_Basiert[-]")){
-        		 if (St[1].equals("KW")){
-        			 zeit_oder_KW = "KW";
-        		 }
-        		 else {
-        			 zeit_oder_KW = "zeit";
-        		 }
-        	 }
-        }
-        in.close();
-        BufferedReader br = new  BufferedReader(new FileReader(file.getParent()+"/DVA_"+file.getName()));
-        XYSeries serie1 = new XYSeries("p_soll") ;
-        XYSeries serie2 = new XYSeries("p") ;
-        XYDataset datasetDruckVerlauf ;
+		/**  GraphikPanel Processing  **************************************************/
         
-        zeile = null;
-		String [] header = null;
-		String [] value = null;
-		if ((zeile = br.readLine()) != null){
-			header = zeile.split("\t");
-		}
-		while ((zeile = br.readLine()) != null){
-			value = zeile.split(" ");
-			if (zeit_oder_KW.equals("KW")) {
-				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[15]));//  KW  p_soll
-				serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[17])); // KW  p
-			}
-			else {
-				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[15]));//  Zeit p_soll
-				serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[17])); // Zeit p
-			}
-		}
-		XYSeriesCollection collectionDruckVerlauf = new XYSeriesCollection();
-		collectionDruckVerlauf.addSeries(serie1);
-		collectionDruckVerlauf.addSeries(serie2);
-		datasetDruckVerlauf = collectionDruckVerlauf;
-		ChartPanel chartDruckVerlauf = null;
-		if (zeit_oder_KW.equals("KW")){
-			//chartDruckVerlauf = createChartPanel(null, "[°KW]","[bar]" , datasetDruckVerlauf);
-			chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
-		}
-		else {
-			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]","[bar]" , datasetDruckVerlauf);
-			chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
-        }
-		br.close();
+        GraphikPanel.add(Druckverlauf(file));
+		GraphikPanel.add(new JPanel());
+		GraphikPanel.add(new JPanel());
+		GraphikPanel.add(new JPanel());
+		/*******************************************************************************/
 		
-		//chartDruckVerlauf.setPreferredSize(new Dimension(500,300));
-		chartDruckVerlauf.setBorder(BorderFactory.createTitledBorder("Druckverlauf"));
-		GraphikPanel.add(chartDruckVerlauf);
-		GraphikPanel.add(new JPanel());
-		GraphikPanel.add(new JPanel());
-		GraphikPanel.add(new JPanel());
+		/** TabellePanel Processing  ***************************************************/
 		
 		JLabel TabellePostLabel = TabellePostFIle(file);
-		//TabellePostLabel.setBorder(BorderFactory.createTitledBorder("Tabelle Post File"));
 		JLabel TabelleInputLabel = TabelleInputFile(file);
-		//TabelleInputLabel.setBorder(BorderFactory.createTitledBorder("Tabelle Input File"));
 		TabellePanel.add(TabellePostLabel);
 		TabellePanel.add(TabelleInputLabel);
-        
-//        druckverlaufPanel.setBorder(BorderFactory.createTitledBorder(null, "Druckverlauf", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12))); // NOI18N
-////        druckverlaufPanel.setSize(460, 270);
-////        druckverlaufPanel.setLayout(new GridLayout(1, 1));
-////        druckverlaufPanel.add(chartDruckVerlauf);
-////        
-//        GroupLayout druckverlaufPanelLayout = new GroupLayout(druckverlaufPanel);
-//        druckverlaufPanel.setLayout(druckverlaufPanelLayout);
-//        druckverlaufPanelLayout.setHorizontalGroup(
-//            druckverlaufPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 460, Short.MAX_VALUE)
-//            .addComponent(chartDruckVerlauf, 460, 460, 460)           
-//        );
-//        druckverlaufPanelLayout.setVerticalGroup(
-//            druckverlaufPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 270, Short.MAX_VALUE)
-//            .addComponent(chartDruckVerlauf, 270, 270, 270)
-//        );
-//                                                                                                                                                                                                                                               
-//        graphik1Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 1", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
-//
-//        GroupLayout graphik1PanelLayout = new GroupLayout(graphik1Panel);
-//        graphik1Panel.setLayout(graphik1PanelLayout);
-//        graphik1PanelLayout.setHorizontalGroup(
-//            graphik1PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 460, Short.MAX_VALUE)
-//        );
-//        graphik1PanelLayout.setVerticalGroup(
-//            graphik1PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 270, Short.MAX_VALUE)
-//        );
-//
-//        graphik2Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 2", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
-//
-//        GroupLayout graphik2PanelLayout = new GroupLayout(graphik2Panel);
-//        graphik2Panel.setLayout(graphik2PanelLayout);
-//        graphik2PanelLayout.setHorizontalGroup(
-//            graphik2PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 460, Short.MAX_VALUE)
-//        );
-//        graphik2PanelLayout.setVerticalGroup(
-//            graphik2PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 270, Short.MAX_VALUE)
-//        );
-//
-//        graphik3Panel.setBorder(BorderFactory.createTitledBorder(null, "Graphik 3", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
-//        graphik3Panel.setPreferredSize(new java.awt.Dimension(480, 300));
-//
-//        GroupLayout graphik3PanelLayout = new GroupLayout(graphik3Panel);
-//        graphik3Panel.setLayout(graphik3PanelLayout);
-//        graphik3PanelLayout.setHorizontalGroup(
-//            graphik3PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 460, Short.MAX_VALUE)
-//        );
-//        graphik3PanelLayout.setVerticalGroup(
-//            graphik3PanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//            .addGap(0, 270, Short.MAX_VALUE)
-//        );
-//
-//        tabelle_Post_File.setBorder(BorderFactory.createTitledBorder("Tabelle Post File"));
-//      //tabelle_Post_File.setPreferredSize(new java.awt.Dimension(250, 300));
-//        tabelle_Post_File.setRequestFocusEnabled(false);
-//        tabelle_Post_File.setVerifyInputWhenFocusTarget(false);
-//        tabelle_Post_File.setLayout(new GridLayout(1, 1));
-//        tabelle_Post_File.add(TabellePostFIle(file));
-//        
-//        
-//
-////        GroupLayout tabelle_Post_FileLayout = new GroupLayout(tabelle_Post_File);
-////        tabelle_Post_File.setLayout(tabelle_Post_FileLayout);
-////        tabelle_Post_FileLayout.setHorizontalGroup(
-////            tabelle_Post_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-////            .addGap(0, 240, Short.MAX_VALUE)
-////        );
-////        tabelle_Post_FileLayout.setVerticalGroup(
-////            tabelle_Post_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-////            .addGap(0, 270, Short.MAX_VALUE)
-////        );
-//
-//        tabelle_Input_File.setBorder(BorderFactory.createTitledBorder("Tabelle Input File"));
-//        tabelle_Input_File.setLayout(new GridLayout(1, 1));
-//        tabelle_Input_File.add(TabelleInputFile(file));
-//
-////        GroupLayout tabelle_Input_FileLayout = new GroupLayout(tabelle_Input_File);
-////        tabelle_Input_File.setLayout(tabelle_Input_FileLayout);
-////        tabelle_Input_FileLayout.setHorizontalGroup(
-////            tabelle_Input_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-////            .addGap(0, 240, Short.MAX_VALUE)
-////        );
-////        tabelle_Input_FileLayout.setVerticalGroup(
-////            tabelle_Input_FileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-////            .addGap(0, 270, Short.MAX_VALUE)
-////        );
-//
-//        datumLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-//        Date dt = new Date();
-//        SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
-//        datumLabel.setText(df.format( dt ));
-//        druckenButton.setText("Drucken");
-//        druckenButton.addActionListener(new ActionListener() {
-//            public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                druckenButtonActionPerformed(evt);
-//            }
-//        });
-//        speichernButton.setText("Speichern");
-//        speichernButton.addActionListener(new ActionListener() {
-//            public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                speichernButtonActionPerformed(evt);
-//            }
-//        });
-//
-//        pathLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-//        pathLabel.setText(file.getParent());
-//
-//        graphik3ComboBox1.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-//
-//        graphik2ComboBox1.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-//        graphik2ComboBox1.addActionListener(new java.awt.event.ActionListener() {
-//            public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                graphik2ComboBox1ActionPerformed(evt);
-//            }
-//        });
-//
-//        graphik2ComboBox2.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+		/******************************************************************************/
+		
+		graphik2ComboBox1.setModel(new DefaultComboBoxModel(new String[] {
+				"20101020__40_DVAParameter.txt",
+				"20101020__40_DVAParameter.txt",
+				"20101020__40_DVAParameter.txt", "Item 4" }));
+		graphik2ComboBox1
+				.addActionListener(new java.awt.event.ActionListener() {
+					public void actionPerformed(ActionEvent evt) {
+						graphik2ComboBox1ActionPerformed(evt);
+					}
+				});
+
+		graphik2ComboBox2.setModel(new DefaultComboBoxModel(new String[] {
+				"20101020__40_DVAParameter.txt",
+				"20101020__40_DVAParameter.txt",
+				"20101020__40_DVAParameter.txt", "Item 4" }));
+		graphik2ComboBox2
+				.addActionListener(new java.awt.event.ActionListener() {
+					public void actionPerformed(ActionEvent evt) {
+						graphik2ComboBox2ActionPerformed(evt);
+					}
+				});
+
+		graphik3ComboBox1.setModel(new DefaultComboBoxModel(new String[] {
+				"20101020__40_DVAParameter.txt",
+				"20101020__40_DVAParameter.txt",
+				"20101020__40_DVAParameter.txt", "Item 4" }));
+		graphik3ComboBox1
+				.addActionListener(new java.awt.event.ActionListener() {
+					public void actionPerformed(ActionEvent evt) {
+						graphik3ComboBox1ActionPerformed(evt);
+					}
+				});
+
+		pathLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+		pathLabel.setText(file.getParent());
+
+		speichernButton.setText("Speichern");
+		speichernButton.addActionListener(new ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				speichernButtonActionPerformed(evt);
+			}
+		});
+
+		druckenButton.setText("Drucken  ");
+		druckenButton.addActionListener(new ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				druckenButtonActionPerformed(evt);
+			}
+		});
+
+		datumLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+		Date dt = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		datumLabel.setText(df.format(dt));
+		
+		GroupLayout layout = new GroupLayout(GroupPanel);
+		GroupPanel.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		
+		
+		layout.setHorizontalGroup(
+				   layout.createSequentialGroup()
+				   .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						   .addGroup(layout.createSequentialGroup()
+								   .addComponent(graphik2ComboBox1, GroupLayout.PREFERRED_SIZE, 225, 300)
+								   .addComponent(graphik2ComboBox2, GroupLayout.PREFERRED_SIZE, 225, 300))
+				           .addComponent(pathLabel))
+				   .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+				   .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+				           .addComponent(graphik3ComboBox1, GroupLayout.PREFERRED_SIZE, 225, 300)
+				           .addGroup(layout.createSequentialGroup()
+								   .addComponent(speichernButton)
+								   .addComponent(druckenButton)))     
+				   .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+				   .addComponent(datumLabel)
+				);
+				layout.setVerticalGroup(
+				   layout.createSequentialGroup()
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				           .addComponent(graphik2ComboBox1,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+				           .addComponent(graphik2ComboBox2,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+				           .addComponent(graphik3ComboBox1,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE))
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				           .addComponent(pathLabel,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+				           .addComponent(speichernButton,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+				           .addComponent(druckenButton)
+				           .addComponent(datumLabel))
+				);
 
 //        GroupLayout chartBremoPanelLayout = new GroupLayout(chartBremoPanel);
 //        chartBremoPanel.setLayout(chartBremoPanelLayout);
@@ -436,7 +363,7 @@ public class bremoGraphik extends JFrame {
 //                .addComponent(chartBremoPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 //                .addContainerGap())
 //        );
-        Container pane = this.getContentPane();
+        Container pane = getContentPane();
         pane.add(TitelPanel,BorderLayout.PAGE_START);
         pane.add(GraphikPanel,BorderLayout.CENTER);
         pane.add(TabellePanel,BorderLayout.LINE_END);
@@ -445,15 +372,26 @@ public class bremoGraphik extends JFrame {
         pack();
     }// </editor-fold>
 
-    private void speichernButtonActionPerformed(ActionEvent evt) {
+   
+
+	protected void graphik3ComboBox1ActionPerformed(ActionEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void speichernButtonActionPerformed(ActionEvent evt) {
         // TODO add your handling code here:
-    	saveImage(chartBremoPanel);
+    	saveImage();
     }
 
     private void graphik2ComboBox1ActionPerformed(ActionEvent evt) {
         // TODO add your handling code here:
     }
     
+    protected void graphik2ComboBox2ActionPerformed(ActionEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
     private void druckenButtonActionPerformed(ActionEvent evt){
     	// TODO add your handling code here:
     	MyPrinter pr = new  MyPrinter(chartBremoPanel);
@@ -462,6 +400,75 @@ public class bremoGraphik extends JFrame {
     	pr.setTBMargins(150);
     	pr.setFitIntoPage(true);
     	pr.print();
+    }
+    
+    /**
+     * Build Graphic for the Pressure Curve (DruckVerlauf)
+     * @param file  InputputFile
+     * @return
+     * @throws IOException
+     */
+    private ChartPanel Druckverlauf(File file) throws IOException{
+    	
+    	BufferedReader in = new BufferedReader(new FileReader(file));
+        String zeile = null;
+		String zeit_oder_KW = "";
+		String [] St = null;
+		while((zeile = in.readLine()) != null) {
+			zeile=zeile.replaceAll(" ", "");
+			zeile=zeile.replaceAll("\t", "");
+        	 St = zeile.split(":=");
+        	 if (St[0].equals("zeit_oder_KW_Basiert[-]")){
+        		 if (St[1].equals("KW")){
+        			 zeit_oder_KW = "KW";
+        		 }
+        		 else {
+        			 zeit_oder_KW = "zeit";
+        		 }
+        	 }
+        }
+        in.close();
+        BufferedReader br = new  BufferedReader(new FileReader(file.getParent()+"/DVA_"+file.getName()));
+        XYSeries serie1 = new XYSeries("p_soll") ;
+        XYSeries serie2 = new XYSeries("p") ;
+        XYDataset datasetDruckVerlauf ;
+        
+        zeile = null;
+		String [] header = null;
+		String [] value = null;
+		if ((zeile = br.readLine()) != null){
+			header = zeile.split("\t");
+		}
+		while ((zeile = br.readLine()) != null){
+			value = zeile.split(" ");
+			if (zeit_oder_KW.equals("KW")) {
+				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[15]));//  KW  p_soll
+				serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[17])); // KW  p
+			}
+			else {
+				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[15]));//  Zeit p_soll
+				serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[17])); // Zeit p
+			}
+		}
+		XYSeriesCollection collectionDruckVerlauf = new XYSeriesCollection();
+		collectionDruckVerlauf.addSeries(serie1);
+		collectionDruckVerlauf.addSeries(serie2);
+		datasetDruckVerlauf = collectionDruckVerlauf;
+		ChartPanel chartDruckVerlauf = null;
+		if (zeit_oder_KW.equals("KW")){
+			//chartDruckVerlauf = createChartPanel(null, "[°KW]","[bar]" , datasetDruckVerlauf);
+			chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
+		}
+		else {
+			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]","[bar]" , datasetDruckVerlauf);
+			chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
+        }
+		br.close();
+		
+		chartDruckVerlauf.setBorder(BorderFactory.createTitledBorder("Druckverlauf"));
+		
+		return chartDruckVerlauf;
+    	
     }
     
     /**
@@ -630,7 +637,7 @@ private ChartPanel createChartPanel(String Titel, String XLabel,String YLabel, X
 		return chartPanel;
 	}
 
-private void saveImage(JPanel panel) {
+private void saveImage() {
 	Container c = getContentPane();
 	BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB);
 	c.paint(im.getGraphics());

@@ -29,6 +29,7 @@ import java.util.Date;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.Icon;
@@ -81,7 +82,7 @@ public class bremoGraphik extends JFrame {
 	 * @throws IOException 
 	 * @throws ParameterFileWrongInputException 
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "static-access" })
    
     private void initComponents(File file) throws IOException, ParameterFileWrongInputException {
         
@@ -103,6 +104,7 @@ public class bremoGraphik extends JFrame {
         speichernButton = new JButton();
         pathLabel = new JLabel();
         graphik3ComboBox1 = new JComboBox();
+        graphik3ComboBox2 = new JComboBox();
         graphik2ComboBox1 = new JComboBox();
         graphik2ComboBox2 = new JComboBox();
         inputfile = file;
@@ -150,29 +152,40 @@ public class bremoGraphik extends JFrame {
         GraphikPanel.setLayout(GraphikPanelLayout);
         /********************************************************************************/
         
-        /** Layout of TabellePanel  *****************************************************/ 
+        /** Layout of TabellePanel  and TabellePanel Processing *************************/ 
+//        
+//        GridLayout TabellePanelLayout = new GridLayout();
+//        TabellePanelLayout.setColumns(1);
+//        TabellePanelLayout.setRows(3);
+//        TabellePanel.setLayout(TabellePanelLayout);
+        JLabel TabellePostLabel = TabellePostFIle(file);
+		JLabel TabelleInputLabel = TabelleInputFile(file);
+		
+        Box b1 = Box.createHorizontalBox();
+        b1.add(Box.createHorizontalStrut(7));
+        b1.add(TabellePostLabel);
         
-        GridLayout TabellePanelLayout = new GridLayout();
-        TabellePanelLayout.setColumns(1);
-        TabellePanelLayout.setRows(3);
-        TabellePanel.setLayout(TabellePanelLayout);
+        Box b2 = Box.createHorizontalBox();
+        b2.add(Box.createHorizontalStrut(25));
+        b2.add(TabelleInputLabel);
+        
+        Box b3 = Box.createVerticalBox();
+        b3.add(Box.createVerticalStrut(20));
+        b3.add(b1);
+        b3.add(Box.createVerticalStrut(100));
+        b3.add(b2);
+        
+        TabellePanel.add(b3);
+        
         /********************************************************************************/
         
 		/**  GraphikPanel Processing  **************************************************/
         
         GraphikPanel.add(Druckverlauf(file));
-		GraphikPanel.add(new JPanel());
-		GraphikPanel.add(new JPanel());
-		GraphikPanel.add(new JPanel());
+		GraphikPanel.add(Druckverlauf(file));
+		GraphikPanel.add(Druckverlauf(file));
+		GraphikPanel.add(Druckverlauf(file));
 		/*******************************************************************************/
-		
-		/** TabellePanel Processing  ***************************************************/
-		
-		JLabel TabellePostLabel = TabellePostFIle(file);
-		JLabel TabelleInputLabel = TabelleInputFile(file);
-		TabellePanel.add(TabellePostLabel);
-		TabellePanel.add(TabelleInputLabel);
-		/******************************************************************************/
 		
 		graphik2ComboBox1.setModel(new DefaultComboBoxModel(new String[] {
 				"20101020__40_DVAParameter.txt",
@@ -206,6 +219,16 @@ public class bremoGraphik extends JFrame {
 						graphik3ComboBox1ActionPerformed(evt);
 					}
 				});
+		graphik3ComboBox2.setModel(new DefaultComboBoxModel(new String[] {
+				"20101020__40_DVAParameter.txt",
+				"20101020__40_DVAParameter.txt",
+				"20101020__40_DVAParameter.txt", "Item 4" }));
+		graphik3ComboBox2
+				.addActionListener(new java.awt.event.ActionListener() {
+					public void actionPerformed(ActionEvent evt) {
+						graphik3ComboBox2ActionPerformed(evt);
+					}
+				});
 
 		pathLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 		pathLabel.setText(file.getParent());
@@ -229,40 +252,65 @@ public class bremoGraphik extends JFrame {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		datumLabel.setText(df.format(dt));
 		
-		GroupLayout layout = new GroupLayout(GroupPanel);
-		GroupPanel.setLayout(layout);
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
+	    Box box1 = Box.createHorizontalBox();
+	    box1.add(graphik2ComboBox1);
+	    box1.add(graphik2ComboBox2);
+	    box1.add(Box.createHorizontalStrut(60));
+	    box1.add(graphik3ComboBox1);
+	    box1.add(graphik3ComboBox2);
+	    box1.add(Box.createHorizontalStrut(315));
+	    
+	    Box box2 = Box.createHorizontalBox();
+	    box2.add(pathLabel);
+	    box2.add(Box.createHorizontalStrut(240));  
+	    box2.add(speichernButton);
+	    box2.add(Box.createHorizontalStrut(140));
+	    box2.add(druckenButton);
+	    box2.add(Box.createHorizontalStrut(175));
+	    box2.add(datumLabel);
+	    
+	    Box box3 = Box.createVerticalBox();
+	    box3.add(box1);
+	    box3.add(Box.createVerticalStrut(8));
+	    box3.add(box2);
+	    
+	    GroupPanel.add(box3);
 		
 		
-		layout.setHorizontalGroup(
-				   layout.createSequentialGroup()
-				   .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						   .addGroup(layout.createSequentialGroup()
-								   .addComponent(graphik2ComboBox1, GroupLayout.PREFERRED_SIZE, 225, 300)
-								   .addComponent(graphik2ComboBox2, GroupLayout.PREFERRED_SIZE, 225, 300))
-				           .addComponent(pathLabel))
-				   .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-				   .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-				           .addComponent(graphik3ComboBox1, GroupLayout.PREFERRED_SIZE, 225, 300)
-				           .addGroup(layout.createSequentialGroup()
-								   .addComponent(speichernButton)
-								   .addComponent(druckenButton)))     
-				   .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-				   .addComponent(datumLabel)
-				);
-				layout.setVerticalGroup(
-				   layout.createSequentialGroup()
-				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-				           .addComponent(graphik2ComboBox1,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
-				           .addComponent(graphik2ComboBox2,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
-				           .addComponent(graphik3ComboBox1,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE))
-				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-				           .addComponent(pathLabel,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
-				           .addComponent(speichernButton,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
-				           .addComponent(druckenButton)
-				           .addComponent(datumLabel))
-				);
+//		GroupLayout layout = new GroupLayout(GroupPanel);
+//		GroupPanel.setLayout(layout);
+//		layout.setAutoCreateGaps(true);
+//		layout.setAutoCreateContainerGaps(true);
+//		
+//		
+//		layout.setHorizontalGroup(
+//				   layout.createSequentialGroup()
+//				   .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+//						   .addGroup(layout.createSequentialGroup()
+//								   .addComponent(graphik2ComboBox1, GroupLayout.PREFERRED_SIZE, 225, 300)
+//								   .addComponent(graphik2ComboBox2, GroupLayout.PREFERRED_SIZE, 225, 300))
+//				           .addComponent(pathLabel))
+//				   .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+//				   .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+//				           .addComponent(graphik3ComboBox1, GroupLayout.PREFERRED_SIZE, 225, 300)
+//				           .addGroup(layout.createSequentialGroup()
+//								   .addComponent(speichernButton)
+//								   .addComponent(druckenButton)))     
+//				   .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+//				   .addComponent(datumLabel)
+//				);
+//				layout.setVerticalGroup(
+//				   layout.createSequentialGroup()
+//				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+//				           .addComponent(graphik2ComboBox1,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+//				           .addComponent(graphik2ComboBox2,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+//				           .addComponent(graphik3ComboBox1,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE))
+//				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+//				           .addComponent(pathLabel,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+//				           .addComponent(speichernButton,GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+//				           .addComponent(druckenButton)
+//				           .addComponent(datumLabel))
+//				);
 
 //        GroupLayout chartBremoPanelLayout = new GroupLayout(chartBremoPanel);
 //        chartBremoPanel.setLayout(chartBremoPanelLayout);
@@ -373,6 +421,11 @@ public class bremoGraphik extends JFrame {
     }// </editor-fold>
 
    
+
+	protected void graphik3ComboBox2ActionPerformed(ActionEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	protected void graphik3ComboBox1ActionPerformed(ActionEvent evt) {
 		// TODO Auto-generated method stub
@@ -711,6 +764,7 @@ private void saveImage() {
     private JComboBox graphik2ComboBox2;
     private JPanel graphik2Panel;
     private JComboBox graphik3ComboBox1;
+    private JComboBox graphik3ComboBox2;
     private JPanel graphik3Panel;
     private JLabel pathLabel;
     private JButton speichernButton;

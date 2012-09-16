@@ -92,7 +92,6 @@ public class Bremo extends Thread {
 			verl.berechneVerluste();
 			System.out.println("Verlustteilung fertig");
 			}
-		SwingBremo.StateBremoThread();
 	}	
 
 	/**

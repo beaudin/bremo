@@ -113,6 +113,10 @@ T_freeze	[K]	:=	1609
 debuggingMode	[-]	:=	nein
 debuggingTime 	[KWnZOT]	:=	8
 
+Verlustteilung [-] := nein
+burnFileName [-]  :=  Brennverlauf-Vorgabe.txt
+spalte_dQburn [-] := 2
+
 indizierFileName	[-] 	:= 	20101020_40_IndizierDaten.txt
 spalte_pZyl	[-]	:=	2
 spalte_pEin	[-]	:=	3

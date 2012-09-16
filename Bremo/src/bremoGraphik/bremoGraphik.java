@@ -255,18 +255,18 @@ public class bremoGraphik extends JFrame {
 	    Box box1 = Box.createHorizontalBox();
 	    box1.add(graphik2ComboBox1);
 	    box1.add(graphik2ComboBox2);
-	    box1.add(Box.createHorizontalStrut(60));
+	    box1.add(Box.createHorizontalStrut(110));
 	    box1.add(graphik3ComboBox1);
 	    box1.add(graphik3ComboBox2);
-	    box1.add(Box.createHorizontalStrut(315));
+	    box1.add(Box.createHorizontalStrut(290));
 	    
 	    Box box2 = Box.createHorizontalBox();
 	    box2.add(pathLabel);
-	    box2.add(Box.createHorizontalStrut(240));  
+	    box2.add(Box.createHorizontalStrut(255));  
 	    box2.add(speichernButton);
-	    box2.add(Box.createHorizontalStrut(140));
+	    box2.add(Box.createHorizontalStrut(125));
 	    box2.add(druckenButton);
-	    box2.add(Box.createHorizontalStrut(175));
+	    box2.add(Box.createHorizontalStrut(155));
 	    box2.add(datumLabel);
 	    
 	    Box box3 = Box.createVerticalBox();

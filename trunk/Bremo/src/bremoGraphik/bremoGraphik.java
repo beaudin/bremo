@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -108,6 +109,7 @@ public class bremoGraphik extends JFrame {
         graphik2ComboBox1 = new JComboBox();
         graphik2ComboBox2 = new JComboBox();
         inputfile = file;
+        itemAction = new ItemAction();
         /********************************************************************************/
         
         
@@ -132,7 +134,7 @@ public class bremoGraphik extends JFrame {
         /** TitelLabel Processing  ******************************************************/
         
         TitelLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        TitelLabel.setText(file.getName());
+        TitelLabel.setText(inputfile.getName());
         URL url = getClass().getResource("/bremoswing/bild/bremo2.png");
         ImageIcon icon = new ImageIcon(url);
         Image image = icon.getImage();
@@ -158,8 +160,8 @@ public class bremoGraphik extends JFrame {
 //        TabellePanelLayout.setColumns(1);
 //        TabellePanelLayout.setRows(3);
 //        TabellePanel.setLayout(TabellePanelLayout);
-        JLabel TabellePostLabel = TabellePostFIle(file);
-		JLabel TabelleInputLabel = TabelleInputFile(file);
+        JLabel TabellePostLabel = TabellePostFIle();
+		JLabel TabelleInputLabel = TabelleInputFile();
 		
         Box b1 = Box.createHorizontalBox();
         b1.add(Box.createHorizontalStrut(7));
@@ -181,57 +183,55 @@ public class bremoGraphik extends JFrame {
         
 		/**  GraphikPanel Processing  **************************************************/
         
-        GraphikPanel.add(Druckverlauf(file));
-		GraphikPanel.add(Druckverlauf(file));
-		GraphikPanel.add(Druckverlauf(file));
-		GraphikPanel.add(Druckverlauf(file));
+        GraphikPanel.add(Druckverlauf());
+		GraphikPanel.add(dQb_Qb_Qmax_Verlauf());
+		GraphikPanel.add(p_V_Diagramm ());
+		is_P_V_Diagramm = true;
+		GraphikPanel.add(T_mittel_Verlauf());
+		is_Verlustteilung_Digramm = false;
 		/*******************************************************************************/
-		
-		graphik2ComboBox1.setModel(new DefaultComboBoxModel(new String[] {
-				"20101020__40_DVAParameter.txt",
-				"20101020__40_DVAParameter.txt",
-				"20101020__40_DVAParameter.txt", "Item 4" }));
+		String str = "<html><b>\" Bitte Wählen : \"</b></html>";
+		graphik2ComboBox1.addItem(str);
+		graphik2ComboBox1.addItem("p-V-Digramm");
+		graphik2ComboBox1.addItem("Andere Diagramm");
+				 
+//		graphik2ComboBox1.setModel(new DefaultComboBoxModel(new String[] {
+//				"p-V-Digramm",
+//				"Andere Diagramm",
+//				 }));
 		graphik2ComboBox1
 				.addActionListener(new java.awt.event.ActionListener() {
 					public void actionPerformed(ActionEvent evt) {
-						graphik2ComboBox1ActionPerformed(evt);
+						try {
+							graphik2ComboBox1ActionPerformed(evt);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				});
 
-		graphik2ComboBox2.setModel(new DefaultComboBoxModel(new String[] {
-				"20101020__40_DVAParameter.txt",
-				"20101020__40_DVAParameter.txt",
-				"20101020__40_DVAParameter.txt", "Item 4" }));
-		graphik2ComboBox2
-				.addActionListener(new java.awt.event.ActionListener() {
-					public void actionPerformed(ActionEvent evt) {
-						graphik2ComboBox2ActionPerformed(evt);
-					}
-				});
-
-		graphik3ComboBox1.setModel(new DefaultComboBoxModel(new String[] {
-				"20101020__40_DVAParameter.txt",
-				"20101020__40_DVAParameter.txt",
-				"20101020__40_DVAParameter.txt", "Item 4" }));
+		graphik2ComboBox2.setPreferredSize(new Dimension(150,30));
+		
+		graphik3ComboBox1.addItem(str);
+		graphik3ComboBox1.addItem("Andere Diagramm");
+		graphik3ComboBox1.addItem("Verlustteilung BalkenDiagramm");
 		graphik3ComboBox1
 				.addActionListener(new java.awt.event.ActionListener() {
 					public void actionPerformed(ActionEvent evt) {
-						graphik3ComboBox1ActionPerformed(evt);
+						try {
+							graphik3ComboBox1ActionPerformed(evt);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				});
-		graphik3ComboBox2.setModel(new DefaultComboBoxModel(new String[] {
-				"20101020__40_DVAParameter.txt",
-				"20101020__40_DVAParameter.txt",
-				"20101020__40_DVAParameter.txt", "Item 4" }));
-		graphik3ComboBox2
-				.addActionListener(new java.awt.event.ActionListener() {
-					public void actionPerformed(ActionEvent evt) {
-						graphik3ComboBox2ActionPerformed(evt);
-					}
-				});
-
+		
+		graphik3ComboBox2.setPreferredSize(new Dimension(150,30));
+		
 		pathLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-		pathLabel.setText(file.getParent());
+		pathLabel.setText(inputfile.getParent());
 
 		speichernButton.setText("Speichern");
 		speichernButton.addActionListener(new ActionListener() {
@@ -240,7 +240,7 @@ public class bremoGraphik extends JFrame {
 			}
 		});
 
-		druckenButton.setText("Drucken  ");
+		druckenButton.setText(" Drucken ");
 		druckenButton.addActionListener(new ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				druckenButtonActionPerformed(evt);
@@ -427,8 +427,31 @@ public class bremoGraphik extends JFrame {
 		
 	}
 
-	protected void graphik3ComboBox1ActionPerformed(ActionEvent evt) {
+	protected void graphik3ComboBox1ActionPerformed(ActionEvent evt) throws IOException {
 		// TODO Auto-generated method stub
+		String selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
+    	if (selected.equals("Andere Diagramm")) {
+    		if (is_Verlustteilung_Digramm) {
+    			graphik3ComboBox2.removeActionListener(itemAction);
+    			GraphikPanel.remove(3);
+    			GraphikPanel.add(T_mittel_Verlauf(),3);
+    			is_Verlustteilung_Digramm = false;
+    			GraphikPanel.revalidate();
+    			graphik3ComboBox2.addActionListener(itemAction);
+    		}
+    	}
+    	else if (selected.equals("Verlustteilung BalkenDiagramm")){
+    		    if (! is_Verlustteilung_Digramm) {
+    		       graphik3ComboBox2.removeActionListener(itemAction);
+    		       GraphikPanel.remove(3);
+    			   //GraphikPanel.add(BalkenDiagramm(),3);
+    		       GraphikPanel.add(new JPanel());
+    			   graphik3ComboBox2.removeAllItems();
+    			   is_Verlustteilung_Digramm = true;
+    			   GraphikPanel.revalidate();
+    			   graphik3ComboBox2.addActionListener(itemAction);
+    		}
+    	}
 		
 	}
 
@@ -437,14 +460,43 @@ public class bremoGraphik extends JFrame {
     	saveImage();
     }
 
-    private void graphik2ComboBox1ActionPerformed(ActionEvent evt) {
+    private void graphik2ComboBox1ActionPerformed(ActionEvent evt) throws IOException {
         // TODO add your handling code here:
+    	String selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
+    	if (selected.equals("p-V-Digramm")) {
+    		if (! is_P_V_Diagramm) {
+    			graphik2ComboBox2.removeActionListener(itemAction);
+    			GraphikPanel.remove(2);
+    			GraphikPanel.add(p_V_Diagramm(),2);
+    			is_P_V_Diagramm = true;
+    			graphik2ComboBox2.removeAllItems();
+    			GraphikPanel.revalidate();
+    			graphik2ComboBox2.addActionListener(itemAction);
+    		}
+    	}
+    	else if (selected.equals("Andere Diagramm")){
+    		    if (is_P_V_Diagramm) {
+    		       graphik3ComboBox2.removeActionListener(itemAction);
+    		       GraphikPanel.remove(2);
+    			   GraphikPanel.add(WaermeStromDichteVerlauf(),2);
+    			   is_P_V_Diagramm = false;
+    			   GraphikPanel.revalidate();
+    			   graphik2ComboBox2.addActionListener(itemAction);
+    		}
+    	}
     }
     
-    protected void graphik2ComboBox2ActionPerformed(ActionEvent evt) {
-		// TODO Auto-generated method stub
-		
-	}
+//    protected void graphik2ComboBox2ActionPerformed(ActionEvent evt) throws IOException {
+//		// TODO Auto-generated method stub
+//    	String selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
+//    	
+//    	if (selected != null) {
+//    		GraphikPanel.remove(2);
+//			GraphikPanel.add(Auswahl_Diagramm(selected),2);
+//			is_P_V_Diagramm = false;
+//			GraphikPanel.revalidate();
+//    	}
+//	}
     private void druckenButtonActionPerformed(ActionEvent evt){
     	// TODO add your handling code here:
     	MyPrinter pr = new  MyPrinter(chartBremoPanel);
@@ -455,15 +507,53 @@ public class bremoGraphik extends JFrame {
     	pr.print();
     }
     
+    private class ItemAction implements ActionListener{
+        public void actionPerformed(ActionEvent e) {
+          if (e.getSource() == graphik2ComboBox2) {
+        	  
+        	  String selected = graphik2ComboBox2.getSelectedItem().toString();
+          	
+          	if (selected != null) {
+          		GraphikPanel.remove(2);
+      			try {
+					GraphikPanel.add(Auswahl_Diagramm(selected),2);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+      			is_P_V_Diagramm = false;
+      			GraphikPanel.revalidate();
+          	}
+        	  
+          }
+          else {
+        	  String selected = graphik3ComboBox2.getSelectedItem().toString();
+            	
+            	if (selected != null) {
+            		GraphikPanel.remove(3);
+        			try {
+  					GraphikPanel.add(Auswahl_Diagramm(selected),3);
+  				} catch (IOException e1) {
+  					// TODO Auto-generated catch block
+  					e1.printStackTrace();
+  				}
+        			is_Verlustteilung_Digramm = false;
+        			GraphikPanel.revalidate();
+            	}
+        	  
+          }
+        }               
+     }
+    
     /**
      * Build Graphic for the Pressure Curve (DruckVerlauf)
      * @param file  InputputFile
      * @return
      * @throws IOException
      */
-    private ChartPanel Druckverlauf(File file) throws IOException{
+    private ChartPanel Druckverlauf() throws IOException{
     	
-    	BufferedReader in = new BufferedReader(new FileReader(file));
+    	BufferedReader in = new BufferedReader(new FileReader(inputfile));
         String zeile = null;
 		String zeit_oder_KW = "";
 		String [] St = null;
@@ -481,9 +571,9 @@ public class bremoGraphik extends JFrame {
         	 }
         }
         in.close();
-        BufferedReader br = new  BufferedReader(new FileReader(file.getParent()+"/DVA_"+file.getName()));
-        XYSeries serie1 = new XYSeries("p_soll") ;
-        XYSeries serie2 = new XYSeries("p") ;
+        BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/DVA_"+inputfile.getName()));
+        XYSeries serie1 = new XYSeries("p_soll [bar]") ;
+        XYSeries serie2 = new XYSeries("p [bar] ") ;
         XYDataset datasetDruckVerlauf ;
         
         zeile = null;
@@ -509,11 +599,11 @@ public class bremoGraphik extends JFrame {
 		datasetDruckVerlauf = collectionDruckVerlauf;
 		ChartPanel chartDruckVerlauf = null;
 		if (zeit_oder_KW.equals("KW")){
-			//chartDruckVerlauf = createChartPanel(null, "[°KW]","[bar]" , datasetDruckVerlauf);
+			//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
 			chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
 		}
 		else {
-			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]","[bar]" , datasetDruckVerlauf);
+			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
 			chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
         }
 		br.close();
@@ -525,16 +615,302 @@ public class bremoGraphik extends JFrame {
     }
     
     /**
+     * Build Graphic for the dQb and Qb/Qmax  Curve 
+     * @param inputfile  InputputFile
+     * @return
+     * @throws IOException
+     */
+    private ChartPanel dQb_Qb_Qmax_Verlauf () throws IOException{
+    	
+    	
+       
+        BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/DVA_"+inputfile.getName()));
+        XYSeries serie1 = new XYSeries("dQb [J/KW]") ;
+        XYSeries serie2 = new XYSeries("Qb/Qmax [-]") ;
+        XYDataset datasetVerlauf ;
+        
+        String zeile = null;
+		String [] header = null;
+		String [] value = null;
+		if ((zeile = br.readLine()) != null){
+			header = zeile.split("\t");
+		}
+		while ((zeile = br.readLine()) != null){
+			value = zeile.split(" ");
+			serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[19]));//  KW  dQb
+			serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[30])); // KW  Qb/Qmax
+		}
+		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
+		collectionVerlauf.addSeries(serie1);
+		collectionVerlauf.addSeries(serie2);
+		datasetVerlauf = collectionVerlauf;
+		ChartPanel chartVerlauf = null;
+	    //chartVerlauf = createChartPanel(null, "[°KW]",null , datasetVerlauf);
+		chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
+	
+		br.close();
+		
+		chartVerlauf.setBorder(BorderFactory.createTitledBorder("dQb und Qb/Qmax Verlauf"));
+		
+		return chartVerlauf;
+    	
+    }
+    
+    /**
+     * Build Graphic for the  p-V-Diagramm
+     * @param file  InputputFile
+     * @return
+     * @throws IOException
+     */
+    private ChartPanel p_V_Diagramm () throws IOException{
+    	
+    	
+       
+        BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/DVA_"+inputfile.getName()));
+        XYSeries serie1 = new XYSeries("p-V-Diagramm ( X -> [m^3]  Y -> [log(p_soll)]") ;
+        XYDataset datasetVerlauf ;
+        
+        String zeile = null;
+		String [] header = null;
+		String [] value = null;
+		if ((zeile = br.readLine()) != null){
+			header = zeile.split("\t");
+		}
+		while ((zeile = br.readLine()) != null){
+			value = zeile.split(" ");
+			serie1.add(Double.parseDouble(value[2]),Math.log(Double.parseDouble(value[15])));//  Brennraumvolumen  log(p_soll)
+		}
+		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
+		collectionVerlauf.addSeries(serie1);
+		datasetVerlauf = collectionVerlauf;
+		ChartPanel chartVerlauf = null;
+	    //chartVerlauf = createChartPanel(null, "[°KW]",null , datasetVerlauf);
+		chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
+	
+		br.close();
+		
+		chartVerlauf.setBorder(BorderFactory.createTitledBorder("p-V-Diagramm"));
+		
+		return chartVerlauf;
+    	
+    }
+    /**
+     * Build Graphic for the WaermeStromDichte Curve
+     * @param file  InputputFile
+     * @return
+     * @throws IOException
+     */
+    private ChartPanel WaermeStromDichteVerlauf() throws IOException{
+    	
+    	BufferedReader in = new BufferedReader(new FileReader(inputfile));
+        String zeile = null;
+		String zeit_oder_KW = "";
+		String [] St = null;
+		while((zeile = in.readLine()) != null) {
+			zeile=zeile.replaceAll(" ", "");
+			zeile=zeile.replaceAll("\t", "");
+        	 St = zeile.split(":=");
+        	 if (St[0].equals("zeit_oder_KW_Basiert[-]")){
+        		 if (St[1].equals("KW")){
+        			 zeit_oder_KW = "KW";
+        		 }
+        		 else {
+        			 zeit_oder_KW = "zeit";
+        		 }
+        	 }
+        }
+        in.close();
+        BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/DVA_"+inputfile.getName()));
+        XYSeries serie1 = new XYSeries("WaermeStromDichte [MW/m^2]") ;
+        XYDataset dataseVerlauf ;
+        
+        zeile = null;
+		String [] header = null;
+		String [] value = null;
+		if ((zeile = br.readLine()) != null){
+			header = zeile.split("\t");
+			addItemToComboBox(graphik2ComboBox2, header);
+		}
+		while ((zeile = br.readLine()) != null){
+			value = zeile.split(" ");
+			if (zeit_oder_KW.equals("KW")) {
+				serie1.setKey("WaermeStromDichte [MW/m^2]   X -> [°KW]");
+				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[33]));//  KW  WaermeStromDichte
+			}
+			else {
+				serie1.setKey("WaermeStromDichte [MW/m^2]   X -> [s n. Rechenbeginn]");
+				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[33]));//  Zeit WaermeStromDichte
+			}
+		}
+		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
+		collectionVerlauf.addSeries(serie1);
+		dataseVerlauf = collectionVerlauf;
+		ChartPanel chartVerlauf = null;
+		if (zeit_oder_KW.equals("KW")){
+			//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
+			chartVerlauf = createChartPanel(null, null, null , dataseVerlauf);
+		}
+		else {
+			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
+			chartVerlauf = createChartPanel(null, null, null , dataseVerlauf);
+        }
+		br.close();
+		
+		chartVerlauf.setBorder(BorderFactory.createTitledBorder("WaermeStromDichte verlauf"));
+		
+		return chartVerlauf;
+    	
+    }
+    
+    /**
+     * Build Graphic for the T_mittel Curve 
+     * @return
+     * @throws IOException
+     */
+    private ChartPanel T_mittel_Verlauf() throws IOException{
+    	
+    	BufferedReader in = new BufferedReader(new FileReader(inputfile));
+        String zeile = null;
+		String zeit_oder_KW = "";
+		String [] St = null;
+		while((zeile = in.readLine()) != null) {
+			zeile=zeile.replaceAll(" ", "");
+			zeile=zeile.replaceAll("\t", "");
+        	 St = zeile.split(":=");
+        	 if (St[0].equals("zeit_oder_KW_Basiert[-]")){
+        		 if (St[1].equals("KW")){
+        			 zeit_oder_KW = "KW";
+        		 }
+        		 else {
+        			 zeit_oder_KW = "zeit";
+        		 }
+        	 }
+        }
+        in.close();
+        BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/DVA_"+inputfile.getName()));
+        XYSeries serie1 = new XYSeries("T_mittel [K]") ;
+        XYDataset datasetVerlauf ;
+        
+        zeile = null;
+		String [] header = null;
+		String [] value = null;
+		if ((zeile = br.readLine()) != null){
+			header = zeile.split("\t");
+			addItemToComboBox(graphik3ComboBox2, header);
+		}
+		while ((zeile = br.readLine()) != null){
+			value = zeile.split(" ");
+			if (zeit_oder_KW.equals("KW")) {
+				serie1.setKey("T_mittel [K]  X -> [°KW]");
+				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[9]));//  KW  T_mittel
+			}
+			else {
+				serie1.setKey("T_mittel [K]  X -> [s n. Rechenbeginn]");
+				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[9]));//  Zeit T_mittel
+			}
+		}
+		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
+		collectionVerlauf.addSeries(serie1);
+		datasetVerlauf = collectionVerlauf;
+		ChartPanel chartVerlauf = null;
+		if (zeit_oder_KW.equals("KW")){
+			//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
+			chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
+		}
+		else {
+			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
+			chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
+        }
+		br.close();
+		
+		chartVerlauf.setBorder(BorderFactory.createTitledBorder("T_mittel verlauf"));
+		
+		return chartVerlauf;
+    	
+    }
+    
+    /**
+     * Build Graphic for the choice  Curve
+     * @return
+     * @throws IOException
+     */
+    private ChartPanel Auswahl_Diagramm(String selected) throws IOException{
+    	
+    	BufferedReader in = new BufferedReader(new FileReader(inputfile));
+        String zeile = null;
+		String zeit_oder_KW = "";
+		String [] St = null;
+		while((zeile = in.readLine()) != null) {
+			zeile=zeile.replaceAll(" ", "");
+			zeile=zeile.replaceAll("\t", "");
+        	 St = zeile.split(":=");
+        	 if (St[0].equals("zeit_oder_KW_Basiert[-]")){
+        		 if (St[1].equals("KW")){
+        			 zeit_oder_KW = "KW";
+        		 }
+        		 else {
+        			 zeit_oder_KW = "zeit";
+        		 }
+        	 }
+        }
+        in.close();
+        BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/DVA_"+inputfile.getName()));
+        XYSeries serie1 = new XYSeries(selected) ;
+        XYDataset datasetVerlauf ;
+        
+        zeile = null;
+		String [] header = null;
+		String [] value = null;
+		int index = -1;
+		if ((zeile = br.readLine()) != null){
+			header = zeile.split("\t");
+			for (int i = 0; i < header.length; i++){
+				if (header[i].equals(selected)){
+					index = i;
+				}
+			}
+		}
+		while ((zeile = br.readLine()) != null){
+			value = zeile.split(" ");
+			if (zeit_oder_KW.equals("KW")) {
+				serie1.setKey(selected +"  X -> [°KW]");
+				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index]));//  KW  T_mittel
+			}
+			else {
+				serie1.setKey(selected+"  X -> [s n. Rechenbeginn]");
+				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index]));//  Zeit T_mittel
+			}
+		}
+		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
+		collectionVerlauf.addSeries(serie1);
+		datasetVerlauf = collectionVerlauf;
+		ChartPanel chartVerlauf = null;
+		if (zeit_oder_KW.equals("KW")){
+			//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
+			chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
+		}
+		else {
+			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
+			chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
+        }
+		br.close();
+		selected = selected.substring(0, selected.indexOf("["));
+		chartVerlauf.setBorder(BorderFactory.createTitledBorder(selected+" verlauf"));
+		
+		return chartVerlauf;
+    	
+    }
+    /**
      * Build the Table for Post File 
      * @param file
      * @return Label as Table
      * @throws IOException
      */
-    public JLabel TabellePostFIle(File file) throws IOException {
+    public JLabel TabellePostFIle() throws IOException {
     	
-    	String parent = file.getParent();
+    	String parent = inputfile.getParent();
     	
-    	BufferedReader in = new BufferedReader(new FileReader(parent+"/DVA_Post_"+file.getName()));
+    	BufferedReader in = new BufferedReader(new FileReader(parent+"/DVA_Post_"+inputfile.getName()));
 		String zeile = null;
 		String [] header1 = null;
 		String [] header2 = null;
@@ -590,10 +966,10 @@ public class bremoGraphik extends JFrame {
 			
 	}
     
-    public JLabel TabelleInputFile (File file) throws ParameterFileWrongInputException, IOException  {
+    public JLabel TabelleInputFile () throws ParameterFileWrongInputException, IOException  {
     	
     //	CasePara cp = new CasePara(file);
-    	BufferedReader in = new BufferedReader(new FileReader(file.getPath()));
+    	BufferedReader in = new BufferedReader(new FileReader(inputfile.getPath()));
 		String zeile = null;
 		String [] header1 = null;
 		String [] header2 = new  String [10];
@@ -690,6 +1066,23 @@ private ChartPanel createChartPanel(String Titel, String XLabel,String YLabel, X
 		return chartPanel;
 	}
 
+/**
+ * füge elemente von Array to JComboBox als Item hinzu. Nur für Spalte
+ * ComboBox
+ */
+public void addItemToComboBox(JComboBox cb, String[] item) {
+
+	cb.removeAllItems();
+	// cb.addItem("");
+
+	for (int i = 0; i < item.length; i++) {
+
+		cb.addItem(item[i]);
+
+	}
+
+}
+
 private void saveImage() {
 	Container c = getContentPane();
 	BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -775,5 +1168,8 @@ private void saveImage() {
     private JPanel GraphikPanel;
     private JPanel GroupPanel;
     private JPanel TabellePanel;
+    private boolean is_P_V_Diagramm;
+    private boolean is_Verlustteilung_Digramm;
+    private ItemAction itemAction ;
     // End of variables declaration
 }

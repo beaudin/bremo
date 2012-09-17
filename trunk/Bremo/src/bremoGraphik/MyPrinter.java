@@ -126,8 +126,10 @@ public class MyPrinter
         g2d.translate(pf.getImageableX(), pf.getImageableY());
         if(fitIntoPage)
         {
-           // double ratio = Math.min(scaleX, scaleY);
-            g2d.scale(0.67, 0.8);
+          //  double ratio = Math.min(scaleX, scaleY);
+            g2d.scale(scaleX,  scaleY);
+            //g2d.scale(0.67, 0.8);
+            
         } else
         if(wrapComponent)
         {

@@ -499,7 +499,7 @@ public class bremoGraphik extends JFrame {
 //	}
     private void druckenButtonActionPerformed(ActionEvent evt){
     	// TODO add your handling code here:
-    	MyPrinter pr = new  MyPrinter(chartBremoPanel);
+    	MyPrinter pr = new  MyPrinter((JPanel) getContentPane());
     	pr.setOrientation(0);
     	pr.setLRMargins(150);
     	pr.setTBMargins(150);

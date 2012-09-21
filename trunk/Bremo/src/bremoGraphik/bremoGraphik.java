@@ -870,6 +870,7 @@ public class bremoGraphik extends JFrame {
 				}
 			}
 		}
+		System.err.println(selected +" : "+index);
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
 			if (zeit_oder_KW.equals("KW")) {

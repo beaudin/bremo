@@ -579,18 +579,28 @@ public class bremoGraphik extends JFrame {
         zeile = null;
 		String [] header = null;
 		String [] value = null;
+		int index_1 = -1;
+		int index_2 = -1;
 		if ((zeile = br.readLine()) != null){
 			header = zeile.split("\t");
+			for (int i = 0; i < header.length; i++){
+				if (header[i].equals("p_soll [bar]")){
+					index_1 = i;
+				}
+				else if (header[i].equals("p [bar]")){
+					index_2 = i;
+				}
+			}
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
 			if (zeit_oder_KW.equals("KW")) {
-				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[15]));//  KW  p_soll
-				serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[17])); // KW  p
+				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_1]));//  KW  p_soll
+				serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_2])); // KW  p
 			}
 			else {
-				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[15]));//  Zeit p_soll
-				serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[17])); // Zeit p
+				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_1]));//  Zeit p_soll
+				serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_2])); // Zeit p
 			}
 		}
 		XYSeriesCollection collectionDruckVerlauf = new XYSeriesCollection();
@@ -632,13 +642,23 @@ public class bremoGraphik extends JFrame {
         String zeile = null;
 		String [] header = null;
 		String [] value = null;
+		int index_1 = -1;
+		int index_2 = -1;
 		if ((zeile = br.readLine()) != null){
 			header = zeile.split("\t");
+			for (int i = 0; i < header.length; i++){
+				if (header[i].equals("dQb [J/KW]")){
+					index_1 = i;
+				}
+				else if (header[i].equals("Qb/Qmax [-]")){
+					index_2 = i;
+				}
+			}
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
-			serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[19]));//  KW  dQb
-			serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[30])); // KW  Qb/Qmax
+			serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_1]));//  KW  dQb
+			serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_2])); // KW  Qb/Qmax
 		}
 		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
 		collectionVerlauf.addSeries(serie1);
@@ -673,12 +693,22 @@ public class bremoGraphik extends JFrame {
         String zeile = null;
 		String [] header = null;
 		String [] value = null;
+		int index_1 = -1;
+		int index_2 = -1;
 		if ((zeile = br.readLine()) != null){
 			header = zeile.split("\t");
+			for (int i = 0; i < header.length; i++){
+				if (header[i].equals("Brennraumvolumen [m3]")){
+					index_1 = i;
+				}
+				else if (header[i].equals("p_soll [bar]")){
+					index_2 = i;
+				}
+			}
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
-			serie1.add(Double.parseDouble(value[2]),Math.log(Double.parseDouble(value[15])));//  Brennraumvolumen  log(p_soll)
+			serie1.add(Double.parseDouble(value[index_1]),Math.log(Double.parseDouble(value[index_2])));//  Brennraumvolumen  log(p_soll)
 		}
 		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
 		collectionVerlauf.addSeries(serie1);
@@ -727,19 +757,25 @@ public class bremoGraphik extends JFrame {
         zeile = null;
 		String [] header = null;
 		String [] value = null;
+		int index_1 = -1;
 		if ((zeile = br.readLine()) != null){
 			header = zeile.split("\t");
+			for (int i = 0; i < header.length; i++){
+				if (header[i].equals("Wandwärmestromdichte [MW/m^2]")){
+					index_1 = i;
+				}
+			}
 			addItemToComboBox(graphik2ComboBox2, header);
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
 			if (zeit_oder_KW.equals("KW")) {
 				serie1.setKey("WaermeStromDichte [MW/m^2]   X -> [°KW]");
-				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[33]));//  KW  WaermeStromDichte
+				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_1]));//  KW  WaermeStromDichte
 			}
 			else {
 				serie1.setKey("WaermeStromDichte [MW/m^2]   X -> [s n. Rechenbeginn]");
-				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[33]));//  Zeit WaermeStromDichte
+				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_1]));//  Zeit WaermeStromDichte
 			}
 		}
 		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
@@ -794,19 +830,25 @@ public class bremoGraphik extends JFrame {
         zeile = null;
 		String [] header = null;
 		String [] value = null;
+		int index_1 = -1;
 		if ((zeile = br.readLine()) != null){
 			header = zeile.split("\t");
+			for (int i = 0; i < header.length; i++){
+				if (header[i].equals("T_mittel [K]")){
+					index_1 = i;
+				}
+			}
 			addItemToComboBox(graphik3ComboBox2, header);
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
 			if (zeit_oder_KW.equals("KW")) {
 				serie1.setKey("T_mittel [K]  X -> [°KW]");
-				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[9]));//  KW  T_mittel
+				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_1]));//  KW  T_mittel
 			}
 			else {
 				serie1.setKey("T_mittel [K]  X -> [s n. Rechenbeginn]");
-				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[9]));//  Zeit T_mittel
+				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_1]));//  Zeit T_mittel
 			}
 		}
 		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();

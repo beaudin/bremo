@@ -1,0 +1,4 @@
+pmi-Werte	----->>	Idealprozess	Reale Ladung	Verbrennungslage	HC-/CO-Emissionen	Realer Brennverlauf	Wandwärmeverlust	leer	leer	LWAideal	LWA real	Reibmitteldruck
+NaN	 NaN	 577406.0668273456	 457489.4874077982	 448191.1169208719	 446858.471358402	 422548.3285912202	 358644.83188512776	 NaN	 NaN	 -64996.70390247697	 -72338.10163646347	 180644.83188512776
+Wirkungsgrade	----->>	Idealprozess	Reale Ladung	Verbrennungslage	HC-/CO-Emissionen	Realer Brennverlauf	Wandwärmeverlust	leer	leer	LWAideal	LWA real	Mechanischer Wirkungsgrad
+NaN	 NaN	 0.6286518920903328	 0.49809250091642454	 0.4879688833519576	 0.4865179631028238	 0.46005025151200546	 0.3904752047235106	 NaN	 NaN	 NaN	 NaN	 0.49631274223132416

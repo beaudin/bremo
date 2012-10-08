@@ -46,25 +46,27 @@ public class IndizierDaten {
 	 * abgeglichen werden.</p>
 	 * Weiterhin wird fuer HubKolbenMotoren in dieser Klasse pmi berechnet.
 	 * @param  CasePara cp
+	 * 
 	 */
-	public IndizierDaten(CasePara cp){			
-
+	public IndizierDaten(CasePara cp){
 		CP=cp;
 		filternBitte=CP.SYS.FILTERN;
 		createMe(cp,false);
-		}
-		public IndizierDaten(CasePara cp, boolean gemittelt){
+	}
+	public IndizierDaten(CasePara cp, boolean gemittelt){
 		CP=cp;
 		filternBitte=CP.SYS.FILTERN;
 		createMe(cp,gemittelt);
-		}
-		public void createMe(CasePara cp, boolean gemittelt){
+	}
+	public void createMe(CasePara cp, boolean gemittelt){			
+
+		
 		File indiFile= CP.SYS.INDIZIER_FILE;		
 		String fileName=indiFile.getName();
 		L_Interp = new LinInterp(CP);
 		motor=CP.MOTOR;		
 		
-	
+		
 		if(filternBitte){
 			int halbeBreite=(CP.SYS.SGOLAY_BREITE-1)/2;
 			sgol=new SavitzkyGolayFilter(halbeBreite,halbeBreite,CP.SYS.SGOLAY_ORDNUNG);
@@ -138,24 +140,28 @@ public class IndizierDaten {
 		pAus=misc.LittleHelpers.concat(pAus,pAus);		
 		}
 		if(gemittelt == true){
-		pEinRoh=indiReader.get_pEin();
-		pAusRoh=indiReader.get_pAbg();
-		double summePein=0;
-		double summePaus=0;
-		for (int i = 0; i < pEinRoh.length; i++) {
-		summePein += pEinRoh[i];
-		}
-		for (int i = 0; i < pAusRoh.length; i++) {
-		summePaus += pAusRoh[i];
-		}
-		double pEinWert=summePein/pEinRoh.length;
-		double pAusWert=summePaus/pAusRoh.length;
-		pEin = new double[zeitAchse.length];
-		pAus = new double[zeitAchse.length];
-		for (int i = 0; i < zeitAchse.length; i++) {
-		pEin [i]= pEinWert;
-		pAus [i]= pAusWert;
-		}
+			
+			pEinRoh=indiReader.get_pEin();
+			pAusRoh=indiReader.get_pAbg();
+			double summePein=0;
+			double summePaus=0;
+			for (int i = 0; i < pEinRoh.length; i++) {
+			    summePein += pEinRoh[i];
+			}
+			for (int i = 0; i < pAusRoh.length; i++) {
+			    summePaus += pAusRoh[i];
+			}
+			double pEinWert=summePein/pEinRoh.length;
+			double pAusWert=summePaus/pAusRoh.length;
+			
+			pEin = new double[zeitAchse.length];
+			pAus = new double[zeitAchse.length];
+			
+			for (int i = 0; i < zeitAchse.length; i++) {
+			    pEin [i]= pEinWert;
+			    pAus [i]= pAusWert;
+			}
+			
 		}
 		////////////////////////////////////
 		//Definieren des Zylidnerdrucks
@@ -213,6 +219,7 @@ public class IndizierDaten {
 		L_Interp.set_lastsearchedIndex(0); 		
 
 	}
+	
 
 	/**
 	 * Liefert den maximalen Zylinderdruck
@@ -280,6 +287,8 @@ public class IndizierDaten {
 			return 0;
 		}
 	}
+	
+	
 
 	/**
 	 * Diese Methode fuert einen Nulllinienabgleich nach der KanalMethode durch

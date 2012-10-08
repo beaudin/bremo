@@ -202,8 +202,8 @@ public class BrennverlaufDaten {
 				dQburn[k]= 0;
 			}
 		double[][] matrix ={zeitAchseKW,dQburn};
-		FileWriter_txt txtFile = new FileWriter_txt("F://Workspace//Bremo//src//InputFiles//Brennverlauf-startQ.txt");
-		txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);
+	//	FileWriter_txt txtFile = new FileWriter_txt("F://Workspace//Bremo//src//InputFiles//Brennverlauf-startQ.txt");
+	//	txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);
 		}
 	}
 				

@@ -1944,9 +1944,9 @@ public class CasePara {
 		public final String EINGABEDATEI_FORMAT;
 		public final String NULLLINIEN_METHODE;
 		// Brennverlaufsvariablen
-		public final File BRENNVERLAUF_FILE;
-		public final int KANAL_SPALTEN_NR_DQBURN;
-		public final String EINGABEDATEI_FORMAT_BURN;
+		public File BRENNVERLAUF_FILE;
+		public int KANAL_SPALTEN_NR_DQBURN;
+		public String EINGABEDATEI_FORMAT_BURN;
 		
 		public final File DFKENNZAHL_AUS_FILE;
 		public final File DFKENNZAHL_EIN_FILE;
@@ -2236,13 +2236,20 @@ public class CasePara {
 			if(KANAL_SPALTEN_NR_PZYL==KANAL_SPALTEN_NR_PEIN || KANAL_SPALTEN_NR_PZYL==KANAL_SPALTEN_NR_PABG || KANAL_SPALTEN_NR_PEIN==KANAL_SPALTEN_NR_PABG)
 				throw new ParameterFileWrongInputException("Die angegebenen Kanalnummern bzw Spaltennummern " +
 				"für pZyl, pEin und pAbg sind teilweise identisch");
-			String burnFileName=set_FileName(PARAMETER,"burnFileName");
-			int indexOf_burn=burnFileName.indexOf(".");
-			EINGABEDATEI_FORMAT_BURN=burnFileName.substring(indexOf_burn+1);
-			//Dateiendung
-			BRENNVERLAUF_FILE=new File(WD+burnFileName);
-			KANAL_SPALTEN_NR_DQBURN=(int)set_doublePara(PARAMETER,
-			"spalte_dQburn","",1,40); //bis zu fünf kaskadierte CombiWF
+			try{
+				String burnFileName=set_FileName(PARAMETER,"burnFileName");
+				int indexOf_burn=burnFileName.indexOf(".");
+				EINGABEDATEI_FORMAT_BURN=burnFileName.substring(indexOf_burn+1); //Dateiendung
+				BRENNVERLAUF_FILE=new File(WD+burnFileName);
+
+				KANAL_SPALTEN_NR_DQBURN=(int)set_doublePara(PARAMETER, "spalte_dQburn","",1,40); //bis zu fünf kaskadierte CombiWF
+				}
+				catch (ParameterFileWrongInputException e) {
+					e.log_Warning("Es wurde kein Brennverlaufsfile angegeben! Es kann keine APR durchgeführt werden!");
+					
+				
+		
+				}
 		
 			
 			DAUER_ASP_SEC=(DAUER_ASP_KW)/(360*get_DrehzahlInUproSec());

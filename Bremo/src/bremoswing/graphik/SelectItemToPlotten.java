@@ -1,10 +1,16 @@
-package bremoGraphik;
+package bremoswing.graphik;
 
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -45,7 +51,26 @@ public class SelectItemToPlotten extends JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
-        jPanel1 = new JPanel();
+        jPanel1 = new JPanel(){
+			@SuppressWarnings("null")
+			public void paintComponent(Graphics g) 
+            {
+              
+				URL url = getClass().getResource("/bremoswing/bild/Abstract_Frozen_Blue.jpg");
+				ImageIcon icon = new ImageIcon(url);
+			    Image img = icon.getImage();
+			    BufferedImage buffImage = 
+			    	      new BufferedImage(
+			    	          img.getWidth(null), 
+			    	          img.getHeight(null), 
+			    	          BufferedImage.TYPE_INT_ARGB);
+			    Graphics gr = buffImage.getGraphics();
+			    gr.drawImage(img, 0, 0, null);
+			    img = buffImage.getSubimage(200, 210, 500, 100);
+				g.drawImage(img, 0, 0, null);
+                
+            } 
+		};
         fileComboBox = new JComboBox();
         
         setResizable(false);
@@ -65,8 +90,37 @@ public class SelectItemToPlotten extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
 			    File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
+			    String berechnungModell = "";
 			    try {
-					new bremoGraphik(input);
+			    	BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
+					String zeile = null;
+					String [] header = null;
+					while((zeile = in.readLine()) != null) {
+						zeile=zeile.replaceAll(" ", "");
+						zeile=zeile.replaceAll("\t", "");
+						header = zeile.split(":");
+						header[0] = header[0].replace("[", "");
+						if (header[0].equals("berechnungsModell")){
+							String[] tmp =  header[1].split("_");
+							if (tmp[0].equals("DVA")){
+								berechnungModell = "DVA";
+							}
+							else if (tmp[0].equals("APR")){
+								berechnungModell = "APR";
+							}
+							
+						}
+					}
+					// new bremoGraphik(input);
+					if (berechnungModell.equals("DVA")){
+						
+						new DVA_ModellGraphik(input);
+					}
+					else if  (berechnungModell.equals("APR")){
+						
+						new APR_ModellGraphik(input); 
+					}
+					in.close();
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

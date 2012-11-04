@@ -2,12 +2,15 @@ package bremoswing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Insets;
 
 import java.awt.GridBagConstraints;
@@ -25,14 +28,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.ThreadGroup;
+import java.net.URL;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -60,7 +68,8 @@ import javax.swing.border.TitledBorder;
 import BremoLogFile.LogFileWriter;
 import bremo.main.Bremo;
 import bremoExceptions.StopBremoException;
-import bremoGraphik.SelectItemToPlotten;
+import bremoswing.graphik.SelectItemToPlotten;
+import bremoswing.util.ImageBackgroundJOptionPane;
 
 /*
  * SwingBremo.java
@@ -94,7 +103,7 @@ public class SwingBremo extends JFrame {
 	private JPanel konsole2;
 	private JPanel manager;
 	public static JButton stop;
-	private JTextField textFile;
+	private static JTextField textFile;
 	public static JButton wahlFile;
 	public static boolean DebuggingMode;
 	public static int NrOfFile;
@@ -166,7 +175,26 @@ public class SwingBremo extends JFrame {
 		System.setOut(outStream);
 		//System.setErr(errStream);
 
-		manager = new JPanel();
+		manager = new JPanel(){
+			@SuppressWarnings("null")
+			public void paintComponent(Graphics g) 
+            {
+              
+				URL url = getClass().getResource("/bremoswing/bild/Abstract_Frozen_Blue.jpg");
+				ImageIcon icon = new ImageIcon(url);
+			    Image img = icon.getImage();
+			    BufferedImage buffImage = 
+			    	      new BufferedImage(
+			    	          img.getWidth(null), 
+			    	          img.getHeight(null), 
+			    	          BufferedImage.TYPE_INT_ARGB);
+			    Graphics gr = buffImage.getGraphics();
+			    gr.drawImage(img, 0, 0, null);
+			    img = buffImage.getSubimage(200, 210, 750, 40);
+				g.drawImage(img, 0, 0, null);
+                
+            } 
+		};
 
 		berechnen = new JButton();
 		wahlFile = new JButton();
@@ -176,7 +204,25 @@ public class SwingBremo extends JFrame {
 		textFile = new JTextField();
 
 		// konsole = new JCheckBox();
-		konsole2 = new JPanel();
+		konsole2 = new JPanel(){
+			public void paintComponent(Graphics g) 
+            {
+				URL url = getClass().getResource("/bremoswing/bild/Abstract_Frozen_Blue.jpg");
+				ImageIcon icon = new ImageIcon(url);
+			    Image img = icon.getImage();
+			    BufferedImage buffImage = 
+			    	      new BufferedImage(
+			    	          img.getWidth(null), 
+			    	          img.getHeight(null), 
+			    	          BufferedImage.TYPE_INT_ARGB);
+			    Graphics gr = buffImage.getGraphics();
+			    gr.drawImage(img, 0, 0, null);
+			    img = buffImage.getSubimage(200, 250, 750, 750);
+				g.drawImage(img, 0, 0, null);
+                
+            } 
+		};
+		
 
 		kleinArea = new JTextArea();
 		grosArea = new JTextArea();
@@ -200,9 +246,10 @@ public class SwingBremo extends JFrame {
 		setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo1.png")).getImage());
 		setName("BremoSwing");
-		setResizable(true);
+		setResizable(false);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
+		Dimension size = new Dimension(720,320);
+        setPreferredSize(size);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				closeFrame();
@@ -479,8 +526,7 @@ public class SwingBremo extends JFrame {
 //	     
 //	     toolBar.add(progressBarInd);
 //	     toolBar.add(progressBar);
-	     
-	     
+	    getContentPane().setBackground(new Color(225, 225, 225));
          
 	   //  manager.add(toolBar, BorderLayout.PAGE_START);
 		/************ FRAME LAYOUT EINSTELUNG ************************************/
@@ -490,7 +536,7 @@ public class SwingBremo extends JFrame {
 				GroupLayout.Alignment.LEADING).addGroup(
 				GroupLayout.Alignment.TRAILING,
 				layout.createSequentialGroup()
-						.addContainerGap()
+						//.addContainerGap()
 						.addGroup(
 								layout.createParallelGroup(
 										GroupLayout.Alignment.TRAILING)
@@ -502,20 +548,20 @@ public class SwingBremo extends JFrame {
 												GroupLayout.Alignment.LEADING,
 												GroupLayout.DEFAULT_SIZE, 685,
 												Short.MAX_VALUE))
-						.addContainerGap()));
+						/*.addContainerGap()*/));
 		layout.setVerticalGroup(layout.createParallelGroup(
 				GroupLayout.Alignment.LEADING)
 				.addGroup(
 						layout.createSequentialGroup()
-								.addContainerGap()
+								//.addContainerGap()
 								.addComponent(manager,
 										GroupLayout.PREFERRED_SIZE, 38,
 										GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(
-										LayoutStyle.ComponentPlacement.RELATED)
+								//.addPreferredGap(
+								//		LayoutStyle.ComponentPlacement.RELATED)
 								.addComponent(konsole2,
 										GroupLayout.DEFAULT_SIZE, 180,
-										Short.MAX_VALUE).addContainerGap()));
+										Short.MAX_VALUE)/*.addContainerGap()*/));
 		/*****************************************************************************************/
 		pack();
 
@@ -650,6 +696,7 @@ public class SwingBremo extends JFrame {
 		progressBar.setValue(0);
 		progressBar.setVisible(false);
 		progressBarInd.setVisible(false);
+		textFile.setText("");
 	}
 
 	/****** Change the Mode of The Console When DebbugMode is Active ***********/
@@ -715,7 +762,13 @@ public class SwingBremo extends JFrame {
 			test.setEnabled(true);
 		}
 	}
-
+	public static void VerlustteilungThread() {
+		timerCalcul.stop();
+		progressBar.setVisible(false);
+		progressBarInd.setVisible(true);
+		stop.setEnabled(false);
+		label.setText("Verlustteilung wird berechnen...");
+	}
 	/************************ place Frame to the center ************************/
 	public static void placeFrame(JFrame frame) {
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -726,9 +779,31 @@ public class SwingBremo extends JFrame {
 
 	/************************* close the Frame ********************************/
 	public   void closeFrame() {
+		 URL url = getClass().getResource("/bremoswing/bild/questionIcon.png");
+	     ImageIcon icon = new ImageIcon(url);
 		final JOptionPane optionPane = new JOptionPane(
 				"Wollen Sie Wirklich das Program beendet ?",
-				JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION);
+				JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, icon);/* {
+			       
+					private static final long serialVersionUID = 1L;
+
+			public void paintComponent(Graphics g) 
+            {
+				URL url = getClass().getResource("/bremoswing/bild/Abstract_Frozen_Blue.jpg");
+				ImageIcon icon = new ImageIcon(url);
+			    Image img = icon.getImage();
+			    BufferedImage buffImage = 
+			    	      new BufferedImage(
+			    	          img.getWidth(null), 
+			    	          img.getHeight(null), 
+			    	          BufferedImage.TYPE_INT_ARGB);
+			    Graphics gr = buffImage.getGraphics();
+			    gr.drawImage(img, 0, 0, null);
+			    img = buffImage.getSubimage(200, 250, 750, 750);
+				g.drawImage(img, 0, 0, null);
+                
+            } 
+		};*/
 
 		final JDialog dialog = optionPane.createDialog(this, "Exit");
 

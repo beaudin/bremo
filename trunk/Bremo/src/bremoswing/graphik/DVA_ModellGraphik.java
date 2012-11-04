@@ -104,42 +104,40 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 		String selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
     	if (selected.equals("Andere Diagramm")) {
     		if (is_Verlustteilung_Digramm) {
-    			graphik3ComboBox2.removeAllItems();
     			GraphikPanel.remove(3);
     			GraphikPanel.add(T_mittel_Verlauf(),3);
     			GraphikPanel.revalidate();
-    			
+    			is_Verlustteilung_Digramm = false;
     		}
     	}
     	else if (selected.equals("Verlustteilung BalkenDiagramm")){
-    		    if (! is_Verlustteilung_Digramm) {
-    		    	if (! is_verlust_berechnen) {
-    		       GraphikPanel.remove(3);
-    		       URL url = getClass().getResource("/bremoswing/bild/balkenErrorIcon.png");
-    			   ImageIcon icon = new ImageIcon(url);
-    		      JLabel label =  new JLabel("Graphik nicht vorhanden !",icon, SwingConstants.LEFT);
-    		      label.setFont(new java.awt.Font("Tahoma", 0, 16));
-    		      label.setForeground(new Color(255,0,0));
-    		      label.setBorder(BorderFactory.createEmptyBorder(70, 0, 0, 0));
-    		      JPanel panel = new JPanel();
-    		      panel.add(BorderLayout.CENTER,label);
-    		      panel.setBorder(BorderFactory.createTitledBorder("Verlustteilung Digramm"));
-    		      GraphikPanel.add(panel,3);
-    		       //GraphikPanel.add(new JPanel());
-    			   graphik3ComboBox2.removeAllItems();
-    			   is_Verlustteilung_Digramm = true;
-    			   GraphikPanel.revalidate();
-    		    }
-    		    else {
-    		    		graphik3ComboBox2.removeAllItems();
-                        graphik3ComboBox2.addItem("pmi-Werte");
-                        graphik3ComboBox2.addItem("Wirkungsgrade");
-    		    		is_Verlustteilung_Digramm = true;
-    		    		GraphikPanel.revalidate();
+		    if (! is_Verlustteilung_Digramm) {
+		    	if (! is_verlust_berechnen) {
+		       GraphikPanel.remove(3);
+		       URL url = getClass().getResource("/bremoswing/bild/balkenErrorIcon.png");
+			   ImageIcon icon = new ImageIcon(url);
+		      JLabel label =  new JLabel("Graphik nicht vorhanden !",icon, SwingConstants.LEFT);
+		      label.setFont(new java.awt.Font("Tahoma", 0, 16));
+		      label.setForeground(new Color(255,0,0));
+		      label.setBorder(BorderFactory.createEmptyBorder(70, 0, 0, 0));
+		      JPanel panel = new JPanel();
+		      panel.add(BorderLayout.CENTER,label);
+		      panel.setBorder(BorderFactory.createTitledBorder("Verlustteilung Digramm"));
+		      GraphikPanel.add(panel,3);
+		       //GraphikPanel.add(new JPanel());
+			   graphik3ComboBox2.removeAllItems();
+			   is_Verlustteilung_Digramm = true;
+			   GraphikPanel.revalidate();
+		    }
+		    else {
+		    		String [] item  = new String [] {"pmi-Werte","Wirkungsgrade"};
+		    		addItemToComboBox(graphik3ComboBox2, item);
+                    is_Verlustteilung_Digramm = true;
+		    		GraphikPanel.revalidate();
 
-    		    	}
-    		}
-    	}
+		    	}
+		}
+	}
 
 	}
 	
@@ -166,46 +164,46 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 	void graphik3ComboBox2ActionPerformed(ActionEvent evt) throws IOException {
 		// TODO Auto-generated method stub
 		String selected = null;
-   	 try{
-  		  
-      	  selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
-      	
-      	  if (selected.equals("Wirkungsgrade")){
-			is_Wirkungsgrade_Diagramm = true ;
-		} else {
-			is_Wirkungsgrade_Diagramm = false ;
-		}
-      	  } catch (NullPointerException npe) {
-      		  
-      	  }
-  
-	  if ((selected.equals("pmi-Werte")|| selected.equals("Wirkungsgrade")) && is_Verlustteilung_Digramm) {
-		GraphikPanel.remove(3);
-		try {
-			GraphikPanel.add(Verlustteilung(selected),3);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		is_P_V_Diagramm = false;
-
-		GraphikPanel.revalidate();
-		GroupPanel.revalidate();
+	   	 try{
+	  		  
+	      	  selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
+	      	  
+	      	if (selected.equals("Wirkungsgrade")){
+				is_Wirkungsgrade_Diagramm = true ;
+			} else {
+				is_Wirkungsgrade_Diagramm = false ;
+			}
+	      	
+	      	 if ((selected.equals("pmi-Werte")|| selected.equals("Wirkungsgrade")) && is_Verlustteilung_Digramm) {
+				GraphikPanel.remove(3);
+				try {
+					GraphikPanel.add(Verlustteilung(selected),3);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				is_P_V_Diagramm = false;
+				GraphikPanel.revalidate();
+				GroupPanel.revalidate();
+	      	}
+	      	 
+			  else if (selected != null) {
+		  		GraphikPanel.remove(3);
+					try {
+					GraphikPanel.add(Auswahl_Diagramm(selected),3);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+					GraphikPanel.revalidate();
+					GroupPanel.revalidate();
+		  	}
+	      	  
+	      	  } catch (NullPointerException npe) {
+	      		  
+	      	  }
 	}
-	  
-	  
-	  else if (selected != null) {
-  		GraphikPanel.remove(3);
-			try {
-			GraphikPanel.add(Auswahl_Diagramm(selected),3);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-			GraphikPanel.revalidate();
-			GroupPanel.revalidate();
-  	}
-	}
+   	 
 
 
 	/* (non-Javadoc)

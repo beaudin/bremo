@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -870,7 +869,8 @@ public abstract class BremoModellGraphik extends JFrame{
 	}
      public String zeit_oder_KW() throws IOException{
     	 
-    	 BufferedReader in = new BufferedReader(new FileReader(inputfile));
+    	 @SuppressWarnings("resource")
+		BufferedReader in = new BufferedReader(new FileReader(inputfile));
          String zeile = null;
  		 String [] St = null;
  		 while((zeile = in.readLine()) != null) {

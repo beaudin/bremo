@@ -8,19 +8,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.Shape;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.print.Paper;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,8 +41,6 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import javax.swing.border.TitledBorder;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -66,7 +60,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import com.itextpdf.awt.DefaultFontMapper;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.pdf.BaseFont;
 //import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfTemplate;
@@ -103,7 +96,6 @@ public class bremoGraphik extends JFrame {
 	 * @throws IOException 
 	 * @throws ParameterFileWrongInputException 
      */
-    @SuppressWarnings({ "unchecked", "static-access" })
    
     private void initComponents(File file) throws IOException, ParameterFileWrongInputException {
         
@@ -643,8 +635,6 @@ public class bremoGraphik extends JFrame {
     		}
     	}
     ChartPanel	chartpanel = (ChartPanel) GraphikPanel.getComponent(0);
-    TitledBorder border = (TitledBorder) chartpanel.getBorder();
-    String Titel = border.getTitle();
     chartpanel.getChart();
     writeChartToPDF(Graphik_Chart, 320, 230, "src/bremoGraphik/pdf/Graphik"+TitelLabel.getText()+".pdf");
     }

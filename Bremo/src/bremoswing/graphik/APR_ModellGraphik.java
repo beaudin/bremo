@@ -33,6 +33,10 @@ import bremoExceptions.ParameterFileWrongInputException;
  */
 public class APR_ModellGraphik extends BremoModellGraphik {
 	 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	String [] header ;
 	
 	/**

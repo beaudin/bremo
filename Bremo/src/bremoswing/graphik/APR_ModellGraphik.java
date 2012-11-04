@@ -32,8 +32,9 @@ import bremoExceptions.ParameterFileWrongInputException;
  *
  */
 public class APR_ModellGraphik extends BremoModellGraphik {
-
-	 String [] header ;
+	 
+	String [] header ;
+	
 	/**
 	 * @param file
 	 * @param berechnungModell
@@ -306,16 +307,16 @@ public class APR_ModellGraphik extends BremoModellGraphik {
 	}
 	
 	public String [] showHeaderOutFile () throws IOException {
-		
-		BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/APR_"+inputfile.getName()));
-       
-        String zeile = null;
-		String [] header = null;
-		if ((zeile = br.readLine()) != null){
-			header = zeile.split("\t");		
-		}
-		br.close();
-		return header;
-	}
+	 		
+	 		BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/APR_"+inputfile.getName()));
+	        
+	         String zeile = null;
+	 		String [] header = null;
+	 		if ((zeile = br.readLine()) != null){
+	 			header = zeile.split("\t");		
+	 		}
+	 		br.close();
+	 		return header;
+	 	}
 
 }

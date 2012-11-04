@@ -98,6 +98,7 @@ public abstract class BremoModellGraphik extends JFrame{
      static JLabel Tabelle_PostLabel;
      String berechnungModell;
      String zeit_oder_KW;
+     String [] header ;
      
      BremoModellGraphik (File file, String berechnungModell ) throws ParameterFileWrongInputException, IOException {
     	 
@@ -1075,5 +1076,4 @@ public abstract class BremoModellGraphik extends JFrame{
          }
          document.close();
      }
-	
 }

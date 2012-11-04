@@ -133,6 +133,36 @@ public class FileWriter_txt {
 			pw.close();		
 		}
 	}
+	
+	public void writeStringInLine ( String text, boolean appendToFile) {
+		
+		PrintWriter pw = null;
+	
+		try {
+			
+			if (appendToFile) {		
+			//If the file already exists, start writing at the end of it.
+				pw = new PrintWriter(new FileWriter(filename, true));		
+			}
+			else {
+			
+				pw = new PrintWriter(new FileWriter(filename));
+				//this is equal to:
+				//pw = new PrintWriter(new FileWriter(filename, false));		
+				}
+			pw.print(text+" ");
+			pw.flush();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally {		
+			//Close the PrintWriter
+			if (pw != null)
+			pw.close();		
+		}
+			
+	}
 
 
 	public void writeTestLinesToFile() {

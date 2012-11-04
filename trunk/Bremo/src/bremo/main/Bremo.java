@@ -81,17 +81,21 @@ public class Bremo extends Thread {
 					"Thread "+this.getName()+" ist fertig!", this.getName(),
 					JOptionPane.INFORMATION_MESSAGE);
 			SwingBremo.PutInBremoThreadFertig(this.getName());
-	        SwingBremo.StateBremoThread();
 		} catch (Exception  e) {
 			this.interrupt();
 			e.printStackTrace();
 			
 		}
-		if(casePara.is_Verlustteilung() == true){
+		if(casePara.is_Verlustteilung()){
+			SwingBremo.VerlustteilungThread();
 			Verlustteilung verl = new Verlustteilung(casePara);
 			verl.berechneVerluste();
-			System.out.println("Verlustteilung fertig");
+			System.err.println("Verlustteilung fertig");
+			SwingBremo.StateBremoThread();
 			}
+		else {
+			SwingBremo.StateBremoThread();
+		}
 	}	
 
 	/**

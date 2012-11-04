@@ -1,5 +1,9 @@
 package berechnungsModule.Berechnung;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 import io.FileWriter_txt;
@@ -298,22 +302,27 @@ public class Verlustteilung {
 		//////////////////
 		//Ausgabebereich//
 		//////////////////
-		double[] pmi = {Double.NaN,Double.NaN,pmiIdeal,pmiReal,pmiVerbrennungslage, pmiHCCO,pmiBrennverlauf,pmiMit,pmiLWAideal,pmiLWArealGem,pmiLWA,pmr};
-		String [] headerPmi = {"pmi-Werte [Pa]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Reibmitteldruck"};
+//		double[] pmi = {Double.NaN,Double.NaN,pmiIdeal,pmiReal,pmiVerbrennungslage, pmiHCCO,pmiBrennverlauf,pmiMit,pmiLWAideal,pmiLWArealGem,pmiLWA,pmr};
+//		String [] headerPmi = {"pmi-Werte [Pa]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Reibmitteldruck"};
+//		
+//		double[] eta = {Double.NaN,Double.NaN,etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaLWAideal,etaLWArealGem,etaLWA,etaMech};
+//		String [] headerEta = {"Wirkungsgrade","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Mechanischer Wirkungsgrad"};
 		
-		double[] eta = {Double.NaN,Double.NaN,etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaLWAideal,etaLWArealGem,etaLWA,etaMech};
-		String [] headerEta = {"Wirkungsgrade","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Mechanischer Wirkungsgrad"};
+		String [] header = {"*******","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Reibmitteldruck","Mechanischer Wirkungsgrad"};
+		double[] pmi = {pmiIdeal,pmiReal,pmiVerbrennungslage, pmiHCCO,pmiBrennverlauf,pmiMit,pmiLWAideal,pmiLWArealGem,pmiLWA,pmr,Double.NaN};
+		double[] eta = {etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaLWAideal,etaLWArealGem,etaLWA,Double.NaN,etaMech};
 		
 		//String name="Verlustteilung-Verläufe_"+CP.get_CaseName()+".txt";
 		Ergebnis.schreibeErgebnisFile("Verlustteilung-APR-Verlauf_"+CP.get_CaseName()+".txt");
 		ErgebnisLWA.schreibeErgebnisFile("Verlustteilung-LWA-Verlauf_"+CP.get_CaseName()+".txt");
-		FileWriter_txt txtFile = new FileWriter_txt(CP.get_workingDirectory()+"Verlustteilung-Wirkungsgrade_"+CP.get_CaseName()+".txt");		
-		txtFile.writeTextLineToFile(headerPmi, false);
+		FileWriter_txt txtFile = new FileWriter_txt(CP.get_workingDirectory()+"Verlustteilung-Wirkungsgrade_"+CP.get_CaseName()+".txt");
+	
+		txtFile.writeTextLineToFile(header, false);
+		txtFile.writeStringInLine("pmi-Werte",true);
 		txtFile.writeLineToFile (pmi, true);
-		txtFile.writeTextLineToFile(headerEta, true);
+		txtFile.writeStringInLine("Wirkungsgrade",true);
 		txtFile.writeLineToFile (eta, true);
-		
-		
+
 //		APR_homogen_EinZonig mitWandwaerme = new APR_homogen_EinZonig(CP, true);
 //		VektorBuffer mitWandwaermeverlust = berechnungDurchfuehren(mitWandwaerme);
 //		double [] pMit = mitWandwaermeverlust.getValues();

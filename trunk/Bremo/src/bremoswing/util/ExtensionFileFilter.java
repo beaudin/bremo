@@ -1,4 +1,4 @@
-package bremoswing; 
+package bremoswing.util; 
 
 /*
  * To change this template, choose Tools | Templates
@@ -14,7 +14,7 @@ import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 
-class ExtensionFileFilter extends FileFilter {
+public class ExtensionFileFilter extends FileFilter {
   String description;
 
   String extensions[];

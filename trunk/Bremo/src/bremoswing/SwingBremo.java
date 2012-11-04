@@ -1,15 +1,9 @@
 package bremoswing;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
 
@@ -19,57 +13,40 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.ThreadGroup;
 import java.net.URL;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JToolBar;
-import javax.swing.LayoutStyle;
 import javax.swing.Timer;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
-
 import BremoLogFile.LogFileWriter;
 import bremo.main.Bremo;
-import bremoExceptions.StopBremoException;
 import bremoswing.graphik.SelectItemToPlotten;
-import bremoswing.util.ImageBackgroundJOptionPane;
+import bremoswing.util.ExtensionFileFilter;
+import bremoswing.util.SucheBremo;
 
 /*
  * SwingBremo.java
@@ -115,6 +92,7 @@ public class SwingBremo extends JFrame {
 	public static Timer timerUpdate;
 	public static Timer timerCalcul;
 	public static int percent;
+	static SelectItemToPlotten plotten;
 	PrintStream outStream = new PrintStream(System.out) {
 
 		@Override
@@ -176,7 +154,11 @@ public class SwingBremo extends JFrame {
 		//System.setErr(errStream);
 
 		manager = new JPanel(){
-			@SuppressWarnings("null")
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void paintComponent(Graphics g) 
             {
               
@@ -205,6 +187,11 @@ public class SwingBremo extends JFrame {
 
 		// konsole = new JCheckBox();
 		konsole2 = new JPanel(){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void paintComponent(Graphics g) 
             {
 				URL url = getClass().getResource("/bremoswing/bild/Abstract_Frozen_Blue.jpg");
@@ -346,7 +333,12 @@ public class SwingBremo extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
-				new SelectItemToPlotten().setVisible(true);
+				if(plotten != null ) {
+				  plotten.dispose();
+				}
+			    plotten = new SelectItemToPlotten();
+				plotten.setVisible(true);
+				
 			}
 		});
 		gc.fill = GridBagConstraints.NONE;
@@ -820,13 +812,16 @@ public class SwingBremo extends JFrame {
 		dialog.setContentPane(optionPane);
 		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		dialog.setVisible(true);
-
+        try {
 		int value = ((Integer) optionPane.getValue()).intValue();
 		if (value == JOptionPane.YES_OPTION) {
 			System.exit(0);
 		} else if (value == JOptionPane.NO_OPTION) {
 
 		}
+        } catch (NullPointerException npe){
+        	
+        }
 	}
 
 	/**

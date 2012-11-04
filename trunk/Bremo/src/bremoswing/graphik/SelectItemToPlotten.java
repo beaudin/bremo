@@ -32,7 +32,7 @@ import bremoswing.SwingBremo;
  *
  * @author Beaudin
  */
-public class SelectItemToPlotten extends JFrame {
+public  class SelectItemToPlotten extends JFrame {
 
     /**
      * Creates new form SelectItemToPlotten
@@ -172,13 +172,13 @@ public class SelectItemToPlotten extends JFrame {
 	 * ComboBox
 	 */
 	public void addFileItemToComboBox(JComboBox cb, String[] item) {
-
-		// cb.addItem("");
-		for (int i = 0; i < item.length; i++) {
-
-			cb.addItem(item[i]);
-		}
-
+		cb.removeAllItems();
+		cb.setModel(new JComboBox(item).getModel());
+	}
+	
+	public void update(String [] item) {
+		addFileItemToComboBox(fileComboBox, item);
+		jPanel1.revalidate();
 	}
 
     /**

@@ -65,6 +65,8 @@ public class APR_ModellGraphik extends BremoModellGraphik {
 		addItemToComboBox(graphik2ComboBox2, header);
 		addItemToComboBox(graphik3ComboBox2, header);
 		GraphikPanel.revalidate();
+		graphik2ComboBox2.setSelectedItem("Brennraumvolumen [m3]");
+		graphik3ComboBox2.setSelectedItem("Alpha [W/(m^2K)]");
 		/*******************************************************************************/
 		
 		setVisible(true);
@@ -92,12 +94,13 @@ public class APR_ModellGraphik extends BremoModellGraphik {
     			   addItemToComboBox(graphik2ComboBox2, header);
     		       GraphikPanel.remove(2);
     			   GraphikPanel.add(Auswahl_Diagramm("Brennraumvolumen [m3]"),2);
+    			   graphik2ComboBox2.setSelectedItem("Brennraumvolumen [m3]");
     			   is_P_V_Diagramm = false;
     			   GraphikPanel.revalidate();
     	       }
     	}
 	}
-
+ 
 	/* (non-Javadoc)
 	 * @see bremoswing.graphik.BremoModellGraphik#graphik2ComboBox2ActionPerformed(java.awt.event.ActionEvent)
 	 */
@@ -133,6 +136,7 @@ public class APR_ModellGraphik extends BremoModellGraphik {
                 addItemToComboBox(graphik3ComboBox2, header);
     			GraphikPanel.remove(3);
     			GraphikPanel.add(Auswahl_Diagramm("Alpha [W/(m^2K)]"),3);
+    			graphik3ComboBox2.setSelectedItem("Alpha [W/(m^2K)]");
     			GraphikPanel.revalidate();
     			is_Verlustteilung_Digramm = false;
     			
@@ -161,6 +165,15 @@ public class APR_ModellGraphik extends BremoModellGraphik {
     		    		String [] item  = new String [] {"pmi-Werte","Wirkungsgrade"};
     		    		addItemToComboBox(graphik3ComboBox2, item);
                         is_Verlustteilung_Digramm = true;
+                        GraphikPanel.remove(3);
+            			try {
+            			    	GraphikPanel.add(Verlustteilung("pmi-Werte"),3);
+            				}
+            			catch (IOException e1) {
+            					// TODO Auto-generated catch block
+            					e1.printStackTrace();
+            				}
+            			is_P_V_Diagramm = false;
     		    		GraphikPanel.revalidate();
 
     		    	}

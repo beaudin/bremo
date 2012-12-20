@@ -759,7 +759,7 @@ public class SwingBremo extends JFrame {
 		progressBar.setVisible(false);
 		progressBarInd.setVisible(true);
 		stop.setEnabled(false);
-		label.setText("Verlustteilung wird berechnen...");
+		label.setText("Verlustteilung wird berechnet...");
 	}
 	/************************ place Frame to the center ************************/
 	public static void placeFrame(JFrame frame) {

@@ -9,7 +9,7 @@ public class PdfFilePrinting {
 	     try{
 	             Executable ex = new Executable();
 	             //ex.openDocument(file);
-	             ex.printDocument(file);
+	             ex.openDocument(file);
 	     }catch(IOException e){
 	             e.printStackTrace();
 	     }

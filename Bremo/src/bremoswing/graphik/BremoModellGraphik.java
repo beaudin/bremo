@@ -38,18 +38,24 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYDataset;
@@ -75,6 +81,8 @@ public abstract class BremoModellGraphik extends JFrame{
 	
 	 private static final long serialVersionUID = 3116616946658017906L;
 	
+	 static JLabel KITLabel;
+	 static JLabel IFKMLabel;
 	 static JLabel TitelLabel;
      static JLabel datumLabel;
      JButton druckenButton;
@@ -121,7 +129,9 @@ public abstract class BremoModellGraphik extends JFrame{
     	TabellePanel = new JPanel();
     	GroupPanel   = new JPanel();
     	
+    	KITLabel= new JLabel();
         TitelLabel = new JLabel();
+        IFKMLabel= new JLabel();
         pathLabel  = new JLabel();
         datumLabel = new JLabel();
         
@@ -159,9 +169,19 @@ public abstract class BremoModellGraphik extends JFrame{
         GroupPanel.setPreferredSize(new Dimension (1280,75));
         GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         
+        
         /********************************************************************************/     
         
         /** TitelLabel Processing  ******************************************************/
+        URL urlKit= getClass().getResource("/bremoswing/bild/KIT.png");
+        ImageIcon iconKIT = new ImageIcon(urlKit);
+        Image imageKit = iconKIT.getImage();
+        imageKit  = imageKit.getScaledInstance(87, 40,java.awt.Image.SCALE_SMOOTH);
+        iconKIT = new ImageIcon(imageKit);
+        KITLabel.setIcon(iconKIT);
+        Border KitBorder = new LineBorder(Color.black, 1, true);
+        KITLabel.setBorder(KitBorder);
+        TitelPanel.add(KITLabel, BorderLayout.LINE_START);
         
         TitelLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         TitelLabel.setText(inputfile.getName());
@@ -171,7 +191,17 @@ public abstract class BremoModellGraphik extends JFrame{
         image  = image.getScaledInstance(40, 40,java.awt.Image.SCALE_SMOOTH);
         icon = new ImageIcon(image);
         TitelLabel.setIcon(icon);
+        TitelLabel.setBorder(BorderFactory.createEmptyBorder(0, 450, 0, 450));
         TitelPanel.add(TitelLabel, BorderLayout.CENTER);
+        
+        URL urlIFKM = getClass().getResource("/bremoswing/bild/IFKM.png");
+        ImageIcon iconIFKM = new ImageIcon(urlIFKM);
+        Image imageIFKM = iconIFKM.getImage();
+        imageIFKM  = imageIFKM.getScaledInstance(40, 40,java.awt.Image.SCALE_SMOOTH);
+        iconIFKM = new ImageIcon(imageIFKM);
+        IFKMLabel.setIcon(iconIFKM);
+        TitelPanel.add(IFKMLabel, BorderLayout.LINE_END);
+        
         /********************************************************************************/
         
         /**  Layout of GraphikPanel  ****************************************************/
@@ -563,7 +593,8 @@ public abstract class BremoModellGraphik extends JFrame{
      * @param data      set von Daten zum zeichnen 
      * @return
      */
-    public ChartPanel createChartPanel(String Titel, String XLabel,String YLabel, XYDataset data1 ,XYDataset data2) {
+    @SuppressWarnings("deprecation")
+	public ChartPanel createChartPanel(String Titel, String XLabel,String YLabel, XYDataset data1 ,XYDataset data2) {
     				
     		JFreeChart chart = ChartFactory.createXYLineChart(
     				Titel, XLabel , YLabel ,  data1,
@@ -579,9 +610,11 @@ public abstract class BremoModellGraphik extends JFrame{
     	     xyplot.setDataset(1, data2);
     	     xyplot.setRangeAxis(1, numberaxis1);
     	     xyplot.mapDatasetToRangeAxis(1, 1);
-    	     StandardXYItemRenderer standardxyitemrenderer = new StandardXYItemRenderer();
-    	     standardxyitemrenderer.setSeriesPaint(0, Color.blue);
-    	     xyplot.setRenderer(1, standardxyitemrenderer);
+    	     XYItemRenderer xyitemrenderer = new StandardXYItemRenderer();
+    	     xyitemrenderer.setSeriesPaint(0, Color.blue);
+    	     XYToolTipGenerator generator = new StandardXYToolTipGenerator();
+    	     xyitemrenderer.setToolTipGenerator(generator);
+    	     xyplot.setRenderer(1,xyitemrenderer);
 
     		//writeChartToPDF(chart, 600, 400, "src/bremoGraphik/pdf/Verlauf von "+Titel+".pdf");
     		
@@ -641,13 +674,13 @@ public abstract class BremoModellGraphik extends JFrame{
 	        ImageIO.write(im, "png", new File(inputfile.getParent()+"/panel.png"));
 	       // System.err.println("panel saved as image");
 	        JOptionPane.showMessageDialog(this,
-	        		"panel saved as image", "Save",
+	        		"Bild wurde unter \" "+inputfile.getParent()+File.pathSeparator+"panel.png \" gespeichert."  , "Speichern",
 					JOptionPane.INFORMATION_MESSAGE);
 
 	    } catch (Exception e) {
 	       // System.err.println("panel not saved " + e.getMessage());
 	        JOptionPane.showMessageDialog(this,
-	        		"panel not Saved ", "Save",
+	        		"Fehler: Bild wurde nicht gespeichert ", "Save",
 					JOptionPane.WARNING_MESSAGE);
 
 	    }
@@ -769,7 +802,7 @@ public abstract class BremoModellGraphik extends JFrame{
 			//cellpadding=\"0\"  cellspacing=\"0\" style= \"border-collapse: collapse;\"
 	    	
 			String tabelle ="<html>"+
-			        "<table border = 1 width = 200>"+
+			        "<table border = 1 cellspacing = 0 width = 200 bgcolor=#FFFFFF >"+
 			        "<font size =-2>"+
 			        "<tr>"+
 	                "<th colspan=\"2\"><font size =-2>Tabelle Input File</font></th>"+
@@ -826,7 +859,7 @@ public abstract class BremoModellGraphik extends JFrame{
 				        "</style>"+
 				        "</head>"+
 				        "<body>"+
-				        "<table border = 1 width = 200>"+
+				        "<table border = 1 width = 200 bgcolor=#FFFFFF>"+
 				        "<tr>"+
 		                "<th colspan=\"2\"><font size =-2>Tabelle Post File</font></th>"+
 		                "</tr>"+
@@ -997,6 +1030,19 @@ public abstract class BremoModellGraphik extends JFrame{
              transformation.translate(width, -(2*height + TitelLabel.getHeight()));
              contentByte.addTemplate(template, transformation);
               
+             
+             template = contentByte.createTemplate(KITLabel.getWidth(), KITLabel.getHeight());
+             graphics2d = template.createGraphics(KITLabel.getWidth(), KITLabel.getHeight(),
+                     new DefaultFontMapper());
+             KITLabel.paint(graphics2d);
+             KITLabel.addNotify();
+             KITLabel.validate();
+             graphics2d.dispose();
+             transformation = new AffineTransform();
+             transformation.rotate(Math.PI/2);
+             transformation.translate(5 , -KITLabel.getHeight()-5);
+             contentByte.addTemplate(template, transformation);
+             
         
              
              template = contentByte.createTemplate(TitelLabel.getWidth(), TitelLabel.getHeight());
@@ -1009,6 +1055,19 @@ public abstract class BremoModellGraphik extends JFrame{
              transformation = new AffineTransform();
              transformation.rotate(Math.PI/2);
              transformation.translate((document.getPageSize().getHeight()-TitelLabel.getWidth())/2, -TitelLabel.getHeight());
+             contentByte.addTemplate(template, transformation);
+             
+             
+             template = contentByte.createTemplate(IFKMLabel.getWidth(), IFKMLabel.getHeight());
+             graphics2d = template.createGraphics(IFKMLabel.getWidth(), IFKMLabel.getHeight(),
+                     new DefaultFontMapper());
+             IFKMLabel.paint(graphics2d);
+             IFKMLabel.addNotify();
+             IFKMLabel.validate();
+             graphics2d.dispose();
+             transformation = new AffineTransform();
+             transformation.rotate(Math.PI/2);
+             transformation.translate(2 * width - IFKMLabel.getWidth(), -IFKMLabel.getHeight());
              contentByte.addTemplate(template, transformation);
              
              
@@ -1075,5 +1134,13 @@ public abstract class BremoModellGraphik extends JFrame{
              e.printStackTrace();
          }
          document.close();
+     }
+     
+     public Color  PrintMode (){ 
+    	 
+    	 
+    	 
+    	 return null;
+    	
      }
 }

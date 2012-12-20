@@ -55,8 +55,10 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
         GraphikPanel.add(Druckverlauf());
 		GraphikPanel.add(dQb_Qb_Qmax_Verlauf());
 		GraphikPanel.add(WaermeStromDichteVerlauf());
+		graphik2ComboBox2.setSelectedItem("Wandwärmestromdichte [MW/m^2]");
 		is_P_V_Diagramm = false;
 		GraphikPanel.add(T_mittel_Verlauf());
+		graphik3ComboBox2.setSelectedItem("T_mittel [K]");
 		is_Verlustteilung_Digramm = false;
 		GraphikPanel.revalidate();
 		
@@ -87,6 +89,7 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
     		       graphik2ComboBox2.removeAllItems();
     		       GraphikPanel.remove(2);
     			   GraphikPanel.add(WaermeStromDichteVerlauf(),2);
+    			   graphik2ComboBox2.setSelectedItem("Wandwärmestromdichte [MW/m^2]");
     			   is_P_V_Diagramm = false;
     			   GraphikPanel.revalidate();
     	       }
@@ -105,6 +108,7 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
     		if (is_Verlustteilung_Digramm) {
     			GraphikPanel.remove(3);
     			GraphikPanel.add(T_mittel_Verlauf(),3);
+    			graphik3ComboBox2.setSelectedItem("T_mittel [K]");
     			GraphikPanel.revalidate();
     			is_Verlustteilung_Digramm = false;
     		}
@@ -115,7 +119,7 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 		       GraphikPanel.remove(3);
 		       URL url = getClass().getResource("/bremoswing/bild/balkenErrorIcon.png");
 			   ImageIcon icon = new ImageIcon(url);
-		      JLabel label =  new JLabel("Graphik nicht vorhanden !",icon, SwingConstants.LEFT);
+		      JLabel label =  new JLabel("Verlustteilung wurde nicht berechnet!",icon, SwingConstants.LEFT);
 		      label.setFont(new java.awt.Font("Tahoma", 0, 16));
 		      label.setForeground(new Color(255,0,0));
 		      label.setBorder(BorderFactory.createEmptyBorder(70, 0, 0, 0));
@@ -132,8 +136,16 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 		    		String [] item  = new String [] {"pmi-Werte","Wirkungsgrade"};
 		    		addItemToComboBox(graphik3ComboBox2, item);
                     is_Verlustteilung_Digramm = true;
-		    		GraphikPanel.revalidate();
-
+                    GraphikPanel.remove(3);
+        			try {
+        			    	GraphikPanel.add(Verlustteilung("pmi-Werte"),3);
+        				}
+        			catch (IOException e1) {
+        					// TODO Auto-generated catch block
+        					e1.printStackTrace();
+        				}
+        			is_P_V_Diagramm = false;
+       	    		GraphikPanel.revalidate();
 		    	}
 		}
 	}
@@ -355,7 +367,8 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 					index_1 = i;
 				}
 			}
-			addItemToComboBox(graphik2ComboBox2, header);		
+			addItemToComboBox(graphik2ComboBox2, header);
+			//graphik2ComboBox2.setSelectedItem("Wandwärmestromdichte [MW/m^2]");
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
@@ -429,6 +442,7 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 				}
 			}
 			addItemToComboBox(graphik3ComboBox2, header);
+			//graphik3ComboBox2.setSelectedItem("T_mittel [K]");
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");

@@ -9,8 +9,11 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -173,15 +176,24 @@ public abstract class BremoModellGraphik extends JFrame{
         /********************************************************************************/     
         
         /** TitelLabel Processing  ******************************************************/
+        
+        TitelPanel.setLayout(new GridBagLayout());
+		GridBagConstraints gc = new GridBagConstraints();
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.ipadx = 0;
+		gc.ipady = 0;
+		gc.weightx = 0;
+        
         URL urlKit= getClass().getResource("/bremoswing/bild/KIT.png");
         ImageIcon iconKIT = new ImageIcon(urlKit);
         Image imageKit = iconKIT.getImage();
-        imageKit  = imageKit.getScaledInstance(87, 40,java.awt.Image.SCALE_SMOOTH);
+        imageKit  = imageKit.getScaledInstance(90, 45,java.awt.Image.SCALE_SMOOTH);
         iconKIT = new ImageIcon(imageKit);
         KITLabel.setIcon(iconKIT);
-        Border KitBorder = new LineBorder(Color.black, 1, true);
-        KITLabel.setBorder(KitBorder);
-        TitelPanel.add(KITLabel, BorderLayout.LINE_START);
+//        Border KitBorder = new LineBorder(Color.black, 1, true);
+//        KITLabel.setBorder(KitBorder);
+       
         
         TitelLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         TitelLabel.setText(inputfile.getName());
@@ -191,8 +203,7 @@ public abstract class BremoModellGraphik extends JFrame{
         image  = image.getScaledInstance(40, 40,java.awt.Image.SCALE_SMOOTH);
         icon = new ImageIcon(image);
         TitelLabel.setIcon(icon);
-        TitelLabel.setBorder(BorderFactory.createEmptyBorder(0, 450, 0, 450));
-        TitelPanel.add(TitelLabel, BorderLayout.CENTER);
+       
         
         URL urlIFKM = getClass().getResource("/bremoswing/bild/IFKM.png");
         ImageIcon iconIFKM = new ImageIcon(urlIFKM);
@@ -200,7 +211,24 @@ public abstract class BremoModellGraphik extends JFrame{
         imageIFKM  = imageIFKM.getScaledInstance(40, 40,java.awt.Image.SCALE_SMOOTH);
         iconIFKM = new ImageIcon(imageIFKM);
         IFKMLabel.setIcon(iconIFKM);
-        TitelPanel.add(IFKMLabel, BorderLayout.LINE_END);
+        
+        int links = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-KITLabel.getPreferredSize().width;
+        int right = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-IFKMLabel.getPreferredSize().width;
+        System.err.println(links+" "+ right);
+        gc.insets = new Insets(0, 0, 0, links);
+        gc.gridx = 0;
+		gc.gridy = 0;
+        TitelPanel.add(KITLabel,gc);
+        
+        gc.insets = new Insets(0, 0, 0, 0);
+        gc.gridx = 1;
+		gc.gridy = 0;
+        TitelPanel.add(TitelLabel,gc);
+        
+        gc.insets = new Insets(0,right , 0, 0);
+        gc.gridx = 2;
+		gc.gridy = 0;
+        TitelPanel.add(IFKMLabel,gc);
         
         /********************************************************************************/
         
@@ -1040,7 +1068,7 @@ public abstract class BremoModellGraphik extends JFrame{
              graphics2d.dispose();
              transformation = new AffineTransform();
              transformation.rotate(Math.PI/2);
-             transformation.translate(5 , -KITLabel.getHeight()-5);
+             transformation.translate(0 , -KITLabel.getHeight());
              contentByte.addTemplate(template, transformation);
              
         
@@ -1054,7 +1082,7 @@ public abstract class BremoModellGraphik extends JFrame{
              graphics2d.dispose();
              transformation = new AffineTransform();
              transformation.rotate(Math.PI/2);
-             transformation.translate((document.getPageSize().getHeight()-TitelLabel.getWidth())/2, -TitelLabel.getHeight());
+             transformation.translate((document.getPageSize().getHeight()-IFKMLabel.getHeight()-Tabelle_PostLabel.getWidth()-TitelLabel.getWidth())/2, -TitelLabel.getHeight());
              contentByte.addTemplate(template, transformation);
              
              

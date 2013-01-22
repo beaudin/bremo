@@ -48,7 +48,7 @@ public class APR_ModellGraphik extends BremoModellGraphik {
 	public APR_ModellGraphik(File file)throws ParameterFileWrongInputException, IOException {
 		super(file, "APR");
 		initComponentAPR();
-		// TODO Auto-generated constructor stub
+		PopUp();
 	}
 
 	private void initComponentAPR() throws IOException {

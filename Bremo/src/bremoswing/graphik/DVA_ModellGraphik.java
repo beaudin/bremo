@@ -46,6 +46,7 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 		// TODO Auto-generated constructor stub
 		super(file,"DVA");
 		initComponentDVA();
+		PopUp();
 	}
 
 	private void initComponentDVA() throws IOException {

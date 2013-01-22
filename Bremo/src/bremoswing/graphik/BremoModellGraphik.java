@@ -5,6 +5,7 @@ package bremoswing.graphik;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -17,6 +18,9 @@ import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -27,8 +31,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -40,6 +46,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
+import javax.swing.Timer;
+import javax.swing.ToolTipManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -688,7 +698,8 @@ public abstract class BremoModellGraphik extends JFrame{
 
 	public void speichernButtonActionPerformed(ActionEvent evt) {
         // TODO add your handling code here:
-    	saveImage();
+    	PrintMode();
+		//saveImage();
     }
 	/**
 	 * Save Image of Panel from Frame
@@ -699,10 +710,10 @@ public abstract class BremoModellGraphik extends JFrame{
 		c.paint(im.getGraphics());
 		 
 	    try {
-	        ImageIO.write(im, "png", new File(inputfile.getParent()+"/panel.png"));
+	        ImageIO.write(im, "png", new File(inputfile.getParent()+File.separator+inputfile.getName()+".png"));
 	       // System.err.println("panel saved as image");
 	        JOptionPane.showMessageDialog(this,
-	        		"Bild wurde unter \" "+inputfile.getParent()+File.pathSeparator+"panel.png \" gespeichert."  , "Speichern",
+	        		"Bild wurde unter \" "+inputfile.getParent()+File.separator+inputfile.getName()+".png \" gespeichert."  , "Speichern",
 					JOptionPane.INFORMATION_MESSAGE);
 
 	    } catch (Exception e) {
@@ -747,61 +758,61 @@ public abstract class BremoModellGraphik extends JFrame{
 				
 				if (header1[0].equals("Einlassschluss[KWnZOT]")){
 					header2[0]=header1[0].replace("[", " [");
-					header2[1]=header1[1];
+					header2[1]=NumberCuter(header1[1]);
 					
 				}
 				if (header1[0].equals("Einlassoeffnet[KWnZOT]")){
 					header2[2]=header1[0].replace("[", " [");
-					header2[3]=header1[1];
+					header2[3]=NumberCuter(header1[1]);
 					
 				}
 				if (header1[0].equals("Auslassoeffnet[KWnZOT]")){
 					header2[4]=header1[0].replace("[", " [");
-					header2[5]=header1[1];
+					header2[5]=NumberCuter(header1[1]);
 					
 				}
 				if (header1[0].equals("Auslassschluss[KWnZOT]")){
 					header2[6]=header1[0].replace("[", " [");
-					header2[7]=header1[1];
+					header2[7]=NumberCuter(header1[1]);
 					
 				}
 				if (header1[0].equals("Drehzahl[min^-1]")){
 					header2[8]=header1[0].replace("[", " [");
-					header2[9]=header1[1];
+					header2[9]=NumberCuter(header1[1]);
 					
 				}
 				if (header1[0].equals("BOI[KWnZOT]")){
 					header2[10]=header1[0].replace("[", " [");
-					header2[11]=header1[1];
+					header2[11]=NumberCuter(header1[1]);
 				}
 				if (header1[0].equals("BOI_1[KWnZOT]")){
 					header2[12]=header1[0].replace("[", " [");
-					header2[13]=header1[1];
+					header2[13]=NumberCuter(header1[1]);
 				}
 				if (header1[0].equals("EOI[KWnZOT]")){
 					header2[14]=header1[0].replace("[", " [");
-					header2[15]=header1[1];
+					header2[15]=NumberCuter(header1[1]);
 				}
 				if (header1[0].equals("EOI_1[KWnZOT]")){
 					header2[16]=header1[0].replace("[", " [");
-					header2[17]=header1[1];
+					header2[17]=NumberCuter(header1[1]);
 				}
 				if (header1[0].equals("BOI_2[KWnZOT]")){
 					header2[18]=header1[0].replace("[", " [");
-					header2[19]=header1[1];
+					header2[19]=NumberCuter(header1[1]);
 				}
 				if (header1[0].equals("EOI_2[KWnZOT]")){
 					header2[20]=header1[0].replace("[", " [");
-					header2[21]=header1[1];
+					header2[21]=NumberCuter(header1[1]);
 			    }
 				if (header1[0].equals("rechnungsBeginn[KWnZOT]")){
 					header2[22]=header1[0].replace("[", " [");
-					header2[23]=header1[1];
+					header2[23]=NumberCuter(header1[1]);
 					
 				}
 				if (header1[0].equals("rechnungsEnde[KWnZOT]")){
 					header2[24]=header1[0].replace("[", " [");
-					header2[25]=header1[1];
+					header2[25]=NumberCuter(header1[1]);
 				}
 				if(header1[0].equals("Verlustteilung[-]")){
 					if (header1[1].equals("ja")){
@@ -876,6 +887,13 @@ public abstract class BremoModellGraphik extends JFrame{
 			header1 = zeile.split("\t");
 		if ((zeile = in.readLine()) != null)
 			header2 = zeile.split("\t");
+		try {
+		    for (int i = 0; i < header2.length; i++){
+			     header2 [i] = NumberCuter(header2[i]);
+		    }
+		} catch (NumberFormatException e){
+			
+		}
 		in.close();
 		String tabelle ="<html>"+
 				        "<head>"+
@@ -1164,11 +1182,112 @@ public abstract class BremoModellGraphik extends JFrame{
          document.close();
      }
      
-     public Color  PrintMode (){ 
+     public Boolean  PrintMode (){ 
     	 
+    	 Color panel = TitelPanel.getBackground();
+    	 Color white = Color.white;
+    	 Color chart = Color.gray;
+    	 TitelPanel.setBackground(white);
+    	 GraphikPanel.setBackground(white);
+    	 GroupPanel.setBackground(white);
+    	 TabellePanel.setBackground(white);
     	 
+    	 TitelPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+         GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+         TabellePanel.setBorder(BorderFactory.createLineBorder(Color.white));
+         GroupPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+         
     	 
-    	 return null;
+    	int j = GraphikPanel.getComponentCount();
+  		Paint color = null;
+  		Object[] Graphik_Chart = new Object[j];
+  		for (int i = 0; i < Graphik_Chart.length; i++) {
+  			Graphik_Chart[i] = GraphikPanel.getComponent(i);
+  			try {
+  				chart = ((ChartPanel) Graphik_Chart[i]).getBackground();
+  				((ChartPanel) Graphik_Chart[i]).setBackground(Color.white);
+  				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
+  				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
+  				color = plot.getBackgroundPaint();
+  				plot.setBackgroundPaint(Color.white);
+  			} catch (ClassCastException e) {
+  				Graphik_Chart[i] = null;
+  			}
+  		}
+  		
+  		
+  		saveImage();
+  		
+		TitelPanel.setBackground(panel);
+		GraphikPanel.setBackground(panel);
+		GroupPanel.setBackground(panel);
+		TabellePanel.setBackground(panel);
+		
+		TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        TabellePanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        
+		
+		for (int i = 0; i < Graphik_Chart.length; i++) {
+ 			Graphik_Chart[i] = GraphikPanel.getComponent(i);
+ 			try {
+ 				((ChartPanel) Graphik_Chart[i]).setBackground(chart);
+ 				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
+ 				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
+ 				plot.setBackgroundPaint(color);
+ 			} catch (ClassCastException e) {
+ 				Graphik_Chart[i] = null;
+ 			}
+ 		}
+		
+    	 
+    	 return true;
     	
      }
+     
+     public static String NumberCuter(String number) {
+    	 
+    	 double d = Double.parseDouble(number);
+    	 long i = Math.round(d*100);
+    	 d = (double)i/100;
+    	 return  Double.toString(d);
+    
+     }
+     
+     public void PopUp (){
+ 		
+ 		JLabel label = new JLabel();
+ 		label.setOpaque(true);
+ 		label.setBorder(BorderFactory.createLineBorder(Color.black));
+ 		label.setBackground(Color.WHITE);
+ 		String head = "<html><h3><font color=\"red\"><u>Tipps</u>:</font></h3>" +
+ 				      "<h4>For More Option please right click</h4></html>";
+ 	
+ 		label.setText(head);
+ 	     // panel.add(label,BorderLayout.CENTER);
+ 	      
+ 	      PopupFactory factory = PopupFactory.getSharedInstance();
+ 	      Random random = new Random();
+ 	      int x = random.nextInt(1000);
+ 	      int y = random.nextInt(1000);
+ 	      final Popup popup = factory.getPopup(this, label, 800, 50);
+ 	      popup.show();
+ 	      label.addMouseListener(new MouseAdapter() {
+ 	    	 public void mouseClicked(MouseEvent e) {
+ 				// TODO Auto-generated method stub
+ 				popup.hide();
+ 			}
+		});
+ 	      ActionListener hider = new ActionListener() {
+ 	        public void actionPerformed(ActionEvent e) {
+ 	          popup.hide();
+ 	        }
+ 	      };
+ 	      // Hide popup in 15 seconds
+ 	      Timer timer = new Timer(10000, hider);
+ 	      timer.start();
+ 	    
+ 	}
+
 }

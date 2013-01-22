@@ -1,9 +1,13 @@
 package bremoswing.graphik;
 
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,12 +15,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
@@ -75,7 +84,7 @@ public  class SelectItemToPlotten extends JFrame {
 				"/bremoswing/bild/bremo2.png")).getImage());
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        jPanel1.setBorder(BorderFactory.createTitledBorder("Bitte wählen Input File zu plotten"));
+        jPanel1.setBorder(BorderFactory.createTitledBorder("Bitte Input File zu plotten wählen"));
 
        // fileComboBox.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
@@ -86,53 +95,18 @@ public  class SelectItemToPlotten extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
-			    File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
-			    String berechnungModell = "";
-			    try {
-			    	BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
-					String zeile = null;
-					String [] header = null;
-					while((zeile = in.readLine()) != null) {
-						zeile=zeile.replaceAll(" ", "");
-						zeile=zeile.replaceAll("\t", "");
-						header = zeile.split(":");
-						header[0] = header[0].replace("[", "");
-						if (header[0].equals("berechnungsModell")){
-							String[] tmp =  header[1].split("_");
-							if (tmp[0].equals("DVA")){
-								berechnungModell = "DVA";
-							}
-							else if (tmp[0].equals("APR")){
-								berechnungModell = "APR";
-							}
-							
-						}
-					}
-					// new bremoGraphik(input);
-					if (berechnungModell.equals("DVA")){
-						
-						new DVA_ModellGraphik(input);
-					}
-					else if  (berechnungModell.equals("APR")){
-						
-						new APR_ModellGraphik(input); 
-					}
-					in.close();
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ParameterFileWrongInputException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			    
-				
+				plott();
 			}
 		});
-        
+        fileComboBox.addKeyListener(new KeyAdapter() {
+            @Override 
+        	public void keyPressed (KeyEvent e){
+            	 
+            	if (e.getKeyCode() == KeyEvent.VK_ENTER){
+            		    plott();
+            	}
+             }
+		});
         GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -172,7 +146,53 @@ public  class SelectItemToPlotten extends JFrame {
 		cb.removeAllItems();
 		cb.setModel(new JComboBox(item).getModel());
 	}
-
+	
+	public void plott(){
+		  File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
+		    String berechnungModell = "";
+		    try {
+		    	BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
+				String zeile = null;
+				String [] header = null;
+				while((zeile = in.readLine()) != null) {
+					zeile=zeile.replaceAll(" ", "");
+					zeile=zeile.replaceAll("\t", "");
+					header = zeile.split(":");
+					header[0] = header[0].replace("[", "");
+					if (header[0].equals("berechnungsModell")){
+						String[] tmp =  header[1].split("_");
+						if (tmp[0].equals("DVA")){
+							berechnungModell = "DVA";
+						}
+						else if (tmp[0].equals("APR")){
+							berechnungModell = "APR";
+						}
+						
+					}
+				}
+				// new bremoGraphik(input);
+				if (berechnungModell.equals("DVA")){
+					
+					new DVA_ModellGraphik(input);
+				}
+				else if  (berechnungModell.equals("APR")){
+					
+					new APR_ModellGraphik(input); 
+				}
+				in.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParameterFileWrongInputException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
+	
+	
     /**
      * @param args the command line arguments
      */

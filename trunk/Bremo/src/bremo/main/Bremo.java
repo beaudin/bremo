@@ -28,26 +28,13 @@ public class Bremo extends Thread {
 
 	public Bremo( ThreadGroup group , File inputFile) {
 		super(group,inputFile.getName());
-		this.inputFile=inputFile;
-		//		try {
-		//			casePara = new CasePara(inputFile);
-		//			r = new Rechnung(casePara);
-		//		} catch (ParameterFileWrongInputException e) {				
-		//			e.stopBremo();
-		//		}		
+		this.inputFile=inputFile;		
 	}
 
 
 	public Bremo( File inputFile) {	
 		super(inputFile.getName());
-		this.inputFile=inputFile;
-
-		//		try {
-		//			casePara = new CasePara(inputFile);
-		//			r = new Rechnung(casePara);
-		//		} catch (ParameterFileWrongInputException e) {				
-		//			e.stopBremo();
-		//		}		
+		this.inputFile=inputFile;	
 	}
 
 

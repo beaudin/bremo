@@ -42,7 +42,6 @@ import javax.swing.JTextField;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import BremoLogFile.LogFileWriter;
 import bremo.main.Bremo;
 import bremoswing.graphik.SelectItemToPlotten;
 import bremoswing.util.ExtensionFileFilter;
@@ -577,7 +576,7 @@ public class SwingBremo extends JFrame {
 			wahlFile.setVisible(true);
 			berechnen.setVisible(true);
 		} else {
-			LogFileWriter.reinitialisierung();
+//			LogFileWriter.reinitialisierung();
 			berechnen.setEnabled(false);
 			wahlFile.setEnabled(false);
 			stop.setEnabled(false);

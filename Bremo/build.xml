@@ -14,7 +14,15 @@
     </genkey>
   </target>
   <target name="all">
-    <signjar jar="Bremo.jar" keystore="${keyStorePath}" lazy="true"
+    <signjar jar="Applet/Bremo.jar" keystore="${keyStorePath}" lazy="true"
            alias="${keyStoreKeyAlias}" storepass="${keyStorePassword}"/>
+    <signjar jar="Applet/jcommon-1.0.16.jar" keystore="${keyStorePath}" lazy="true"
+           alias="${keyStoreKeyAlias}" storepass="${keyStorePassword}"/>
+    <signjar jar="Applet/jfreechart-1.0.13.jar" keystore="${keyStorePath}" lazy="true"
+           alias="${keyStoreKeyAlias}" storepass="${keyStorePassword}"/>
+    <signjar jar="Applet/itextpdf-5.3.2.jar" keystore="${keyStorePath}" lazy="true"
+           alias="${keyStoreKeyAlias}" storepass="${keyStorePassword}"/>
+ 
+     
   </target>
 </project> 

@@ -39,7 +39,9 @@ import bremoswing.SwingBremo;
  * @author Beaudin
  */
 public  class SelectItemToPlotten extends JFrame {
-
+   
+	public static boolean pupUp ;
+	
 	private static final long serialVersionUID = 1L;
 	/**
      * Creates new form SelectItemToPlotten
@@ -47,6 +49,7 @@ public  class SelectItemToPlotten extends JFrame {
     public SelectItemToPlotten() {
         initComponents();
         SwingBremo.placeFrame(this);
+        pupUp = false;
     }
 
     /**

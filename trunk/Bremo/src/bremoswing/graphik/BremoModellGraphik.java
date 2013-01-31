@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -708,12 +709,14 @@ public abstract class BremoModellGraphik extends JFrame{
 		Container c = getContentPane();
 		BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		c.paint(im.getGraphics());
-		 
+		String str = "<html>Bild wurde unter <a href = \" \" onclick = onclick() >"+inputfile.getParent()+File.separator+inputfile.getName()+".png</a> gespeichert.</html>";
+		
+		//String str = "<html><font color : blue >"+inputfile.getParent()+"</font></html>";
 	    try {
 	        ImageIO.write(im, "png", new File(inputfile.getParent()+File.separator+inputfile.getName()+".png"));
 	       // System.err.println("panel saved as image");
 	        JOptionPane.showMessageDialog(this,
-	        		"Bild wurde unter \" "+inputfile.getParent()+File.separator+inputfile.getName()+".png \" gespeichert."  , "Speichern",
+	        		str , "Speichern",
 					JOptionPane.INFORMATION_MESSAGE);
 
 	    } catch (Exception e) {
@@ -723,6 +726,16 @@ public abstract class BremoModellGraphik extends JFrame{
 					JOptionPane.WARNING_MESSAGE);
 
 	    }
+	}
+	
+	public void onclick() {
+		Desktop desktop = Desktop.getDesktop();
+	    try {
+			desktop.open(inputfile.getParentFile());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 	
 	/**
@@ -1261,8 +1274,8 @@ public abstract class BremoModellGraphik extends JFrame{
  		label.setOpaque(true);
  		label.setBorder(BorderFactory.createLineBorder(Color.black));
  		label.setBackground(Color.WHITE);
- 		String head = "<html><h3><font color=\"red\"><u>Tipps</u>:</font></h3>" +
- 				      "<h4>For More Option please right click</h4></html>";
+ 		String head = "<html><h2><font color=\"red\"><u>Tipps</u>:</font></h2>" +
+ 				      "<h3>For More Option make a right click</h3></html>";
  	
  		label.setText(head);
  	     // panel.add(label,BorderLayout.CENTER);
@@ -1272,7 +1285,10 @@ public abstract class BremoModellGraphik extends JFrame{
  	      int x = random.nextInt(1000);
  	      int y = random.nextInt(1000);
  	      final Popup popup = factory.getPopup(this, label, 800, 50);
- 	      popup.show();
+ 	      if (!SelectItemToPlotten.pupUp) {
+ 	          popup.show();
+ 	          SelectItemToPlotten.pupUp = true;
+ 	      }
  	      label.addMouseListener(new MouseAdapter() {
  	    	 public void mouseClicked(MouseEvent e) {
  				// TODO Auto-generated method stub

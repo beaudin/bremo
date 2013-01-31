@@ -918,37 +918,37 @@ public abstract class BremoModellGraphik extends JFrame{
 				        "</style>"+
 				        "</head>"+
 				        "<body>"+
-				        "<table border = 1 width = 200 bgcolor=#FFFFFF>"+
+				        "<table border = 0 width = 200 >"+ /*bgcolor=#FFFFFF*/
 				        "<tr>"+
-		                "<th colspan=\"2\"><font size =-2>Tabelle Post File</font></th>"+
+		                "<th colspan=\"2\" bgcolor=#848484><font size =-1>Tabelle Post File</font></th>"+
 		                "</tr>"+
 		                "<tr>"+
-		                "<th><font size =-2>"+header1[0] +"</font></th>"+
-		                "<td><font size =-2>"+header2[0] +"</font></td>"+
+		                "<th bgcolor=#BDBDBD><font size =-2>"+header1[0] +"</font></th>"+
+		                "<td bgcolor=#BDBDBD><font size =-2>"+header2[0] +"</font></td>"+
 		                "</tr>"+
 		                "<tr>"+
-		                "<th><font size =-2>"+header1[1] +"</font></th>"+
-	   	                "<td><font size =-2>"+header2[1] +"</font></td>"+
+		                "<th bgcolor=#A4A4A4><font size =-2>"+header1[1] +"</font></th>"+
+	   	                "<td bgcolor=#A4A4A4><font size =-2>"+header2[1] +"</font></td>"+
 	   	                "</tr>"+
 	   	                "<tr>"+
-		                "<th><font size =-2>"+header1[6] +"</font></th>"+
-		                "<td><font size =-2>"+header2[6] +"</font></td>"+
+		                "<th bgcolor=#BDBDBD><font size =-2>"+header1[6] +"</font></th>"+
+		                "<td bgcolor=#BDBDBD><font size =-2>"+header2[6] +"</font></td>"+
 		                "</tr>"+
 		                "<tr>"+
-		                "<th><font size =-2>"+header1[8] +"</font></th>"+
-		                "<td><font size =-2>"+header2[8] +"</font></td>"+
+		                "<th bgcolor=#A4A4A4><font size =-2>"+header1[8] +"</font></th>"+
+		                "<td bgcolor=#A4A4A4><font size =-2>"+header2[8] +"</font></td>"+
 		                "</tr>"+
 		                "<tr>"+
-		                "<th><font size =-2>"+header1[10] +"</font></th>"+
-		                "<td><font size =-2>"+header2[10] +"</font></td>"+
+		                "<th bgcolor=#BDBDBD><font size =-2>"+header1[10] +"</font></th>"+
+		                "<td bgcolor=#BDBDBD><font size =-2>"+header2[10] +"</font></td>"+
 		                "</tr>"+
 		                "<tr>"+
-		                "<th><font size =-2>"+header1[3] +"</font></th>"+
-		                "<td><font size =-2>"+header2[3] +"</font></td>"+
+		                "<th bgcolor=#A4A4A4><font size =-2>"+header1[3] +"</font></th>"+
+		                "<td bgcolor=#A4A4A4><font size =-2>"+header2[3] +"</font></td>"+
 		                "</tr>"+
 		                "<tr>"+
-		                "<th><font size =-2>"+header1[22] +"</font></th>"+
-		                "<td><font size =-2>"+header2[22] +"</font></td>"+
+		                "<th bgcolor=#BDBDBD><font size =-2>"+header1[22] +"</font></th>"+
+		                "<td bgcolor=#BDBDBD><font size =-2>"+header2[22] +"</font></td>"+
 		                "</tr>"+
 		                "</table>"+
 		                "</body>"+

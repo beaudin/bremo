@@ -1,0 +1,6 @@
+                         23.02.2013
+                         ##########
+
+- Fix PrintMode :  grau fläsche  wenn kein verlusteilung berechnet ist. (GeLöst)
+- Fix FileName ohne FileTyp und mit BerechnungModell: FileName hatte immer den Typ .txt (GeLöst: neue Variable "Name").
+

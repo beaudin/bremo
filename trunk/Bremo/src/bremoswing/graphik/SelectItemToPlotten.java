@@ -20,6 +20,7 @@ import java.util.Random;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -82,6 +83,15 @@ public  class SelectItemToPlotten extends JFrame {
 		};
         fileComboBox = new JComboBox();
         
+        ButtonOK = new JButton("OK");
+        ButtonOK.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+        		    plott();
+			}
+		});
         setResizable(false);
         setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo2.png")).getImage());
@@ -98,7 +108,7 @@ public  class SelectItemToPlotten extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
-				plott();
+				//plott();
 			}
 		});
         fileComboBox.addKeyListener(new KeyAdapter() {
@@ -115,15 +125,17 @@ public  class SelectItemToPlotten extends JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+                //.addContainerGap()
                 .addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, 297, GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(ButtonOK,GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE))
+                //.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+            	.addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+            	        .addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(ButtonOK,GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -153,6 +165,7 @@ public  class SelectItemToPlotten extends JFrame {
 	public void plott(){
 		  File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
 		    String berechnungModell = "";
+		    boolean is_RestgasVorgabe_LWA = false;
 		    try {
 		    	BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
 				String zeile = null;
@@ -170,17 +183,19 @@ public  class SelectItemToPlotten extends JFrame {
 						else if (tmp[0].equals("APR")){
 							berechnungModell = "APR";
 						}
-						
+					}
+					if (header[0].equals("RestgasVorgabeLWA")){
+						is_RestgasVorgabe_LWA = true;
 					}
 				}
 				// new bremoGraphik(input);
 				if (berechnungModell.equals("DVA")){
 					
-					new DVA_ModellGraphik(input);
+					new DVA_ModellGraphik(input,is_RestgasVorgabe_LWA);
 				}
 				else if  (berechnungModell.equals("APR")){
 					
-					new APR_ModellGraphik(input); 
+					new APR_ModellGraphik(input, is_RestgasVorgabe_LWA); 
 				}
 				in.close();
 			} catch (FileNotFoundException e) {
@@ -240,5 +255,6 @@ public  class SelectItemToPlotten extends JFrame {
     // Variables declaration - do not modify
     private JComboBox fileComboBox;
     private JPanel jPanel1;
+    private JButton ButtonOK;
     // End of variables declaration
 }

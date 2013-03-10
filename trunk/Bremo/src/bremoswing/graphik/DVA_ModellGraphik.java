@@ -42,9 +42,9 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 	 * @throws ParameterFileWrongInputException
 	 * @throws IOException
 	 */
-	public DVA_ModellGraphik(File file) throws ParameterFileWrongInputException, IOException {
+	public DVA_ModellGraphik(File file,boolean is_RestgasVorgabe_LWA) throws ParameterFileWrongInputException, IOException {
 		// TODO Auto-generated constructor stub
-		super(file,"DVA");
+		super(file,"DVA",is_RestgasVorgabe_LWA);
 		initComponentDVA();
 		PopUp();
 	}

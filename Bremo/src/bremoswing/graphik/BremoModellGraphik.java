@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.management.modelmbean.ModelMBean;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -75,6 +76,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.RectangleInsets;
 
 import com.itextpdf.awt.DefaultFontMapper;
 import com.itextpdf.text.Document;
@@ -94,12 +96,12 @@ import bremoswing.util.PdfFilePrinting;
 public abstract class BremoModellGraphik extends JFrame{
 	
 	 private static final long serialVersionUID = 3116616946658017906L;
-	
 	 static JLabel KITLabel;
 	 static JLabel IFKMLabel;
 	 static JLabel TitelLabel;
      static JLabel datumLabel;
      JButton druckenButton;
+     JButton LWAButton;
      JComboBox graphik2ComboBox1;
      JComboBox graphik2ComboBox2;
      JComboBox graphik3ComboBox1;
@@ -115,17 +117,19 @@ public abstract class BremoModellGraphik extends JFrame{
      boolean is_Verlustteilung_Digramm;
      boolean is_Wirkungsgrade_Diagramm;
      static boolean is_verlust_berechnen;
+     boolean is_RestgasVorgabe_LWA;
      static JLabel Tabelle_InLabel;
      static JLabel Tabelle_PostLabel;
      String berechnungModell;
      String zeit_oder_KW;
      String [] header ;
-     
-     BremoModellGraphik (File file, String berechnungModell ) throws ParameterFileWrongInputException, IOException {
+     String Name;
+   
+     BremoModellGraphik (File file, String berechnungModell, boolean is_RestgasVorgabe_LWA ) throws ParameterFileWrongInputException, IOException {
     	 
     	 if (file == null) throw new FileNotFoundException();
          
-     	initComponents(file , berechnungModell);
+     	 initComponents(file , berechnungModell, is_RestgasVorgabe_LWA);
      }
      
      /**
@@ -133,7 +137,7 @@ public abstract class BremoModellGraphik extends JFrame{
  	 * @throws IOException 
  	 * @throws ParameterFileWrongInputException 
       */
-	public void initComponents(File file, String berechnungModell) throws ParameterFileWrongInputException, IOException {
+	public void initComponents(File file, String berechnungModell, boolean is_RestgasVorgabe_LWA) throws ParameterFileWrongInputException, IOException {
 		// TODO Auto-generated method stub
 		
 		/**  initialization of Variable ***********************************************/
@@ -151,6 +155,7 @@ public abstract class BremoModellGraphik extends JFrame{
         
         druckenButton   = new JButton();
         speichernButton = new JButton();
+        LWAButton = new JButton();
         
         graphik3ComboBox1 = new JComboBox();
         graphik3ComboBox2 = new JComboBox();
@@ -162,15 +167,17 @@ public abstract class BremoModellGraphik extends JFrame{
         is_verlust_berechnen = false;
         
         this.berechnungModell = berechnungModell;
-        
+        this.is_RestgasVorgabe_LWA = is_RestgasVorgabe_LWA;
         zeit_oder_KW = zeit_oder_KW() ;
+        
+        Name = berechnungModell +"_"+ (inputfile.getName().replaceFirst(".txt", ""));
         /********************************************************************************/
 		
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setPreferredSize(new Dimension (1280,800));
         setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo2.png")).getImage());
-       setResizable(false);
+        setResizable(false);
         
         /** Size and Border of All Panel of the Frame************************************/
         
@@ -195,11 +202,11 @@ public abstract class BremoModellGraphik extends JFrame{
 		gc.ipadx = 0;
 		gc.ipady = 0;
 		gc.weightx = 0;
-        
+    
         URL urlKit= getClass().getResource("/bremoswing/bild/KIT.png");
         ImageIcon iconKIT = new ImageIcon(urlKit);
         Image imageKit = iconKIT.getImage();
-        imageKit  = imageKit.getScaledInstance(90, 45,java.awt.Image.SCALE_SMOOTH);
+        imageKit  = imageKit.getScaledInstance(94, 45,java.awt.Image.SCALE_SMOOTH);
         iconKIT = new ImageIcon(imageKit);
         KITLabel.setIcon(iconKIT);
 //        Border KitBorder = new LineBorder(Color.black, 1, true);
@@ -207,7 +214,7 @@ public abstract class BremoModellGraphik extends JFrame{
        
         
         TitelLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        TitelLabel.setText(inputfile.getName());
+        TitelLabel.setText(Name);
         URL url = getClass().getResource("/bremoswing/bild/bremo2.png");
         ImageIcon icon = new ImageIcon(url);
         Image image = icon.getImage();
@@ -268,13 +275,30 @@ public abstract class BremoModellGraphik extends JFrame{
       b2.add(Box.createHorizontalStrut(5));
       b2.add(Tabelle_InLabel);
       
-      Box b3 = Box.createVerticalBox();
-      b3.add(Box.createVerticalStrut(10));
-      b3.add(b1);
-      b3.add(Box.createVerticalStrut(60));
-      b3.add(b2);
+      Box b3 = Box.createHorizontalBox();
+      b3.add(Box.createHorizontalStrut(5));
+     
+      LWAButton.setText("LWA");
+      if (berechnungModell.equals("DVA")|| berechnungModell.equals("APR")) {
+    	  if (!is_RestgasVorgabe_LWA){
+    	      LWAButton.setEnabled(false);
+    	  }
+      } else {
+    	  LWAButton.setVisible(false);
+    	  LWAButton.setEnabled(false);
+      }
+     
+      b3.add(LWAButton);
       
-      TabellePanel.add(b3);
+      
+      Box b4 = Box.createVerticalBox();
+      b4.add(Box.createVerticalStrut(10));
+      b4.add(b1);
+      b4.add(Box.createVerticalStrut(60));
+      b4.add(b2);
+      b4.add(Box.createVerticalStrut(50));
+      b4.add(b3);
+      TabellePanel.add(b4);
         
         String str = "<html><b>\" Bitte Wählen : \"</b></html>";
 		graphik2ComboBox1.addItem(str);
@@ -352,6 +376,25 @@ public abstract class BremoModellGraphik extends JFrame{
 		druckenButton.addActionListener(new ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				druckenButtonActionPerformed(evt);
+			}
+		});
+		
+		LWAButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+				
+				try {
+					new LWA_Graphik(inputfile, "LWA", false,BremoModellGraphik.this );
+				} catch (ParameterFileWrongInputException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		});
 
@@ -639,18 +682,33 @@ public abstract class BremoModellGraphik extends JFrame{
     				Titel, XLabel , YLabel ,  data1,
     				PlotOrientation.VERTICAL, true, true, false);
     		 XYPlot xyplot = (XYPlot)chart.getPlot();
+    		 Font font = new Font("SansSerif", Font.BOLD, 8);
+    		 
     		 NumberAxis numberaxis0 = (NumberAxis) xyplot.getRangeAxis();
     		 numberaxis0.setLabelPaint(Color.red);
     	     numberaxis0.setTickLabelPaint(Color.red);
+    	     numberaxis0.setLabelFont(font);
+    	     numberaxis0.setPositiveArrowVisible(false);
+    	     numberaxis0.setLabel("[bar]");
+    	     numberaxis0.setLabelInsets(new RectangleInsets(0.0, 0.0, 0.0, 0.0));
+    	     
     	     NumberAxis numberaxis1 = new NumberAxis();
     	     numberaxis1.setLabelPaint(Color.blue);
     	     numberaxis1.setTickLabelPaint(Color.blue);
+    	     numberaxis1.setLabelFont(font);
+    	     numberaxis1.setPositiveArrowVisible(false);
+    	     numberaxis1.setLabel("[m3]");
+    	     numberaxis1.setLabelInsets(new RectangleInsets(3.0, 3.0, 3.0, 3.0));
+    	     
     	     xyplot.setRangeAxis(1, numberaxis1);
     	     xyplot.setDataset(1, data2);
     	     xyplot.setRangeAxis(1, numberaxis1);
     	     xyplot.mapDatasetToRangeAxis(1, 1);
     	     XYItemRenderer xyitemrenderer = new StandardXYItemRenderer();
-    	     xyitemrenderer.setSeriesPaint(0, Color.blue);
+    	     xyitemrenderer.setSeriesPaint(0, new Color(16,78,139));
+    	     if (data2.getSeriesCount()> 1 ) {
+    	    	 xyitemrenderer.setSeriesPaint(1, new Color(0,191,255));
+    	     }
     	     XYToolTipGenerator generator = new StandardXYToolTipGenerator();
     	     xyitemrenderer.setToolTipGenerator(generator);
     	     xyplot.setRenderer(1,xyitemrenderer);
@@ -709,11 +767,11 @@ public abstract class BremoModellGraphik extends JFrame{
 		Container c = getContentPane();
 		BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		c.paint(im.getGraphics());
-		String str = "<html>Bild wurde unter <a href = \" \" onclick = onclick() >"+inputfile.getParent()+File.separator+inputfile.getName()+".png</a> gespeichert.</html>";
+		String str = "<html>Bild wurde unter <h3>\" "+inputfile.getParent()+File.separator+Name+".png \" </h3> gespeichert.</html>";
 		
 		//String str = "<html><font color : blue >"+inputfile.getParent()+"</font></html>";
 	    try {
-	        ImageIO.write(im, "png", new File(inputfile.getParent()+File.separator+inputfile.getName()+".png"));
+	        ImageIO.write(im, "png", new File(inputfile.getParent()+File.separator+Name+".png"));
 	       // System.err.println("panel saved as image");
 	        JOptionPane.showMessageDialog(this,
 	        		str , "Speichern",
@@ -854,30 +912,34 @@ public abstract class BremoModellGraphik extends JFrame{
 			//cellpadding=\"0\"  cellspacing=\"0\" style= \"border-collapse: collapse;\"
 	    	
 			String tabelle ="<html>"+
-			        "<table border = 1 cellspacing = 0 width = 200 bgcolor=#FFFFFF >"+
-			        "<font size =-2>"+
+			        "<table border = 1  width = 200>"+
 			        "<tr>"+
-	                "<th colspan=\"2\"><font size =-2>Tabelle Input File</font></th>"+
+	                "<th colspan=\"2\" bgcolor=#848484><font size =-1>Tabelle Input File</font></th>"+
 	                "</tr>"+
 	                "<tr>"+
-	                "<th><font size =-2>"+header2[0]+"</font></th>"+
-	                "<td><font size =-2>"+header2[1]+"</font></td>"+
+	                "<th bgcolor=#BDBDBD><font size =-2>"+header2[0]+"</font></th>"+
+	                "<td bgcolor=#BDBDBD><font size =-2>"+header2[1]+"</font></td>"+
 	                "</tr>";
-	                
+	                String color = "bgcolor=#A4A4A4";
 	                for (int i = 2 ;i < header2.length;){
 	                	if (header2[i]!= null){
 	                		tabelle = tabelle + "<tr>"+
-	                                            "<th><font size =-2>"+header2[i]+"</font></th>"+
-	                	                        "<td><font size =-2>"+header2[i+1]+"</font></td>"+
+	                                            "<th "+color+"><font size =-2>"+header2[i]+"</font></th>"+
+	                	                        "<td "+color+"><font size =-2>"+header2[i+1]+"</font></td>"+
 	                	                        "</tr>";
 	                	}
 	                	i = i+2;
+	                	if (color.equals("bgcolor=#BDBDBD")){
+	                		color = "bgcolor=#A4A4A4";
+	                	} else {
+	                		color = "bgcolor=#BDBDBD";
+	                	}
 	                }
 	                
 	      tabelle = tabelle +
 	                "</table>"+
 	                "</html>";
-
+          
 	      JLabel input = new JLabel(tabelle);
           
 	      return input;	
@@ -909,15 +971,6 @@ public abstract class BremoModellGraphik extends JFrame{
 		}
 		in.close();
 		String tabelle ="<html>"+
-				        "<head>"+
-				        "<style type=\"text/css\"> \n"+
-				        "<!--"+
-				        "table {border-collapse: collapse;} \n"+
-                        "th,td {border: 1px solid black; font-size: 8pt;} \n"+
-				        "--->"+
-				        "</style>"+
-				        "</head>"+
-				        "<body>"+
 				        "<table border = 0 width = 200 >"+ /*bgcolor=#FFFFFF*/
 				        "<tr>"+
 		                "<th colspan=\"2\" bgcolor=#848484><font size =-1>Tabelle Post File</font></th>"+
@@ -951,7 +1004,6 @@ public abstract class BremoModellGraphik extends JFrame{
 		                "<td bgcolor=#BDBDBD><font size =-2>"+header2[22] +"</font></td>"+
 		                "</tr>"+
 		                "</table>"+
-		                "</body>"+
 		                "</html>";
 		
 		JLabel post = new JLabel(tabelle);
@@ -1197,63 +1249,75 @@ public abstract class BremoModellGraphik extends JFrame{
      
      public Boolean  PrintMode (){ 
     	 
-    	 Color panel = TitelPanel.getBackground();
-    	 Color white = Color.white;
-    	 Color chart = Color.gray;
-    	 TitelPanel.setBackground(white);
-    	 GraphikPanel.setBackground(white);
-    	 GroupPanel.setBackground(white);
-    	 TabellePanel.setBackground(white);
-    	 
-    	 TitelPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-         GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-         TabellePanel.setBorder(BorderFactory.createLineBorder(Color.white));
-         GroupPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-         
-    	 
-    	int j = GraphikPanel.getComponentCount();
-  		Paint color = null;
-  		Object[] Graphik_Chart = new Object[j];
-  		for (int i = 0; i < Graphik_Chart.length; i++) {
-  			Graphik_Chart[i] = GraphikPanel.getComponent(i);
-  			try {
-  				chart = ((ChartPanel) Graphik_Chart[i]).getBackground();
-  				((ChartPanel) Graphik_Chart[i]).setBackground(Color.white);
-  				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
-  				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
-  				color = plot.getBackgroundPaint();
-  				plot.setBackgroundPaint(Color.white);
-  			} catch (ClassCastException e) {
-  				Graphik_Chart[i] = null;
-  			}
-  		}
-  		
-  		
-  		saveImage();
-  		
-		TitelPanel.setBackground(panel);
-		GraphikPanel.setBackground(panel);
-		GroupPanel.setBackground(panel);
-		TabellePanel.setBackground(panel);
-		
-		TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        TabellePanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        
-		
-		for (int i = 0; i < Graphik_Chart.length; i++) {
- 			Graphik_Chart[i] = GraphikPanel.getComponent(i);
- 			try {
- 				((ChartPanel) Graphik_Chart[i]).setBackground(chart);
- 				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
- 				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
- 				plot.setBackgroundPaint(color);
- 			} catch (ClassCastException e) {
- 				Graphik_Chart[i] = null;
- 			}
- 		}
-		
+//    	 Color panel = TitelPanel.getBackground();
+//    	 Color white = Color.white;
+//    	 Color chart = Color.gray;
+//    	 TitelPanel.setBackground(white);
+//    	 GraphikPanel.setBackground(white);
+//    	 GroupPanel.setBackground(white);
+//    	 TabellePanel.setBackground(white);
+//    	 
+//    	 TitelPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+//         GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+//         TabellePanel.setBorder(BorderFactory.createLineBorder(Color.white));
+//         GroupPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+//         
+//    	 
+//    	int j = GraphikPanel.getComponentCount();
+//  		Paint color = null;
+//  		Object[] Graphik_Chart = new Object[j];
+//  		for (int i = 0; i < Graphik_Chart.length; i++) {
+//  			Graphik_Chart[i] = GraphikPanel.getComponent(i);
+//  			try {
+//  				chart = ((ChartPanel) Graphik_Chart[i]).getBackground();
+//  				((ChartPanel) Graphik_Chart[i]).setBackground(Color.white);
+//  				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
+//  				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
+//  				color = plot.getBackgroundPaint();
+//  				plot.setBackgroundPaint(Color.white);
+//  			} catch (ClassCastException e) {
+//  				((JPanel)Graphik_Chart[i]).setBackground(Color.white);  				
+//  			}
+//  		}
+//  		String textIn = Tabelle_InLabel.getText();
+//  		String textOut = Tabelle_PostLabel.getText();
+//  		
+//  		changeColorLineTabelleLabel(Tabelle_InLabel, "#FFFFFF");
+//  		changeColorLineTabelleLabel(Tabelle_PostLabel, "#FFFFFF");
+//  		
+ 		changeBorderTabelleLabel(Tabelle_InLabel, false);
+ 		changeBorderTabelleLabel(Tabelle_PostLabel, true);
+//  		
+//  		saveImage();
+//  		
+//		TitelPanel.setBackground(panel);
+//		GraphikPanel.setBackground(panel);
+//		GroupPanel.setBackground(panel);
+//		TabellePanel.setBackground(panel);
+//		
+//		TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+//        GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+//        TabellePanel.setBorder(BorderFactory.createLineBorder(Color.black));
+//        GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+//        
+//		
+//		for (int i = 0; i < Graphik_Chart.length; i++) {
+// 			Graphik_Chart[i] = GraphikPanel.getComponent(i);
+// 			try {
+// 				((ChartPanel) Graphik_Chart[i]).setBackground(chart);
+// 				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
+// 				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
+// 				plot.setBackgroundPaint(color);
+// 			} catch (ClassCastException e) {
+// 				((JPanel)Graphik_Chart[i]).setBackground(panel);
+//  			}
+// 		}
+//		
+//		changeBorderTabelleLabel(Tabelle_InLabel, false);
+//  		changeBorderTabelleLabel(Tabelle_PostLabel, false);
+//  		
+//  		Tabelle_InLabel.setText(textIn);
+//  		Tabelle_PostLabel.setText(textOut);
     	 
     	 return true;
     	
@@ -1305,5 +1369,44 @@ public abstract class BremoModellGraphik extends JFrame{
  	      timer.start();
  	    
  	}
-
+     /**
+      * ändern die farbe  einer Tabelle
+      * @param TabelleLabel
+      * @param ColorLine1  
+      *                   Color in Hexadecimal ohne '#' zu vergessen
+      * @param ColorLine2
+      *                   Color in Hexadecimal ohne '#' zu vergessen
+      */
+     public void changeColorLineTabelleLabel(JLabel TabelleLabel , String ColorLine){
+     
+    	 String text = TabelleLabel.getText();
+    	 
+    	 text = text.replaceAll("bgcolor=#.{6}",  "th bgcolor="+ColorLine);
+    	
+    	 TabelleLabel.setText(text);
+    	 
+    	 TabellePanel.revalidate();
+     }
+     /**
+      * Tabelle mit/ohne Border 
+      * @param TabelleLabel
+      * @param withBorder
+      */
+     public void changeBorderTabelleLabel(JLabel TabelleLabel, boolean withBorder){
+    	 
+    	 String text = TabelleLabel.getText();
+    	 
+    	 if (withBorder){
+    	      text.replaceAll("table border = 0", "table border = 1");
+    		 }
+    	 else {
+    		 text.replaceAll("table border = 1", "table border = 0");
+    	 }
+    	 
+    	 TabelleLabel.setText(text);
+    	 TabelleLabel.revalidate();
+    	 TabellePanel.revalidate();
+    	 
+     }
 }
+	

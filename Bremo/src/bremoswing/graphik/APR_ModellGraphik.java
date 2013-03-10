@@ -38,15 +38,15 @@ public class APR_ModellGraphik extends BremoModellGraphik {
 	 */
 	private static final long serialVersionUID = 1L;
 	String [] header ;
-	
+
 	/**
 	 * @param file
 	 * @param berechnungModell
 	 * @throws ParameterFileWrongInputException
 	 * @throws IOException
 	 */
-	public APR_ModellGraphik(File file)throws ParameterFileWrongInputException, IOException {
-		super(file, "APR");
+	public APR_ModellGraphik(File file, boolean is_RestgasVorgabe_LWA)throws ParameterFileWrongInputException, IOException {
+		super(file, "APR", is_RestgasVorgabe_LWA);
 		initComponentAPR();
 		PopUp();
 	}

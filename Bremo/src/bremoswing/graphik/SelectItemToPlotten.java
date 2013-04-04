@@ -163,11 +163,12 @@ public  class SelectItemToPlotten extends JFrame {
 	}
 	
 	public void plott(){
-		  File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
-		    String berechnungModell = "";
-		    boolean is_RestgasVorgabe_LWA = false;
+		    
 		    try {
-		    	BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
+		    	File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
+		        String berechnungModell = "";
+		        boolean is_RestgasVorgabe_LWA = false;
+		        BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
 				String zeile = null;
 				String [] header = null;
 				while((zeile = in.readLine()) != null) {
@@ -207,6 +208,8 @@ public  class SelectItemToPlotten extends JFrame {
 			} catch (ParameterFileWrongInputException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (NullPointerException e){
+				
 			}
 	}
 	

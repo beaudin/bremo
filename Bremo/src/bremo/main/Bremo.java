@@ -11,6 +11,7 @@ import bremo.sys.Rechnung;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
 import bremoswing.SwingBremo;
+import bremoswing.util.FertigMeldungFrame;
 
 
 /**
@@ -50,11 +51,13 @@ public class Bremo extends Thread {
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {
 			SwingBremo.setNrOfBremoAlive();
-			JFrame popup = new JFrame();
-			JOptionPane.showMessageDialog(popup,
-					"Thread : Eine Fehler ist in der File "+this.getName()+" \n aufgetreten !!!" +
-					"\n"+e.getMessage(), this.getName(),
-					JOptionPane.ERROR_MESSAGE);
+			//JFrame popup = new JFrame();
+			new FertigMeldungFrame(this.getName(),"<html><u>Thread</u> : Eine Fehler ist in der File <b>"+this.getName()+"</b> aufgetreten !!! <p>" +
+					"\n "+e.getMessage()+"</p></html>", JOptionPane.ERROR_MESSAGE);
+//			JOptionPane.showMessageDialog(popup,
+//					"Thread : Eine Fehler ist in der File "+this.getName()+" \n aufgetreten !!!" +
+//					"\n"+e.getMessage(), this.getName(),
+//					JOptionPane.ERROR_MESSAGE);
 			//SwingBremo.NrOfFile--;
 			SwingBremo.StateBremoThread();
 			e.stopBremo();			
@@ -63,10 +66,11 @@ public class Bremo extends Thread {
 			r.berechnungDurchfuehren();
 			//SwingBremo.StateBremoThread();
 			//System.err.println("Thread : "+this.getName()+"   is Fertig !!!");
-			JFrame popup = new JFrame();
-			JOptionPane.showMessageDialog(popup,
-					"Thread "+this.getName()+" ist fertig!", this.getName(),
-					JOptionPane.INFORMATION_MESSAGE);
+//			JFrame popup = new JFrame();
+			new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
+//			JOptionPane.showMessageDialog(popup,
+//					"Thread "+this.getName()+" ist fertig!", this.getName(),
+//					JOptionPane.INFORMATION_MESSAGE);
 			SwingBremo.PutInBremoThreadFertig(this.getName());
 		} catch (Exception  e) {
 			this.interrupt();

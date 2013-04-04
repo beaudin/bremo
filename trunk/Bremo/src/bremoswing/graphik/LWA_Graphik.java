@@ -16,6 +16,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -69,7 +70,10 @@ public class LWA_Graphik extends BremoModellGraphik{
 		//panel2.setBackground(Color.blue);
 		//panel2.setBorder(BorderFactory.createTitledBorder("panel_3"));
 		UnterePanel.add(p_V_Diagramm());
+		is_P_V_Diagramm = true;
+		graphik2ComboBox1.setSelectedItem("p-V-Digramm");
 		UnterePanel.add(p_V_Diagramm());
+		
 		GraphikPanel.add(UnterePanel);
 		
 		
@@ -81,13 +85,50 @@ public class LWA_Graphik extends BremoModellGraphik{
 	@Override
 	void graphik2ComboBox1ActionPerformed(ActionEvent evt) throws IOException {
 		// TODO Auto-generated method stub
-		
+		try {
+			String selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
+	    	if (selected.equals("p-V-Digramm")) {
+	    		if (! is_P_V_Diagramm) {
+	    			graphik2ComboBox2.removeAllItems();
+	    			GraphikPanel.remove(1);
+	    			GraphikPanel.add(p_V_Diagramm(),1);
+	    			is_P_V_Diagramm = true;
+	    			GraphikPanel.revalidate();
+	    		}
+	    	}
+	    	else if (selected.equals("Andere Diagramm")){
+	    		   if (is_P_V_Diagramm) {
+	    			   addItemToComboBox(graphik2ComboBox2, header);
+	    		       GraphikPanel.remove(1);
+	    			   GraphikPanel.add(Auswahl_Diagramm("Brennraumvolumen [m3]"),1);
+	    			   graphik2ComboBox2.setSelectedItem("Brennraumvolumen [m3]");
+	    			   is_P_V_Diagramm = false;
+	    			   GraphikPanel.revalidate();
+	    	       }
+	    	}
+			
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	void graphik2ComboBox2ActionPerformed(ActionEvent evt) throws IOException {
 		// TODO Auto-generated method stub
-		
+		String selected = null;
+	   	 try{
+	  		  
+	      	  selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
+	      	  
+	      	  } catch (NullPointerException npe) {
+	      		  
+	      	  }
+	   	 if (selected != null && !is_P_V_Diagramm) {
+	   	      GraphikPanel.remove(1);
+			  GraphikPanel.add(Auswahl_Diagramm(selected),1);
+		      GraphikPanel.revalidate();
+	          GroupPanel.revalidate();
+	   	 }
 	}
 
 	@Override

@@ -46,7 +46,7 @@ import bremo.main.Bremo;
 import bremoswing.graphik.SelectItemToPlotten;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.SucheBremo;
-
+import bremoswing.util.FertigMeldungFrame;
 /*
  * SwingBremo.java
  *
@@ -560,9 +560,10 @@ public class SwingBremo extends JFrame {
 
 	/** Warning Massage **********/
 	protected void messsage() {
-		JOptionPane.showMessageDialog(this,
-				"Berechnung läuf gerade... Warten Sie bis Ende ", "Achtung",
-				JOptionPane.WARNING_MESSAGE);
+		new FertigMeldungFrame("Achtung","Berechnung läuf gerade... Warten Sie bis Ende ",JOptionPane.WARNING_MESSAGE);
+//		JOptionPane.showMessageDialog(this,
+//				"Berechnung läuf gerade... Warten Sie bis Ende ", "Achtung",
+//				JOptionPane.WARNING_MESSAGE);
 	}
 
 	/**** Button Setting To Run Bremo Thread / to Run the calcul ***********/
@@ -570,9 +571,10 @@ public class SwingBremo extends JFrame {
 		grosArea.setText("");
 		kleinArea.setText("");
 		if (textFile.getText().equals("")) {
-			JOptionPane.showMessageDialog(this,
-					"Überprüfen Sie Bitte die InputDatei !!!", "Achtung",
-					JOptionPane.WARNING_MESSAGE);
+			new FertigMeldungFrame("Achtung","Überprüfen Sie Bitte die InputDatei !!!",JOptionPane.WARNING_MESSAGE);
+//			JOptionPane.showMessageDialog(this,
+//					"Überprüfen Sie Bitte die InputDatei !!!", "Achtung",
+//					JOptionPane.WARNING_MESSAGE);
 			wahlFile.setVisible(true);
 			berechnen.setVisible(true);
 		} else {
@@ -739,9 +741,10 @@ public class SwingBremo extends JFrame {
 			if (bremoThreadFertig[0] != null) {
 				
 				label.setText(" Berechnung Fertig ! ");
-				JOptionPane.showMessageDialog(popup,
-						"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
-						JOptionPane.INFORMATION_MESSAGE);
+				new FertigMeldungFrame("Zustand Berechnung","Die Berechnung ist Fertig !!!",JOptionPane.INFORMATION_MESSAGE);
+//				JOptionPane.showMessageDialog(popup,
+//						"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
+//						JOptionPane.INFORMATION_MESSAGE);
 			}
 			for (String str : bremoThreadFertig) {
 				if (str != null)
@@ -774,27 +777,8 @@ public class SwingBremo extends JFrame {
 	     ImageIcon icon = new ImageIcon(url);
 		final JOptionPane optionPane = new JOptionPane(
 				"Wollen Sie Wirklich das Program beendet ?",
-				JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, icon);/* {
-			       
-					private static final long serialVersionUID = 1L;
-
-			public void paintComponent(Graphics g) 
-            {
-				URL url = getClass().getResource("/bremoswing/bild/Abstract_Frozen_Blue.jpg");
-				ImageIcon icon = new ImageIcon(url);
-			    Image img = icon.getImage();
-			    BufferedImage buffImage = 
-			    	      new BufferedImage(
-			    	          img.getWidth(null), 
-			    	          img.getHeight(null), 
-			    	          BufferedImage.TYPE_INT_ARGB);
-			    Graphics gr = buffImage.getGraphics();
-			    gr.drawImage(img, 0, 0, null);
-			    img = buffImage.getSubimage(200, 250, 750, 750);
-				g.drawImage(img, 0, 0, null);
-                
-            } 
-		};*/
+				JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, icon);
+			 
 
 		final JDialog dialog = optionPane.createDialog(this, "Exit");
 

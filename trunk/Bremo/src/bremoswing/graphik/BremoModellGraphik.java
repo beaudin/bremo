@@ -85,6 +85,7 @@ import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import bremoExceptions.ParameterFileWrongInputException;
+import bremoswing.util.FertigMeldungFrame;
 import bremoswing.util.PdfFilePrinting;
 
 
@@ -206,7 +207,7 @@ public abstract class BremoModellGraphik extends JFrame{
         URL urlKit= getClass().getResource("/bremoswing/bild/KIT.png");
         ImageIcon iconKIT = new ImageIcon(urlKit);
         Image imageKit = iconKIT.getImage();
-        imageKit  = imageKit.getScaledInstance(94, 45,java.awt.Image.SCALE_SMOOTH);
+        imageKit  = imageKit.getScaledInstance(95, 45,java.awt.Image.SCALE_SMOOTH);
         iconKIT = new ImageIcon(imageKit);
         KITLabel.setIcon(iconKIT);
 //        Border KitBorder = new LineBorder(Color.black, 1, true);
@@ -230,9 +231,9 @@ public abstract class BremoModellGraphik extends JFrame{
         iconIFKM = new ImageIcon(imageIFKM);
         IFKMLabel.setIcon(iconIFKM);
         
-        int links = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-KITLabel.getPreferredSize().width;
-        int right = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-IFKMLabel.getPreferredSize().width;
-        System.err.println(links+" "+ right);
+        int links = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-KITLabel.getPreferredSize().width-5;
+        int right = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-IFKMLabel.getPreferredSize().width-5;
+       // System.err.println(links+" "+ right);
         gc.insets = new Insets(0, 0, 0, links);
         gc.gridx = 0;
 		gc.gridy = 0;
@@ -265,8 +266,8 @@ public abstract class BremoModellGraphik extends JFrame{
 
       Tabelle_InLabel = TabelleInputFile();
       Tabelle_PostLabel = TabellePostFIle();
-	  TabellePanel.add(Tabelle_PostLabel);
-	  TabellePanel.add(Tabelle_InLabel);
+	
+   
       Box b1 = Box.createHorizontalBox();
       b1.add(Box.createHorizontalStrut(7));
       b1.add(Tabelle_PostLabel);
@@ -685,7 +686,7 @@ public abstract class BremoModellGraphik extends JFrame{
     		 Font font = new Font("SansSerif", Font.BOLD, 8);
     		 
     		 NumberAxis numberaxis0 = (NumberAxis) xyplot.getRangeAxis();
-    		 numberaxis0.setLabelPaint(Color.red);
+    		 numberaxis0.setLabelPaint(Color.black);
     	     numberaxis0.setTickLabelPaint(Color.red);
     	     numberaxis0.setLabelFont(font);
     	     numberaxis0.setPositiveArrowVisible(false);
@@ -767,21 +768,23 @@ public abstract class BremoModellGraphik extends JFrame{
 		Container c = getContentPane();
 		BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		c.paint(im.getGraphics());
-		String str = "<html>Bild wurde unter <h3>\" "+inputfile.getParent()+File.separator+Name+".png \" </h3> gespeichert.</html>";
+		String str = "<html>Bild wurde unter <p><b>\" "+inputfile.getParent()+File.separator+Name+".png \" </b></p> gespeichert.</html>";
 		
 		//String str = "<html><font color : blue >"+inputfile.getParent()+"</font></html>";
 	    try {
 	        ImageIO.write(im, "png", new File(inputfile.getParent()+File.separator+Name+".png"));
 	       // System.err.println("panel saved as image");
-	        JOptionPane.showMessageDialog(this,
-	        		str , "Speichern",
-					JOptionPane.INFORMATION_MESSAGE);
+	        new FertigMeldungFrame("Speichern",str,JOptionPane.INFORMATION_MESSAGE);
+//	        JOptionPane.showMessageDialog(this,
+//	        		str , "Speichern",
+//					JOptionPane.INFORMATION_MESSAGE);
 
 	    } catch (Exception e) {
 	       // System.err.println("panel not saved " + e.getMessage());
-	        JOptionPane.showMessageDialog(this,
-	        		"Fehler: Bild wurde nicht gespeichert ", "Save",
-					JOptionPane.WARNING_MESSAGE);
+	    	 new FertigMeldungFrame("Speichern","Fehler: Bild wurde nicht gespeichert ",JOptionPane.WARNING_MESSAGE);
+//	        JOptionPane.showMessageDialog(this,
+//	        		"Fehler: Bild wurde nicht gespeichert ", "Speichern",
+//					JOptionPane.WARNING_MESSAGE);
 
 	    }
 	}
@@ -908,32 +911,27 @@ public abstract class BremoModellGraphik extends JFrame{
 			}
 			
 			in.close();
-	    	
-			//cellpadding=\"0\"  cellspacing=\"0\" style= \"border-collapse: collapse;\"
-	    	
+	    		    	
 			String tabelle ="<html>"+
-			        "<table border = 1  width = 200>"+
+			        "<table border = 0  width = 200>"+
 			        "<tr>"+
 	                "<th colspan=\"2\" bgcolor=#848484><font size =-1>Tabelle Input File</font></th>"+
-	                "</tr>"+
-	                "<tr>"+
-	                "<th bgcolor=#BDBDBD><font size =-2>"+header2[0]+"</font></th>"+
-	                "<td bgcolor=#BDBDBD><font size =-2>"+header2[1]+"</font></td>"+
 	                "</tr>";
-	                String color = "bgcolor=#A4A4A4";
-	                for (int i = 2 ;i < header2.length;){
+	                String color = "bgcolor=#BDBDBD";
+	                for (int i = 0 ;i < header2.length;){
 	                	if (header2[i]!= null){
 	                		tabelle = tabelle + "<tr>"+
 	                                            "<th "+color+"><font size =-2>"+header2[i]+"</font></th>"+
 	                	                        "<td "+color+"><font size =-2>"+header2[i+1]+"</font></td>"+
 	                	                        "</tr>";
+	                		if (color.equals("bgcolor=#BDBDBD")){
+		                		color = "bgcolor=#A4A4A4";
+		                	} else {
+		                		color = "bgcolor=#BDBDBD";
+		                	}
 	                	}
 	                	i = i+2;
-	                	if (color.equals("bgcolor=#BDBDBD")){
-	                		color = "bgcolor=#A4A4A4";
-	                	} else {
-	                		color = "bgcolor=#BDBDBD";
-	                	}
+	                	
 	                }
 	                
 	      tabelle = tabelle +
@@ -1249,80 +1247,132 @@ public abstract class BremoModellGraphik extends JFrame{
      
      public Boolean  PrintMode (){ 
     	 
-//    	 Color panel = TitelPanel.getBackground();
-//    	 Color white = Color.white;
-//    	 Color chart = Color.gray;
-//    	 TitelPanel.setBackground(white);
-//    	 GraphikPanel.setBackground(white);
-//    	 GroupPanel.setBackground(white);
-//    	 TabellePanel.setBackground(white);
-//    	 
-//    	 TitelPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-//         GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-//         TabellePanel.setBorder(BorderFactory.createLineBorder(Color.white));
-//         GroupPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-//         
-//    	 
-//    	int j = GraphikPanel.getComponentCount();
-//  		Paint color = null;
-//  		Object[] Graphik_Chart = new Object[j];
-//  		for (int i = 0; i < Graphik_Chart.length; i++) {
-//  			Graphik_Chart[i] = GraphikPanel.getComponent(i);
-//  			try {
-//  				chart = ((ChartPanel) Graphik_Chart[i]).getBackground();
-//  				((ChartPanel) Graphik_Chart[i]).setBackground(Color.white);
-//  				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
-//  				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
-//  				color = plot.getBackgroundPaint();
-//  				plot.setBackgroundPaint(Color.white);
-//  			} catch (ClassCastException e) {
-//  				((JPanel)Graphik_Chart[i]).setBackground(Color.white);  				
-//  			}
-//  		}
-//  		String textIn = Tabelle_InLabel.getText();
-//  		String textOut = Tabelle_PostLabel.getText();
-//  		
-//  		changeColorLineTabelleLabel(Tabelle_InLabel, "#FFFFFF");
-//  		changeColorLineTabelleLabel(Tabelle_PostLabel, "#FFFFFF");
-//  		
- 		changeBorderTabelleLabel(Tabelle_InLabel, false);
+    	 Color panel = TitelPanel.getBackground();
+    	 Color white = Color.white;
+    	 Color chart = Color.gray;
+    	 TitelPanel.setBackground(white);
+    	 GraphikPanel.setBackground(white);
+    	 GroupPanel.setBackground(white);
+    	 TabellePanel.setBackground(white);
+    	 
+    	 TitelPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+         GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+         TabellePanel.setBorder(BorderFactory.createLineBorder(Color.white));
+         GroupPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+         
+         Object[] Graphik_Chart;
+         Paint color = null;
+    	 
+    	int j = GraphikPanel.getComponentCount();
+    	if (this instanceof LWA_Graphik){
+    		
+		    Graphik_Chart = new Object[3];
+			Graphik_Chart[0] = ((JPanel)GraphikPanel.getComponent(0)).getComponent(0);
+			Graphik_Chart[1] = ((JPanel)GraphikPanel.getComponent(1)).getComponent(0);
+			Graphik_Chart[2] = ((JPanel)GraphikPanel.getComponent(1)).getComponent(1);
+			
+			((JPanel)GraphikPanel.getComponent(1)).setBackground(white);
+			
+			for (int i = 0; i < Graphik_Chart.length; i++) {
+				try {
+					chart = ((ChartPanel) Graphik_Chart[i]).getBackground();
+					((ChartPanel) Graphik_Chart[i]).setBackground(Color.white);
+					Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i])
+							.getChart();
+					Plot plot = ((JFreeChart) Graphik_Chart[i]).getPlot();
+					color = plot.getBackgroundPaint();
+					plot.setBackgroundPaint(Color.white);
+				} catch (ClassCastException e) {
+					((JPanel) Graphik_Chart[i]).setBackground(Color.white);
+				}
+			}
+    	}
+        else {
+			Graphik_Chart = new Object[j];
+			for (int i = 0; i < Graphik_Chart.length; i++) {
+				Graphik_Chart[i] = GraphikPanel.getComponent(i);
+				try {
+					chart = ((ChartPanel) Graphik_Chart[i]).getBackground();
+					((ChartPanel) Graphik_Chart[i]).setBackground(Color.white);
+					Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i])
+							.getChart();
+					Plot plot = ((JFreeChart) Graphik_Chart[i]).getPlot();
+					color = plot.getBackgroundPaint();
+					plot.setBackgroundPaint(Color.white);
+				} catch (ClassCastException e) {
+					((JPanel) Graphik_Chart[i]).setBackground(Color.white);
+				}
+			}
+		}
+  		String textIn = Tabelle_InLabel.getText();
+  		String textOut = Tabelle_PostLabel.getText();
+  		
+  		changeColorLineTabelleLabel(Tabelle_InLabel, "#FFFFFF");
+  		changeColorLineTabelleLabel(Tabelle_PostLabel, "#FFFFFF");
+  		  		  		
+ 		changeBorderTabelleLabel(Tabelle_InLabel, true);
  		changeBorderTabelleLabel(Tabelle_PostLabel, true);
-//  		
-//  		saveImage();
-//  		
-//		TitelPanel.setBackground(panel);
-//		GraphikPanel.setBackground(panel);
-//		GroupPanel.setBackground(panel);
-//		TabellePanel.setBackground(panel);
-//		
-//		TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-//        GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-//        TabellePanel.setBorder(BorderFactory.createLineBorder(Color.black));
-//        GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-//        
-//		
-//		for (int i = 0; i < Graphik_Chart.length; i++) {
-// 			Graphik_Chart[i] = GraphikPanel.getComponent(i);
-// 			try {
-// 				((ChartPanel) Graphik_Chart[i]).setBackground(chart);
-// 				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
-// 				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
-// 				plot.setBackgroundPaint(color);
-// 			} catch (ClassCastException e) {
-// 				((JPanel)Graphik_Chart[i]).setBackground(panel);
-//  			}
-// 		}
-//		
-//		changeBorderTabelleLabel(Tabelle_InLabel, false);
-//  		changeBorderTabelleLabel(Tabelle_PostLabel, false);
-//  		
-//  		Tabelle_InLabel.setText(textIn);
-//  		Tabelle_PostLabel.setText(textOut);
+ 	
+  		saveImage();
+  		
+		TitelPanel.setBackground(panel);
+		GraphikPanel.setBackground(panel);
+		GroupPanel.setBackground(panel);
+		TabellePanel.setBackground(panel);
+		
+		TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        TabellePanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        
+        if (this instanceof LWA_Graphik){
+    		
+		    Graphik_Chart = new Object[3];
+			Graphik_Chart[0] = ((JPanel)GraphikPanel.getComponent(0)).getComponent(0);
+			Graphik_Chart[1] = ((JPanel)GraphikPanel.getComponent(1)).getComponent(0);
+			Graphik_Chart[2] = ((JPanel)GraphikPanel.getComponent(1)).getComponent(1);
+			
+			((JPanel)GraphikPanel.getComponent(1)).setBackground(panel);
+			
+			for (int i = 0; i < Graphik_Chart.length; i++) {
+	 			try {
+	 				((ChartPanel) Graphik_Chart[i]).setBackground(chart);
+	 				Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i]).getChart();
+	 				Plot plot =((JFreeChart) Graphik_Chart[i]).getPlot();
+	 				plot.setBackgroundPaint(color);
+	 			} catch (ClassCastException e) {
+	 				((JPanel)Graphik_Chart[i]).setBackground(panel);
+	  			}
+	 		}
+    	} 
+        else {
+			for (int i = 0; i < Graphik_Chart.length; i++) {
+				Graphik_Chart[i] = GraphikPanel.getComponent(i);
+				try {
+					((ChartPanel) Graphik_Chart[i]).setBackground(chart);
+					Graphik_Chart[i] = ((ChartPanel) Graphik_Chart[i])
+							.getChart();
+					Plot plot = ((JFreeChart) Graphik_Chart[i]).getPlot();
+					plot.setBackgroundPaint(color);
+				} catch (ClassCastException e) {
+					((JPanel) Graphik_Chart[i]).setBackground(panel);
+				}
+			}
+		}
+		changeBorderTabelleLabel(Tabelle_InLabel, false);
+  		changeBorderTabelleLabel(Tabelle_PostLabel, false);
+  		
+  		Tabelle_InLabel.setText(textIn);
+  		Tabelle_PostLabel.setText(textOut);
     	 
     	 return true;
     	
      }
-     
+     /**
+      * Round a Number 2 digit after comma
+      * @param number
+      * @return
+      */
      public static String NumberCuter(String number) {
     	 
     	 double d = Double.parseDouble(number);
@@ -1332,12 +1382,16 @@ public abstract class BremoModellGraphik extends JFrame{
     
      }
      
+     /**
+      * Show PopUp to prevent the User for more Choose.
+      */
      public void PopUp (){
  		
  		JLabel label = new JLabel();
  		label.setOpaque(true);
  		label.setBorder(BorderFactory.createLineBorder(Color.black));
  		label.setBackground(Color.WHITE);
+ 		
  		String head = "<html><h2><font color=\"red\"><u>Tipps</u>:</font></h2>" +
  				      "<h3>For More Option make a right click</h3></html>";
  	
@@ -1370,7 +1424,7 @@ public abstract class BremoModellGraphik extends JFrame{
  	    
  	}
      /**
-      * ändern die farbe  einer Tabelle
+      * Change the Color of Table
       * @param TabelleLabel
       * @param ColorLine1  
       *                   Color in Hexadecimal ohne '#' zu vergessen
@@ -1381,14 +1435,14 @@ public abstract class BremoModellGraphik extends JFrame{
      
     	 String text = TabelleLabel.getText();
     	 
-    	 text = text.replaceAll("bgcolor=#.{6}",  "th bgcolor="+ColorLine);
+    	 text = text.replaceAll("bgcolor=#.{6}",  "bgcolor="+ColorLine);
     	
     	 TabelleLabel.setText(text);
     	 
     	 TabellePanel.revalidate();
      }
      /**
-      * Tabelle mit/ohne Border 
+      * Change Border of Table
       * @param TabelleLabel
       * @param withBorder
       */
@@ -1397,15 +1451,15 @@ public abstract class BremoModellGraphik extends JFrame{
     	 String text = TabelleLabel.getText();
     	 
     	 if (withBorder){
-    	      text.replaceAll("table border = 0", "table border = 1");
+    	     text =  text.replaceAll("border = 0", "border = 1");
     		 }
     	 else {
-    		 text.replaceAll("table border = 1", "table border = 0");
+    		 text = text.replaceAll("border = 1", "border = 0");
     	 }
     	 
     	 TabelleLabel.setText(text);
-    	 TabelleLabel.revalidate();
-    	 TabellePanel.revalidate();
+    	 
+    	 TabellePanel.validate();
     	 
      }
 }

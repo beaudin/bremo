@@ -77,8 +77,10 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleInsets;
+import org.jfree.util.ShapeUtilities;
 
 import com.itextpdf.awt.DefaultFontMapper;
+import com.itextpdf.awt.geom.Shape;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfTemplate;
@@ -512,7 +514,7 @@ public abstract class BremoModellGraphik extends JFrame{
 		Qb_QmaxVerlauf = collectionVerlauf2;
 		ChartPanel chartVerlauf = null;
 	    //chartVerlauf = createChartPanel(null, "[°KW]",null , datasetVerlauf);
-		chartVerlauf = createChartPanel(null, null, null , dQbVerlauf, Qb_QmaxVerlauf);
+		chartVerlauf = createChartPanel(null, null, null , null, dQbVerlauf, Qb_QmaxVerlauf);
 	
 		br.close();
 		
@@ -659,11 +661,27 @@ public abstract class BremoModellGraphik extends JFrame{
      */
     public ChartPanel createChartPanel(String Titel, String XLabel,String YLabel, XYDataset data ) {
     				
-    		JFreeChart chart = ChartFactory.createXYLineChart(
+    	JFreeChart chart = ChartFactory.createXYLineChart(
     				Titel, XLabel , YLabel ,  data,
     				PlotOrientation.VERTICAL, true, true, false);
-  	     
-    		final ChartPanel chartPanel = new ChartPanel(chart);
+    	
+    	XYPlot xyplot = (XYPlot)chart.getPlot();
+    	
+    	NumberAxis numberaxisY = (NumberAxis) xyplot.getRangeAxis();
+    	numberaxisY.setLabelPaint(Color.black);
+		numberaxisY.setTickLabelPaint(Color.black);
+		numberaxisY.setLabelFont(new Font("Arial", Font.BOLD, 10));
+		numberaxisY.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
+		numberaxisY.setPositiveArrowVisible(false);
+    	
+		NumberAxis numberaxisX = (NumberAxis) xyplot.getDomainAxis();
+    	numberaxisX.setLabelPaint(Color.black);
+		numberaxisX.setTickLabelPaint(Color.black);
+		numberaxisX.setLabelFont(new Font("Arial", Font.BOLD, 10));
+		numberaxisX.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
+		numberaxisX.setPositiveArrowVisible(false);
+   
+		final ChartPanel chartPanel = new ChartPanel(chart);
     		
     		return chartPanel;
     	}
@@ -677,10 +695,10 @@ public abstract class BremoModellGraphik extends JFrame{
      * @return
      */
     @SuppressWarnings("deprecation")
-	public ChartPanel createChartPanel(String Titel, String XLabel,String YLabel, XYDataset data1 ,XYDataset data2) {
+	public ChartPanel createChartPanel(String Titel, String XLabel,String YLabel1,String YLabel2, XYDataset data1 ,XYDataset data2) {
     				
     		JFreeChart chart = ChartFactory.createXYLineChart(
-    				Titel, XLabel , YLabel ,  data1,
+    				Titel, XLabel , YLabel1 ,  data1,
     				PlotOrientation.VERTICAL, true, true, false);
     		 XYPlot xyplot = (XYPlot)chart.getPlot();
     		 Font font = new Font("SansSerif", Font.BOLD, 8);
@@ -688,18 +706,24 @@ public abstract class BremoModellGraphik extends JFrame{
     		 NumberAxis numberaxis0 = (NumberAxis) xyplot.getRangeAxis();
     		 numberaxis0.setLabelPaint(Color.black);
     	     numberaxis0.setTickLabelPaint(Color.red);
-    	     numberaxis0.setLabelFont(font);
+    	     numberaxis0.setLabelFont(new Font("Arial", Font.BOLD, 10));
+    	     numberaxis0.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
     	     numberaxis0.setPositiveArrowVisible(false);
-    	     numberaxis0.setLabel("[bar]");
-    	     numberaxis0.setLabelInsets(new RectangleInsets(0.0, 0.0, 0.0, 0.0));
     	     
+    	     NumberAxis numberaxisX = (NumberAxis) xyplot.getDomainAxis();
+    	     numberaxisX.setLabelPaint(Color.black);
+    		 numberaxisX.setTickLabelPaint(Color.black);
+    		 numberaxisX.setLabelFont(new Font("Arial", Font.BOLD, 10));
+    		 numberaxisX.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
+    		 numberaxisX.setPositiveArrowVisible(false);
+    	   
     	     NumberAxis numberaxis1 = new NumberAxis();
-    	     numberaxis1.setLabelPaint(Color.blue);
+    	     numberaxis1.setLabelPaint(Color.black);
     	     numberaxis1.setTickLabelPaint(Color.blue);
-    	     numberaxis1.setLabelFont(font);
+    	     numberaxis1.setLabelFont(new Font("Arial", Font.PLAIN, 10));
+    	     numberaxis1.setTickLabelFont(new Font("Arial", Font.PLAIN, 10));
     	     numberaxis1.setPositiveArrowVisible(false);
-    	     numberaxis1.setLabel("[m3]");
-    	     numberaxis1.setLabelInsets(new RectangleInsets(3.0, 3.0, 3.0, 3.0));
+    	     numberaxis1.setLabel(YLabel2);
     	     
     	     xyplot.setRangeAxis(1, numberaxis1);
     	     xyplot.setDataset(1, data2);

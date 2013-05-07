@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Custom build script that makes a keystore, finds all jars in the 'dist' directory and copies them into the 'distSigned' directory where they will be signed with the keystore. -->
+<!-- Insert this code in your project's build.xml file just before the </project> tag. -->
+<project basedir="." default="-post-jar" name="Sign">
+<target name="-post-jar">
+   <property name="aliasName" value="IFKM"/>
+   <property name="password" value="password"/>
+   <property name="keystoreFileName" location="keystoreFileName.ks"/>
+   <property name="firstNameSurName" value="IFKM KIT"/>
+   <property name="organisationUnitOrDepartment" value=""/>
+   <property name="organisationName" value=""/>
+   <property name="cityOrLocality" value="KA"/>
+   <property name="stateOrProvince" value="BW"/>
+   <property name="twoLetterJavaLocaleCountryCode" value="DE"/>
+
+
+
+   <delete file="${keystoreFileName}" failonerror="false" />
+   <genkey alias="${aliasName}" storepass="${password}" keystore="${keystoreFileName}">
+      <dname>
+      <param name="CN" value="${firstNameSurName}"/>
+      <param name="OU" value="${organisationUnitOrDepartment}"/>
+      <param name="O"  value="${organisationName}"/>
+      <param name="L"  value="${cityOrLocality}"/>
+      <param name="ST"  value="${stateOrProvince}"/>
+      <param name="C"  value="${twoLetterJavaLocaleCountryCode}"/>   
+      </dname>
+   </genkey>
+
+   <delete dir="Applet" failonerror="false" />
+   <mkdir dir="Applet" />
+   <signjar destDir="Applet"
+      alias="${aliasName}" keystore="${keystoreFileName}"
+      storepass="${password}"
+      preservelastmodified="true">
+      <path>
+      <fileset dir="dist" includes="*.jar" />
+      </path>
+      <flattenmapper />
+   </signjar>
+	
+   <copy file="dist/BremoApplet.html" todir="Applet"/>
+	
+</target>
+</project>

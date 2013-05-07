@@ -13,8 +13,10 @@
    <property name="stateOrProvince" value="BW"/>
    <property name="twoLetterJavaLocaleCountryCode" value="DE"/>
 
-
-
+	 <jar destfile="dist/Bremo.jar">
+	    <fileset dir="bin" excludes="InputFiles/**/" />
+	 </jar>
+	
    <delete file="${keystoreFileName}" failonerror="false" />
    <genkey alias="${aliasName}" storepass="${password}" keystore="${keystoreFileName}">
       <dname>

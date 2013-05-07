@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Custom build script that makes a keystore, finds all jars in the 'dist' directory and copies them into the 'distSigned' directory where they will be signed with the keystore. -->
-<!-- Insert this code in your project's build.xml file just before the </project> tag. -->
+
 <project basedir="." default="build" name="BremoOriginal">
     <property environment="env"/>
     <property name="debuglevel" value="source,lines,vars"/>

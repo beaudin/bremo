@@ -730,9 +730,10 @@ public abstract class BremoModellGraphik extends JFrame{
     	     xyplot.setRangeAxis(1, numberaxis1);
     	     xyplot.mapDatasetToRangeAxis(1, 1);
     	     XYItemRenderer xyitemrenderer = new StandardXYItemRenderer();
-    	     xyitemrenderer.setSeriesPaint(0, new Color(16,78,139));
+    	     //xyitemrenderer.setSeriesPaint(0, new Color(16,78,139));
+    	     xyitemrenderer.setSeriesPaint(0, new Color(0,191,255));
     	     if (data2.getSeriesCount()> 1 ) {
-    	    	 xyitemrenderer.setSeriesPaint(1, new Color(0,191,255));
+    	    	 xyitemrenderer.setSeriesPaint(1, new Color(0,0,0));
     	     }
     	     XYToolTipGenerator generator = new StandardXYToolTipGenerator();
     	     xyitemrenderer.setToolTipGenerator(generator);

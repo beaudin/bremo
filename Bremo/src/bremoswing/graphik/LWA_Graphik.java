@@ -147,7 +147,8 @@ public class LWA_Graphik extends BremoModellGraphik{
 	ChartPanel Druckverlauf() throws IOException {
 		// TODO Auto-generated method stub
 		  BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/"+berechnungModell+"_"+inputfile.getName().replace(".txt", "_ERGEBNISSE_LW.txt")));
-	        XYSeries serie1 =  new XYSeries("pZyl-Berech",false) ;
+	        XYSeries serie1 =  new XYSeries("pZyl-Berech_2",false) ;
+	        XYSeries serie5 =  new XYSeries("pZyl-Berech_1",false) ;
 	        XYSeries serie4 =  new XYSeries("p") ;
 	        XYSeries serie2 = new XYSeries("Ventillehub_EV") ;
 	        XYSeries serie3 = new XYSeries("Ventillehub_AV") ;
@@ -193,7 +194,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 					}
 					}else{
 					  if (x-720 < -165){
-				          serie1.add(x-720,y);
+				          serie5.add(x-720,y);
 					  }
 					  if (y_E > 0) {
 					      serie2.add(x-720,y_E);
@@ -205,7 +206,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 					//serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_2])); // KW  p
 				}
 				else {
-					serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_1]));//  Zeit p_soll
+					//serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_1]));//  Zeit p_soll
 					//serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_2])); // Zeit p
 				}
 			}
@@ -243,18 +244,19 @@ public class LWA_Graphik extends BremoModellGraphik{
 			br.close();
 			
 			XYSeriesCollection collectionDruckVerlauf = new XYSeriesCollection();
-			collectionDruckVerlauf.addSeries(serie1);
 			collectionDruckVerlauf.addSeries(serie4);
+			collectionDruckVerlauf.addSeries(serie5);
+			collectionDruckVerlauf.addSeries(serie1);
 			XYSeriesCollection collectionDruckVerlauf2 = new XYSeriesCollection();
-			collectionDruckVerlauf2.addSeries(serie2);
 			collectionDruckVerlauf2.addSeries(serie3);
+			collectionDruckVerlauf2.addSeries(serie2);
 	
 			datasetDruckVerlauf = collectionDruckVerlauf;
 			datasetDruckVerlauf2 = collectionDruckVerlauf2;
 			ChartPanel chartDruckVerlauf = null;
 			if (zeit_oder_KW.equals("KW")){
 				//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
-				chartDruckVerlauf = createChartPanel(null, "KW", "Bar", "Meter" , datasetDruckVerlauf,datasetDruckVerlauf2);
+				chartDruckVerlauf = createChartPanel(null, zeit_oder_KW , "Bar", "Meter" , datasetDruckVerlauf,datasetDruckVerlauf2);
 			}
 			else {
 				//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);

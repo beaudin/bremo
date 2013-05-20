@@ -92,9 +92,11 @@
 
 		<copy file="dist/BremoApplet.html" todir="Applet" />
         
-		<param name="browser" value="${C:/Program Files/Mozilla Firefox/firefox.exe}" />
-		<exec executable="${browser}" spawn="yes">
-			<arg line="${Applet/BremoApplet.html}" />
+		<property name="firefox" value="C:/Program Files/Mozilla Firefox/firefox.exe" />
+		<property name="file" value="Applet/BremoApplet.html"/>
+
+		<exec executable="${firefox}" spawn="yes">
+			<arg line="${file}" />
 		</exec>
 
 	</target>

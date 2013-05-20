@@ -33,11 +33,11 @@ import bremoExceptions.ParameterFileWrongInputException;
  */
 public class APR_ModellGraphik extends BremoModellGraphik {
 	 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	String [] header ;
+//	/**
+//	 * 
+//	 */
+//	private static final long serialVersionUID = 1L;
+//	String [] header ;
 
 	/**
 	 * @param file
@@ -61,7 +61,7 @@ public class APR_ModellGraphik extends BremoModellGraphik {
 		is_P_V_Diagramm = false;
 		GraphikPanel.add(Auswahl_Diagramm("Alpha [W/(m^2K)]"));
 		is_Verlustteilung_Digramm = false;
-		header = showHeaderOutFile();
+		header = showHeaderOutFile(berechnungModell+"_"+inputfile.getName());
 		addItemToComboBox(graphik2ComboBox2, header);
 		addItemToComboBox(graphik3ComboBox2, header);
 		GraphikPanel.revalidate();
@@ -267,7 +267,7 @@ public class APR_ModellGraphik extends BremoModellGraphik {
 			ChartPanel chartDruckVerlauf = null;
 			if (zeit_oder_KW.equals("KW")){
 				//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
-				chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
+				chartDruckVerlauf = createChartPanel(null, zeit_oder_KW, "[bar]" , datasetDruckVerlauf);
 			}
 			else {
 				//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
@@ -322,18 +322,5 @@ public class APR_ModellGraphik extends BremoModellGraphik {
 		
 		return chartVerlauf;
 	}
-	
-	public String [] showHeaderOutFile () throws IOException {
-	 		
-	 		BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/APR_"+inputfile.getName()));
-	        
-	         String zeile = null;
-	 		String [] header = null;
-	 		if ((zeile = br.readLine()) != null){
-	 			header = zeile.split("\t");		
-	 		}
-	 		br.close();
-	 		return header;
-	 	}
 
 }

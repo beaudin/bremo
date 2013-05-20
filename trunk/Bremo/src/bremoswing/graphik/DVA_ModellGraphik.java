@@ -264,7 +264,7 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 		ChartPanel chartDruckVerlauf = null;
 		if (zeit_oder_KW.equals("KW")){
 			//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
-			chartDruckVerlauf = createChartPanel(null, null, null , datasetDruckVerlauf);
+			chartDruckVerlauf = createChartPanel(null, zeit_oder_KW, "[bar]" , datasetDruckVerlauf);
 		}
 		else {
 			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
@@ -388,7 +388,7 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 		ChartPanel chartVerlauf = null;
 		if (zeit_oder_KW.equals("KW")){
 			//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
-			chartVerlauf = createChartPanel(null, null, null , dataseVerlauf);
+			chartVerlauf = createChartPanel(null, zeit_oder_KW,"[MW/m^2]", dataseVerlauf);
 		}
 		else {
 			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
@@ -448,11 +448,11 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
 			if (zeit_oder_KW.equals("KW")) {
-				serie1.setKey("T_mittel [K]  X -> [°KW]");
+				serie1.setKey("T_mittel");
 				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_1]));//  KW  T_mittel
 			}
 			else {
-				serie1.setKey("T_mittel [K]  X -> [s n. Rechenbeginn]");
+				serie1.setKey("T_mittel");
 				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_1]));//  Zeit T_mittel
 			}
 		}
@@ -462,7 +462,7 @@ public class DVA_ModellGraphik extends BremoModellGraphik {
 		ChartPanel chartVerlauf = null;
 		if (zeit_oder_KW.equals("KW")){
 			//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
-			chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
+			chartVerlauf = createChartPanel(null, zeit_oder_KW, "[K]" , datasetVerlauf);
 		}
 		else {
 			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);

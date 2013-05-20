@@ -514,7 +514,7 @@ public abstract class BremoModellGraphik extends JFrame{
 		Qb_QmaxVerlauf = collectionVerlauf2;
 		ChartPanel chartVerlauf = null;
 	    //chartVerlauf = createChartPanel(null, "[°KW]",null , datasetVerlauf);
-		chartVerlauf = createChartPanel(null, null, null , null, dQbVerlauf, Qb_QmaxVerlauf);
+		chartVerlauf = createChartPanel(null, zeit_oder_KW, "[J/KW]", "[--]", dQbVerlauf, Qb_QmaxVerlauf);
 	
 		br.close();
 		
@@ -530,10 +530,13 @@ public abstract class BremoModellGraphik extends JFrame{
      * @throws IOException
      */
     public ChartPanel Auswahl_Diagramm(String selected) throws IOException{
-    	
-  
-        BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/"+berechnungModell+"_"+inputfile.getName()));
-        XYSeries serie1 = new XYSeries(selected) ;
+    	BufferedReader br;
+        if (this instanceof LWA_Graphik){
+             br = new  BufferedReader(new FileReader(inputfile.getParent()+"/"+berechnungModell+"_"+inputfile.getName().replace(".txt", "_ERGEBNISSE_LW.txt")));
+        } else {
+            br = new  BufferedReader(new FileReader(inputfile.getParent()+"/"+berechnungModell+"_"+inputfile.getName()));
+        } 
+       XYSeries serie1 = new XYSeries(selected) ;
         XYDataset datasetVerlauf ;
         
         String zeile = null;
@@ -551,11 +554,11 @@ public abstract class BremoModellGraphik extends JFrame{
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
 			if (zeit_oder_KW.equals("KW")) {
-				serie1.setKey(selected +"  X -> [°KW]");
+				serie1.setKey(selected );
 				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index]));//  KW  T_mittel
 			}
 			else {
-				serie1.setKey(selected+"  X -> [s n. Rechenbeginn]");
+				serie1.setKey(selected);
 				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index]));//  Zeit T_mittel
 			}
 		}
@@ -565,7 +568,7 @@ public abstract class BremoModellGraphik extends JFrame{
 		ChartPanel chartVerlauf = null;
 		if (zeit_oder_KW.equals("KW")){
 			//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
-			chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
+			chartVerlauf = createChartPanel(null, zeit_oder_KW, selected.split(" ")[1] , datasetVerlauf);
 		}
 		else {
 			//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
@@ -1487,5 +1490,24 @@ public abstract class BremoModellGraphik extends JFrame{
     	 TabellePanel.validate();
     	 
      }
+     /**
+      * Load the Header of this fileName
+      * @param fileName
+      * @return
+      * @throws IOException
+      */
+     public String [] showHeaderOutFile (String fileName) throws IOException {
+	 		
+	 		BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/"+fileName));
+	        
+	        String zeile = null;
+	 		String [] header = null;
+	 		if ((zeile = br.readLine()) != null){
+	 			header = zeile.split("\t");		
+	 		}
+	 		br.close();
+	 		return header;
+	 	}
+
 }
 	

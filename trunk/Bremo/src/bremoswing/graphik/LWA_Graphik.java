@@ -14,11 +14,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.data.xy.XYDataset;
@@ -31,6 +35,8 @@ public class LWA_Graphik extends BremoModellGraphik{
 
 	private static final long serialVersionUID = -673633318746544253L;
     private String berechnungModell_Parent;
+    JPanel OberePanel ;
+    JPanel UnterePanel ;
     
 	LWA_Graphik(File file, String berechnungModell, boolean is_RestgasVorgabe_LWA, BremoModellGraphik Parent)throws ParameterFileWrongInputException, IOException {
 		super(file, berechnungModell, is_RestgasVorgabe_LWA);
@@ -48,7 +54,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 		GridLayout gl = new GridLayout(2,1);
 		GraphikPanel.setLayout(gl);
 		
-		JPanel OberePanel = new JPanel();
+		OberePanel = new JPanel();
 		//OberePanel.setBackground(Color.red);
 		//OberePanel.setBorder(BorderFactory.createTitledBorder("Panel_1"));
 		
@@ -57,7 +63,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 		OberePanel.add(Druckverlauf());
 		GraphikPanel.add(OberePanel);
 		
-		JPanel UnterePanel = new JPanel();
+		UnterePanel = new JPanel();
 		GridLayout ul = new GridLayout(1,2);
 		ul.setVgap(10);
 		ul.setHgap(10);
@@ -72,8 +78,13 @@ public class LWA_Graphik extends BremoModellGraphik{
 		UnterePanel.add(p_V_Diagramm());
 		is_P_V_Diagramm = true;
 		graphik2ComboBox1.setSelectedItem("p-V-Digramm");
-		UnterePanel.add(p_V_Diagramm());
-		
+		UnterePanel.add(Auswahl_Diagramm("T [K]"));
+		is_Verlustteilung_Digramm = false;
+		String path = inputfile.getName().replace(".txt", "_ERGEBNISSE_LW.txt");
+		header = showHeaderOutFile(berechnungModell+"_"+path);
+		addItemToComboBox(graphik3ComboBox2, header);
+		graphik3ComboBox2.setSelectedItem("T [K]");
+		GraphikPanel.revalidate();
 		GraphikPanel.add(UnterePanel);
 		
 		
@@ -90,20 +101,20 @@ public class LWA_Graphik extends BremoModellGraphik{
 	    	if (selected.equals("p-V-Digramm")) {
 	    		if (! is_P_V_Diagramm) {
 	    			graphik2ComboBox2.removeAllItems();
-	    			GraphikPanel.remove(1);
-	    			GraphikPanel.add(p_V_Diagramm(),1);
+	    			UnterePanel.remove(0);
+	    			UnterePanel.add(p_V_Diagramm(),0);
 	    			is_P_V_Diagramm = true;
-	    			GraphikPanel.revalidate();
+	    			UnterePanel.revalidate();
 	    		}
 	    	}
 	    	else if (selected.equals("Andere Diagramm")){
 	    		   if (is_P_V_Diagramm) {
 	    			   addItemToComboBox(graphik2ComboBox2, header);
-	    		       GraphikPanel.remove(1);
-	    			   GraphikPanel.add(Auswahl_Diagramm("Brennraumvolumen [m3]"),1);
-	    			   graphik2ComboBox2.setSelectedItem("Brennraumvolumen [m3]");
+	    		       UnterePanel.remove(0);
+	    			   UnterePanel.add(Auswahl_Diagramm("pSaug [bar]"),0);
+	    			   graphik2ComboBox2.setSelectedItem("pSaug [bar]");
 	    			   is_P_V_Diagramm = false;
-	    			   GraphikPanel.revalidate();
+	    			   UnterePanel.revalidate();
 	    	       }
 	    	}
 			
@@ -124,9 +135,9 @@ public class LWA_Graphik extends BremoModellGraphik{
 	      		  
 	      	  }
 	   	 if (selected != null && !is_P_V_Diagramm) {
-	   	      GraphikPanel.remove(1);
-			  GraphikPanel.add(Auswahl_Diagramm(selected),1);
-		      GraphikPanel.revalidate();
+	   	      UnterePanel.remove(0);
+			  UnterePanel.add(Auswahl_Diagramm(selected),0);
+		      UnterePanel.revalidate();
 	          GroupPanel.revalidate();
 	   	 }
 	}
@@ -134,13 +145,100 @@ public class LWA_Graphik extends BremoModellGraphik{
 	@Override
 	void graphik3ComboBox1ActionPerformed(ActionEvent evt) throws IOException {
 		// TODO Auto-generated method stub
-		
+		String selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
+    	if (selected.equals("Andere Diagramm")) {
+    		if (is_Verlustteilung_Digramm) {
+                addItemToComboBox(graphik3ComboBox2, header);
+    			UnterePanel.remove(1);
+    			UnterePanel.add(Auswahl_Diagramm("T [K]"),1);
+    			graphik3ComboBox2.setSelectedItem("T [K]");
+    			UnterePanel.revalidate();
+    			is_Verlustteilung_Digramm = false;
+    			
+    		}
+    	}
+    	else if (selected.equals("Verlustteilung BalkenDiagramm")){
+    		    if (! is_Verlustteilung_Digramm) {
+    		    	if (! is_verlust_berechnen) {
+    		    		UnterePanel.remove(1);
+    		       URL url = getClass().getResource("/bremoswing/bild/balkenErrorIcon.png");
+    			   ImageIcon icon = new ImageIcon(url);
+    		      JLabel label =  new JLabel("Graphik nicht vorhanden !",icon, SwingConstants.LEFT);
+    		      label.setFont(new java.awt.Font("Tahoma", 0, 16));
+    		      label.setForeground(new Color(255,0,0));
+    		      label.setBorder(BorderFactory.createEmptyBorder(70, 0, 0, 0));
+    		      JPanel panel = new JPanel();
+    		      panel.add(BorderLayout.CENTER,label);
+    		      panel.setBorder(BorderFactory.createTitledBorder("Verlustteilung Digramm"));
+    		      UnterePanel.add(panel,1);
+    		       //GraphikPanel.add(new JPanel());
+    			   graphik3ComboBox2.removeAllItems();
+    			   is_Verlustteilung_Digramm = true;
+    			   UnterePanel.revalidate();
+    		    }
+    		    else {
+    		    		String [] item  = new String [] {"pmi-Werte","Wirkungsgrade"};
+    		    		addItemToComboBox(graphik3ComboBox2, item);
+                        is_Verlustteilung_Digramm = true;
+                        UnterePanel.remove(1);
+            			try {
+            				UnterePanel.add(Verlustteilung("pmi-Werte"),1);
+            				}
+            			catch (IOException e1) {
+            					// TODO Auto-generated catch block
+            					e1.printStackTrace();
+            				}
+            			is_P_V_Diagramm = false;
+    		    		GraphikPanel.revalidate();
+
+    		    	}
+    		}
+    	}
+
 	}
 
 	@Override
 	void graphik3ComboBox2ActionPerformed(ActionEvent evt) throws IOException {
 		// TODO Auto-generated method stub
-		
+		String selected = null;
+	   	 try{
+	  		  
+	      	  selected = ((JComboBox) evt.getSource()).getSelectedItem().toString();
+	      	  
+	      	if (selected.equals("Wirkungsgrade")){
+				is_Wirkungsgrade_Diagramm = true ;
+			} else {
+				is_Wirkungsgrade_Diagramm = false ;
+			}
+	      	
+	      	 if ((selected.equals("pmi-Werte")|| selected.equals("Wirkungsgrade")) && is_Verlustteilung_Digramm) {
+				UnterePanel.remove(1);
+				try {
+					UnterePanel.add(Verlustteilung(selected),1);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				is_P_V_Diagramm = false;
+				UnterePanel.revalidate();
+				GroupPanel.revalidate();
+	      	}
+	      	 
+			  else if (selected != null) {
+				  UnterePanel.remove(1);
+					try {
+						UnterePanel.add(Auswahl_Diagramm(selected),1);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+					UnterePanel.revalidate();
+					GroupPanel.revalidate();
+		  	}
+	      	  
+	      	  } catch (NullPointerException npe) {
+	      		  
+	      	  }
 	}
 
 	@Override

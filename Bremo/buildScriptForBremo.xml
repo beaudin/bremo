@@ -31,7 +31,7 @@
 		<javac debug="true" debuglevel="${debuglevel}" destdir="bin"
 			includeantruntime="false" source="${source}" target="${target}">
 			<src path="src" />
-			<classpath refid="BremoOriginal.classpath" />
+			<classpath refid="Bremo.classpath" />
 		</javac>
 		<antcall target="-post-jar" />
 	</target>

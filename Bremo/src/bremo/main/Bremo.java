@@ -13,7 +13,6 @@ import bremoExceptions.ParameterFileWrongInputException;
 import bremoswing.SwingBremo;
 import bremoswing.util.FertigMeldungFrame;
 
-
 /**
  * @author eichmeier
  * @author Ngueneko
@@ -51,26 +50,15 @@ public class Bremo extends Thread {
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {
 			SwingBremo.setNrOfBremoAlive();
-			//JFrame popup = new JFrame();
+			
 			new FertigMeldungFrame(this.getName(),"<html><u>Thread</u> : Eine Fehler ist in der File <b>"+this.getName()+"</b> aufgetreten !!! <p>" +
 					"\n "+e.getMessage()+"</p></html>", JOptionPane.ERROR_MESSAGE);
-//			JOptionPane.showMessageDialog(popup,
-//					"Thread : Eine Fehler ist in der File "+this.getName()+" \n aufgetreten !!!" +
-//					"\n"+e.getMessage(), this.getName(),
-//					JOptionPane.ERROR_MESSAGE);
-			//SwingBremo.NrOfFile--;
 			SwingBremo.StateBremoThread();
 			e.stopBremo();			
 		}
 		try {
 			r.berechnungDurchfuehren();
-			//SwingBremo.StateBremoThread();
-			//System.err.println("Thread : "+this.getName()+"   is Fertig !!!");
-//			JFrame popup = new JFrame();
 			new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
-//			JOptionPane.showMessageDialog(popup,
-//					"Thread "+this.getName()+" ist fertig!", this.getName(),
-//					JOptionPane.INFORMATION_MESSAGE);
 			SwingBremo.PutInBremoThreadFertig(this.getName());
 		} catch (Exception  e) {
 			this.interrupt();
@@ -135,16 +123,16 @@ public class Bremo extends Thread {
 	 */
 	public static void main(String[] args)
 	throws ParameterFileWrongInputException {		
-		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
-		//Hier einige Beisspile wie Funktionen getestet werden können
-		//File fileCP 
-		//= new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//funktionsTester.txt");
-		//CasePara privateCP = new CasePara(fileCP);
-		//FunktionsTester ft=new FunktionsTester(privateCP);
-		//ft.test_Motor();
-
-		//Bremo kann auch ohne GUI ausgefuehrt werden!
-		//Das InputFile muss dann manuell erzeugt oder mittels "args" uebergeben werden
+//		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
+//		//Hier einige Beisspile wie Funktionen getestet werden können
+//		//File fileCP 
+//		//= new File("D://Daten//Eichmeier//Dropbox//Dropbox//Eclipse//BremoGC//src//InputFiles//funktionsTester.txt");
+//		//CasePara privateCP = new CasePara(fileCP);
+//		//FunktionsTester ft=new FunktionsTester(privateCP);
+//		//ft.test_Motor();
+//
+//		//Bremo kann auch ohne GUI ausgefuehrt werden!
+//		//Das InputFile muss dann manuell erzeugt oder mittels "args" uebergeben werden
 		File file;	
 		if(args.length>0)
 			file = new File(args[0]);

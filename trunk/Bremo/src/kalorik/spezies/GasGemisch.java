@@ -15,8 +15,13 @@ public class GasGemisch extends Spezies {
 	
 	
 	private double M; 
+	private double Hu_mol;
 	private Hashtable<Spezies,Double> speziesMolenBruchHash; 
 	private Hashtable<Spezies,Double> speziesMolenBruchHashDetail;	
+	private Hashtable<Spezies,Double> speziesMolenBruchHashDetailToIntegrate;
+	private Hashtable<Spezies,Double> speziesMassenBruchHash; 
+	private Hashtable<Spezies,Double> speziesMassenBruchHashDetail;	
+	private Hashtable<Spezies,Double> speziesMassenBruchHashDetailToIntegrate;
 	
 	public GasGemisch(String name){				
 		super();
@@ -27,22 +32,34 @@ public class GasGemisch extends Spezies {
 	public GasGemisch(Hashtable<Spezies,Double> speziesMolenBruchHash, String name) {	
 		super();
 		erzeugeGasGemsich(speziesMolenBruchHash, name);
-	}
+	}	
+	
+	
+
+	
 	/**
 	 * Dies ist ein "Quasi-Konstruktor". 
 	 * Er wird vom Konstruktor als auch von set_Gasmischung aufgerufen und erzeugt das Gasgemisch
 	 * @param speziesMolenBruchHash
 	 * @param name
 	 */
-	private void erzeugeGasGemsich(Hashtable<Spezies,Double> speziesMolenBruchHash, String name){
-		Gasmischer.checkSum(speziesMolenBruchHash);
-		this.speziesMolenBruchHash=speziesMolenBruchHash;
+	private void erzeugeGasGemsich(Hashtable<Spezies,Double> speziesMolenBruchHash_IN, String name){
+
+		this.speziesMolenBruchHash=Gasmischer.checkSum(speziesMolenBruchHash_IN);
+		//checksum in molenBruch2massenBruch
+		this.speziesMassenBruchHash=Gasmischer.molenBruch2massenBruch(speziesMolenBruchHash);
 		this.name=name;
 		this.M=Gasmischer.calc_M_misch(speziesMolenBruchHash);
-		this.speziesMolenBruchHashDetail=berechne_DetailMolenbrueche(speziesMolenBruchHash);	
-		this.isGasGemisch=true;//Variable kommt aus Superklasse	
-
-		this.h_evap_mol= Gasmischer.calc_h_evap_misch_mol(speziesMolenBruchHash);
+		this.speziesMolenBruchHashDetail=berechne_DetailMolenbrueche(speziesMolenBruchHash);
+		//checksum in molenBruch2massenBruch
+		this.speziesMassenBruchHashDetail=Gasmischer.molenBruch2massenBruch(speziesMolenBruchHashDetail);
+		this.speziesMolenBruchHashDetailToIntegrate
+							=berechne_DetailMolenbruecheToIntegrate(speziesMolenBruchHash);
+		//checksum in molenBruch2massenBruch
+		this.speziesMassenBruchHashDetailToIntegrate=
+				Gasmischer.molenBruch2massenBruch(speziesMolenBruchHashDetailToIntegrate);
+		
+		this.isGasGemisch=true;//Variable kommt aus Superklasse			
 		this.Hu_mol=Gasmischer.calc_Hu_misch_mol(speziesMolenBruchHash);
 		this.anzO_Atome=Gasmischer.calc_AnzO_Atome_misch(speziesMolenBruchHash);
 		this.anzC_Atome=Gasmischer.calc_AnzC_Atome_misch(speziesMolenBruchHash);
@@ -123,7 +140,7 @@ public class GasGemisch extends Spezies {
 			}			
 		}		
 
-		return molenbruchDetailHash;
+		return Gasmischer.checkSum(molenbruchDetailHash);
 	}
 
 
@@ -220,12 +237,9 @@ public class GasGemisch extends Spezies {
 					e.stopBremo();
 				}
 			}
-		}
+		}	
 		
-		
-		
-		
-		return molenbruchDetailHash;
+		return Gasmischer.checkSum(molenbruchDetailHash);
 
 	}
 	
@@ -238,7 +252,7 @@ public class GasGemisch extends Spezies {
 	}
 	
 	
-	public void set_Gasmischung_massenBruch(Hashtable<Spezies,Double> speziesMassenBruchHash) {	
+	public void set_Gasmischung_massenBruch(Hashtable<Spezies,Double> speziesMassenBruchHash) {			
 		erzeugeGasGemsich(Gasmischer.massenBruch2molenBruch(speziesMassenBruchHash),name);	
 	}
 	
@@ -246,8 +260,12 @@ public class GasGemisch extends Spezies {
 	
 	public double get_M() {		
 		return  M;
-	}
+	}	
 	
+
+	public double get_Hu_mol() {
+		return this.Hu_mol;
+	}	
 	
 	
 	public double get_h_mol(double T) {
@@ -268,7 +286,7 @@ public class GasGemisch extends Spezies {
 	}
 	
 	public Hashtable<Spezies, Double> get_speziesMassenBrueche(){
-		return Gasmischer.molenBruch2massenBruch(speziesMolenBruchHash);		
+		return this.speziesMassenBruchHash;				
 	}
 	
 	
@@ -278,16 +296,19 @@ public class GasGemisch extends Spezies {
 	
 	
 	public Hashtable<Spezies, Double> get_speziesMassenBruecheDetail(){
-		return Gasmischer.molenBruch2massenBruch(speziesMolenBruchHashDetail);		
+		//return Gasmischer.molenBruch2massenBruch(speziesMolenBruchHashDetail);
+		return this.speziesMassenBruchHashDetail;
+		
 	}	
 	
 	public Hashtable<Spezies, Double> get_speziesMassenBruecheDetailToIntegrate(){
-		return Gasmischer.molenBruch2massenBruch(
-				this.berechne_DetailMolenbruecheToIntegrate(speziesMolenBruchHash));		
+		//return Gasmischer.molenBruch2massenBruch(speziesMolenBruchHashDetailToIntegrate);	
+		return speziesMassenBruchHashDetailToIntegrate;
 	}
 	
-	
-	
+	public Hashtable<Spezies, Double> get_speziesMolenBruecheDetailToIntegrate(){
+		return speziesMolenBruchHashDetailToIntegrate;		
+	}	
 	
 	
 	
@@ -311,7 +332,7 @@ public class GasGemisch extends Spezies {
 		double a=PhysKonst.get_vol_N2_Luft()/PhysKonst.get_vol_O2_Luft();
 		double b=PhysKonst.get_vol_CO2_Luft()/PhysKonst.get_vol_O2_Luft();
 		double d=1+b;
-
+		//nLuft=N_Atome/2/vol_N2_Luft
 		double y=this.get_AnzH_Atome();
 		double x=this.get_AnzC_Atome()-b*this.get_AnzN_Atome()/(2*a);
 		double z=this.get_AnzO_Atome()-this.get_AnzN_Atome()*d/a;		
@@ -335,7 +356,7 @@ public class GasGemisch extends Spezies {
 	public static class Gasmischer {
 			
 		
-		public static void checkSum(Hashtable<Spezies,Double>speziesMolenMassenBruchHash){			
+		public static Hashtable<Spezies,Double> checkSum(Hashtable<Spezies,Double>speziesMolenMassenBruchHash){			
 			Enumeration<Spezies> e = speziesMolenMassenBruchHash.keys();
 			Spezies spez;
 			double sum=0;
@@ -346,33 +367,49 @@ public class GasGemisch extends Spezies {
 					try {
 						throw new MiscException("Gasmischer: " +
 						"Molen-/ bzw. Massenbrueche kleiner 0 \n --> Das geht nun wirklich nicht" +
-						" Check: "+ spez.get_name());
+						" Check: "+ spez.get_name() + "; "+ speziesMolenMassenBruchHash.get(spez));
 					} catch (MiscException e1) {
 						e1.stopBremo();
 					}			
 				sum=sum+speziesMolenMassenBruchHash.get(spez);
 			}
+			
+			e=null;
+			e=speziesMolenMassenBruchHash.keys();			
+			spez=null;	
+			Hashtable<Spezies, Double> newFrac= new Hashtable<Spezies, Double>();
+			while(e.hasMoreElements()){
+				spez=e.nextElement();
+				newFrac.put(spez, speziesMolenMassenBruchHash.get(spez)/sum);			
+			}	
+			
 			e=null;
 			//Die Umwandlung von double in float verhindert, dass die Ungenauigkeit von Java (grrrrrrr) einen Fehler erzeugt wenn die Summe 
 			//z.B. 0.9999999999999 ist! --> Quick and Dirty 			
-			if((float)sum!=1){				
-				
-				e = speziesMolenMassenBruchHash.keys();
+			if(Math.abs(sum-1)>1e-10){				
+				e = newFrac.keys();
 				while(e.hasMoreElements()){				
 					spez=e.nextElement();
-					System.out.println(spez.get_name()+ ": " +speziesMolenMassenBruchHash.get(spez));
+					System.out.println(spez.get_name()+ ": " +newFrac.get(spez));
 				}
 				
 				try {
 					throw new MiscException("Gasmischer: " + 
 					"Die Summe aller Molen -/ bzw. Massenbrüche muss 1 ergeben! Sie ist aber "+ sum+ "\n --> Setzen 6");
 				} catch (MiscException e1) {
-					if(Double.isNaN(sum))
+					if(Double.isNaN(sum)){
 						e1.log_Warning();
-					else
+						return newFrac;
+					}
+					else{						
 						e1.stopBremo();
+						return newFrac;
+					}
 				}
 			}
+			
+			return newFrac;					
+					
 		}
 		
 		
@@ -448,29 +485,8 @@ public class GasGemisch extends Spezies {
 			}
 			return Hu_misch;	
 			
-		}
-		
-		/**
-		 * Berechnet die Verdampfungsenthalpie in [J/mol] als Mischungsenthalpie der Konponenten des 
-		 * Gasgemsiches
-		 * @param speziesMolenBruchHash
-		 * @return h_evap_misch
-		 */
-		static double calc_h_evap_misch_mol(Hashtable<Spezies,Double> speziesMolenBruchHash){			
-			//IllegalArgumentException wenn die Summe der Molenbrüche nicht eins ist
-//			Gasmischer.checkSum(speziesMolenBruchHash);
-			
-			Spezies spez;
-			double h_evap_misch=0;
-			Enumeration<Spezies> e = speziesMolenBruchHash.keys();
-			
-			while(e.hasMoreElements()){				
-				spez=e.nextElement();				
-				h_evap_misch=h_evap_misch+ spez.get_h_evap_mol()*speziesMolenBruchHash.get(spez);
-			}
-			return h_evap_misch;	
-			
-		}	
+		}		
+	
 		
 		/**
 		 * Berechnet die Standardbildungsenthalpie in [J/mol] als Mischungsenthalpie der Konponenten des 
@@ -560,9 +576,9 @@ public class GasGemisch extends Spezies {
 		}
 		
 		
-		public static Hashtable<Spezies,Double> molenBruch2massenBruch(Hashtable<Spezies,Double> speziesMolenBruchHash) {
+		public static Hashtable<Spezies,Double> molenBruch2massenBruch(Hashtable<Spezies,Double> speziesMolenBruchHash_IN) {
 			//IllegalArgumentException wenn die Summe der Molenbrüche nicht eins ist
-			Gasmischer.checkSum(speziesMolenBruchHash);
+			Hashtable<Spezies,Double> speziesMolenBruchHash= Gasmischer.checkSum(speziesMolenBruchHash_IN);
 			
 			Hashtable<Spezies,Double> speziesMassenbruchHash =
 				new Hashtable<Spezies,Double>(speziesMolenBruchHash.size());
@@ -577,15 +593,16 @@ public class GasGemisch extends Spezies {
 				
 				speziesMassenbruchHash.put(spez, spez.get_M()/M_misch*speziesMolenBruchHash.get(spez));	
 			}		
-			return speziesMassenbruchHash;
+			return Gasmischer.checkSum(speziesMassenbruchHash);
 		}
 
 
 		public static Hashtable<Spezies,Double> 
-			massenBruch2molenBruch(Hashtable<Spezies,Double> speziesMassenbruchHash) {
+			massenBruch2molenBruch(Hashtable<Spezies,Double> speziesMassenbruchHash_IN) {
 			
 			//IllegalArgumentException wenn die Summe der Massenbrüche nicht eins ist
-			Gasmischer.checkSum(speziesMassenbruchHash);
+			Hashtable<Spezies,Double> speziesMassenbruchHash=
+					Gasmischer.checkSum(speziesMassenbruchHash_IN);
 			
 			Hashtable<Spezies,Double> speziesMolenenbruchHash =
 				new Hashtable<Spezies,Double>(speziesMassenbruchHash.size());
@@ -613,80 +630,78 @@ public class GasGemisch extends Spezies {
 				speziesMolenenbruchHash.put(spez, speziesMassenbruchHash.get(spez)*M_misch/spez.get_M());			
 			}				
 			
-			return speziesMolenenbruchHash;
+			return checkSum(speziesMolenenbruchHash);
 		}
 
 
-		public static KoeffizientenSpezies erzeugeKoeffSpeziesGemisch(
-				Hashtable<KoeffizientenSpezies,Double> koeffSpeziesMolenBruchHash, 
-				String name,
-				boolean isToIntegrate){
-						
-			double gemischKoeffs [][] =new double[2][9];
-			double  M=0, delta_hf298_mol=0, h_evap_mol=0,Hu_mol=0;
-			double [] T_grenz=new double [1]; //wird als Vektor definiert damit unten die Zuweisung zur Koeffizientenmatrix klappt
-			double anzO_Atome,anzC_Atome ,anzH_Atome ,anzN_Atome ;			
-			KoeffizientenSpezies spez=null;
-			
-			//Umkopieren der KoeffSpezies in eine Hashtable mit Spezies da sonst
-			//die Funktionen von Gasmischer nicht  aufgerufen werden können			
-			Hashtable<Spezies,Double> speziesMolenBruchHash = new Hashtable<Spezies,Double> ();
-			Enumeration<KoeffizientenSpezies>  e = koeffSpeziesMolenBruchHash.keys();	
-			while(e.hasMoreElements()){	
-				spez=e.nextElement();
-				speziesMolenBruchHash.put(spez,koeffSpeziesMolenBruchHash.get(spez));
-			}
-			
-			//IllegalArgumentException wenn die Summe der Molenbrüche nicht eins ist
-			Gasmischer.checkSum(speziesMolenBruchHash);
-			
-			
-			spez=null;
-			e=null;
-			e = koeffSpeziesMolenBruchHash.keys();			
-			while(e.hasMoreElements() ){				
-				if (spez!=null && T_grenz[0]!=spez.get_T_grenz()){
-					throw new IllegalArgumentException("Gasmischer.erzeugeSpeziesGemisch: " +
-							"Spezies mit unterschiedlichen T_grenz können nicht berechnet werden");
-				}			
-				spez=e.nextElement();
-				T_grenz[0]=spez.get_T_grenz();			
-				//Multiplikation der Elemente der Koeffizientenmatrix mit den Molenbrüchen
-				//und elementweise Addition				
-				gemischKoeffs=MatLibBase.addMat(gemischKoeffs,
-											spez.get_Koeffizienten(),
-											koeffSpeziesMolenBruchHash.get(spez));
-				}	
-			
-			//addieren der Grenztemperatur zur koeffizientenMatrix --> benötigt der KoeffSpezies-Konstruktor
-			double [][] gemischKoeffsFINAL=new double [3][];
-			
-			gemischKoeffsFINAL [0]=gemischKoeffs[0];
-			gemischKoeffsFINAL [1]=gemischKoeffs[1];
-			gemischKoeffsFINAL [2]=T_grenz;			
-			
-			//Berechnen der Eingabewerte für den Konstruktor;
-			M=calc_M_misch(speziesMolenBruchHash);
-			delta_hf298_mol=calc_delta_hf298_misch_mol(speziesMolenBruchHash);
-			h_evap_mol=calc_h_evap_misch_mol(speziesMolenBruchHash);
-			Hu_mol=calc_Hu_misch_mol(speziesMolenBruchHash);
-			anzO_Atome=calc_AnzO_Atome_misch(speziesMolenBruchHash);
-			anzC_Atome=calc_AnzC_Atome_misch(speziesMolenBruchHash);
-			anzH_Atome =calc_AnzH_Atome_misch(speziesMolenBruchHash);			
-			anzN_Atome =calc_AnzN_Atome_misch(speziesMolenBruchHash);
-			
-			KoeffizientenSpezies  gemisch=new KoeffizientenSpezies(	gemischKoeffsFINAL,M,
-													delta_hf298_mol,
-													h_evap_mol,
-													Hu_mol,
-													anzO_Atome,
-													anzC_Atome,
-													anzH_Atome,
-													anzN_Atome,
-													name);
-			return gemisch;
-			
-		}	
+//		public static KoeffizientenSpezies erzeugeKoeffSpeziesGemisch(
+//				Hashtable<KoeffizientenSpezies,Double> koeffSpeziesMolenBruchHash, 
+//				String name,
+//				boolean isToIntegrate){
+//						
+//			double gemischKoeffs [][] =new double[2][9];
+//			double  M=0, delta_hf298_mol=0, h_evap_mol=0,Hu_mol=0;
+//			double [] T_grenz=new double [1]; //wird als Vektor definiert damit unten die Zuweisung zur Koeffizientenmatrix klappt
+//			double anzO_Atome,anzC_Atome ,anzH_Atome ,anzN_Atome ;			
+//			KoeffizientenSpezies spez=null;
+//			
+//			//Umkopieren der KoeffSpezies in eine Hashtable mit Spezies da sonst
+//			//die Funktionen von Gasmischer nicht  aufgerufen werden können			
+//			Hashtable<Spezies,Double> speziesMolenBruchHash = new Hashtable<Spezies,Double> ();
+//			Enumeration<KoeffizientenSpezies>  e = koeffSpeziesMolenBruchHash.keys();	
+//			while(e.hasMoreElements()){	
+//				spez=e.nextElement();
+//				speziesMolenBruchHash.put(spez,koeffSpeziesMolenBruchHash.get(spez));
+//			}
+//			
+//			//IllegalArgumentException wenn die Summe der Molenbrüche nicht eins ist
+//			speziesMolenBruchHash=	Gasmischer._checkSum(speziesMolenBruchHash);
+//			
+//			
+//			spez=null;
+//			e=null;
+//			e = koeffSpeziesMolenBruchHash.keys();			
+//			while(e.hasMoreElements() ){				
+//				if (spez!=null && T_grenz[0]!=spez.get_T_grenz()){
+//					throw new IllegalArgumentException("Gasmischer.erzeugeSpeziesGemisch: " +
+//							"Spezies mit unterschiedlichen T_grenz können nicht berechnet werden");
+//				}			
+//				spez=e.nextElement();
+//				T_grenz[0]=spez.get_T_grenz();			
+//				//Multiplikation der Elemente der Koeffizientenmatrix mit den Molenbrüchen
+//				//und elementweise Addition				
+//				gemischKoeffs=MatLibBase.addMat(gemischKoeffs,
+//											spez.get_Koeffizienten(),
+//											koeffSpeziesMolenBruchHash.get(spez));
+//				}	
+//			
+//			//addieren der Grenztemperatur zur koeffizientenMatrix --> benötigt der KoeffSpezies-Konstruktor
+//			double [][] gemischKoeffsFINAL=new double [3][];
+//			
+//			gemischKoeffsFINAL [0]=gemischKoeffs[0];
+//			gemischKoeffsFINAL [1]=gemischKoeffs[1];
+//			gemischKoeffsFINAL [2]=T_grenz;			
+//			
+//			//Berechnen der Eingabewerte für den Konstruktor;
+//			M=calc_M_misch(speziesMolenBruchHash);
+//			delta_hf298_mol=calc_delta_hf298_misch_mol(speziesMolenBruchHash);			
+//			Hu_mol=calc_Hu_misch_mol(speziesMolenBruchHash);
+//			anzO_Atome=calc_AnzO_Atome_misch(speziesMolenBruchHash);
+//			anzC_Atome=calc_AnzC_Atome_misch(speziesMolenBruchHash);
+//			anzH_Atome =calc_AnzH_Atome_misch(speziesMolenBruchHash);			
+//			anzN_Atome =calc_AnzN_Atome_misch(speziesMolenBruchHash);
+//			
+//			KoeffizientenSpezies  gemisch=new KoeffizientenSpezies(gemischKoeffsFINAL,
+//													delta_hf298_mol,													
+//													Hu_mol,
+//													anzO_Atome,
+//													anzC_Atome,
+//													anzH_Atome,
+//													anzN_Atome,
+//													name);
+//			return gemisch;
+//			
+//		}	
 		
 //		public static Spezies mischeGasmassen(double m1, Spezies s1, double m2, Spezies s2, String name){
 //			
@@ -775,12 +790,7 @@ public class GasGemisch extends Spezies {
 //		}
 //		
 				
-	}	
-
-
-
-
-
+	}
 
 }
 	

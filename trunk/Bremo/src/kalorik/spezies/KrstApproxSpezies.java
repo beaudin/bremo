@@ -3,6 +3,9 @@
  */
 package kalorik.spezies;
 
+import bremoExceptions.MiscException;
+import misc.PhysKonst;
+
 /**
  * 
  * 
@@ -14,8 +17,9 @@ package kalorik.spezies;
  */
 public class KrstApproxSpezies extends Spezies  {
 	//TODO Ueberpruefen ob das Modell stimmt!!!
-	private final double molekularGewicht; 
+	private final double molarWeight; 
 	private final double  N_Hn, N_On, K_H, K_O;
+	private double lhv;
 	
 	
 	/**
@@ -37,16 +41,20 @@ public class KrstApproxSpezies extends Spezies  {
 			double anzH_Atome,
 			double anzN_Atome,				
 			String name){
-		super();
-		this.molekularGewicht=molekularGewicht;
-		this.h_evap_mol=h_evap_mol;
-		this.Hu_mol=Hu_mol;
+		
+		super();		
+		this.lhv=Hu_mol;
 		this.anzO_Atome=anzO_Atome;
 		this.anzC_Atome=anzC_Atome;
 		this.anzH_Atome=anzH_Atome;
 		this.anzN_Atome=anzN_Atome;
 		 //so wird sichergestellt, dass der Name nicht mit dem einer KoeffSpezies uebereinstimmt
 		this.name=name+"krstApprox";
+		
+		this.molarWeight=this.anzC_Atome*PhysKonst.get_M_C()+
+				this.anzH_Atome*PhysKonst.get_M_H()+
+				this.anzN_Atome*PhysKonst.get_M_N()+
+				this.anzO_Atome*PhysKonst.get_M_O();
 		
 		N_Hn=anzH_Atome/anzC_Atome;
 		N_On=anzO_Atome/anzC_Atome;
@@ -73,21 +81,16 @@ public class KrstApproxSpezies extends Spezies  {
 		}else{
 			K_O=Double.NaN;
 			try{
-				throw new IllegalArgumentException(
+				throw new MiscException(
 			"KrstApproxSpezies: Krafstoffe mit einem O/C-Verhältnis >1 können mit dem Modell nach Grill nicht berechnet werden");
-			}catch(IllegalArgumentException e){
+			}catch(MiscException e){
 				e.printStackTrace();
-				System.exit(0);		
+				e.stopBremo();		
 			}
 		}
 		
 		this.delta_hf298_mol=-1*calc_h_mol(298.15);		
 	}
-
-	public double get_M() {	
-		return molekularGewicht;
-	}
-
 
 	public double get_h_mol(double T) {	
 		double h=-1;
@@ -126,6 +129,15 @@ public class KrstApproxSpezies extends Spezies  {
 				+1.763*T*T
 				-46.506*T-126575.419))*get_M();	
 		
+	}
+
+	public double get_M() {		
+		return molarWeight;
+	}
+
+	@Override
+	public double get_Hu_mol() {		
+		return lhv;
 	}
 	
 

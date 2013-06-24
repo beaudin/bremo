@@ -27,12 +27,15 @@ public abstract class DVA extends BerechnungsModell{
 	private boolean foundVerbrennungsBeginn=false;
 	private double t_VerbrennungsBeginn;
 	protected final IndizierDaten indiD;
+	private double precission, relaxFactor;
 
 	protected DVA(CasePara cp) {		
 		super(cp,new ErgebnisBuffer(cp,"DVA_"));	
 		indiD=new IndizierDaten(cp);
 		dQburn=0;
 		ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");
+		precission=CP.get_precissionPressureTraceAnalysis();
+		relaxFactor=CP.get_relaxFactor();
 	}	
 
 	public abstract Zone[] ersterHSBrennraum(double time, Zone[] zonen);	
@@ -40,12 +43,11 @@ public abstract class DVA extends BerechnungsModell{
 
 
 	public  boolean is_pSoll_Gleich_pIst(double pIst, Zone [] zonen ,double time){			
-		boolean converged;
-		double relax=CP.SYS.RELAX; //Daempfungskonstante		
+		boolean converged;			
 		double pSoll=indiD.get_pZyl(time);
 		double pDiff=Math.abs(pSoll-pIst);
 
-		if(pDiff<=super.CP.SYS.RECHENGENAUIGKEIT_DVA){				
+		if(pDiff<=precission){				
 			converged= true;
 		}else{	
 			converged= false;
@@ -65,7 +67,7 @@ public abstract class DVA extends BerechnungsModell{
 						double dV=m.get_dV(time)/1; //[m^3/s]
 						double p=zonen[znIdx].get_p();
 						double dpSoll=(pSoll-p)/delta_time;
-						//						dQburn=-V/(1-kappa)*(dpSoll+kappa/V*p*dV); //Komischerweise konvergiert es so auch???
+						//dQburn=-V/(1-kappa)*(dpSoll+kappa/V*p*dV); //Komischerweise konvergiert es so auch???
 						dQburn+=(-V/(1-kappa)*(dpSoll+kappa/V*p*dV))*V/m.get_V(time);					
 					}
 				}
@@ -75,7 +77,7 @@ public abstract class DVA extends BerechnungsModell{
 				dQburn_alt=dQburn;
 				pDiff_alt=pDiff;
 
-				dQburn=dQburn-relax*pDiff/dpDiff;
+				dQburn=dQburn-relaxFactor*pDiff/dpDiff;
 			}
 			dQIters+=1;
 		}	
@@ -90,7 +92,7 @@ public abstract class DVA extends BerechnungsModell{
 			ergBuffDebug.buffer_EinzelErgebnis("dQIters", dQIters, i);	
 
 			i+=1;
-			ergBuffDebug.buffer_EinzelErgebnis("relaxationsFaktor",relax, i);
+			ergBuffDebug.buffer_EinzelErgebnis("relaxationsFaktor",relaxFactor, i);
 			i+=1;
 			ergBuffDebug.buffer_EinzelErgebnis("pSoll", pSoll, i);
 			i+=1;

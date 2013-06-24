@@ -58,9 +58,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 	private boolean esBrennt=false;
 	
 	private double dQburnMAX=0;
-	private double fortschritt=0;
-	
-	
+	private double fortschritt=0;	
 	
 	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen
 	private misc.VektorBuffer T_buffer ;
@@ -120,7 +118,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 		double T_init=(p_init*V_init)/(mINIT*R);		
 
 		initialZones[0]=new Zone(CP,p_init, V_init, T_init, 
-				mINIT,ggZone_init , false,0);			
+				mINIT,ggZone_init, false,0);			
 		
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
@@ -337,20 +335,13 @@ public class DVA_Homogen_EinZonig extends DVA{
 		double Vol_b = 0;
 		int cnt=0;
 		
-		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
-			pZyl_b=indiD.get_pZyl(kw);
-			Vol_b=motor.get_V(kw);
-			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
-			cnt++;
-		}
-		
-		/*for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
+		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
 			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
 			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
 			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
 			cnt++;
-		}*/
-	
+		}
+		
 		double n=MatLibBase.mw_aus_1DArray(n_array); //Polytropenexponent
 		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
 		i+=1;
@@ -425,13 +416,13 @@ public class DVA_Homogen_EinZonig extends DVA{
 	 * Diese Methode ueberprueft ob alle Einspritzungen in die Zone null erfolgen. Wenn nicht bricht das Programm ab
 	 */
 	protected void checkEinspritzungen(MasterEinspritzung me) {
-		for(int i=0;i<me.get_AlleEinspritzungen().length;i++){
-			if(me.get_AlleEinspritzungen()[i].get_ID_Zone()!=0){
+		for(int i=0;i<me.get_AllInjections().length;i++){
+			if(me.get_AllInjections()[i].get_ID_Zone()!=0){
 				try {
 					throw new ParameterFileWrongInputException("Für das gwaehlte Berechnungsmodell " +
 							"koennen die Einspritzungen " +
 							"nur in Zone 0 erfolgen.\n Gewaehlt wurde aber Zone "+ 
-							me.get_AlleEinspritzungen()[i].get_ID_Zone());
+							me.get_AllInjections()[i].get_ID_Zone());
 				} catch (ParameterFileWrongInputException e) {				
 					e.stopBremo();
 				}
@@ -466,11 +457,12 @@ public class DVA_Homogen_EinZonig extends DVA{
 	public VektorBuffer get_dm_buffer() {
 		return this.dmb_buffer;
 	}
-	
+
+
 	@Override
 	public VektorBuffer get_p_buffer() {
-	// TODO Auto-generated method stub
-	return null;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -3,8 +3,10 @@ package berechnungsModule.gemischbildung;
 
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.motor.Motor;
+import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.main.Bremo;
 import bremo.parameter.CasePara;
+import bremoExceptions.BirdBrainedProgrammerException;
 import misc.PhysKonst;
 import misc.VektorBuffer;
 
@@ -35,6 +37,8 @@ public class Paket_Hiroyasu {
 	private final double Cd;
 	private final double C1; //Frickelfaktor zur Anpassung des Modells
 	private VektorBuffer ma_buffer;
+	private double exp;
+	private double t_Mix=-5;
 	
     public Paket_Hiroyasu(	int ax,
     						int rad,
@@ -46,6 +50,7 @@ public class Paket_Hiroyasu {
     						double cRad,
     						double d0,
     						double cd,
+    						double 	EntrainmentFaktor_C1,
     						Kraftstoff_Eigenschaften krstEigenschaften,
     						CasePara cp){
     	this.CP=cp;
@@ -59,9 +64,11 @@ public class Paket_Hiroyasu {
 		this.Tkrst_0=Tkrst_0;
 		this.d0=d0;	
 		this.Cd=cd;
-		this.C1=2.95/3.555; //2.95 aus paper Hiroyasu 3.555 so ausgewaehlt dass es ungefaehr zu dma aus der CFD passt
-		
+		//this.C1=2.95/3.555; //2.95 aus paper Hiroyasu 3.555 so ausgewaehlt dass es ungefaehr zu dma aus der CFD passt
+		this.C1=EntrainmentFaktor_C1;
 		this.ma_buffer=new VektorBuffer(CP);
+		
+		exp=2;
 		
 		this.krstEigenschaften=krstEigenschaften;
 		gasKonstanteLuft=PhysKonst.get_R_Luft(); //in J/(Kg*K)
@@ -80,12 +87,18 @@ public class Paket_Hiroyasu {
 		//Berechnung des mittleren Sauter-Durchmessers	nach Hiroyasu	
 		double smd=2.39e-3*Math.pow(deltaP,-0.135)*Math.pow(rhoZyl_0,0.12)*Math.pow(mfl_Paket_0*250/rhoK_fl,0.131);
 
-		//Formel nach Stiesch 
+		//Formel nach Stiesch/ Merker in Grundlagen Verbrennungsmotoren Kapitel 11
 		double viskositaet_krst=krstEigenschaften.get_dynVis_krst(Tkrst_0);
 		double kin_viskositaet_krst=viskositaet_krst/rhoK_fl;	
-		smd=0.5*6156e-6*Math.pow(kin_viskositaet_krst,0.385)*Math.pow(rhoK_fl,0.737)*Math.pow(rhoZyl_0,0.06)*
-            Math.pow(deltaP/1000,-0.54);
+//		smd=0.5*6156e-6*Math.pow(kin_viskositaet_krst,0.385)*Math.pow(rhoK_fl,0.737)*Math.pow(rhoZyl_0,0.06)*
+//            Math.pow(deltaP/1000,-0.54);
+		//der Faktor 0.5 ist Falsch!
+		smd=6156e-6*Math.pow(kin_viskositaet_krst,0.385)*Math.pow(rhoK_fl,0.737)*Math.pow(rhoZyl_0,0.06)*
+	            Math.pow(deltaP/1000,-0.54);
+		
 
+		
+	
 		//Kraftstoffmass in einem einzelnen Tropfen
 		mfl_tropfen_0=Math.PI*rhoK_fl*smd*smd*smd/6;
 		//Tropfenanzahl
@@ -100,8 +113,31 @@ public class Paket_Hiroyasu {
 		
     	m_D_T[0]=mfl_tropfen_0;
     	m_D_T[1]=smd;
-    	m_D_T[2]=Tkrst_0;     
+    	m_D_T[2]=Tkrst_0;  
     	
+    	//calculation of the charachteristic mixing time needed for Krishnan's model
+    	if(this.axialPosIndex==0 && this.radialPosIndex==0){
+    		double r=((Motor_HubKolbenMotor)CP.MOTOR).get_Bohrung()/2;
+    		double s=0, t1=0,t2=10,t;
+    		double tb=this.get_breakupZeit();
+    		double a=10;      	
+    		do{
+    			t=0.5*(t1+t2);
+    			if(t<tb)
+    				s= v0*t;
+    			else if(t>=tb)
+    				//C1 is set to the value given by Hiroyasu
+    				s = 2.95*Math.pow(deltaP/rhoZyl_0,0.25)*Math.sqrt(d0*t);
+    			if(s>r)
+    				t2=t;
+    			if(s<r)
+    				t1=t;  
+    		a=	Math.abs(s-r);    		
+    		if(s==r)
+    			a=0;
+    		}while(a>1e-6);   		
+    		t_Mix=t;    		
+    	}     	
     }
     
 	public int get_axialPosIndex(){
@@ -111,6 +147,23 @@ public class Paket_Hiroyasu {
 	
 	public int get_radialPosIndex(){
 		return radialPosIndex;
+	}
+	/**
+	 * Characteristic time used in "Multi-zone modelling of 
+	 * partially premixed low-temperature combustion 
+	 * in pilot-ignited natural-gas engines"
+	 * S.R. Krishnan and K.K. Srinivasan
+	 * @return
+	 */
+	public double get_t_Mix(){
+		if(this.axialPosIndex!=0 || this.radialPosIndex!=0){
+			try{
+				throw new BirdBrainedProgrammerException("t_Mix can only be called for the first packet (0,0)");
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
+		}
+		return t_Mix;
 	}
     
 	public double get_lifetime(double time){
@@ -146,7 +199,7 @@ public class Paket_Hiroyasu {
 	
 	public double get_s(double time){
 		double s;   // Eindringtiefe am r-te Paket, m	
-		s = get_sStrahlspitze(time)*Math.exp(cRad*radialPosIndex*radialPosIndex);		
+		s = get_sStrahlspitze(time)*Math.exp(cRad*Math.pow(radialPosIndex,exp));		
 		return s;
 	}
 	
@@ -169,7 +222,7 @@ public class Paket_Hiroyasu {
     	double tb=this.breakupZeit;
     	double v=-1;
     	if(lifetime>=tb)
-    		v= get_vStrahlspitze(time)*Math.exp(cRad*radialPosIndex*radialPosIndex);	
+    		v= get_vStrahlspitze(time)*Math.exp(cRad*Math.pow(radialPosIndex,exp));	
     	else
     		v= get_vStrahlspitze(time);
     	return v;
@@ -216,7 +269,7 @@ public class Paket_Hiroyasu {
     		
     		//Ableitung aus ma=mf*(v0/(ds/dt) -1) --> ableiten nach dt --> dma=mf*v0/([ds/dt]^2)*d2s/dt2
     		dma_Paket=mfl_Paket_0*v0/Math.sqrt(get_lifetime(time))/(C1*Math.pow(deltaP/rhoZyl_0,0.25)*Math.sqrt(d0))
-    								/Math.exp(cRad*radialPosIndex*radialPosIndex);
+    								/Math.exp(cRad*Math.pow(radialPosIndex,exp));
     		//Glechungen nach Thoma für die Voreinspritzung --> liefert sehr kleine Wert für dma wenn m=-0.9  		
 //    		double v=get_v(time)/1.475;
 //    		double t=get_lifetime(time);
@@ -227,8 +280,7 @@ public class Paket_Hiroyasu {
 //    		Bei Wandkontakt erhoeht sich das air entrainment --> liefert aber eher Bloedsinn
 //    		if(this.get_s(time)>=0.5*CP.get_Bohrung())
 //    			dma_Paket=CW*dma_Paket; 
-    	}
-    	
+    	}    	
     	//Faktor hingedreht, dass es ungefaehr zur CFD-Passt 
     	return dma_Paket;
 	}
@@ -308,11 +360,18 @@ public class Paket_Hiroyasu {
     	return mfg_Paket;
     }
 
+	public double get_vRel(double time){
+		double a=1.0/3.0;
+		//Konvention: Zur Berechnung der Verdampfung wird meist ein Drittel der Paketgeschwindigkeit genommen 
+		//(siehe Merker: Verbrennungsmotoren 2006 Kap. 11.1)
+		double v_relativ=this.get_v(time); 
+		return v_relativ*a;		
+	}
 	
 	public double get_dmKrst(double time,Zone zn){
 		double dm=0;
 		if(get_lifetime(time)>0&&this.verdampfungIsAbgeschlossen()==false){			
-			double v_relativ=this.get_v(time)/3;
+			double v_relativ=this.get_vRel(time);
 			dm=-1*this.verdampf.get_dm_dD_dT(time, m_D_T, v_relativ, zn)[0];
 			if(((Double) dm).isNaN()) 
 				dm=0; //Passiert wennder Krst fast vollst. verdampft ist
@@ -337,7 +396,7 @@ public class Paket_Hiroyasu {
 	public double get_dQ(double time,Zone zn){
 		double dQ=0;
 		if(get_lifetime(time)>0&&this.verdampfungIsAbgeschlossen()==false){
-			double v_relativ=this.get_v(time)/3;
+			double v_relativ=this.get_vRel(time);
 			dQ= this.verdampf.get_dQ(time, m_D_T, v_relativ, zn);
 			if(((Double) dQ).isNaN()) 
 				dQ=0;
@@ -354,10 +413,10 @@ public class Paket_Hiroyasu {
 //	}
 	
 	
-	public void berechneZeitschritt(Zone zn, double time, double nextTime){
-		double delta_time=nextTime-time;	
-		//Konvention: Zur Berechnung der Verdampfung wird meist ein Drittel der Paketgeschwindigkeit genommen
-		double v_relativ=this.get_v(time)/3;
+	public void berechneZeitschritt(Zone zn, double time, double nextTime){			
+		double delta_time=nextTime-time;		
+		
+		double v_relativ=this.get_vRel(time);	
 		if(get_lifetime(time)>0&&this.verdampfungIsAbgeschlossen()==false){			
 			m_D_T=verdampf.get_m_D_T(zn,0,delta_time,v_relativ,m_D_T);	
 			//kommt am Ende der Verdampfung schon mal vor

@@ -11,22 +11,21 @@ public class Hensel extends WandWaermeUebergang {
 
 	private Motor_HubKolbenMotor motor;
 	private CasePara cp;
-	protected final IndizierDaten indiD;
+//	protected final IndizierDaten indiD;
 	
 	private double mittlereKolbengeschwindigkeit; 
-	private double Wandtemperatur;
+	private double Twall;
 	private double t_zzp;	//Temperatur beim Referenzzeitpunkt [K]
     private double p_zzp;	//Druck beim Referenzzeitpunkt [Pa]
-    private VentilhubFileReader VH_Datei_Ein;
-	private VentilhubFileReader VH_Datei_Aus;
+
 	
 	protected Hensel(CasePara cp) {
 		super(cp);
 		this.cp=super.cp;
-		indiD=new IndizierDaten(cp);	//TODO: umprogrammieren, so dass die Indizierdatei nur ein einziges Mal eingelesen wird
+//		indiD=new IndizierDaten(cp);	//TODO: umprogrammieren, so dass die Indizierdatei nur ein einziges Mal eingelesen wird
 		this.motor=(Motor_HubKolbenMotor) super.motor;
 		mittlereKolbengeschwindigkeit=cp.get_DrehzahlInUproSec()*motor.get_Hub()*2; //[m/s]
-		Wandtemperatur=cp.get_T_Wand();
+		Twall=cp.get_T_Wand();
 	    t_zzp = 0;
 	    p_zzp = 0;	       
 	}
@@ -102,8 +101,8 @@ public class Hensel extends WandWaermeUebergang {
 		double mluft = cp.get_mLuft_feucht_ASP()*cp.get_DrehzahlInUproSec()/2; // [kg/s]
 		double dichte = 1.2; // kg / m³; Dichte von Luft bei 20° angenommen => Vereinfachung, da entdrosselt und Dichte aus SAugrohr...
 		double querschnitt = Math.pow(motor.get_Bohrung(),2)/4*Math.PI ;
-		double vh = motor.get_EV_Hub(); // [m]
-		double vh_max = motor.get_EV_Hub_max(); // [m]
+		double vh = motor.get_IV_Stroke(); // [m]
+		double vh_max = motor.get_IV_Stroke_max(); // [m]
 
 		double einstroem =  1.9*(mluft / dichte / querschnitt)*Math.pow((vh_max / vh),1.35);
 		
@@ -124,7 +123,7 @@ public class Hensel extends WandWaermeUebergang {
 		double verbrennung = 1;
 		double t_uv =0, t_v = 0, verbrannt = 0, unverbrannt = 0;
 		double kappa = 1.35;
-		double x_rg = cp.get_interne_AGR_Rate();
+
 		double kurbelwinkel = cp.convert_SEC2KW(time);
 		//double fortschritt = neuerfortschritt;
 		if (neuerfortschritt <= 0.0){
@@ -149,8 +148,8 @@ public class Hensel extends WandWaermeUebergang {
 			//System.out.println(t_v);
 		}
 				
-		verbrannt = neuerfortschritt * t_v / Temperatur * (t_v - Wandtemperatur) / (Temperatur -Wandtemperatur ); 
-		unverbrannt = (1-neuerfortschritt) * t_uv / Temperatur * (t_uv-Wandtemperatur) / (Temperatur -Wandtemperatur );
+		verbrannt = neuerfortschritt * t_v / Temperatur * (t_v - Twall) / (Temperatur -Twall ); 
+		unverbrannt = (1-neuerfortschritt) * t_uv / Temperatur * (t_uv-Twall) / (Temperatur -Twall );
 		
 		//verbrennungsterm = Math.pow( verbrannt + unverbrannt ,2);
 		verbrennungsterm = 1;
@@ -159,7 +158,7 @@ public class Hensel extends WandWaermeUebergang {
 		}
 //	    System.out.println(getTzzp());
 //	    System.out.println(fortschritt);
-		verbrennungsterm = 1* (Temperatur - Wandtemperatur) / (Wandtemperatur);
+		verbrennungsterm = 1* (Temperatur - Twall) / (Twall);
 
 		// unverbrannt = (1-neuerfortschritt) ()
 		// Verbrennungsterm soll Anstieg während Umsatz glätten
@@ -191,7 +190,7 @@ public class Hensel extends WandWaermeUebergang {
 			T=tBuffer.getValue(ficticious_time);
 		}
 		
-		return this.get_WaermeUebergangsKoeffizient(time,zonen_IN, fortschritt) * (T- T_WAND);
+		return this.get_WaermeUebergangsKoeffizient(time,zonen_IN, fortschritt) * (T- Twall);
 	}	
 	
 	@Override

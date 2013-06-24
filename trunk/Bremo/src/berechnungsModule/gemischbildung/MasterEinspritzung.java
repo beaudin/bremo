@@ -7,6 +7,7 @@ import berechnungsModule.ModulFabrik;
 import berechnungsModule.Berechnung.Zone;
 import bremo.parameter.CasePara;
 import bremoExceptions.BirdBrainedProgrammerException;
+import bremoExceptions.MiscException;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
@@ -27,7 +28,7 @@ public class MasterEinspritzung extends ModulFabrik{
 
 	public  MasterEinspritzung(CasePara cp){
 		super(cp);
-		anzEinspr=CP.get_AnzahlEinspritzungen(); //untere Grenze liegt bei eins!
+		anzEinspr=CP.get_AnzahlEinspritzungen(); 
 
 		einspritzungen= new Einspritzung [anzEinspr];	
 		for(int index=0;index<anzEinspr;index++){
@@ -79,11 +80,19 @@ public class MasterEinspritzung extends ModulFabrik{
 	 * @return Objekt vom Typ Einspritzung
 	 */
 	public Einspritzung get_Einspritzung(int index){
-		return einspritzungen[index]; //TODO IndexOutOfBounds abfangen
+		if(index>=einspritzungen.length){
+			try{
+				throw new MiscException("The given Index "+ index + 
+						" exceeds the number of injections("+einspritzungen.length+")");
+			}catch(MiscException me){
+				me.stopBremo();
+			}
+		}			
+		return einspritzungen[index]; 
 	}
 
 
-	public Einspritzung [] get_AlleEinspritzungen(){
+	public Einspritzung [] get_AllInjections(){
 		return einspritzungen;
 	}	
 
@@ -288,12 +297,16 @@ public class MasterEinspritzung extends ModulFabrik{
 	public  Spezies get_spezKrst_verdampft(double time, int zonenID){
 		double mKrstDampf_ges_t=this.get_mKrst_dampffoermig_Sum_Zone(time, zonenID);
 		if(mKrstDampf_ges_t>0){
-			Hashtable<Spezies, Double> krstMassenbruchHash=new Hashtable<Spezies, Double>();		
-
+			Hashtable<Spezies, Double> krstMassenbruchHash=new Hashtable<Spezies, Double>();	
 			for(int index=0;index<anzEinspr;index++){
 				if(einspritzungen[index].get_ID_Zone()==zonenID){
-					krstMassenbruchHash.put(einspritzungen[index].get_Krst(), 
-						einspritzungen[index].get_mKrst_verdampft(time)/mKrstDampf_ges_t);
+					double m=einspritzungen[index].get_mKrst_verdampft(time);
+					Spezies spez=einspritzungen[index].get_Krst();	
+					if(krstMassenbruchHash.containsKey(spez)){
+						krstMassenbruchHash.put(spez, krstMassenbruchHash.get(spez)+m/mKrstDampf_ges_t);			
+					}else{				
+						krstMassenbruchHash.put(spez, m/mKrstDampf_ges_t);	
+					}
 				}
 			}	
 			GasGemisch mixKrst=new GasGemisch("KraftstoffMix");
@@ -301,32 +314,9 @@ public class MasterEinspritzung extends ModulFabrik{
 
 			return mixKrst;
 		}else
-			return CP.SPEZIES_FABRIK.get_spezCO2(); //Damit was zurückgegeben wird!
-	}	
-
-
-	/**
-	 * <p>Liefert ein Objekt vom Typ Spezies zurueck, das durch die Mischung 
-	 * aller Kraftstoffe der </br>
-	 * einzelenen Eispritzungen in die Zone mit der ID zonenID gebildet wird. </p>
-	 * @param zonenID
-	 * @return Objekt vom Typ Spezies
-	 */
-	public  Spezies get_spezKrstALLZone(int zonenID){
-		double mKrstDampf_ges=get_mKrst_Sum_ASP();
-		Hashtable<Spezies, Double> krstMassenbruchHash=new Hashtable<Spezies, Double>();		
-
-		for(int index=0;index<anzEinspr;index++){
-			if(einspritzungen[index].get_ID_Zone()==zonenID)
-				krstMassenbruchHash.put(einspritzungen[index].get_Krst(), 
-						einspritzungen[index].get_mKrst_ASP()/mKrstDampf_ges);
-		}	
-		GasGemisch mixKrst=new GasGemisch("KraftstoffMix");
-		mixKrst.set_Gasmischung_massenBruch(krstMassenbruchHash);
-
-		return mixKrst;
-	}	
-
+//			return CP.SPEZIES_FABRIK.get_spezCO2(); //Damit was zurückgegeben wird!
+			return null;
+	}
 
 
 
@@ -338,16 +328,22 @@ public class MasterEinspritzung extends ModulFabrik{
 	 */
 	public  Spezies get_spezKrstALL(){
 		double mKrstDampf_ges=get_mKrst_Sum_ASP();
-		Hashtable<Spezies, Double> krstMassenbruchHash=new Hashtable<Spezies, Double>();		
-
-		for(int index=0;index<anzEinspr;index++){
-			krstMassenbruchHash.put(einspritzungen[index].get_Krst(), 
-					einspritzungen[index].get_mKrst_ASP()/mKrstDampf_ges);
-		}	
-		GasGemisch mixKrst=new GasGemisch("KraftstoffMix");
-		mixKrst.set_Gasmischung_massenBruch(krstMassenbruchHash);
-
-		return mixKrst;
+		if(mKrstDampf_ges>0){
+			Hashtable<Spezies, Double> krstMassenbruchHash=new Hashtable<Spezies, Double>();	
+			for(int index=0;index<anzEinspr;index++){
+				double m=einspritzungen[index].get_mKrst_ASP();
+				Spezies spez=einspritzungen[index].get_Krst();	
+				if(krstMassenbruchHash.containsKey(spez)){
+					krstMassenbruchHash.put(spez, krstMassenbruchHash.get(spez)+m/mKrstDampf_ges);			
+				}else{				
+					krstMassenbruchHash.put(spez, m/mKrstDampf_ges);	
+				}
+			}	
+			GasGemisch mixKrst=new GasGemisch("KraftstoffMix");
+			mixKrst.set_Gasmischung_massenBruch(krstMassenbruchHash);
+			return mixKrst;
+		} else
+			return null;		
 	}	
 	
 	

@@ -7,7 +7,7 @@ import bremoExceptions.BirdBrainedProgrammerException;
 public class MotorFabrik extends ModulFabrik {
 
 	public static final String MOTOR_FLAG="Motor";
-	public static final  String[] MOTORENTYPEN={"HubKolbenMotor" , "ausDatei"};
+	public static final  String[] MOTORENTYPEN={"HubKolbenMotor" , "ausDatei", "DruckKammer"};
 
 	public final Motor MOTOR;
 
@@ -21,7 +21,7 @@ public class MotorFabrik extends ModulFabrik {
 		else if(motorVorgabe.equals("ausDatei"))
 			MOTOR=null;
 		else if(motorVorgabe.equals("DruckKammer"))
-			MOTOR=null;
+			MOTOR=new Motor_DruckKammer(cp);
 		else{
 			try {
 				throw new BirdBrainedProgrammerException(

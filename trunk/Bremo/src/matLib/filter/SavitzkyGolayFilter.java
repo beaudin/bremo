@@ -4,6 +4,8 @@ package matLib.filter;
 import java.util.LinkedList;
 import java.util.List;
 
+import bremo.parameter.CasePara;
+
 import Jama.LUDecomposition;
 import Jama.Matrix;
 
@@ -36,7 +38,7 @@ public class SavitzkyGolayFilter{
         LEFT = left;
         RIGHT = right;
         ORDER = order;
-    }
+    }   
 
     /**
      * Prepares the filter coefficients

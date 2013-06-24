@@ -13,4 +13,10 @@ public class RestgasVorgabe extends InternesRestgas{
 		return super.CP.get_mAGR_intern_ASP_aus_InputFile();
 	}
 
+
+	@Override
+	public boolean involvesGasExchangeCalc() {		
+		return false;
+	}
+
 }

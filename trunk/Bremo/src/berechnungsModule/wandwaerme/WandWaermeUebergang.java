@@ -6,21 +6,18 @@ package berechnungsModule.wandwaerme;
 import berechnungsModule.Berechnung.Zone;
 import misc.VektorBuffer;
 import berechnungsModule.motor.Motor;
-import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.parameter.*;
 
 
 public abstract class WandWaermeUebergang {
 //Abstrakte Klasse für alle Wandwärmemodelle
-	protected final double T_WAND;
+	private double T_wall=Double.NaN;;
 	protected Motor motor;
-	protected CasePara cp;
-	
+	protected CasePara cp;	
 	
 	protected WandWaermeUebergang(CasePara cp){				
 		motor=cp.MOTOR;
-		this.cp=cp;
-		T_WAND=cp.get_T_Wand();	
+		this.cp=cp;		
 	}
 	
 	//Hiermit bekommt der Benutzer den Alpha-Wert in W/(m^2K)
@@ -87,11 +84,13 @@ public abstract class WandWaermeUebergang {
 	
 	//...und hiermit die Wärmestromdichte in W/m^2
 	public double get_WandWaermeStromDichte(double time, Zone[] zonen_IN, double fortschritt, VektorBuffer tBuffer){
+		//wall temperature
+		if(Double.isNaN(T_wall))	
+			T_wall=cp.get_T_Wand();	
 		// Waermestromdichte in W/m^2 (W/m^2 x K)
 		double T=get_Tmb(zonen_IN);
-		return get_WaermeUebergangsKoeffizient(time,zonen_IN, fortschritt) * (T- T_WAND);
-	}
-
-	
+		//multiply with factor		
+		return get_WaermeUebergangsKoeffizient(time,zonen_IN, fortschritt) * (T- T_wall);
+	}	
 	
 }

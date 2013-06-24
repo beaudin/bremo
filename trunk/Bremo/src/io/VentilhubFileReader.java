@@ -9,6 +9,7 @@ import java.io.IOException;
 import misc.LinInterp;
 
 import bremo.parameter.CasePara;
+import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
 
 public class VentilhubFileReader {
@@ -25,24 +26,41 @@ public class VentilhubFileReader {
 	private boolean convertKW2SEC=false;
 	private double offsetKW;
 	private double offsetSEC;
+	private double ventilspiel;
 
 	
 	public VentilhubFileReader(CasePara CP, String typ){		
+/*		try{
+			throw new BirdBrainedProgrammerException("This class has not been changed and not tested yet!" +
+					"Contact your local programmer");			
+		}catch(BirdBrainedProgrammerException bbp){
+			bbp.stopBremo();
+		}
+*/		
 		this.cp=CP;
-		L_Interp = new LinInterp(CP);
+		L_Interp = new LinInterp(CP);			
+
+		File VENTILHUB_EIN_FILE=CP.get_FileToRead("VentilhubEinFileName");		
+		int indexOf=VENTILHUB_EIN_FILE.getName().indexOf(".");
+		String VENTILHUB_EIN_FORMAT=VENTILHUB_EIN_FILE.getName().substring(indexOf+1); //Dateiendung;
 		
+		File VENTILHUB_AUS_FILE=CP.get_FileToRead("VentilhubAusFileName");
+		indexOf=VENTILHUB_AUS_FILE.getName().indexOf(".");
+		String VENTILHUB_AUS_FORMAT=VENTILHUB_AUS_FILE.getName().substring(indexOf+1); //Dateiendung;	
+				
 		if(typ.equalsIgnoreCase("Einlass")){
 			zeitEinheiten[0]="[KWnEO]";
 			zeitEinheiten[1]="[snEO]";
 			offsetKW=cp.get_Einlassoeffnet_KW();
 			offsetSEC=cp.get_Einlassoeffnet();
-			 if( !CP.SYS.VENTILHUB_EIN_FORMAT.equalsIgnoreCase(ext))
+			ventilspiel=cp.get_Ventilspiel("Einlass");
+			 if( !VENTILHUB_EIN_FORMAT.equalsIgnoreCase(ext))
 				 throw new IllegalArgumentException("TXT_datei: kein gültiges Dateiformat");
-			 file = CP.SYS.VENTILHUB_EIN_FILE;
+			 file = VENTILHUB_EIN_FILE;
 				if (!file.isFile())
 					try{ throw new ParameterFileWrongInputException("Der für das " +
 							"Ventilhubfile angegebene Pfad zeigt nicht auf eine Datei! \n"
-							+ CP.SYS.VENTILHUB_EIN_FILE.getAbsolutePath());
+							+ VENTILHUB_EIN_FILE.getAbsolutePath());
 					}catch(ParameterFileWrongInputException e){
 						e.stopBremo();				
 					}
@@ -51,13 +69,14 @@ public class VentilhubFileReader {
 				zeitEinheiten[1]="[snAO]";
 				offsetKW=cp.get_Auslassoeffnet_KW();
 				offsetSEC=cp.get_Auslassoeffnet();
-			 if( !CP.SYS.VENTILHUB_AUS_FORMAT.equalsIgnoreCase(ext))
+				ventilspiel=cp.get_Ventilspiel("Auslass");
+			 if( !VENTILHUB_AUS_FORMAT.equalsIgnoreCase(ext))
 				 throw new IllegalArgumentException("TXT_datei: kein gültiges Dateiformat");
-			 file = CP.SYS.VENTILHUB_AUS_FILE;
+			 file = VENTILHUB_AUS_FILE;
 				if (!file.isFile())
 					try{ throw new ParameterFileWrongInputException("Der für das " +
 							"Ventilhubfile angegebene Pfad zeigt nicht auf eine Datei! \n"
-							+ CP.SYS.VENTILHUB_AUS_FILE.getAbsolutePath());
+							+ VENTILHUB_AUS_FILE.getAbsolutePath());
 					}catch(ParameterFileWrongInputException e){
 						e.stopBremo();				
 					} 
@@ -219,14 +238,17 @@ public class VentilhubFileReader {
 		double dauerASP_SEC=cp.SYS.DAUER_ASP_SEC;
 		letzterWert=zeitAchse[zeitAchse.length-1];
 		ersterWert=zeitAchse[0];
+		double hubX = 0;
 		
 		if(time>=(ersterWert+dauerASP_SEC) && time<=(letzterWert+dauerASP_SEC)){
-			return L_Interp.linInterPol(time-dauerASP_SEC, zeitAchse, hub);
+			hubX = L_Interp.linInterPol(time-dauerASP_SEC, zeitAchse, hub);
 		}else if(time>=ersterWert && time<=letzterWert){
-			return L_Interp.linInterPol(time, zeitAchse, hub);
-		}else{
-			return 0;
+			hubX = L_Interp.linInterPol(time, zeitAchse, hub);
 		}
+		if(hubX-ventilspiel>0)
+			return hubX-ventilspiel;
+		else
+			return 0;
 	}
 
 	public double get_integral(double drehzahl, double time1, double time2) {
@@ -249,5 +271,3 @@ public class VentilhubFileReader {
 		return integral;
 	}
 }
-
-

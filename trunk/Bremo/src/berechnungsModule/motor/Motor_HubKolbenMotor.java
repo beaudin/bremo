@@ -22,18 +22,19 @@ public class Motor_HubKolbenMotor extends Motor{
 	private final double HUB ;					//m
 	private final double KURBELRADIUS;			//m, nicht gleich 0,5xHub bei einer Desachsierung bzw. einer Schränkung...
 	private final double EPS ;  		//-
-	private final double KOLBENFLÄCHE ; 		//m²
-	private final double BRENNRAUM_DACH_FLAECHE; //m²
-	private final double FEUERSTEGHOEHE;		//m
+	
 	private final double SCHRAENKUNG ;			//m
 	private final double DESACHSIERUNG;			//m	
 	private final double AUSLASSSCHLUSS ; 		//°KWnZOT
 	private final double AUSLASSOEFFNET ; 		//°KWnZOT
 	private final double EINLASSSCHLUSS ; 		//°KWnZOT
 	private final double EINLASSOEFFNET ; 		//°KWnZOT
-	private final double EV_HUB;				//m
-	private final double EV_HUB_MAX;			//m
-	private final double QUETSCHSPALTHOEHE;		//m
+	private double ivStroke=Double.NaN;				//m
+	private double pistonArea=Double.NaN; 		//m²
+	private double fireDeckArea=Double.NaN; //m²
+	private double feuerstegHoehe=Double.NaN;		//m
+	private double ivStrokeMax=Double.NaN;			//m
+	private double squishHeigth=Double.NaN;;		//m
 	private final double SMAX;
 	private final CasePara CP;	
 
@@ -44,19 +45,15 @@ public class Motor_HubKolbenMotor extends Motor{
 		PLEUELLAENGE =CP.get_Pleuellaenge();			//m
 		BOHRUNG= CP.get_Bohrung();						//m
 		KURBELRADIUS = CP.get_Kurbelradius();		//m
-		EPS=CP.get_Verdichtung();  					//-
-		KOLBENFLÄCHE =CP.get_Kolbenflaeche(); 		//m^2
-		BRENNRAUM_DACH_FLAECHE =CP.get_Brennraumdachflaeche(); //m^2
-		FEUERSTEGHOEHE =CP.get_Feuersteghoehe();		//m
+		EPS=CP.get_Verdichtung();  					//-			
 		SCHRAENKUNG =CP.get_Schraenkung();			//m
 		DESACHSIERUNG =-1*CP.get_Desachsierung();		//m	
 		AUSLASSSCHLUSS =CP.get_Auslassoeffnet(); 		//°KWnZOT
 		AUSLASSOEFFNET =CP.get_Auslassschluss(); 		//°KWnZOT
 		EINLASSSCHLUSS =CP.get_Einlassschluss(); 		//°KWnZOT
 		EINLASSOEFFNET =CP.get_Einlassoeffnet(); 		//°KWnZOT	
-		EV_HUB=CP.get_EV_Hub();							//m
-		EV_HUB_MAX=CP.get_EV_Hub_max();					//m
-		QUETSCHSPALTHOEHE=CP.get_Quetschspalthoehe();	//m
+	
+	
 
 		if(SCHRAENKUNG!=0||DESACHSIERUNG!=0){
 			//Hub wird aus dem Kolbenweg berechnet
@@ -130,20 +127,33 @@ public class Motor_HubKolbenMotor extends Motor{
 		return EPS;
 	}
 
-	public double get_Brennraumdachflaeche() {
-		return BRENNRAUM_DACH_FLAECHE;
+	/**
+	 * Surface area of the combustion chamber roof 
+	 * respectively fire deck
+	 * @return fireDeckArea [m^2]
+	 */
+	public double get_fireDeckArea() {
+		if(Double.isNaN(fireDeckArea))
+			fireDeckArea =CP.get_fireDeckArea(); //m^2		
+		return fireDeckArea;
 	}
 
 	public double get_Feuersteghoehe(){
-		return FEUERSTEGHOEHE;
+		if(Double.isNaN(feuerstegHoehe))
+			feuerstegHoehe =CP.get_Feuersteghoehe();		//m
+		return feuerstegHoehe;
 	}
 
 	public double get_Quetschspalthoehe(){
-		return QUETSCHSPALTHOEHE;
+		if(Double.isNaN(squishHeigth))
+			squishHeigth=CP.get_Quetschspalthoehe();	//m
+		return squishHeigth;
 	}
 
 	public double get_Kolbenflaeche() {
-		return KOLBENFLÄCHE;
+		if(Double.isNaN(pistonArea))
+			pistonArea =CP.get_pistonArea(); 		//m^2
+		return pistonArea;
 	}
 
 	public double get_Einlass_oeffnet(){
@@ -162,12 +172,16 @@ public class Motor_HubKolbenMotor extends Motor{
 		return AUSLASSSCHLUSS;
 	}
 
-	public double get_EV_Hub(){
-		return EV_HUB;
+	public double get_IV_Stroke(){
+		if(Double.isNaN(ivStroke))
+			ivStroke=CP.get_EV_Hub_max();
+		return ivStroke;
 	}
 
-	public double get_EV_Hub_max(){
-		return EV_HUB_MAX;
+	public double get_IV_Stroke_max(){
+		if(Double.isNaN(ivStrokeMax))
+			ivStrokeMax=CP.get_EV_Hub_max();					//m
+		return ivStrokeMax;
 	}
 
 	//Ab hier müssen die Ausgaben berechnet werden
@@ -339,7 +353,7 @@ public class Motor_HubKolbenMotor extends Motor{
 		double zylinderLaufflaeche = java.lang.Math.PI * get_Bohrung() * 
 		(get_Kolbenweg(time)+get_Quetschspalthoehe());			
 
-		brennraumFlaeche = get_Brennraumdachflaeche() + get_Kolbenflaeche() + 
+		brennraumFlaeche = get_fireDeckArea() + get_Kolbenflaeche() + 
 		zylinderLaufflaeche;
 		return brennraumFlaeche;
 	}	

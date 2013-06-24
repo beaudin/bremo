@@ -3,16 +3,16 @@
  */
 package kalorik.spezies;
 
+
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import bremo.main.Bremo;
+import berechnungsModule.Berechnung.CanteraCaller;
 import bremo.parameter.CasePara;
 import bremo.parameter.CasePara.MakeMeUnique;
+import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.MiscException;
-
-import kalorik.spezies.GasGemisch.Gasmischer;
-import misc.HeizwertRechner;
 import misc.PhysKonst;
 
 /**
@@ -20,8 +20,6 @@ import misc.PhysKonst;
  *
  */
 public class SpeziesFabrik {		
-	// TODO Heizwerte recherchieren und eintragen
-	
 	//damit der Vektor mit den zu integrierenden Spezies nicht ueberfluessiferweise mit 
 	//doppelten Grundspezies gefuellt ist wird jede Spezies nur einmal erzeugt!	
 	private Spezies spezH;
@@ -42,34 +40,118 @@ public class SpeziesFabrik {
 	private Spezies spezRON_95;
 	private Spezies spezRON_98;
 	private Spezies spezDiesel;
+	private Spezies nC14H30;	
+	private Spezies nC7H16;	
+	private Spezies H2O2;
+	private Spezies HO2;
+	private Spezies CH3O;
+	private Spezies CH2O;
+	private Spezies HCO;
+	private Spezies CH2;
+	private Spezies CH3;
+	private Spezies CH4;
+	private Spezies C2H2;
+	private Spezies C2H3;
+	private Spezies C2H4;
+	private Spezies C2H5;
+	private Spezies C3H4;
+	private Spezies C3H5;
+	private Spezies C3H6;
+	private Spezies C3H7;
+	private Spezies C7H15_2;
+	private Spezies C7H15O2;
+	private Spezies C7KET12;
+	private Spezies C5H11CO;
+	private Spezies N2O;
+	private Spezies NO2;
+	private Spezies iC8H18;
+	private Spezies C8H17;
+	private Spezies C8H17OO;
+	private Spezies iC8KET21;
+	private Spezies C6H13CO;
+	private Spezies C4H9;
+	private Spezies C2H6;
+	private Spezies CH2CHO;
+	private Spezies CH2CO;
+	private Spezies CH3O2;
+	private Spezies CH3O2H;
+	private Spezies soot;
+	private Spezies NOx;
 	
-//	private  Spezies [] allSpez =new Spezies[25]; //erstmal nicht mehr als 25 Spezies bitte
-	private  int nmbrOfSpez=0; //dann wirds bei der ersten Spezies null
 
-	public final boolean STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD;
+	private  int nmbrOfSpez=0; //dann wirds bei der ersten Spezies null
 
 	private final CasePara CP;
 	private Hashtable<Spezies,Integer> allSpez;
 	private Vector<Spezies> allSpezVec;
+	private Hashtable<String,Spezies> speciesByName;
+	private CanteraCaller cc;
+	boolean callsCantera,canteraInitialized;	
 
 	
-	public SpeziesFabrik(CasePara cp, MakeMeUnique mmu){	
-		CP=cp;
-		STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD=CP.SYS.STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD;
+	public SpeziesFabrik(CasePara cp, MakeMeUnique mmu){
+		callsCantera=cp.callsCantera(); 
+		canteraInitialized=false;	
+		CP=cp;		
 		allSpez=new Hashtable<Spezies,Integer>();
-		allSpezVec =new Vector<Spezies>();
+		allSpezVec =new Vector<Spezies>();	
+		speciesByName=new Hashtable<String,Spezies>();
+		if(callsCantera){
+			cc=new CanteraCaller(CP,1);
+			//cc=new CanteraCaller("ERCmechLHVAdapted.cti","gas",1);
+			Spezies spez;
+			for(int i=0; i<cc.get_NbrOfSpecies();i++){
+				spez=this.get_SpeciesByName(cc.get_getNameOfSpecie(i));	
+				this.integrierMich(spez);
+				speciesByName.put(spez.get_name(), spez);
+			}		
+			this.checkCanteraBremoIndex();	
+			canteraInitialized=true;
+		}else{			
+			String[] names={"H","O","N","H2","OH","CO","NO","O2","H2O","CO2","N2"};
+			Spezies spez;
+			for(int i=0; i<names.length;i++){
+				spez=this.get_SpeciesByName(names[i]);	
+				this.integrierMich(spez);
+				speciesByName.put(spez.get_name(), spez);
+			}			
+		}		
 	}
 	
-	
+	public void checkCanteraBremoIndex(){
+
+		for(int i=0; i<cc.get_NbrOfSpecies();i++)
+			if(!cc.get_getNameOfSpecie(i).equalsIgnoreCase(get_Spez(i).name)){			
+				try{
+					throw new BirdBrainedProgrammerException("For index " + i  +
+							" Species in Cantera and Bremo are not the same!");
+				}catch (BirdBrainedProgrammerException e){
+					e.stopBremo();
+				}
+			}		
+	}
+			
 	public void integrierMich(Spezies spez){	
 		if(allSpez.containsKey(spez)==false){
+			if(callsCantera&&canteraInitialized){
+				try{
+					throw new BirdBrainedProgrammerException("If Bremo calls Cantera no additional " +
+							"Species can be integrated. Please don't use "+ spez.get_name());
+				}catch (BirdBrainedProgrammerException e){
+					e.stopBremo();
+				}
+			}
 			nmbrOfSpez=nmbrOfSpez+1;
 			int index=nmbrOfSpez-1;
 			allSpez.put(spez,index); //Speichern der grade erzeugten Spezies im Vektor
 			allSpezVec.add(index,spez);
-			spez.set_isTointegrate(true);
-		}
+			spez.set_isTointegrate(true);			
+		}			
 	}	
+	
+	public int get_nbrOfSpecies(){
+		return allSpez.size();
+	}
 	
 	public boolean isToIntegrate(Spezies spez){
 		if(allSpez.containsKey(spez)&&spez.isToIntegrate)
@@ -78,12 +160,11 @@ public class SpeziesFabrik {
 			return false;
 		else{
 			try{
-				throw new MiscException("Bei Spezies "+ spez.get_name()+" stimmt die" +
-						"Belegung von isTointegrate nicht+ \n" +
+				throw new MiscException("Bei Spezies "+ spez.get_name()+" stimmt die " +
+						"Belegung von isToIntegrate nicht+ \n" +
 						"SpeziesFabrik und Spezis haben unterschiedliche Werte");
 			}catch(MiscException me){
-				me.stopBremo();
-				
+				me.stopBremo();				
 			}
 			return false;
 		}
@@ -97,10 +178,405 @@ public class SpeziesFabrik {
 		return allSpez.get(spez);
 	}
 	
-	public  Spezies get_Spez(int i){
-		//TODO Fehlerabfrage einbauen fuer indexOutOfBounds		
+	public  Spezies get_Spez(int i){		
+		if(i>nmbrOfSpez){
+			try{
+				throw new BirdBrainedProgrammerException(i + " is not a valid Index of any Species");
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			} 
+		}			
 		return allSpezVec.get(i);		
 	}
+	
+	/**
+	 * 
+	 * @param thermodynKoeffs
+	 * @return Heat of Formation in J/mol
+	 */
+	private double calc_deltaHf(double [][] thermodynKoeffs){		
+		double T=298.15;
+		double h = thermodynKoeffs[0][0] * (-1 / (T));
+		h = h + thermodynKoeffs[0][1] * Math.log(T);
+		h = h + thermodynKoeffs[0][2] * T;
+		h = h + thermodynKoeffs[0][3] * T * T / 2;
+		h = h + thermodynKoeffs[0][4] * T * T * T / 3;
+		h = h + thermodynKoeffs[0][5] * T * T * T * T / 4;
+		h = h + thermodynKoeffs[0][6] * T * T * T * T * T / 5;
+		h = h + thermodynKoeffs[0][7];
+		return h*PhysKonst.get_R_allg();
+	}
+	
+
+	/**
+	 * calculates the NASA-polynomial without using the factor b1.
+	 * This will not return a physically meaningful value!
+	 * @param thermodynKoeffs
+	 * @param a low=0, high=1
+	 * @param T
+	 * @return
+	 */
+	private double calc_Poly(double [][] thermodynKoeffs,int a, double T){
+		double h=0;
+		if(a==0||a==1){
+		h = thermodynKoeffs[a][0] * (-1 / (T));
+		h = h + thermodynKoeffs[a][1] * Math.log(T);
+		h = h + thermodynKoeffs[a][2] * T;
+		h = h + thermodynKoeffs[a][3] * T * T / 2;
+		h = h + thermodynKoeffs[a][4] * T * T * T / 3;
+		h = h + thermodynKoeffs[a][5] * T * T * T * T / 4;
+		h = h + thermodynKoeffs[a][6] * T * T * T * T * T / 5;
+		}else{
+			try{
+				throw new BirdBrainedProgrammerException("a must be 1 or 0 but it is: "+a);
+			}catch (BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
+		}
+		return h;		
+	}
+
+
+	/**
+	 * Recalculates the factor b1 of the NASA-Polynomials for lower temperatures
+	 * in respect to the given LHV
+	 * (respectively the heat of formation is changed) 
+	 * @param thermodynKoeffs
+	 * @param lhv in J/mol
+	 * @param cAtoms
+	 * @param hAtoms
+	 * @param oAtoms
+	 * @return
+	 */
+	private double calc_b1_low(double [][] thermodynKoeffs, double lhv, 
+			double cAtoms, double hAtoms, double oAtoms){		
+		double T=298.15;
+		double h=calc_Poly(thermodynKoeffs,0,T);
+		
+		//Adapting the heat of formation
+		double hf_Adapted=this.calc_hf4LHV(cAtoms, hAtoms, oAtoms, lhv);
+		
+		double b1=hf_Adapted/PhysKonst.get_R_allg()-h;
+
+		return b1;
+	}
+	
+	/**
+	 * Recalculates the factor b1 of the NASA-Polynomials for higher temperatures
+	 * in respect to the given LHV
+	 * (respectively the heat of formation is changed) 
+	 * @param thermodynKoeffs
+	 * @param lhv in J/mol
+	 * @param cAtoms
+	 * @param hAtoms
+	 * @param oAtoms
+	 * @return
+	 */
+	private double calc_b1_high(double [][] thermodynKoeffs, double lhv, 
+			double cAtoms, double hAtoms, double oAtoms){	
+		double R_allg=PhysKonst.get_R_allg();
+		double TGrenz=thermodynKoeffs[2][1];
+		double poly_298 = this.calc_Poly(thermodynKoeffs,0,298.15);
+		double poly_TGrenz_l = this.calc_Poly(thermodynKoeffs,0,TGrenz);
+		double poly_TGrenz_h = this.calc_Poly(thermodynKoeffs,1,TGrenz);
+		
+		//Adapting the heat of formation
+		double hf_Adapted=this.calc_hf4LHV(cAtoms, hAtoms, oAtoms, lhv);
+		// h/R at TGrenz
+		double h=poly_TGrenz_l-poly_298+hf_Adapted/R_allg;
+		double b1=h-poly_TGrenz_h;
+		return b1;
+	}
+	
+	
+	
+	
+	
+
+	/**
+	 * 
+	 * @param cAtoms
+	 * @param hAtoms
+	 * @param oAtoms
+	 * @param delta_hf_fuel
+	 * @return Lower Heating Value in J/mol
+	 */
+	private double calc_LHV(double cAtoms, double hAtoms, 
+			double oAtoms, double delta_hf_fuel){
+		double x=cAtoms;
+		double y=hAtoms;		
+		double hf_O2=get_spezO2().get_delta_hf298_mol();
+		double hf_CO2=get_spezCO2().get_delta_hf298_mol();
+		double hf_H2O=get_spezH2O().get_delta_hf298_mol();
+		double o2min=x+0.25*y-0.5*oAtoms;
+		double LHV=0;
+		double bb=o2min*hf_O2-x*hf_CO2-0.5*y*hf_H2O;
+		if(o2min>0)
+			LHV=(delta_hf_fuel+o2min*hf_O2-x*hf_CO2-0.5*y*hf_H2O);
+
+		return LHV;
+	}
+
+	private double calc_hf4LHV(double c, double h, double o, double hu ){
+		double x=c;
+		double y=h;		
+		double z=o;
+		double hf_O2=get_spezO2().get_delta_hf298_mol();
+		double hf_CO2=get_spezCO2().get_delta_hf298_mol();
+		double hf_H2O=get_spezH2O().get_delta_hf298_mol();	
+		double o2min=x+0.25*y-0.5*z;
+		double bb=-o2min*hf_O2+x*hf_CO2+0.5*y*hf_H2O;
+
+		return hu-o2min*hf_O2+x*hf_CO2+0.5*y*hf_H2O;	
+	}
+	
+
+	private void initializeCanteraSpecies(String speciesName){
+		
+		if(speciesName.equalsIgnoreCase("H"))
+			speciesByName.put(get_spezH().get_name(), get_spezH());		
+		else if(speciesName.equalsIgnoreCase("O"))
+			speciesByName.put(get_spezO().get_name(), get_spezO());
+		else if(speciesName.equalsIgnoreCase("N"))
+			speciesByName.put(get_spezN().get_name(), get_spezN());
+		else if(speciesName.equalsIgnoreCase("H2"))
+			speciesByName.put(get_spezH2().get_name(), get_spezH2());
+		else if(speciesName.equalsIgnoreCase("OH"))
+			speciesByName.put(get_spezOH().get_name(), get_spezOH());
+		else if(speciesName.equalsIgnoreCase("CO"))
+			speciesByName.put(get_spezCO().get_name(), get_spezCO());
+		else if(speciesName.equalsIgnoreCase("NO"))
+			speciesByName.put(get_spezNO().get_name(), get_spezNO());
+		else if(speciesName.equalsIgnoreCase("O2"))
+			speciesByName.put(get_spezO2().get_name(), get_spezO2());
+		else if(speciesName.equalsIgnoreCase("H2O"))
+			speciesByName.put(get_spezH2O().get_name(), get_spezH2O());
+		else if(speciesName.equalsIgnoreCase("C2H5OH"))
+			speciesByName.put(get_spezC2H5OH().get_name(), get_spezC2H5OH());
+		else if(speciesName.equalsIgnoreCase("CO2"))
+			speciesByName.put(get_spezCO2().get_name(), get_spezCO2());
+		else if(speciesName.equalsIgnoreCase("N2"))
+			speciesByName.put(get_spezN2().get_name(), get_spezN2());
+		else if(speciesName.equalsIgnoreCase("Ar"))
+			speciesByName.put(get_spezAr().get_name(), get_spezAr());
+		else if(speciesName.equalsIgnoreCase("LuftTr"))
+			speciesByName.put(get_spezLuft_trocken().get_name(), get_spezLuft_trocken());
+		else if(speciesName.equalsIgnoreCase("RON_91"))
+			speciesByName.put(get_spezRON_91().get_name(), get_spezRON_91());
+		else if(speciesName.equalsIgnoreCase("RON_95"))
+			speciesByName.put(get_spezRON_95().get_name(), get_spezRON_95());
+		else if(speciesName.equalsIgnoreCase("RON_98"))
+			speciesByName.put(get_spezRON_98().get_name(), get_spezRON_98());
+		else if(speciesName.equalsIgnoreCase("Diesel"))
+			speciesByName.put(get_spezDiesel().get_name(), get_spezDiesel());
+		else if(speciesName.equalsIgnoreCase("nC14H30"))
+			speciesByName.put(get_nC7H16().get_name(), get_nC14H30());
+		else if(speciesName.equalsIgnoreCase("nC7H16"))
+			speciesByName.put(get_nC7H16().get_name(), get_nC7H16());
+		else if(speciesName.equalsIgnoreCase("H2O2"))
+			speciesByName.put(get_H2O2().get_name(), get_H2O2());
+		else if(speciesName.equalsIgnoreCase("HO2"))
+			speciesByName.put(get_HO2().get_name(), get_HO2());
+		else if(speciesName.equalsIgnoreCase("CH3O"))
+			speciesByName.put(get_CH3O().get_name(), get_CH3O());
+		else if(speciesName.equalsIgnoreCase("CH2O"))
+			speciesByName.put(get_CH2O().get_name(), get_CH2O());
+		else if(speciesName.equalsIgnoreCase("HCO"))
+			speciesByName.put(get_HCO().get_name(), get_HCO());
+		else if(speciesName.equalsIgnoreCase("CH2"))
+			speciesByName.put(get_CH2().get_name(), get_CH2());
+		else if(speciesName.equalsIgnoreCase("CH3"))
+			speciesByName.put(get_CH3().get_name(), get_CH3());
+		else if(speciesName.equalsIgnoreCase("CH4"))
+			speciesByName.put(get_CH4().get_name(), get_CH4());
+		else if(speciesName.equalsIgnoreCase("C2H2"))
+			speciesByName.put(get_C2H2().get_name(), get_C2H2());
+		else if(speciesName.equalsIgnoreCase("C2H3"))
+			speciesByName.put(get_C2H3().get_name(), get_C2H3());
+		else if(speciesName.equalsIgnoreCase("C2H4"))
+			speciesByName.put(get_C2H4().get_name(), get_C2H4());
+		else if(speciesName.equalsIgnoreCase("C2H5"))
+			speciesByName.put(get_C2H5().get_name(), get_C2H5());
+		else if(speciesName.equalsIgnoreCase("C3H4"))
+			speciesByName.put(get_C3H4().get_name(), get_C3H4());
+		else if(speciesName.equalsIgnoreCase("C3H5"))
+			speciesByName.put(get_C3H5().get_name(), get_C3H5());
+		else if(speciesName.equalsIgnoreCase("C3H6"))
+			speciesByName.put(get_C3H6().get_name(), get_C3H6());
+		else if(speciesName.equalsIgnoreCase("C3H7"))
+			speciesByName.put(get_C3H7().get_name(), get_C3H7());
+		else if(speciesName.equalsIgnoreCase("C7H15-2"))
+			speciesByName.put(get_C7H15_2().get_name(), get_C7H15_2());
+		else if(speciesName.equalsIgnoreCase("C7H15O2"))
+			speciesByName.put(get_C7H15O2().get_name(), get_C7H15O2());
+		else if(speciesName.equalsIgnoreCase("C7KET12"))
+			speciesByName.put(get_C7KET12().get_name(), get_C7KET12());
+		else if(speciesName.equalsIgnoreCase("C5H11CO"))
+			speciesByName.put(get_C5H11CO().get_name(), get_C5H11CO());		
+		else if(speciesName.equalsIgnoreCase("N2O"))
+			speciesByName.put(get_N2O().get_name(), get_N2O());
+		else if(speciesName.equalsIgnoreCase("NO2"))
+			speciesByName.put(get_NO2().get_name(), get_NO2());
+		else if(speciesName.equalsIgnoreCase("iC8H18"))
+			speciesByName.put(get_iC8H18().get_name(), get_iC8H18());
+		else if(speciesName.equalsIgnoreCase("C8H17"))
+			speciesByName.put(get_C8H17().get_name(), get_C8H17());
+		else if(speciesName.equalsIgnoreCase("C8H17OO"))
+			speciesByName.put(get_C8H17OO().get_name(), get_C8H17OO());
+		else if(speciesName.equalsIgnoreCase("iC8KET21"))
+			speciesByName.put(get_iC8KET21().get_name(), get_iC8KET21());
+		else if(speciesName.equalsIgnoreCase("C6H13CO"))
+			speciesByName.put(get_C6H13CO().get_name(), get_C6H13CO());
+		else if(speciesName.equalsIgnoreCase("C4H9"))
+			speciesByName.put(get_C4H9().get_name(), get_C4H9());
+		else if(speciesName.equalsIgnoreCase("C2H6"))
+			speciesByName.put(get_C2H6().get_name(), get_C2H6());
+		else if(speciesName.equalsIgnoreCase("CH2CHO"))
+			speciesByName.put(get_CH2CHO().get_name(), get_CH2CHO());
+		else if(speciesName.equalsIgnoreCase("CH2CO"))
+			speciesByName.put(get_CH2CO().get_name(), get_CH2CO());
+		else if(speciesName.equalsIgnoreCase("CH3O2"))
+			speciesByName.put(get_CH3O2().get_name(), get_CH3O2());
+		else if(speciesName.equalsIgnoreCase("CH3O2H"))
+			speciesByName.put(get_CH3O2H().get_name(), get_CH3O2H());
+		else if(speciesName.equalsIgnoreCase("soot"))
+			speciesByName.put(get_soot().get_name(), get_soot());
+		else {
+			try{
+				throw new BirdBrainedProgrammerException("" +
+						"This species has not been programmed yet!");
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
+		}
+		
+	}	
+	
+public Spezies get_SpeciesByName(String speciesName){
+		
+		if(speciesName.equalsIgnoreCase("H"))
+			return get_spezH();		
+		else if(speciesName.equalsIgnoreCase("O"))
+			return get_spezO();
+		else if(speciesName.equalsIgnoreCase("N"))
+			return get_spezN();
+		else if(speciesName.equalsIgnoreCase("H2"))
+			return get_spezH2();
+		else if(speciesName.equalsIgnoreCase("OH"))
+			return get_spezOH();
+		else if(speciesName.equalsIgnoreCase("CO"))
+			return get_spezCO();
+		else if(speciesName.equalsIgnoreCase("NO"))
+			return get_spezNO();
+		else if(speciesName.equalsIgnoreCase("O2"))
+			return get_spezO2();
+		else if(speciesName.equalsIgnoreCase("H2O"))
+			return get_spezH2O();
+		else if(speciesName.equalsIgnoreCase("C2H5OH"))
+			return get_spezC2H5OH();
+		else if(speciesName.equalsIgnoreCase("CO2"))
+			return get_spezCO2();
+		else if(speciesName.equalsIgnoreCase("N2"))
+			return get_spezN2();
+		else if(speciesName.equalsIgnoreCase("Ar"))
+			return get_spezAr();
+		else if(speciesName.equalsIgnoreCase("LuftTr"))
+			return get_spezLuft_trocken();
+		else if(speciesName.equalsIgnoreCase("RON_91"))
+			return get_spezRON_91();
+		else if(speciesName.equalsIgnoreCase("RON_95"))
+			return get_spezRON_95();
+		else if(speciesName.equalsIgnoreCase("RON_98"))
+			return get_spezRON_98();
+		else if(speciesName.equalsIgnoreCase("Diesel"))
+			return get_spezDiesel();
+		else if(speciesName.equalsIgnoreCase("nC14H30"))
+			return get_nC14H30();
+		else if(speciesName.equalsIgnoreCase("nC7H16"))
+			return get_nC7H16();
+		else if(speciesName.equalsIgnoreCase("H2O2"))
+			return get_H2O2();
+		else if(speciesName.equalsIgnoreCase("HO2"))
+			return get_HO2();
+		else if(speciesName.equalsIgnoreCase("CH3O"))
+			return get_CH3O();
+		else if(speciesName.equalsIgnoreCase("CH2O"))
+			return get_CH2O();
+		else if(speciesName.equalsIgnoreCase("HCO"))
+			return get_HCO();
+		else if(speciesName.equalsIgnoreCase("CH2"))
+			return get_CH2();
+		else if(speciesName.equalsIgnoreCase("CH3"))
+			return get_CH3();
+		else if(speciesName.equalsIgnoreCase("CH4"))
+			return get_CH4();
+		else if(speciesName.equalsIgnoreCase("C2H2"))
+			return get_C2H2();
+		else if(speciesName.equalsIgnoreCase("C2H3"))
+			return get_C2H3();
+		else if(speciesName.equalsIgnoreCase("C2H4"))
+			return get_C2H4();
+		else if(speciesName.equalsIgnoreCase("C2H5"))
+			return get_C2H5();
+		else if(speciesName.equalsIgnoreCase("C3H4"))
+			return get_C3H4();
+		else if(speciesName.equalsIgnoreCase("C3H5"))
+			return get_C3H5();
+		else if(speciesName.equalsIgnoreCase("C3H6"))
+			return get_C3H6();
+		else if(speciesName.equalsIgnoreCase("C3H7"))
+			return get_C3H7();
+		else if(speciesName.equalsIgnoreCase("C7H15-2"))
+			return get_C7H15_2();
+		else if(speciesName.equalsIgnoreCase("C7H15O2"))
+			return get_C7H15O2();
+		else if(speciesName.equalsIgnoreCase("C7KET12"))
+			return get_C7KET12();
+		else if(speciesName.equalsIgnoreCase("C5H11CO"))
+			return get_C5H11CO();
+		else if(speciesName.equalsIgnoreCase("N2O"))
+			return get_N2O();		
+		else if(speciesName.equalsIgnoreCase("NO2"))
+			return get_NO2();
+		else if(speciesName.equalsIgnoreCase("iC8H18"))
+			return get_iC8H18();
+		else if(speciesName.equalsIgnoreCase("C8H17"))
+			return get_C8H17();
+		else if(speciesName.equalsIgnoreCase("C8H17OO"))
+			return get_C8H17OO();
+		else if(speciesName.equalsIgnoreCase("iC8KET21"))
+			return get_iC8KET21();
+		else if(speciesName.equalsIgnoreCase("C6H13CO"))
+			return get_C6H13CO();
+		else if(speciesName.equalsIgnoreCase("C4H9"))
+			return get_C4H9();
+		else if(speciesName.equalsIgnoreCase("C2H6"))
+			return get_C2H6();
+		else if(speciesName.equalsIgnoreCase("CH2CHO"))
+			return get_CH2CHO();
+		else if(speciesName.equalsIgnoreCase("CH2CO"))
+			return get_CH2CO();
+		else if(speciesName.equalsIgnoreCase("CH3O2"))
+			return get_CH3O2();
+		else if(speciesName.equalsIgnoreCase("CH3O2H"))
+			return get_CH3O2H();
+		else if(speciesName.equalsIgnoreCase("soot"))
+			return get_soot();
+		else if(speciesName.equalsIgnoreCase("NOx"))
+			return get_NOx();
+		else {
+			try{
+				throw new BirdBrainedProgrammerException("Trying to create " + speciesName+ 
+						". This species has not been programmed yet!");
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
+			return null;
+		}
+		
+	}	
+	
+	
 	
 
 	/**
@@ -112,11 +588,13 @@ public class SpeziesFabrik {
 	 * --> safty first
 	 * @return Hashtable<String,Spezies> krstHash
 	 */
-	public Hashtable<String,Spezies> get_alleKrafstoffe(){
+	public Hashtable<String,Spezies> get_alleKrafstoffe(){		
 		Hashtable<String,Spezies> krstHash=new Hashtable<String,Spezies>();
-		krstHash.put(get_spezH().get_name(), get_spezH());
-		krstHash.put(get_spezH2().get_name(), get_spezH2());
-		krstHash.put(get_spezCO().get_name(), get_spezCO());
+		for(int i=0;i<this.get_NmbrOfAllSpez();i++){
+			if(this.get_Spez(i).get_Hu_mol()>0)
+				krstHash.put(this.get_Spez(i).get_name(),this.get_Spez(i));
+		}
+		//hier noch alle Kraftstoffe die nicht im ERC-Mech enthalten sind!
 		krstHash.put(get_spezRON_91().get_name(), get_spezRON_91());
 		krstHash.put(get_spezRON_95().get_name(), get_spezRON_95());
 		krstHash.put(get_spezRON_98().get_name(), get_spezRON_98());
@@ -132,33 +610,29 @@ public class SpeziesFabrik {
 	 */
 	public Spezies get_spezH() {	
 
-		if(spezH==null){
-
-			double hf;	
-			//Hu gerechnet 
-			double hu=338905;
-			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
-			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>218000
-			//else (also nach deJaegher und Grill etc.  hf=338905;	
-			hf=HeizwertRechner.deltaHf4Hu(CP,0, 1, 0,hu );
-
+		if(spezH==null){		
+			
 			double koeffs [][]=new double [3][];
 
 			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_H_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_H_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_H_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_H_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_H();
 			}
-			//Heizwert berechnet --> ziemlich hoch
-			spezH=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_H(),								
-					hf,-10e10,hu,0,0,1,0,"H");	//TODO Verdampfungsenthalpie + Heizwert korrigieren
 			
-			this.integrierMich(spezH);
+			double hf=this.calc_deltaHf(koeffs);
+			
+			double lhv=calc_LHV(0, 1, 0, hf);
+			
+			spezH=new KoeffizientenSpezies(koeffs,hf,lhv,0,0,1,0,"H");	
+			
+//			this.integrierMich(spezH);
 		}
 		
 		return spezH;
@@ -170,8 +644,7 @@ public class SpeziesFabrik {
 	 */
 	public Spezies get_spezO() {	
 		
-		if(spezO==null){
-			double hf=249200; //kein Unterschied
+		if(spezO==null){			
 
 			double koeffs [][]=new double [3][];
 
@@ -179,16 +652,18 @@ public class SpeziesFabrik {
 				koeffs[0] = Koeffs_Burcat.get_koeffs_O_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_O_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_O_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_O_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
-			}
-			spezO=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_O(),								
-					hf,-10e10,0,1,0,0,0,"O"); //TODO Verdampfungsenthalpie korrigieren
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_O();
+			}	
 			
-			this.integrierMich(spezO);
+			double hf=this.calc_deltaHf(koeffs);			
+			spezO=new KoeffizientenSpezies(koeffs,								
+					hf,0,1,0,0,0,"O"); 
+//			this.integrierMich(spezO);
 		}
 		
 		return spezO;
@@ -200,9 +675,7 @@ public class SpeziesFabrik {
 	 */
 	public Spezies get_spezN() {
 
-		if(spezN==null){
-
-			double hf=472680; //kein Unterschied
+		if(spezN==null){		
 
 			double koeffs [][]=new double [3][];
 
@@ -210,19 +683,19 @@ public class SpeziesFabrik {
 				koeffs[0] = Koeffs_Burcat.get_koeffs_N_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_N_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_N_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_N_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_N();
 			}
-
-			spezN=new KoeffizientenSpezies(	koeffs,
-					PhysKonst.get_M_N(),								
-					hf,-10e10,0,0,0,0,1,"N");
+			double hf=this.calc_deltaHf(koeffs);
+			spezN=new KoeffizientenSpezies(	koeffs,								
+					hf,0,0,0,0,1,"N");
 			
-			this.integrierMich(spezN);
+//			this.integrierMich(spezN);
 		}
-
 		return spezN;
 	}
 
@@ -232,16 +705,7 @@ public class SpeziesFabrik {
 	 */
 	public Spezies get_spezH2() {
 		
-		if(spezH2==null){				
-			
-			//Hu gerechnet --> stimmt weitgehend mit Wert 
-			//aus Pischinger Thermodynamik der... ueberein (241700) Abweichung is ok!
-			double hu=241810;
-			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
-			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>0
-			//else hf=241810;
-			double hf;
-			hf=HeizwertRechner.deltaHf4Hu(CP,0, 2, 0,hu );
+		if(spezH2==null){			
 
 			double koeffs [][]=new double [3][];
 
@@ -249,17 +713,21 @@ public class SpeziesFabrik {
 				koeffs[0] = Koeffs_Burcat.get_koeffs_H2_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_H2_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_H2_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_H2_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_H2();				
 			}
-	
-			spezH2=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_H2(),								
-					hf,-10e10,hu,0,0,2,0,"H2");//TODO Verdampfungsenthalpie korrigieren
 			
-			this.integrierMich(spezH2);
+			double hf=this.calc_deltaHf(koeffs);
+			
+			double lhv=calc_LHV(0, 2, 0, hf);	
+			
+			spezH2=new KoeffizientenSpezies(koeffs,hf,lhv,0,0,2,0,"H2");
+			
+//			this.integrierMich(spezH2);
 		}
 		return spezH2;
 	}
@@ -271,30 +739,22 @@ public class SpeziesFabrik {
 	public Spezies get_spezOH() {
 		
 		if(spezOH==null){
-			double hf;			
-			if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD)
-				hf=39300;
-			else //nach deJaeghr und Grill
-				hf=160205;
-
-
 			double koeffs [][]=new double [3][];
 
 			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_OH_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_OH_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_OH_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_OH_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_OH();				
 			}
-			//OH kann nicht mit Luft verbrannt werden Hu=0.....
-			spezOH=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_OH(),								
-					hf,-10e10,0,1,0,1,0,"OH"); //TODO Heizwert + Verdampfungsenthalpie korrigiren
-			
-			this.integrierMich(spezOH);
+			double hf=this.calc_deltaHf(koeffs);			
+			spezOH=new KoeffizientenSpezies(koeffs, hf, 0, 1, 0, 1, 0, "OH");			
+//			this.integrierMich(spezOH);
 		}
 		return spezOH;
 	}
@@ -305,31 +765,25 @@ public class SpeziesFabrik {
 	 */
 	public Spezies get_spezCO() {		
 		if(spezCO==null){
-			double hf;	
-			//Hu gerechnet 
-			double hu=282970;
-			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
-			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-110530
-			//else (also nach deJaegher und Grill etc.  hf=282970;	
-			hf=HeizwertRechner.deltaHf4Hu(CP,1,0,1,hu );
-
+			
 			double koeffs [][]=new double [3][];
 
 			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_CO_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_CO_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_CO_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_CO_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else {
+				koeffs=Koeffs_ERC.get_coeffs_CO();
 			}
-			//Hu gerechnet --> stimmt mit Wert aus Pischinger Thermodynamik der... ueberein
-			spezCO=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_CO(),								
-					hf,-10e10,hu,1,1,0,0,"CO"); //TODO Heizwert korrigieren
 			
-			this.integrierMich(spezCO);
+			double hf=this.calc_deltaHf(koeffs);
+			double hu=this.calc_LHV(1, 0, 1, hf);
+			spezCO=new KoeffizientenSpezies(koeffs,hf,hu,1,1,0,0,"CO"); 			
+//			this.integrierMich(spezCO);
 		}
 		return spezCO;
 	}
@@ -340,27 +794,23 @@ public class SpeziesFabrik {
 	 */
 	public Spezies get_spezNO() {
 
-		if(spezNO==null){
-			
-//			double hf=90290; //keine Unterscheidung notwendig
-			double hf=91290; //nach Janaf Thermobuild
+		if(spezNO==null){			
 			double koeffs [][]=new double [3][];
 
 			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_NO_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_NO_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_NO_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_NO_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
-			}	
-
-			spezNO=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_NO(),								
-					hf,-10e10,0,1,0,0,1,"NO");
-			
-			this.integrierMich(spezNO);
+			}	else{
+				koeffs=Koeffs_ERC.get_coeffs_NO();
+			}
+			double hf=this.calc_deltaHf(koeffs);			
+			spezNO=new KoeffizientenSpezies(koeffs,hf,0,1,0,0,1,"NO");			
+//			this.integrierMich(spezNO);
 		}
 		return spezNO;
 	}
@@ -372,7 +822,6 @@ public class SpeziesFabrik {
 	public Spezies get_spezO2() {
 		
 		if(spezO2==null){
-			double hf=0; //kein Unterscheidung notwendig
 
 			double koeffs [][]=new double [3][];
 
@@ -380,17 +829,16 @@ public class SpeziesFabrik {
 				koeffs[0] = Koeffs_Burcat.get_koeffs_O2_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_O2_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_O2_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_O2_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_O2();
 			}
-
-			spezO2=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_O2(),								
-					hf,-10e10,0,2,0,0,0,"O2");
-			
-			this.integrierMich(spezO2);
+			double hf=this.calc_deltaHf(koeffs);
+			spezO2=new KoeffizientenSpezies(koeffs,hf,0,2,0,0,0,"O2");			
+//			this.integrierMich(spezO2);
 		}
 		return spezO2;
 	}
@@ -402,30 +850,24 @@ public class SpeziesFabrik {
 	public Spezies get_spezH2O() {
 		
 		if(spezH2O==null){
-			
-			double hf;			
-			if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) //so wie in der Chemie ueblich
-				hf=-241810;
-			else //nach deJaegher und Grill etc.
-				hf=0;
-
 			double koeffs [][]=new double [3][];
 
 			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_H2O_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_H2O_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_H2O_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_H2O_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_H2O();
 			}
-
-			spezH2O=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_H2O(),									
-					hf,-10e10,0,1,0,2,0,"H2O"); 
 			
-			this.integrierMich(spezH2O);
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=0;
+			spezH2O=new KoeffizientenSpezies(koeffs,hf,lhv,1,0,2,0,"H2O");			
+//			this.integrierMich(spezH2O);
 		}
 		return spezH2O;
 	}
@@ -437,28 +879,24 @@ public class SpeziesFabrik {
 	public Spezies get_spezCO2() {
 		
 		if(spezCO2==null){
-			double hf;			
-			if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD)
-				hf=-393500;
-			else //nach deJaegher und Grill etc. 
-				hf=0;
-
+			
 			double koeffs [][]=new double [3][];
 
 			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_CO2_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_CO2_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if (CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_CO2_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_CO2_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_CO2();
 			}
-			spezCO2=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_CO2(),									
-					hf,-10e10,0,2,1,0,0,"CO2");
-			
-			this.integrierMich(spezCO2);
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=0;			
+			spezCO2=new KoeffizientenSpezies(koeffs,hf,lhv,2,1,0,0,"CO2");			
+//			this.integrierMich(spezCO2);
 		}
 		return spezCO2;
 	}
@@ -470,24 +908,23 @@ public class SpeziesFabrik {
 	public Spezies get_spezN2() {
 		
 		if(spezN2==null){
-			double hf=0; //keine Unterscheidung notwendig
-
 			double koeffs [][]=new double [3][];
 
 			if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 				koeffs[0] = Koeffs_Burcat.get_koeffs_N2_l();
 				koeffs[1]= Koeffs_Burcat.get_koeffs_N2_h();
 				koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();
-			}else{
+			}else if (CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("NASA9")){
 				koeffs[0] = Koeffs_NASA.get_koeffs_N2_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_N2_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+			}else{
+				koeffs=Koeffs_ERC.get_coeffs_N2();
 			}
-			spezN2=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_N2(),								
-					hf,-10e10,0,0,0,0,2,"N2");	
-			
-			this.integrierMich(spezN2);
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(0, 0, 0, hf);
+			spezN2=new KoeffizientenSpezies(koeffs,hf,lhv,0,0,0,2,"N2");			
+//			this.integrierMich(spezN2);
 		}
 		return spezN2;
 	}
@@ -496,13 +933,9 @@ public class SpeziesFabrik {
 		 * Ar wird NICHT automatisch integriert  
 		 * @return KoeffizientenSpezies spezAr
 		 */
-		public Spezies get_spezAr() {
-			
-			if(spezAr==null){
-				double hf=0; //keine Unterscheidung notwendig
-	
-				double koeffs [][]=new double [3][];
-	
+		public Spezies get_spezAr() {			
+			if(spezAr==null){	
+				double koeffs [][]=new double [3][];	
 				if(CP.SYS.THERMO_POLYNOM_KOEFF_VORGABE.equalsIgnoreCase("Burcat")){		
 					koeffs[0] = Koeffs_Burcat.get_koeffs_Ar_l();
 					koeffs[1]= Koeffs_Burcat.get_koeffs_Ar_h();
@@ -511,12 +944,10 @@ public class SpeziesFabrik {
 					koeffs[0] = Koeffs_NASA.get_koeffs_Ar_l();
 					koeffs[1]= Koeffs_NASA.get_koeffs_Ar_h();
 					koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
-				}
-	
-				spezAr=new KoeffizientenSpezies(koeffs,
-						PhysKonst.get_M_Ar(),								
-						hf,-10e10,0,0,0,0,0,"Ar");			
-
+				}	
+				double hf=this.calc_deltaHf(koeffs);
+				double lhv=this.calc_LHV(0, 0, 0, hf);
+//				spezAr=new KoeffizientenSpezies(koeffs,hf,lhv,0,0,0,0,"Ar");
 			}
 			return spezAr;
 		}
@@ -538,8 +969,7 @@ public class SpeziesFabrik {
 				double vol_N2=1-vol_O2-vol_CO2;
 	//			Ar wird nicht beruecksichtigt, da der Gleichgewichtssolver es nicht beruecksichtigt und die Beruecksichtigung
 	//			von Ar dann zu unstimmigen Massenbruechen fuehren wuerde
-				koeffSpeziesMolenBruchHash.put((KoeffizientenSpezies) get_spezN2(), vol_N2);
-	
+				koeffSpeziesMolenBruchHash.put((KoeffizientenSpezies) get_spezN2(), vol_N2);	
 				spezLuftTr=new GasGemisch("Luft");
 				((GasGemisch)spezLuftTr).set_Gasmischung_molenBruch(koeffSpeziesMolenBruchHash);
 			}
@@ -553,31 +983,543 @@ public class SpeziesFabrik {
 	 * @return KoeffizientenSpezies spezC2H5OH
 	 */
 	public Spezies get_spezC2H5OH() {		
-		if(spezC2H5OH==null){
-				
-			
-			double hu;
-			//Hu gerechnet mit hf=-234950 J/mol (NASA-Wert)
-			hu=1277480.0;
-			//Hu aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
-			//hu=1234676; //J/mol --> Abweichung ca. 3.5% is ok	da es so auch funktioniert  
-			//wenn die Standardbildungsenthalpien nach de Jaegher verwendet werden!
-			double hf;		
-			hf=HeizwertRechner.deltaHf4Hu(CP,2,6,1,hu ); 
-			
-			double h_evap_mol =38929.15; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"		
-
+		if(spezC2H5OH==null){			
 			double koeffs [][]=new double [3][];			
 				koeffs[0] = Koeffs_NASA.get_koeffs_C2H5OH_l();
 				koeffs[1]= Koeffs_NASA.get_koeffs_C2H5OH_h();
 				koeffs[2]=Koeffs_NASA.get_TemperaturGrenze();
+				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2, 6, 1, hf);
 	
-			spezC2H5OH=new KoeffizientenSpezies(koeffs,
-					PhysKonst.get_M_C2H5OH(),								
-					hf,h_evap_mol,hu,1,2,6,0,"Ethanol");
+			spezC2H5OH=new KoeffizientenSpezies(koeffs,hf,lhv,1,2,6,0,"Ethanol");
 		}
 		return spezC2H5OH;
 	}
+	
+	public Spezies get_nC7H16() {		
+		if(nC7H16==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_nC7H16();
+				
+			double hf=this.calc_deltaHf(koeffs); //orig:-188498.08792308983 
+			double lhv=this.calc_LHV(7,16,0,hf); //orig: 4500842.684176453
+			//adaption of delta_hf to get the proper lhv
+			//lhv_ex_mass=lhv_sim_mass [J/kg] --> lhv_ex_mol/M_ex*M_sim=lhv_sim_mol [J/mol]
+
+			//usi this code to adopt delta_hf accordding to the experimental LHV
+//			double M_sim=0.10020404000000001;
+//			lhv=42.5*1e6*M_sim; //4258671.7
+//			hf=this.calc_hf4LHV(7, 16, 0, lhv);
+			
+			double hf_Check=this.calc_hf4LHV(7, 16, 0, lhv);//orig: -188498.0879230895
+			hf_Check=(hf_Check-hf)/hf*100;
+			nC7H16=new KoeffizientenSpezies(koeffs,hf,lhv,0,7,16,0,"nC7H16");
+//			this.integrierMich(nC7H16);
+			
+			//adapting factor b1 in the NASA-Polinomials to generate the appropriate LHV			
+			double lhvMJkg=nC7H16.get_Hu_mass()*1e-6; //orig: 44.91677864661398
+			double M=nC7H16.get_M();
+			double lhvNew=42.5*1e6*M; //4258671.7	
+			double hf_Adapted=this.calc_hf4LHV(7, 16, 0, lhvNew); //-430669.0720995427		
+			double lhv_adaptedCheck=this.calc_LHV(7, 16, 0, hf_Adapted); //4258671.7
+			lhv_adaptedCheck=(lhv_adaptedCheck-lhvNew)/lhvNew*100;
+			double b1_low=this.calc_b1_low(koeffs,lhvNew,7, 16, 0);
+			//-54786.75178222912			
+			double b1Check=this.calc_b1_low(koeffs,lhv,7, 16, 0);
+			double b1L=-2.565865650E+004;
+			b1Check=(b1Check-b1L)/b1L*100;
+			b1Check=b1Check;
+			
+			double b1_high=this.calc_b1_high(koeffs,lhvNew,7, 16, 0);
+			//-63404.10344444763	
+			double b1CheckH=this.calc_b1_high(koeffs,lhv,7, 16, 0);
+			double b1H=-3.427600810E+004;
+			b1CheckH=(b1CheckH- (b1H))/b1H*100;
+			b1CheckH=b1CheckH;
+
+		}	
+		return nC7H16;
+	}
+	
+	public Spezies get_nC14H30() {	
+		try{
+			throw new MiscException("C14H30 has not been checked yet! Check it and delete this Mesage or do NOT use it!");
+		}catch(MiscException me){
+			me.stopBremo();
+		}	
+		if(nC14H30==null){			
+			double koeffs [][]=new double [3][];	
+			koeffs[0] = Koeffs_Burcat.get_koeffs_nC14H30_l();
+			koeffs[1]= Koeffs_Burcat.get_koeffs_nC14H30_h();
+			koeffs[2]=Koeffs_Burcat.get_TemperaturGrenze();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2,5,0,hf);	
+			nC14H30=new KoeffizientenSpezies(koeffs,hf,lhv,0,14,30,0,"nC14H30");
+//			this.integrierMich(C2H5);
+		}
+		return nC14H30;
+	}
+	
+	
+	
+	public Spezies get_H2O2() {		
+		if(H2O2==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_H2O2();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(0,2,2,hf);	
+			H2O2=new KoeffizientenSpezies(koeffs,hf,lhv,2,0,2,0,"H2O2");
+//			this.integrierMich(H2O2);
+		}
+		return H2O2;
+	}
+	
+	public Spezies get_HO2() {		
+		if(HO2==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_HO2();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(0,1,2,hf);	
+			HO2=new KoeffizientenSpezies(koeffs,hf,lhv,2,0,1,0,"HO2");
+//			this.integrierMich(HO2);
+		}
+		return HO2;
+	}
+	
+	public Spezies get_CH3O() {		
+		if(CH3O==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH3O();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(1,3,1,hf);	
+			CH3O=new KoeffizientenSpezies(koeffs,hf,lhv,1,1,3,0,"CH3O");
+//			this.integrierMich(CH3O);
+		}
+		return CH3O;
+	}
+	
+	public Spezies get_CH2O() {		
+		if(CH2O==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH2O();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(1,2,1,hf);	
+			CH2O=new KoeffizientenSpezies(koeffs,hf,lhv,1,1,2,0,"CH2O");
+//			this.integrierMich(CH2O);
+		}
+		return CH2O;
+	}	
+	
+	public Spezies get_HCO() {		
+		if(HCO==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_HCO();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(1,1,1,hf);	
+			HCO=new KoeffizientenSpezies(koeffs,hf,lhv,1,1,1,0,"HCO");
+//			this.integrierMich(HCO);
+		}
+		return HCO;
+	}
+	
+	public Spezies get_CH2() {		
+		if(CH2==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH2();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(1,2,0,hf);	
+			CH2=new KoeffizientenSpezies(koeffs,hf,lhv,0,1,2,0,"CH2");
+//			this.integrierMich(CH2);
+		}
+		return CH2;
+	}
+	
+	public Spezies get_CH3() {		
+		if(CH3==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH3();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(1,3,0,hf);	
+			CH3=new KoeffizientenSpezies(koeffs,hf,lhv,0,1,3,0,"CH3");
+//			this.integrierMich(CH3);
+		}
+		return CH3;
+	}
+	
+	public Spezies get_CH4() {		
+		if(CH4==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH4();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(1,4,0,hf);	
+			CH4=new KoeffizientenSpezies(koeffs,hf,lhv,0,1,4,0,"CH4");
+//			this.integrierMich(CH4);
+		}
+		return CH4;
+	}
+	
+	public Spezies get_C2H2() {		
+		if(C2H2==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C2H2();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2,2,0,hf);	
+			C2H2=new KoeffizientenSpezies(koeffs,hf,lhv,0,2,2,0,"C2H2");
+//			this.integrierMich(C2H2);
+		}
+		return C2H2;
+	}
+	
+	public Spezies get_C2H3() {		
+		if(C2H3==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C2H3();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2,3,0,hf);	
+			C2H3=new KoeffizientenSpezies(koeffs,hf,lhv,0,2,3,0,"C2H3");
+//			this.integrierMich(C2H3);
+		}
+		return C2H3;
+	}
+	
+	public Spezies get_C2H4() {		
+		if(C2H4==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C2H4();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2,4,0,hf);	
+			C2H4=new KoeffizientenSpezies(koeffs,hf,lhv,0,2,4,0,"C2H4");
+//			this.integrierMich(C2H4);
+		}
+		return C2H4;
+	}
+	
+	public Spezies get_C2H5() {		
+		if(C2H5==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C2H5();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2,5,0,hf);	
+			C2H5=new KoeffizientenSpezies(koeffs,hf,lhv,0,2,5,0,"C2H5");
+//			this.integrierMich(C2H5);
+		}
+		return C2H5;
+	}
+	
+	public Spezies get_C3H4() {		
+		if(C3H4==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C3H4();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(3,4,0,hf);	
+			C3H4=new KoeffizientenSpezies(koeffs,hf,lhv,0,3,4,0,"C3H4");
+//			this.integrierMich(C3H4);
+		}
+		return C3H4;
+	}
+	
+	public Spezies get_C3H5() {		
+		if(C3H5==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C3H5();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(3,5,0,hf);	
+			C3H5=new KoeffizientenSpezies(koeffs,hf,lhv,0,3,5,0,"C3H5");
+//			this.integrierMich(C3H5);
+		}
+		return C3H5;
+	}
+	
+	public Spezies get_C3H6() {		
+		if(C3H6==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C3H6();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(3,6,0,hf);	
+			C3H6=new KoeffizientenSpezies(koeffs,hf,lhv,0,3,6,0,"C3H6");
+//			this.integrierMich(C3H6);
+		}
+		return C3H6;
+	}
+	
+	public Spezies get_C3H7() {		
+		if(C3H7==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C3H7();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(3,7,0,hf);	
+			C3H7=new KoeffizientenSpezies(koeffs,hf,lhv,0,3,7,0,"C3H7");
+//			this.integrierMich(C3H7);
+		}
+		return C3H7;
+	}
+	
+	public Spezies get_C7H15_2() {		
+		if(C7H15_2==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C7H15_2();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(7,15,0,hf);	
+			C7H15_2=new KoeffizientenSpezies(koeffs,hf,lhv,0,7,15,0,"C7H15-2");
+//			this.integrierMich(C7H15_2);
+		}
+		return C7H15_2;
+	}
+	
+	public Spezies get_C7H15O2() {		
+		if(C7H15O2==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C7H15O2();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(7,15,2,hf);	
+			C7H15O2=new KoeffizientenSpezies(koeffs,hf,lhv,2,7,15,0,"C7H15O2");
+//			this.integrierMich(C7H15O2);
+		}
+		return C7H15O2;
+	}
+	
+	public Spezies get_C7KET12() {		
+		if(C7KET12==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C7KET12();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(7,14,3,hf);	
+			C7KET12=new KoeffizientenSpezies(koeffs,hf,lhv,3,7,14,0,"C7KET12");
+//			this.integrierMich(C7KET12);
+		}
+		return C7KET12;
+	}
+	
+	public Spezies get_C5H11CO() {		
+		if(C5H11CO==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C5H11CO();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(6,11,1,hf);	
+			C5H11CO=new KoeffizientenSpezies(koeffs,hf,lhv,1,6,11,0,"C5H11CO");
+//			this.integrierMich(C5H11CO);
+		}
+		return C5H11CO;
+	}
+	
+	public Spezies get_N2O() {		
+		if(N2O==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_N2O();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(0,0,1,hf);	
+			N2O=new KoeffizientenSpezies(koeffs,hf,lhv,1,0,0,2,"N2O");
+//			this.integrierMich(N2O);
+		}
+		return N2O;
+	}
+	
+	public Spezies get_NO2() {		
+		if(NO2==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_NO2();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(0,0,2,hf);	
+			NO2=new KoeffizientenSpezies(koeffs,hf,lhv,2,0,0,1,"NO2");
+//			this.integrierMich(NO2);
+		}
+		return NO2;
+	}
+	
+	public Spezies get_iC8H18() {		
+		if(iC8H18==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_iC8H18();	
+			
+			double hf=this.calc_deltaHf(koeffs);			
+			double lhv=this.calc_LHV(8,18,0,hf);
+			double hf_Check=(this.calc_hf4LHV(8,18,0, lhv)-hf)/hf*100;				
+			
+			//adaption of delta_hf to get the proper lhv
+			//lhv_ex_mass=lhv_sim_mass [J/kg] --> lhv_ex_mol/M_ex*M_sim=lhv_sim_mol [J/mol]
+//			double M_sim=0.11423092000000001;
+//			lhv=43.2*1e6*M_sim; 
+//			hf=this.calc_hf4LHV(8,18,0, lhv);
+			iC8H18=new KoeffizientenSpezies(koeffs,hf,lhv,0,8,18,0,"iC8H18");			
+//			this.integrierMich(iC8H18);
+			
+			//adapting factor b1 in the NASA-Polinomials to generate the appropriate LHV
+			double lhvMJkg=iC8H18.get_Hu_mass()*1e-6;
+			double M=iC8H18.get_M();
+			double lhvNew=43.217*1e6*M;			
+				
+			double b1_low=this.calc_b1_low(koeffs,lhvNew,8, 18, 0);
+			//-49720.94130043444			
+			double b1Check=this.calc_b1_low(koeffs,lhv,8, 18, 0);
+			double b1=-2.994468750E+004;
+			b1Check=(b1Check- b1)/b1*100;				
+			
+			double b1_high=this.calc_b1_high(koeffs,lhvNew,8, 18, 0);				
+			//-60572.071545029
+			double b1CheckH=this.calc_b1_high(koeffs,lhv,8, 18, 0);
+			double b1H=-4.079581770E+004;
+			b1CheckH=(b1CheckH- b1H)/b1H*100;
+			b1Check=b1Check;
+		}
+	
+		return iC8H18;
+	}
+	
+	
+	public Spezies get_C8H17() {		
+		if(C8H17==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C8H17();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(8,17,0,hf);	
+			C8H17=new KoeffizientenSpezies(koeffs,hf,lhv,0,8,17,0,"C8H17");
+//			this.integrierMich(C8H17);
+		}
+		return C8H17;
+	}
+	
+	public Spezies get_C8H17OO() {		
+		if(C8H17OO==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C8H17OO();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(8,17,2,hf);	
+			C8H17OO=new KoeffizientenSpezies(koeffs,hf,lhv,2,8,17,0,"C8H17OO");
+//			this.integrierMich(C8H17OO);
+		}
+		return C8H17OO;
+	}
+	
+	public Spezies get_iC8KET21() {		
+		if(iC8KET21==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_iC8KET21();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(8,16,3,hf);	
+			iC8KET21=new KoeffizientenSpezies(koeffs,hf,lhv,3,8,16,0,"iC8KET21");
+//			this.integrierMich(iC8KET21);
+		}
+		return iC8KET21;
+	}
+	
+	public Spezies get_C6H13CO() {		
+		if(C6H13CO==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C6H13CO();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(7,13,1,hf);	
+			C6H13CO=new KoeffizientenSpezies(koeffs,hf,lhv,1,7,13,0,"C6H13CO");
+//			this.integrierMich(C6H13CO);
+		}
+		return C6H13CO;
+	}	
+	
+	public Spezies get_C4H9() {		
+		if(C4H9==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C4H9();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(4,9,0,hf);	
+			C4H9=new KoeffizientenSpezies(koeffs,hf,lhv,0,4,9,0,"C4H9");
+//			this.integrierMich(C4H9);
+		}
+		return C4H9;
+	}
+	
+	
+	public Spezies get_C2H6() {		
+		if(C2H6==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_C2H6();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2,6,0,hf);	
+			C2H6=new KoeffizientenSpezies(koeffs,hf,lhv,0,2,6,0,"C2H6");
+//			this.integrierMich(C2H6);
+		}
+		return C2H6;
+	}
+	
+	
+	
+	public Spezies get_CH2CHO() {		
+		if(CH2CHO==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH2CHO();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2,3,1,hf);	
+			CH2CHO=new KoeffizientenSpezies(koeffs,hf,lhv,1,2,3,0,"CH2CHO");
+//			this.integrierMich(CH2CHO);
+		}
+		return CH2CHO;
+	}
+	
+	public Spezies get_CH2CO() {		
+		if(CH2CO==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH2CO();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(2,2,1,hf);	
+			CH2CO=new KoeffizientenSpezies(koeffs,hf,lhv,1,2,2,0,"CH2CO");
+//			this.integrierMich(CH2CO);
+		}
+		return CH2CO;
+	}
+	
+	public Spezies get_CH3O2() {		
+		if(CH3O2==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH3O2();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(1,3,2,hf);	
+			CH3O2=new KoeffizientenSpezies(koeffs,hf,lhv,2,1,3,0,"CH3O2");
+//			this.integrierMich(CH3O2);
+		}
+		return CH3O2;
+	}
+	
+	
+	public Spezies get_CH3O2H() {		
+		if(CH3O2H==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_CH3O2H();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(1,4,2,hf);	
+			CH3O2H=new KoeffizientenSpezies(koeffs,hf,lhv,2,1,4,0,"CH3O2H");
+//			this.integrierMich(CH3O2H);
+		}
+		return CH3O2H;
+	}
+	
+	
+	public Spezies get_soot() {		
+		if(soot==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_soot();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(80,0,0,hf);	
+			soot=new KoeffizientenSpezies(koeffs,hf,lhv,0,80,0,0,"soot");
+//			this.integrierMich(soot);
+		}
+		return soot;
+	}	
+	
+	public Spezies get_NOx() {		
+		if(NOx==null){			
+			double koeffs [][]=new double [3][];			
+			koeffs=Koeffs_ERC.get_coeffs_NO();				
+			double hf=this.calc_deltaHf(koeffs);
+			double lhv=this.calc_LHV(0,0,0,hf);	
+			NOx=new KoeffizientenSpezies(koeffs,hf,lhv,1,0,0,1,"NOx");
+//			this.integrierMich(soot);
+		}
+		return NOx;
+	}	
+	
+	
+
+	
+	
 
 	/**
 	 *	Gibt ein Objekt vom Typ KoeffizeintenSpezies mit den Koeffizeinten fuer 
@@ -585,26 +1527,19 @@ public class SpeziesFabrik {
 	 *  RON_91 wird NICHT automatisch integriert
 	 *  @return KoeffizientenSpezies spezRON_91
 	 */
-	public Spezies get_spezRON_91() {
-		//TODO Molare Masse als Eingabeparameter inm Inputfile deklarieren
-		if(spezRON_91==null){
-			double Hu=CP.get_Hu_RON_91();	
-			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
-			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-1.3939e+04
-			//else (also nach deJaegher und Grill etc.  hf=;
-			double hf; //-1.8314266E+05
-			hf=HeizwertRechner.deltaHf4Hu(CP,7.317412935,14.19104478,0,Hu );
-			
-			double h_evap_mol =41160; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
-			
+	public Spezies get_spezRON_91() {	
+		//TODO ohc Anteile als Eingabe im Inputfile definieren
+		if(spezRON_91==null){			
+			double lhv=CP.get_Hu_RON_91();				
+			double hf; 
+			hf=this.calc_hf4LHV(7.317412935,14.19104478,0,lhv );			
 			double koeffs [][]=new double [3][];
-
-			koeffs[0] = Koeffs_KrstFVV.get_koeffs_RON_91_l();
-			koeffs[1] = Koeffs_KrstFVV.get_koeffs_RON_91_h();
+			koeffs[0]=Koeffs_KrstFVV.get_koeffs_RON_91_l();
+			koeffs[1]=Koeffs_KrstFVV.get_koeffs_RON_91_h();
 			koeffs[2]=Koeffs_KrstFVV.get_TemperaturGrenze();
-
-			spezRON_91=new KoeffizientenSpezies(koeffs, 102.19e-3,								
-					hf,h_evap_mol,Hu,0,7.317412935,14.19104478,0,"RON_91"); 
+			
+			spezRON_91=new KoeffizientenSpezies(koeffs,
+					hf,lhv,0,7.317412935,14.19104478,0,"RON_91"); 
 		}
 		return spezRON_91;
 	}
@@ -617,26 +1552,18 @@ public class SpeziesFabrik {
 	 *  @return KoeffizientenSpezies spezRON_95
 	 */
 	public Spezies get_spezRON_95() {
-		//TODO Molare Masse als Eingabeparameter inm Inputfile deklarieren
+		//TODO ohc Anteile als Eingabe im Inputfile definieren
 		if(spezRON_95==null){
-			double Hu=CP.get_Hu_RON_95();
-			double hf;
-			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
-			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-3.5775e+04;
-			//else (also nach deJaegher und Grill etc.  hf=XXX;
-			hf=HeizwertRechner.deltaHf4Hu(CP,6.96292482,12.46549949,0,Hu );
-			
-			double h_evap_mol =41160; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
-			
+			double lhv=CP.get_Hu_RON_95();
+			double hf;			
+			hf=this.calc_hf4LHV(6.96292482,12.46549949,0,lhv);			
 			double koeffs [][]=new double [3][];
-
-			koeffs[0] = Koeffs_KrstFVV.get_koeffs_RON_95_l();
-			koeffs[1] = Koeffs_KrstFVV.get_koeffs_RON_95_h();
+			koeffs[0]=Koeffs_KrstFVV.get_koeffs_RON_95_l();
+			koeffs[1]=Koeffs_KrstFVV.get_koeffs_RON_95_h();
 			koeffs[2]=Koeffs_KrstFVV.get_TemperaturGrenze();
 
-			spezRON_95=new KoeffizientenSpezies(koeffs,
-					96.19e-3,								
-					hf,h_evap_mol,Hu,0,6.96292482,12.46549949,0,"RON_95");	
+			spezRON_95=new KoeffizientenSpezies(koeffs,								
+					hf,lhv,0,6.96292482,12.46549949,0,"RON_95");	
 		}
 		return spezRON_95;
 	}
@@ -648,26 +1575,18 @@ public class SpeziesFabrik {
 	 *  @return KoeffizientenSpezies spezRON_98
 	 */
 	public Spezies get_spezRON_98() {
-		//TODO Molare Masse als Eingabeparameter inm Inputfile deklarieren
+		//TODO ohc Anteile als Eingabe im Inputfile definieren
 		if(spezRON_98==null){
-			double Hu=CP.get_Hu_RON_98();
-			double hf;
-			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
-			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>-4.3438e+04;
-			//else (also nach deJaegher und Grill etc.  hf=XXX;
-			hf=HeizwertRechner.deltaHf4Hu(CP,6.895209581,11.9001996,0,Hu );		
-			
-			double h_evap_mol =41160; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
-			
+			double lhv=CP.get_Hu_RON_98();
+			double hf;			
+			hf=this.calc_hf4LHV(6.895209581,11.9001996,0,lhv);				
 			double koeffs [][]=new double [3][];
-
 			koeffs[0] = Koeffs_KrstFVV.get_koeffs_RON_98_l();
 			koeffs[1] = Koeffs_KrstFVV.get_koeffs_RON_98_h();
 			koeffs[2]=Koeffs_KrstFVV.get_TemperaturGrenze();
 
-			spezRON_98=new KoeffizientenSpezies(koeffs,
-					94.81e-3,								
-					hf,h_evap_mol,Hu,0,6.895209581,11.9001996,0,"RON_98");
+			spezRON_98=new KoeffizientenSpezies(koeffs,	
+					hf,lhv,0,6.895209581,11.9001996,0,"RON_98");
 		}
 		return spezRON_98;
 	}
@@ -681,35 +1600,24 @@ public class SpeziesFabrik {
 	public Spezies get_spezDiesel() {
 		//TODO Molare Masse als Eingabeparameter inm Inputfile deklarieren
 		if(spezDiesel==null){
-			double Hu=CP.get_Hu_Diesel();
-			
-			//Berechnung der Standerdbildungsenthalpie passend zum Heizwert
-			//if(STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD) --hf=>4.5996e+04;
-			//else (also nach deJaegher und Grill etc.  hf=8084899.999999999;
+			double lhv=CP.get_Hu_Diesel();			
 			double hf;
-			hf=HeizwertRechner.deltaHf4Hu(CP,12.60179278,23.52813985,0,Hu );	
-			
-			double h_evap_mol =41160; // aus Pischinger "Thermodynamik der Verbrennungskraftmaschine"
-
+			hf=this.calc_hf4LHV(12.60179278,23.52813985,0,lhv );
 			double koeffs [][]=new double [3][];
-
 			koeffs[0] = Koeffs_KrstFVV.get_koeffs_Diesel_l();
 			koeffs[1] = Koeffs_KrstFVV.get_koeffs_Diesel_h();
 			koeffs[2]=Koeffs_KrstFVV.get_TemperaturGrenze();
-
-			spezDiesel=new KoeffizientenSpezies(koeffs,
-					175.07e-3,								
-					hf,h_evap_mol,Hu,0,12.60179278,23.52813985,0,"Diesel");	
-
+			spezDiesel=new KoeffizientenSpezies(koeffs,hf,
+					lhv,0,12.60179278,23.52813985,0,"Diesel");
 		}
 		return spezDiesel;
 	}
-
+	
 	///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////	
 
-	protected static class Koeffs_NASA {
+	private static class Koeffs_NASA {
 
 		// Koeffizienten nach den Janaf-Tables --> http://cea.grc.nasa.gov/
 
@@ -759,7 +1667,8 @@ public class SpeziesFabrik {
 			return N_h;
 		}
 
-		// ////////////////////////////////////////////////////////////////////////
+		// ////////////////////////////////////////////////////////////////////////		
+
 
 		static double[] get_koeffs_H2_l() {
 			double[] H2_l = { 4.078323210E+04, -8.009186040E+02, 8.214702010E+00,
@@ -922,11 +1831,9 @@ public class SpeziesFabrik {
 		} 
 
 		static double [] get_TemperaturGrenze(){
-			double [] T=new double [1];
-			T[0]=1000;
+			double [] T={300,1000,5000};
 			return T;	
-		}
-		
+		}		
 
 	}
 
@@ -934,7 +1841,7 @@ public class SpeziesFabrik {
 	///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////
 
-	protected static class Koeffs_Burcat {	
+	private static class Koeffs_Burcat {	
 
 		// bei Rechnung mit 7 Koeffizienten MÜSSEN die ersten beiden Werte mit 0
 		// besetzt sein!!!!!
@@ -1185,12 +2092,33 @@ public class SpeziesFabrik {
 					0.00000000E+000,-7.45375000E+002,4.37967491E+000};
 			return Ar_h;
 		}
+		
+		//Taken from new database 
+		static double[] get_koeffs_nC14H30_l() {
+
+			
+			double[] C14H30_l = {-1.691930679E+06, 3.079060429E+04,-1.928895104E+02, 
+					7.073264000E-01,
+					-8.651750660E-04, 5.564301820E-07, -1.466757718E-10 ,-1.883644650E+05, 1.100191071E+03};
+			return C14H30_l;
+		}
+
+		static double[] get_koeffs_nC14H30_h() {
+			double[] C14H30_h = {1.504040242E+06,-3.585004240E+04, 1.209602445E+02, 1.701511451E-03,
+					-2.195485192E-07, 1.964713332E-11, -9.452395710E-16, 1.355806368E+05,-7.109002900E+02};
+			return C14H30_h;
+		}
+		
+		
+		
+		
+		
+		
 
 		// ////////////////////////////////////////////////////////////////////////
 
 		static double [] get_TemperaturGrenze(){
-			double [] T=new double [1];
-			T[0]=1000;
+			double [] T ={300,1000,5000};
 			return T;	
 		}
 	}
@@ -1199,8 +2127,7 @@ public class SpeziesFabrik {
 	///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////
 
-	protected static class Koeffs_KrstFVV{
-		// TODO Heizwerte fuer Diesel und Ottokraftstoff recherchieren und einfuegen
+	private static class Koeffs_KrstFVV{		
 
 		//Koeffizienten aus FVV-Zylindermodul --> ExcelSheet
 		//siehe SAE-Paper 2007-01-0936 und FVV Zylinder Modul
@@ -1273,13 +2200,1047 @@ public class SpeziesFabrik {
 		// ////////////////////////////////////////////////////////////////////////
 
 		static double [] get_TemperaturGrenze(){
-			double [] T=new double [1];
-			T[0]=1000;
+			double [] T={300,1000,5000};
 			return T;	
 		}		
 
 	}
+	
 
+	///////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////
+	
+	private static class Koeffs_ERC {		
+		
+		static double[][] get_coeffs_nC7H16(){			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,-1.268361870E+000,  8.543558200E-002, 
+	              -5.253467860E-005,  1.629457210E-008, -2.023949250E-012,
+	              -2.565865650E+004, //orig. value 
+	              //-54786.75178222912, //adapted for LHV
+	              3.537329120E+001};
+			
+			//high
+			double[] coeffs_h={0,0,2.221489690E+001,  3.476757500E-002, 
+		              -1.184071290E-005,  1.832984780E-009, -1.061302660E-013,
+		              -3.427600810E+004, //orig. value
+		              //-63404.10344444763, //adapted for LHV
+		              -9.230401960E+001};
+			
+			double [] T_threshold={300.0,  1391.0, 5000.0};				
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			return coeffs;
+		}		
+		
+		static double[][] get_coeffs_O2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.212936000E+000, 1.127486000E-003, 
+		              -5.756150000E-007,  1.313877000E-009, -8.768554000E-013,
+		              -1.005249000E+003,  6.034738000E+000};
+			
+			//high
+			double[] coeffs_h={0,0,3.697578000E+000,  6.135197000E-004, 
+		              -1.258842000E-007,  1.775281000E-011, -1.136435000E-015,
+		              -1.233930000E+003,  3.189166000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_N2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.298677000E+000,  1.408240000E-003, 
+		              -3.963222000E-006,  5.641515000E-009, -2.444855000E-012,
+		              -1.020900000E+003,  3.950372000E+000};
+			
+			//high
+			double[] coeffs_h={0,0,2.926640000E+000,  1.487977000E-003, 
+		              -5.684761000E-007,  1.009704000E-010, -6.753351000E-015,
+		              -9.227977000E+002,  5.980528000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_CO2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.275725000E+000,  9.922072000E-003, 
+		              -1.040911000E-005,  6.866687000E-009, -2.117280000E-012,
+		              -4.837314000E+004,  1.018849000E+001};
+			
+			//high
+			double[] coeffs_h={0,0,4.453623000E+000,  3.140169000E-003, 
+		              -1.278411000E-006,  2.393997000E-010, -1.669033000E-014,
+		              -4.896696000E+004, -9.553959000E-001};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_H2O(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.386842000E+000,  3.474982000E-003, 
+		              -6.354696000E-006,  6.968581000E-009, -2.506588000E-012,
+		              -3.020811000E+004,  2.590233000E+000};
+			
+			//high
+			double[] coeffs_h={0,0,2.672146000E+000,  3.056293000E-003, 
+		              -8.730260000E-007,  1.200996000E-010, -6.391618000E-015,
+		              -2.989921000E+004,  6.862817000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_CO(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.262452000E+000,  1.511941000E-003, 
+		              -3.881755000E-006,  5.581944000E-009, -2.474951000E-012,
+		              -1.431054000E+004,  4.848897000E+000};
+			
+			//high
+			double[] coeffs_h={0,0,3.025078000E+000,  1.442689000E-003, 
+		              -5.630828000E-007,  1.018581000E-010, -6.910952000E-015,
+		              -1.426835000E+004,  6.108218000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_H2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.298124000E+000,  8.249442000E-004, 
+		              -8.143015000E-007, -9.475434000E-011,  4.134872000E-013,
+		              -1.012521000E+003, -3.294094000E+000};
+			
+			//high
+			double[] coeffs_h={0,0,2.991423000E+000,  7.000644000E-004, 
+		              -5.633829000E-008, -9.231578000E-012,  1.582752000E-015,
+		              -8.350340000E+002, -1.355110000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		static double[][] get_coeffs_OH(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.637266000E+000,  1.850910000E-004, 
+		              -1.676165000E-006,  2.387203000E-009, -8.431442000E-013,
+		               3.606782000E+003,  1.358860000E+000};
+			
+			//high
+			double[] coeffs_h={0,0,2.882730000E+000,  1.013974000E-003, 
+		              -2.276877000E-007,  2.174684000E-011, -5.126305000E-016,
+		               3.886888000E+003,  5.595712000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}	
+		
+		
+		
+		static double[][] get_coeffs_H2O2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,  3.388754000E+000,  6.569226000E-003, 
+		              -1.485013000E-007, -4.625806000E-009,  2.471515000E-012,
+		              -1.766315000E+004,  6.785363000E+000};
+			
+			//high
+			double[] coeffs_h={0,0,4.573167000E+000,  4.336136000E-003, 
+		              -1.474689000E-006,  2.348904000E-010, -1.431654000E-014,
+		              -1.800696000E+004,  5.011370000E-001};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_HO2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,  2.979963000E+000,  4.996697000E-003, 
+		              -3.790997000E-006,  2.354192000E-009, -8.089024000E-013,
+		               1.762274000E+002,  9.222724000E+000};
+			
+			//high
+			double[] coeffs_h={0,0,4.072191000E+000,  2.131296000E-003, 
+		              -5.308145000E-007,  6.112269000E-011, -2.841165000E-015,
+		              -1.579727000E+002,  3.476029000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_H(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.500000000E+000,  0.000000000E+000, 
+		               0.000000000E+000,  0.000000000E+000,  0.000000000E+000,
+		               2.547163000E+004, -4.601176000E-001};
+			
+			//high
+			double[] coeffs_h={0,0,2.500000000E+000,  0.000000000E+000, 
+		               0.000000000E+000,  0.000000000E+000,  0.000000000E+000,
+		               2.547163000E+004, -4.601176000E-001};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		static double[][] get_coeffs_O(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.946429000E+000, -1.638166000E-003, 
+		               2.421032000E-006, -1.602843000E-009,  3.890696000E-013,
+		               2.914764000E+004,  2.963995000E+000};
+			
+			//high
+			double[] coeffs_h={0,0, 2.542060000E+000, -2.755062000E-005, 
+		              -3.102803000E-009,  4.551067000E-012, -4.368052000E-016,
+		               2.923080000E+004,  4.920308000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_CH3O(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.106204000E+000,  7.216595000E-003, 
+		               5.338472000E-006, -7.377636000E-009,  2.075611000E-012,
+		               9.786011000E+002,  1.315218000E+001};
+			
+			//high
+			double[] coeffs_h={0,0, 3.770800000E+000,  7.871497000E-003, 
+		              -2.656384000E-006,  3.944431000E-010, -2.112616000E-014,
+		               1.278325000E+002,  2.929575000E+000};
+			
+			double [] T_threshold={300.0,  1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		static double[][] get_coeffs_CH2O(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 1.652731000E+000,  1.263144000E-002, 
+		              -1.888168000E-005,  2.050031000E-008, -8.413237000E-012,
+		              -1.486540000E+004,  1.378482000E+001};
+			
+			//high
+			double[] coeffs_h={0,0, 2.995606000E+000,  6.681321000E-003, 
+		              -2.628955000E-006,  4.737153000E-010, -3.212517000E-014,
+		              -1.532037000E+004,  6.912572000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_HCO(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.898330000E+000,  6.199147000E-003, 
+		              -9.623084000E-006,  1.089825000E-008, -4.574885000E-012,
+		               4.159922000E+003,  8.983614000E+000};
+			
+			//high
+			double[] coeffs_h={0,0, 3.557271000E+000,  3.345573000E-003, 
+		              -1.335006000E-006,  2.470573000E-010, -1.713851000E-014,
+		               3.916324000E+003,  5.552299000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_CH2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.762237000E+000,  1.159819000E-003, 
+		               2.489585000E-007,  8.800836000E-010, -7.332435000E-013,
+		               4.536791000E+004,  1.712578000E+000};			
+			//high
+			double[] coeffs_h={0,0, 3.636408000E+000,  1.933057000E-003, 
+		              -1.687016000E-007, -1.009899000E-010,  1.808256000E-014,
+		               4.534134000E+004,  2.156561000E+000};
+			
+			double [] T_threshold={250.0, 1000.0, 4000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_CH3(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.430443000E+000,  1.112410000E-002, 
+		              -1.680220000E-005,  1.621829000E-008, -5.864953000E-012,
+		               1.642378000E+004,  6.789794000E+000};			
+			//high
+			double[] coeffs_h={0,0,2.844052000E+000,  6.137974000E-003, 
+		              -2.230345000E-006,  3.785161000E-010, -2.452159000E-014,
+		               1.643781000E+004,  5.452697000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		static double[][] get_coeffs_CH4(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 7.787415000E-001,  1.747668000E-002, 
+		              -2.783409000E-005,  3.049708000E-008, -1.223931000E-011,
+		              -9.825229000E+003,  1.372219000E+001};			
+			//high
+			double[] coeffs_h={0,0,1.683479000E+000,  1.023724000E-002, 
+		              -3.875129000E-006,  6.785585000E-010, -4.503423000E-014,
+		              -1.008079000E+004,  9.623395000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}		
+		
+		static double[][] get_coeffs_C2H2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.013562000E+000,  1.519045000E-002, 
+		              -1.616319000E-005,  9.078992000E-009, -1.912746000E-012,
+		               2.612444000E+004,  8.805378000E+000};			
+			//high
+			double[] coeffs_h={0,0,4.436770000E+000,  5.376039000E-003, 
+		              -1.912817000E-006,  3.286379000E-010, -2.156710000E-014,
+		               2.566766000E+004, -2.800338000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C2H3(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.459276000E+000,  7.371476000E-003, 
+		               2.109873000E-006, -1.321642000E-009, -1.184784000E-012,
+		               3.335225000E+004,  1.155620000E+001};			
+			//high
+			double[] coeffs_h={0,0,5.933468000E+000,  4.017746000E-003, 
+		              -3.966740000E-007, -1.441267000E-010,  2.378644000E-014,
+		               3.185435000E+004, -8.530313000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C2H4(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, -8.614880000E-001,  2.796163000E-002, 
+		              -3.388677000E-005,  2.785152000E-008, -9.737879000E-012,
+		               5.573046000E+003,  2.421149000E+001};			
+			//high
+			double[] coeffs_h={0,0,3.528419000E+000,  1.148518000E-002, 
+		              -4.418385000E-006,  7.844601000E-010, -5.266848000E-014,
+		               4.428289000E+003,  2.230389000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}		
+		
+		static double[][] get_coeffs_C2H5(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.690702000E+000,  8.719133000E-003, 
+		               4.419839000E-006,  9.338703000E-010, -3.927773000E-012,
+		               1.287040000E+004,  1.213820000E+001};			
+			//high
+			double[] coeffs_h={0,0, 7.190480000E+000,  6.484077000E-003, 
+		              -6.428065000E-007, -2.347879000E-010,  3.880877000E-014,
+		               1.067455000E+004, -1.478089000E+001};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C3H4(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.613074870E+000,  1.212233710E-002, 
+		               1.854054000E-005, -3.452584750E-008,  1.533533890E-011,
+		               2.154156420E+004,  1.025033190E+001};			
+			//high
+			double[] coeffs_h={0,0, 6.316948690E+000,  1.113362620E-002, 
+		              -3.962890180E-006,  6.356337750E-010, -3.787498850E-014,
+		               2.011746170E+004, -1.097188620E+001};
+			
+			double [] T_threshold={200.0, 1000.0, 6000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C3H5(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.787946930E+000,  9.484143350E-003, 
+		               2.423433680E-005, -3.656040100E-008,  1.485923560E-011,
+		               1.862612180E+004,  7.828224990E+000};			
+			//high
+			double[] coeffs_h={0,0, 6.547611320E+000,  1.331522460E-002, 
+		              -4.783331000E-006,  7.719498140E-010, -4.619308080E-014,
+		               1.727147070E+004, -9.274868410E+000};
+			
+			double [] T_threshold={200.0, 1000.0, 6000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		
+		static double[][] get_coeffs_C3H6(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.946154440E-001,  2.891076620E-002, 
+		              -1.548868080E-005,  3.888142090E-009, -3.378903520E-013,
+		               1.066881640E+003,  2.190037360E+001};			
+			//high
+			double[] coeffs_h={0,0, 8.015959580E+000,  1.370236340E-002, 
+		              -4.662497330E-006,  7.212544020E-010, -4.173701260E-014,
+		              -1.878212710E+003, -2.001606680E+001};
+			
+			double [] T_threshold={300.0, 1388.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C3H7(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 1.051551800E+000,  2.599198000E-002, 
+		               2.380054000E-006, -1.960956900E-008,  9.373247000E-012,
+		               1.063186300E+004,  2.112255900E+001};			
+			//high
+			double[] coeffs_h={0,0,7.702698700E+000,  1.604420300E-002, 
+		              -5.283322000E-006,  7.629859000E-010, -3.939228400E-014,
+		               8.298433600E+003, -1.548018000E+001};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		static double[][] get_coeffs_C7H15_2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, -3.791557670E-002,  7.567265700E-002, 
+		              -4.074736340E-005,  9.326789430E-009, -4.923607450E-013,
+		              -2.356053030E+003,  3.373215060E+001};			
+			//high
+			double[] coeffs_h={0,0, 2.163688420E+001,  3.233248040E-002, 
+		              -1.092738070E-005,  1.683570600E-009, -9.717740910E-014,
+		              -1.058736160E+004, -8.522096530E+001};
+			
+			double [] T_threshold={300.0, 1382.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C7H15O2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.374993340E+000,  8.346519060E-002, 
+		              -5.138973200E-005,  1.642176620E-008, -2.195052160E-012,
+		              -1.992379610E+004,  2.530673420E+001};			
+			//high
+			double[] coeffs_h={0,0, 2.490236890E+001,  3.507169200E-002, 
+		              -1.204403060E-005,  1.874648220E-009, -1.089477910E-013,
+		              -2.829760500E+004, -9.739235420E+001};
+			
+			double [] T_threshold={300.0, 1390.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		static double[][] get_coeffs_C7KET12(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 5.824336970E-001,  1.012078690E-001, 
+		              -7.658559960E-005,  3.007386060E-008, -4.829027920E-012,
+		              -4.680544190E+004,  3.333314490E+001};			
+			//high
+			double[] coeffs_h={0,0, 2.974729060E+001,  3.066222940E-002, 
+		              -1.055635900E-005,  1.646273430E-009, -9.581716750E-014,
+		              -5.668568280E+004, -1.224324900E+002};
+			
+			double [] T_threshold={300.0, 1396.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C5H11CO(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 2.144790690E+000,  6.178635630E-002, 
+		              -3.741346900E-005,  1.132837950E-008, -1.369176980E-012,
+		              -1.434511720E+004,  2.231280450E+001};			
+			//high
+			double[] coeffs_h={0,0, 1.947838120E+001,  2.504660290E-002, 
+		              -8.548613460E-006,  1.325579440E-009, -7.685032960E-014,
+		              -2.079239370E+004, -7.219955780E+001};
+			
+			double [] T_threshold={300.0, 1383.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		static double[][] get_coeffs_N(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,2.503071000E+000, -2.180018000E-005, 
+		               5.420529000E-008, -5.647560000E-011,  2.099904000E-014,
+		               5.609890000E+004,  4.167566000E+000};			
+			//high
+			double[] coeffs_h={0,0, 2.450268000E+000,  1.066146000E-004, 
+		              -7.465337000E-008,  1.879652000E-011, -1.025984000E-015,
+		               5.611604000E+004,  4.448758000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_N2O(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,2.543058000E+000,  9.492193000E-003, 
+		              -9.792775000E-006,  6.263845000E-009, -1.901826000E-012,
+		               8.765100000E+003,  9.511222000E+000};			
+			//high
+			double[] coeffs_h={0,0,  4.718977000E+000,  2.873714000E-003, 
+		              -1.197496000E-006,  2.250552000E-010, -1.575337000E-014,
+		               8.165811000E+003, -1.657250000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_NO(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,3.376542000E+000,  1.253063000E-003, 
+		              -3.302751000E-006,  5.217810000E-009, -2.446263000E-012,
+		               9.817961000E+003,  5.829590000E+000};	
 
+			//high
+			double[] coeffs_h={0,0, 3.245435000E+000,  1.269138000E-003, 
+		              -5.015890000E-007,  9.169283000E-011, -6.275419000E-015,
+		               9.800840000E+003,  6.417294000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		
+		static double[][] get_coeffs_NO2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,2.670600000E+000,  7.838501000E-003, 
+		              -8.063865000E-006,  6.161715000E-009, -2.320150000E-012,
+		               2.896291000E+003,  1.161207000E+001};			
+			//high
+			double[] coeffs_h={0,0, 4.682859000E+000,  2.462429000E-003, 
+		              -1.042259000E-006,  1.976902000E-010, -1.391717000E-014,
+		               2.261292000E+003,  9.885985000E-001};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_iC8H18(){
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,-4.208688930E+000,  1.114405810E-001, 
+		              -7.913465820E-005,  2.924062420E-008, -4.437431910E-012,
+		              -2.994468750E+004, //original Value 
+		              //-49720.94130043444, //adapted for LHV
+		              4.495217010E+001};			
+			//high
+			double[] coeffs_h={0,0, 2.713735900E+001,  3.790048900E-002, 
+		              -1.294373580E-005,  2.007603720E-009, -1.164005800E-013,
+		              -4.079581770E+004, //original Value  
+		              //-60572.071545029, //adapted for LHV
+		              -1.232774950E+002};
+			
+			double [] T_threshold={300.0, 1396.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C8H17(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,-3.091042620E+000,  1.023188960E-001, 
+		              -6.848588730E-005,  2.301839400E-008, -3.070130800E-012,
+		              -6.628290690E+003,  4.311739320E+001};			
+			//high
+			double[] coeffs_h={0,0, 2.645691790E+001,  3.554207520E-002, 
+		              -1.205209840E-005,  1.860893570E-009, -1.075718940E-013,
+		              -1.703927910E+004, -1.162455110E+002};
+			
+			double [] T_threshold={300.0, 1393.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C8H17OO(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,-3.070023560E+000,  1.226404380E-001, 
+		              -9.722027640E-005,  4.091276250E-008, -7.091025470E-012,
+		              -2.640143080E+004,  4.403456910E+001};			
+			//high
+			double[] coeffs_h={0,0,3.093516150E+001,  3.741025640E-002, 
+		              -1.290709700E-005,  2.015448500E-009, -1.173989110E-013,
+		              -3.774577530E+004, -1.367308000E+002};
+			
+			double [] T_threshold={300.0, 1394.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_iC8KET21(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,-3.657225670E+000,  1.271596770E-001, 
+		              -1.007326220E-004,  4.133679430E-008, -6.923865750E-012,
+		              -5.322146680E+004,  5.138865940E+001};			
+			//high
+			double[] coeffs_h={0,0,3.368802610E+001,  3.515308150E-002, 
+		              -1.224496320E-005,  1.924592290E-009, -1.126259300E-013,
+		              -6.575011900E+004, -1.475500240E+002};
+			
+			double [] T_threshold={300.0, 1393.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C6H13CO(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 7.181291740E-001,  7.978140210E-002, 
+		              -5.308785350E-005,  1.831059640E-008, -2.616739620E-012,
+		              -1.869093660E+004,  2.711267250E+001};			
+			//high
+			double[] coeffs_h={0,0, 2.324129910E+001,  2.940139460E-002, 
+		              -1.012108710E-005,  1.578122010E-009, -9.183499760E-014,
+		              -2.679732040E+004, -9.474602880E+001};
+			
+			double [] T_threshold={300.0, 1393.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C4H9(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.548852350E+000,  1.787476380E-002, 
+		               5.007828250E-005, -7.944750710E-008,  3.358023540E-011,
+		               4.740115880E+003,  1.118493820E+001};			
+			//high
+			double[] coeffs_h={0,0, 9.430406070E+000,  2.342713490E-002, 
+		              -8.535991820E-006,  1.397483550E-009, -8.440574560E-014,
+		               2.142148620E+003, -2.422079940E+001};
+			
+			double [] T_threshold={200.0, 1000.0, 6000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_C2H6(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 1.462539000E+000,  1.549467000E-002, 
+		               5.780507000E-006, -1.257832000E-008,  4.586267000E-012,
+		               -1.123918000E+004,  1.443229000E+001};			
+			//high
+			double[] coeffs_h={0,0, 4.825938000E+000,  1.384043000E-002, 
+		              -4.557259000E-006,  6.724967000E-010, -3.598161000E-014,
+		              -1.271779000E+004, -5.239507000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 4000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		
+		static double[][] get_coeffs_CH2CHO(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0, 3.409062000E+000,  1.073857000E-002, 
+		               1.891492000E-006, -7.158583000E-009,  2.867385000E-012,
+		               1.521477000E+003,  9.558290000E+000};			
+			//high
+			double[] coeffs_h={0,0, 5.975670000E+000,  8.130591000E-003, 
+		              -2.743624000E-006,  4.070304000E-010, -2.176017000E-014,
+		               4.903218000E+002, -5.045251000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		
+		
+		static double[][] get_coeffs_CH2CO(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,2.974971000E+000,  1.211871000E-002, 
+		              -2.345046000E-006, -6.466685000E-009,  3.905649000E-012,
+		              -7.632637000E+003,  8.673553000E+000};			
+			//high
+			double[] coeffs_h={0,0,6.038817000E+000,  5.804840000E-003, 
+		              -1.920954000E-006,  2.794485000E-010, -1.458868000E-014,
+		              -8.583402000E+003, -7.657581000E+000};
+			
+			double [] T_threshold={300.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}	
+		
+		
+		static double[][] get_coeffs_CH3O2(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,4.261469060E+000,  1.008735990E-002, 
+		              -3.215061840E-006,  2.094092670E-010,  4.183391030E-014,
+		               4.731296530E+002,  6.345990670E+000};			
+			//high
+			double[] coeffs_h={0,0,5.957878910E+000,  7.907286260E-003, 
+		              -2.682462340E-006,  4.138913370E-010, -2.390073300E-014,
+		              -3.782244680E+002, -3.536951390E+000};
+			
+			double [] T_threshold={300.0, 1385.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_CH3O2H(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,3.234428170E+000,  1.901297670E-002, 
+		              -1.133862870E-005,  3.403066530E-009, -4.118302220E-013,
+		              -1.771979260E+004,  9.759510750E+000};			
+			//high
+			double[] coeffs_h={0,0,8.431170910E+000,  8.068179090E-003, 
+		              -2.770949210E-006,  4.313322430E-010, -2.506921460E-014,
+		              -1.966787710E+004, -1.861379160E+001};
+			
+			double [] T_threshold={300.0, 1390.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}
+		
+		
+		static double[][] get_coeffs_soot(){		
+			
+			double [][] coeffs=new double[3][];
+			//low
+			double[] coeffs_l={0,0,-3.108720700E-001,  4.403536900E-003, 
+		               1.903941200E-006, -6.385469700E-009,  2.989642500E-012,
+		               -1.086507900E+002,  1.113829500E+000};			
+			//high
+			double[] coeffs_h={0,0,1.455692400E+000,  1.717063800E-003, 
+		              -6.975841000E-007,  1.352831600E-010, -9.676490500E-015,
+		              -6.951280400E+002, -8.525684200E+000};
+			
+			double [] T_threshold={200.0, 1000.0, 5000.0};	
+			
+			coeffs[0]=coeffs_l;
+			coeffs[1]=coeffs_h;
+			coeffs[2]=T_threshold;			
+			
+			return coeffs;
+		}		
+	
+	}
 
 }

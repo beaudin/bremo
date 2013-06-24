@@ -62,7 +62,7 @@ public class Solver implements DglSysFunction {
 				for(int i=0;i<numOfValues;i++) p_V_T_mi_INIT[idx*numOfValues+i]=p_V_T_mi_znIN[i];
 			}		
 		}else{	
-			for(int idx=0;idx<znIN.length;idx++){				
+			for(int idx=0;idx<znIN.length;idx++){			
 
 				{
 					p_V_T_mi_znIN=znIN[idx].get_p_V_T_mi();	
@@ -101,13 +101,20 @@ public class Solver implements DglSysFunction {
 		for(int i=0; i<zonen.length;i++){
 			if(zonen[i].get_m()>CP.SYS.MINIMALE_ZONENMASSE){
 				sumXsi=sumXsi+zonen[i].get_xsi();	
-				sumEta=sumEta+zonen[i].get_eta();	
+				sumEta=sumEta+zonen[i].get_eta();				
 			}
 		}
 
 		double dVSys=CP.MOTOR.get_dV(time);
 
-		double dp=(sumXsi-dVSys)/sumEta;
+		double dp=(sumXsi-dVSys)/sumEta;	
+		
+//		if(Math.abs(time-CP.SYS.DUBUGGING_TIME_SEC)<0.5*CP.SYS.WRITE_INTERVAL_SEC){
+//			System.out.println("dp: "+ dp);
+//		}
+//		System.out.println("sumXsi: "+sumXsi);
+//		System.out.println("sumEta: " +sumEta);
+//		System.out.println("dp: "+ dp);
 		 
 		double dmi[];
 //		double dmdp[];
@@ -132,13 +139,17 @@ public class Solver implements DglSysFunction {
 			if(zonen[i].get_m()>=CP.SYS.MINIMALE_ZONENMASSE){
 				//dp
 				dp_dV_dT_dmi[i*numOfValues]=dp; 
-				//dV
+				//dV				
 				dp_dV_dT_dmi[i*numOfValues+1]=zonen[i].get_xsi()-zonen[i].get_eta()*dp; 
 				//dT
 				dp_dV_dT_dmi[i*numOfValues+2]=(zonen[i].get_aY()-
 						zonen[i].get_ap()*dp-
 						zonen[i].get_p()*dp_dV_dT_dmi[i*numOfValues+1])
-						/zonen[i].get_aT();				
+						/zonen[i].get_aT();		
+				
+//				System.out.println("dp: " + dp_dV_dT_dmi[i*numOfValues]);
+//				System.out.println("dV: " + dp_dV_dT_dmi[i*numOfValues+1]);
+//				System.out.println("dT: " + dp_dV_dT_dmi[i*numOfValues+2]);
 				//mi
 				for(int idx=0;idx<dmi.length;idx++) dp_dV_dT_dmi[i*numOfValues+3+idx]=dmi[idx];
 						//+dmdT[idx]*dp_dV_dT_dmi[i*numOfValues+2]+dmdp[idx]*dp;
@@ -173,9 +184,11 @@ public class Solver implements DglSysFunction {
 			for(int i=0;i<numOfValues;i++) p_V_T_mi[i]=y[idx*numOfValues+i];			
 			znSOL[idx].set_p_V_T_mi(p_V_T_mi);
 		}
+		
 //		berechnen der Differentiale --> erster HS
 		znSOL=bmi.aktualisiereDifferentiale(time, znSOL);		
 //		umrechnen der Differentiale in Vektorform und Ausgabe		
-		return this.get_dp_dV_dT_dmi(znSOL, time);
+		return this.get_dp_dV_dT_dmi(znSOL, time);	
+
 	}	
 }

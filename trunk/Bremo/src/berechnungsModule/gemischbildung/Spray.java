@@ -7,7 +7,7 @@ import bremo.parameter.CasePara;
 import bremoExceptions.ParameterFileWrongInputException;
 
 public class Spray extends Einspritzung {
-	
+
 	private Paket_Hiroyasu [][] pakete;
 	//	private Paket_Stiesch_Thoma[][] pakete;
 	private double mfl_gesamt;
@@ -20,9 +20,10 @@ public class Spray extends Einspritzung {
 	private final double ANZ_SPL;
 	private ErgebnisBuffer ergBuf;
 	private VektorBuffer dmKRst_buffer;;
-	
+
 
 	private boolean verdampfungAbgeschlossen=false;
+	private boolean[][] verdampfungAbgeschlossenPaket;
 
 	public Spray (CasePara cp,int index){
 		super(cp,index);
@@ -36,15 +37,16 @@ public class Spray extends Einspritzung {
 		Kraftstoff_Eigenschaften krstEigenschaften=new Kraftstoff_Eigenschaften(vergleichsKraftstoff);
 		einspritzDruck=CP.get_einspritzDruck(index);		
 		mfl_gesamt=super.get_mKrst_ASP(); //in Kg		
-		double Tkrst_0=super.get_T_Krst_fl();
+		double Tkrst_0=super.get_T_fuel_liq();
 
 		tEinspritzBeginn=super.get_BOI();
 		einspritzDauer=super.get_EOI()-tEinspritzBeginn; 	 //in s
 		paketErzeugungszeit=einspritzDauer/axialAnzahl;
 
 		//Berechnet den Faktor cRad so, dass die die Geschwindigkeit des aeussersten Pakets
-		//50% von der Geschwindigkeit des Pakets auf der Strahlachse betraegt
-		double cRad=Math.log(0.5)/((radialAnzahl-1)*(radialAnzahl-1));	
+		//pF*100% von der Geschwindigkeit des Pakets auf der Strahlachse betraegt
+		double pF=CP.get_ProfilFaktor(super.INDEX); //15. Nov. 2012 War bislang 0.5 
+		double cRad=Math.log(pF)/((radialAnzahl-1)*(radialAnzahl-1));	
 		//Berechnung der Kraftstoffmasse in einem Paket
 		double mfl_Paket_0=mfl_gesamt/radialAnzahl/axialAnzahl/ANZ_SPL;
 
@@ -53,7 +55,12 @@ public class Spray extends Einspritzung {
 		//CD-Faktor
 		double cd=CP.get_CdFaktor(super.INDEX);
 
+		double EntrainmentFaktor_C1=CP.get_EntrainmentFaktor(super.INDEX);
 
+		verdampfungAbgeschlossenPaket=new boolean[axialAnzahl][radialAnzahl];
+		for(int ax=0;ax<axialAnzahl;ax++)
+			for(int rad=0;rad<radialAnzahl;rad++)
+				verdampfungAbgeschlossenPaket[ax][rad]=false;
 
 
 		if(super.boi<super.CP.SYS.RECHNUNGS_BEGINN_DVA_SEC){	//TODO &&!super.isLWA --> war das noetig?
@@ -61,18 +68,16 @@ public class Spray extends Einspritzung {
 				throw new ParameterFileWrongInputException("" +
 						"Fuer das gewaehlte Einspritzmodell " +this.FLAG+ " der " +index+
 						"ten Einspritzung lag der Einspritzbeginn vor dem Rechenbeginn der DVA. \n"+
-				"Fuer das gewahlte Einspritzmodell ist dies nicht zulaessig");
+						"Fuer das gewahlte Einspritzmodell ist dies nicht zulaessig");
 			} catch (ParameterFileWrongInputException e) {				
 				e.log_Warning();
 			}
 			super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,mfl_gesamt);
-			super.mKrst_fluesssig.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, 0);			
+			super.mKrst_fluessig.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, 0);			
 		}else{
 			super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,0 );
-			super.mKrst_fluesssig.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, 0);			
-		}
-
-
+			super.mKrst_fluessig.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, 0);			
+		}		
 
 		pakete=new Paket_Hiroyasu[axialAnzahl][radialAnzahl];
 
@@ -86,17 +91,37 @@ public class Spray extends Einspritzung {
 						cRad,
 						d0,
 						cd,
+						EntrainmentFaktor_C1,
 						krstEigenschaften,
 						cp);
 			}
 		}
-	}	
+	}
 
+	public int get_AnzahlRadialPakete(){
+		return this.radialAnzahl;
+	}
+
+	public int get_AnzahlAxialPakete(){
+		return this.axialAnzahl;
+	}
+
+
+	public int get_nbrOfPacketsAlive(double time){
+		int nbrOfPacketsAlive=0;
+		for(int i=0;i<pakete.length;i++) 
+			for(int j=0;j<pakete[i].length;j++)
+				if(pakete[i][j].get_lifetime(time)>0)
+					nbrOfPacketsAlive+=1;
+
+		return nbrOfPacketsAlive;		
+	}
 
 
 	public Paket_Hiroyasu get_paket(int axialPos,int radialPos ){
 		return pakete[axialPos][radialPos];
 	}	
+
 
 	@Override
 	public double get_Tkrst_dampf(double time, Zone zn) {
@@ -120,6 +145,15 @@ public class Spray extends Einspritzung {
 	}
 
 
+	public double get_Tkrst_dampf_Paket(double time, Zone zn, int axIndex, int radIndex) {
+
+		//Es wird angenommen, dass das Paket die Temperatur der Zone hat
+		double T_krst_dampf=this.pakete[axIndex][radIndex].get_TKrst_dampf(time,zn.get_T());	
+
+		return T_krst_dampf;
+	}
+
+
 
 	@Override
 	public double get_dQ_krstDampf(double time, Zone zn) {
@@ -130,6 +164,15 @@ public class Spray extends Einspritzung {
 					//Wenn ein Paket noch nicht erzeugt wurde wird null zurückgegeben
 					dQ+=this.pakete[i][j].get_dQ(time, zn);				
 			}
+		}
+		return ANZ_SPL*dQ;
+	}	
+
+	public double get_dQ_krstDampf_Paket(double time, Zone zn, int ax, int rad) {
+		double dQ=0;
+		if(this.verdampfungAbgeschlossenPaket[ax][rad]==false){			
+			//Wenn ein Paket noch nicht erzeugt wurde wird null zurückgegeben
+			dQ=this.pakete[ax][rad].get_dQ(time, zn);	
 		}
 		return ANZ_SPL*dQ;
 	}
@@ -145,6 +188,15 @@ public class Spray extends Einspritzung {
 					//Wenn ein Paket noch nicht erzeugt wurde wird null zurückgegeben
 					dm+=this.pakete[i][j].get_dmKrst(time, zn);
 			}
+		}		
+		return ANZ_SPL*dm;
+	}
+
+	public double get_diff_mKrst_dampf_Paket(double time, Zone zn, int axIndex, int radIndex) {
+		double dm=0;
+		if(this.verdampfungAbgeschlossenPaket[axIndex][radIndex]==false){	
+			//Wenn ein Paket noch nicht erzeugt wurde wird null zurückgegeben
+			dm=this.pakete[axIndex][radIndex].get_dmKrst(time, zn);
 		}		
 		return ANZ_SPL*dm;
 	}
@@ -182,7 +234,22 @@ public class Spray extends Einspritzung {
 		}
 		return ANZ_SPL*dma;
 	}
-	
+
+
+	/**
+	 * Liefert das Differential der zum Zeitpunkt "time" in alle Pakete aufgrund von "air eintrainment" eingesaugten Luft
+	 * @param time
+	 * @return
+	 */
+	public double get_dma_Paket(double time, int axIndex,  int radIndex) {
+		double dma=0;		
+		//Wenn ein Paket noch nicht erzeugt wurde wird null zurückgegeben
+		dma=this.pakete[axIndex][radIndex].get_dma_Paket(time);
+
+		return ANZ_SPL*dma;
+	}
+
+
 	/**
 	 * Liefgert die Menge des eingespritzten Krst
 	 * @param time
@@ -197,7 +264,20 @@ public class Spray extends Einspritzung {
 		}
 		return ANZ_SPL*mKRstFl;
 	}
-	
+
+	/**
+	 * Liefgert die Menge des eingespritzten Krst fuer jedes Paket
+	 * @param time
+	 * @return
+	 */
+	private double calc_mKRstEingespritzt_Paket(double time, int axIndex,  int radIndex) {
+		double mKRstFl=0;		
+		//Wenn ein Paket noch nicht erzeugt wurde wird null zurückgegeben
+		mKRstFl=this.pakete[axIndex][radIndex].get_mKrsEingespritzt(time);		
+		return ANZ_SPL*mKRstFl;
+	}
+
+
 	private double calc_mKRstFluessig(double time) {
 		double mKRstFl=0;
 		for(int i=0;i<pakete.length;i++){ 
@@ -207,11 +287,18 @@ public class Spray extends Einspritzung {
 		}
 		return ANZ_SPL*mKRstFl;
 	}
-	
+
+	private double calc_mKRstFluessig_Paket(double time, int axIndex,  int radIndex) {
+		double mKRstFl=0;
+		//Wenn ein Paket noch nicht erzeugt wurde wird null zurückgegeben
+		mKRstFl=this.pakete[axIndex][radIndex].get_mKrstFl(time);		
+		return ANZ_SPL*mKRstFl;
+	}
+
 
 	@Override
 	public void berechneIntegraleGroessen(double time, Zone zn) {		
-		
+
 		//Die Integration des Verdampften Krst ist nicht ganz sauber!!
 		//Der Zustand der Zone entspricht dem grade berechneten Zeitschrit 
 		//--> dmKrst passt also zu time
@@ -219,24 +306,24 @@ public class Spray extends Einspritzung {
 		//--> es ergibt sich eine Abweichung zwischen der 
 		//Masse an Krst die in der Zone ist und dem hier berechneten Wert
 		dmKRst_buffer.addValue(time, get_diff_mKrst_dampf(time,zn));
-		if(Math.abs(time-CP.convert_KW2SEC(-47.5))<0.5*CP.SYS.WRITE_INTERVAL_SEC){ //Rechnet bis KW und schreibt dann alle Werte ins txt-file	
-			System.out.println("I am plotting...");
-		}
-		
+		//		if(Math.abs(time-CP.convert_KW2SEC(-47.5))<0.5*CP.SYS.WRITE_INTERVAL_SEC){ //Rechnet bis KW und schreibt dann alle Werte ins txt-file	
+		//			System.out.println("I am plotting...");
+		//		}
+
 		double mKrst_verdampft=mKrst_dampf.getValue(mKrst_dampf.get_maxTime());
 		if(time>=CP.SYS.WRITE_INTERVAL_SEC){
 			double t=mKrst_dampf.get_maxTime();
 			if(time>mKrst_dampf.get_maxTime()){ //time-CP.SYS.WRITE_INTERVAL_SEC=t liefert einen Fehler da der Wert numerisch zu ungenau ist!!
 				mKrst_verdampft=mKrst_dampf.getValue(t)
-				+this.dmKRst_buffer.getValue(time)*super.CP.SYS.WRITE_INTERVAL_SEC;
+						+this.dmKRst_buffer.getValue(time)*super.CP.SYS.WRITE_INTERVAL_SEC;
 			}
 		}		
 		super.mKrst_dampf.addValue(time,mKrst_verdampft );
 		double mKRstFl=this.calc_mKRstEingespritzt(time)-mKrst_dampf.getValue(time);
 		mKRstFl=calc_mKRstFluessig(time);
-		super.mKrst_fluesssig.addValue(time, mKRstFl);	
+		super.mKrst_fluessig.addValue(time, mKRstFl);	
 
-		
+
 		if(CP.SYS.DUBUGGING_MODE)
 			bufferErgebnisse(time,zn);
 
@@ -257,11 +344,73 @@ public class Spray extends Einspritzung {
 				}
 			}		
 		}
-		
+
 
 	}
 
 
+	public void berechneIntegraleGroessen_Paket(double time, Zone zn, int axIndex,  int radIndex) {	
+
+		if(dmKRst_buffer.get_maxTime()<time)
+			//Fuer das erste Paket, das in diesem Zeitschritt eingetragen wird
+			dmKRst_buffer.addValue(time, get_diff_mKrst_dampf_Paket(time,zn,axIndex,radIndex));
+		else{
+			dmKRst_buffer.addValue(time, dmKRst_buffer.getValue(time)+
+					get_diff_mKrst_dampf_Paket(time,zn,axIndex,radIndex));
+		}			
+
+
+		if(time>mKrst_dampf.get_maxTime())
+			//Fuer das erste Paket, das in diesem Zeitschritt eingetragen wird
+			mKrst_dampf.addValue(time, 
+					get_diff_mKrst_dampf_Paket(time,zn,axIndex,radIndex)*super.CP.SYS.WRITE_INTERVAL_SEC);
+		else{
+			double mKrst_verdampft=mKrst_dampf.getValue(time)
+					+get_diff_mKrst_dampf_Paket(time,zn,axIndex,radIndex)*super.CP.SYS.WRITE_INTERVAL_SEC;
+			mKrst_dampf.addValue(time, mKrst_verdampft);
+		}				
+
+
+		//double mKRstFl=this.calc_mKRstEingespritzt_Paket(time,axIndex,radIndex)-mKrst_dampf.getValue(time);
+		double mKrstFlNeu=calc_mKRstFluessig_Paket(time,axIndex,radIndex);	
+		if(time>mKrst_fluessig.get_maxTime())
+			//Fuer das erste Paket, das in diesem Zeitschritt eingetragen wird
+			mKrst_fluessig.addValue(time, mKrstFlNeu);
+		else{
+			mKrstFlNeu=mKrst_fluessig.getValue(time)+mKrstFlNeu;		
+			super.mKrst_fluessig.addValue(time, mKrstFlNeu);	
+		}
+
+		//do this only once
+		if(CP.SYS.DUBUGGING_MODE&&axIndex==this.axialAnzahl-1&&radIndex==this.radialAnzahl-1)
+			bufferErgebnisse(time,zn);
+		
+		if(this.pakete[axIndex][radIndex].get_lifetime(time)<=0){	
+			this.pakete[axIndex][radIndex].initialise(zn);//							
+		}else{						
+			//Es wird angenommen, dass das Paket die Temperatur der Zone hat
+			this.pakete[axIndex][radIndex].berechneZeitschritt(zn, time, time+CP.SYS.WRITE_INTERVAL_SEC);
+
+			if(this.pakete[axIndex][radIndex].verdampfungIsAbgeschlossen()==true)
+				verdampfungAbgeschlossenPaket[axIndex][radIndex]=true;
+			else
+				verdampfungAbgeschlossenPaket[axIndex][radIndex]=false;
+		}
+	}
+
+	public boolean evaporationFinished(){
+		boolean a= true;
+		for(int i=0;i<pakete.length;i++) 
+			for(int j=0;j<pakete[i].length;j++)
+				if(verdampfungAbgeschlossenPaket[i][j]==false)
+					a=false;
+		return a;
+
+	}
+	
+	public boolean evaporationFinishedPaket(int axIndex,  int radIndex){		
+		return verdampfungAbgeschlossenPaket[axIndex][radIndex];
+	}
 
 	private void bufferErgebnisse(double time, Zone zn ){
 		ergBuf.buffer_EinzelErgebnis("KW", CP.convert_SEC2KW(time), 0);
@@ -272,7 +421,7 @@ public class Spray extends Einspritzung {
 			String name="SMD"+"_"+i+"_"+j;
 			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
 			spalte=spalte+1;
-		
+
 			j=pakete[i].length-1;
 			value=this.pakete[i][j].get_smd();
 			name="SMD"+"_"+i+"_"+j;
@@ -302,7 +451,7 @@ public class Spray extends Einspritzung {
 			name="m_krstTr"+"_"+i+"_"+j;
 			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
 			spalte=spalte+1;
-			
+
 			j=0;
 			value=this.pakete[i][j].get_v(time);
 			name="v"+"_"+i+"_"+j;
@@ -314,7 +463,7 @@ public class Spray extends Einspritzung {
 			name="v"+"_"+i+"_"+j;
 			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
 			spalte=spalte+1;
-			
+
 			j=0;
 			value=this.pakete[i][j].get_mKrstFl(time);
 			name="mfl"+"_"+i+"_"+j;
@@ -326,7 +475,7 @@ public class Spray extends Einspritzung {
 			name="mfl"+"_"+i+"_"+j;
 			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
 			spalte=spalte+1;
-			
+
 			j=0;
 			value=this.pakete[i][j].get_dQ(time, zn);
 			name="dQvap"+"_"+i+"_"+j;
@@ -338,13 +487,36 @@ public class Spray extends Einspritzung {
 			name="dQvap"+"_"+i+"_"+j;
 			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
 			spalte=spalte+1;
-			
+
 			j=0;
 			value=this.pakete[i][j].get_dma_Paket(time);
 			name="dma"+"_"+i+"_"+j;
 			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
 			spalte=spalte+1;
 			
+			j=pakete[i].length-1;
+			value=this.pakete[i][j].get_dma_Paket(time);
+			name="dma"+"_"+i+"_"+j;
+			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
+			spalte=spalte+1;
+			
+			j=0;
+			value=this.pakete[i][j].get_s(time);
+			name="s"+"_"+i+"_"+j;
+			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
+			spalte=spalte+1;
+			
+			j=pakete[i].length-1;
+			value=this.pakete[i][j].get_s(time);
+			name="s"+"_"+i+"_"+j;
+			ergBuf.buffer_EinzelErgebnis(name, value, spalte);
+			spalte=spalte+1;
+			
+			
+			
+			
+			
+
 		}		
 	}
 
@@ -411,7 +583,7 @@ public class Spray extends Einspritzung {
 		for(int axialPos=0; axialPos<axialAnzahl; axialPos++){	
 			for(int radialPos=0; radialPos<radialAnzahl; radialPos++){
 				alleXpos[axialPos*radialAnzahl+radialPos]=
-					get_xPos(pakete[axialPos][radialPos],rhoL,time,pZyl);
+						get_xPos(pakete[axialPos][radialPos],rhoL,time,pZyl);
 			}
 		}
 		return alleXpos;
@@ -430,7 +602,7 @@ public class Spray extends Einspritzung {
 		for(int axialPos=0; axialPos<axialAnzahl; axialPos++){	
 			for(int radialPos=0; radialPos<radialAnzahl; radialPos++){			
 				alleYpos[axialPos*radialAnzahl+radialPos]=
-					get_yPos(zn,pakete[axialPos][radialPos],rhoL,time,pZyl,T);
+						get_yPos(zn,pakete[axialPos][radialPos],rhoL,time,pZyl,T);
 			}
 		}
 		return alleYpos;
@@ -447,7 +619,7 @@ public class Spray extends Einspritzung {
 		for(int axialPos=0; axialPos<axialAnzahl; axialPos++){	
 			for(int radialPos=0; radialPos<radialAnzahl; radialPos++){
 				alleEindringtiefe[axialPos*radialAnzahl+radialPos]=
-					pakete[axialPos][radialPos].get_s(time);
+						pakete[axialPos][radialPos].get_s(time);
 			}
 		}
 		return alleEindringtiefe;

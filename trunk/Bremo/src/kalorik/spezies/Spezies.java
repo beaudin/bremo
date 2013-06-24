@@ -14,8 +14,6 @@ public abstract class Spezies {
 																
 
 	protected double delta_hf298_mol=-1; 						// Standardbildungsenthalpie J/mol
-	protected double h_evap_mol=-1; 							// Verdampfungsenthalpie in J/mol
-	protected double Hu_mol=-1; 								// unterer Heizwert in J/mol
 	protected final double R_allg = PhysKonst.get_R_allg();		// J/mol K	
 	protected String name=null;
 	protected double anzO_Atome=-1;
@@ -24,57 +22,23 @@ public abstract class Spezies {
 	protected double anzN_Atome=-1;
 	protected boolean isGasGemisch;
 	protected boolean isToIntegrate;
-//	public static Spezies [] allSpez =new Spezies[25]; //erstmal nicht mehr als 25 Spezies bitte
-//	protected static int nmbrOfSpez=0; //dann wirds bei der ersten Spezies null
-//	protected int index=-1;
-//	private boolean wirdSchonIntegriert=false; //gibt an ob die Methode integrierMich shon aufgerufen wurde
 	
 	protected Spezies(){
 		//diese Anweisung sorgt dafuer, dass alle Spezies AUTOMATISCH keine GasGemische sind 
 		//Der GasGemsich-Konstruktor ueberschreibt diesen Wert
 		isGasGemisch=false; 
-		isToIntegrate=false;
-//		this.isToIntegrate=isToIntegrate;
-//		if(isToIntegrate){
-//			nmbrOfSpez=nmbrOfSpez+1;
-//			index=nmbrOfSpez-1;			
-//			allSpez[index]=this; //Speichern der grade erzeugten Spezies im Vektor
-//			wirdSchonIntegriert=true;
-//		}
+		isToIntegrate=false;		
 	}
 	
-	public abstract double get_M();							// kg / mol	
+	public abstract double get_M();	
 	public abstract double get_h_mol(double T);	
-	public abstract double get_cp_mol(double T);
-
-	
-	
-//	public static Spezies get_Spez(int i){
-//		//TODO Fehlerabfrage einbauen fuer indexOutOfBounds
-//		return allSpez[i];		
-//	}
-//	
+	public abstract double get_cp_mol(double T);	
 	/**
-	 * Diese Funktion sorgt dafuer, dass die entsprechende Spezies vom 
-	 * Solver integriert wird
+	 * 
+	 * @return Lower Heating Value in J/mol
 	 */
-//	public void integrierMich(){	
-//		if(wirdSchonIntegriert==false){
-//			isToIntegrate=true;
-//			nmbrOfSpez=nmbrOfSpez+1;
-//			index=nmbrOfSpez-1;
-//			allSpez[index]=this; //Speichern der grade erzeugten Spezies im Vektor
-//			wirdSchonIntegriert=true;
-//		}
-//	}
-	
-//	public static int get_NmbrOfAllSpez(){
-//		return nmbrOfSpez;
-//	}
-//	
-//	public int get_index(){
-//		return index;
-//	}
+	public abstract double get_Hu_mol();
+
 	
 	protected void set_isTointegrate(boolean isToint){
 		this.isToIntegrate=isToint;
@@ -82,12 +46,9 @@ public abstract class Spezies {
 	
 	public String get_name() {
 		return name;
-	}
+	}	
 	
 	public double get_delta_hf298_mol(){
-		//die direkte Ausgabe von delta_hf298 wäre auch möglich, dann müsste aber eine Unterscheidung 
-		//zwischen Gasgemischen und reinen Spezies erfolgen!
-//		return get_h_mol(298.15);
 		return delta_hf298_mol;
 	}
 	
@@ -102,31 +63,29 @@ public abstract class Spezies {
 	}
 	
 	
-	public double get_O2_min() {
-		if (get_Hu_mol()>0){
-			return get_AnzC_Atome()+0.25*get_AnzH_Atome()-0.5*get_AnzO_Atome();
-		}
-		else {
+	public double get_O2_min() {		
+		double O2min= get_AnzC_Atome()+0.25*get_AnzH_Atome()-0.5*get_AnzO_Atome();		
+		if(O2min<=0){
 			try{
-				throw new MiscException("Es wurde versucht O2min einer Spezies abzufragen," +
-						" die keinen Heizwert besitz");
+				throw new MiscException("This Species can't be burned");
 			}catch(MiscException e){
 				e.log_Warning();				
 			}
 			return Double.NaN;
-		}
+		}else 
+			return O2min;
 	}	
 	
 	
 	public double get_Lst() {
-		//TODO 20.04.2011 noch nicht getestet
-		if (get_Hu_mol()>0){
-			return get_O2_min()*PhysKonst.get_M_O2()/get_M()/PhysKonst.get_mass_O2_Luft();
+		double O2min=get_O2_min();
+		if (O2min>0){
+			return O2min*PhysKonst.get_M_O2()/get_M()/PhysKonst.get_mass_O2_Luft();
 		}
 		else {
 			try{
-				throw new MiscException("Es wurde versucht Lst einer Spezies abzufragen," +
-						" die keinen Heizwert besitz");
+				throw new MiscException("This Species can't be burned. " +
+						"Don't try to calculate its air requirement");
 			}catch(MiscException e){
 				e.log_Warning();				
 			}
@@ -201,19 +160,7 @@ public abstract class Spezies {
 	public double get_AnzO_Atome() {
 	
 		return anzO_Atome;
-	}
-
-	
-	public double get_Hu_mol() {
-	
-		return Hu_mol;
-	}
-
-	
-	public double get_h_evap_mol() {
-	
-		return h_evap_mol;
-	}
+	}	
 	
 	public boolean isGasGemisch(){
 		return isGasGemisch;
@@ -285,14 +232,8 @@ public abstract class Spezies {
 		return Th;		
 	}
 	
-	
-
-
 
 	public double get_Hu_mass() {		
 		return get_Hu_mol()/get_M();
 	}
-	
-
-
 }

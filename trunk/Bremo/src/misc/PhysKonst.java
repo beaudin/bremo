@@ -6,7 +6,8 @@ import bremoExceptions.MiscException;
 public class PhysKonst {
 	//allgemeine Gaskonstante	
 	public static double get_R_allg(){
-		final double R_allg=8.314472; // J/molK
+		//final double R_allg=8.314472; // J/molK
+		final double R_allg=8.314; // J/molK
 		return R_allg;
 	}
 	
@@ -41,20 +42,16 @@ public class PhysKonst {
 	
 	//Molaremasse N2	
 	public static double get_M_N2(){
-		final double M_N2=0.0280134;	//kg/mol
+		//final double M_N2=0.0280134;	//kg/mol
+		final double M_N2=2*get_M_N();	//kg/mol
 		return M_N2;	
 	}
 	
 	//Molaremasse N	
 	public static double get_M_N(){
-		final double M_N=0.0140067;	//kg/mol
+		final double M_N=0.01400674;	//kg/mol 
+
 		return M_N;	
-	}
-	
-	//Molaremasse NO
-	public static double get_M_NO(){
-		final double M_NO=0.0300061;	//kg/mol
-		return M_NO;	
 	}
 	
 	//Molaremasse CO2	
@@ -82,7 +79,7 @@ public class PhysKonst {
 	}
 	//Molaremasse H	
 	public static double get_M_H(){
-		final double M_H=	0.0010079;	//kg/mol
+		final double M_H=	0.00100794;	//kg/mol 
 		return M_H;	
 	}
 	
@@ -195,7 +192,7 @@ public class PhysKonst {
 			pws= pTr*Math.exp(17.2799-4102.99/(tInCelsius+237.431));
 			if(tInCelsius>60)
 				try{
-					throw new MiscException("Die Berechnung des Saettigungsdampfdrucks bei Temperaturen" +
+					throw new MiscException("Die Berechnung des Saettigungsdampfdrucks bei Temperaturen " +
 							"oberhalb von 60°C kann ungenau sein");
 				}catch(MiscException e){
 					if(!schonGewarnt){

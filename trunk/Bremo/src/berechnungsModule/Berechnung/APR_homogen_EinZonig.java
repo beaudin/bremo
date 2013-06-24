@@ -26,7 +26,7 @@ import bremoExceptions.StopBremoException;
  * Dabei wird mit vorgegebenem Brennverlauf, der entsprechende Zylinderdruck berechnet.
  */ 
 
-public class APR_homogen_EinZonig extends BerechnungsModell{
+public class APR_homogen_EinZonig extends APR{
 	
 	private  WandWaermeUebergang wandWaermeModell;
 	private Motor motor;
@@ -73,14 +73,14 @@ public class APR_homogen_EinZonig extends BerechnungsModell{
 	private misc.VektorBuffer p_buffer;
 	
 	protected APR_homogen_EinZonig (CasePara cp, boolean waermeVerluste, String brennverlaufsart, double wertQ , double startQ) {
-		super(cp, new ErgebnisBuffer(cp,"APR_"));
+		super(cp);
 		brennverlauf=new BrennverlaufDaten(cp,brennverlaufsart, wertQ, startQ); 		
 		//ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");		
 		ANZAHL_ZONEN=1;
 		this.createMe(cp, waermeVerluste);
 	}
 	protected APR_homogen_EinZonig (CasePara cp, boolean waermeVerluste, String brennverlaufsart, double wertQ) {
-		super(cp, new ErgebnisBuffer(cp,"APR_"));
+		super(cp);
 		brennverlauf=new BrennverlaufDaten(cp,brennverlaufsart, wertQ); 		
 		//ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");		
 		ANZAHL_ZONEN=1;
@@ -89,7 +89,7 @@ public class APR_homogen_EinZonig extends BerechnungsModell{
 	}
 	
 	protected APR_homogen_EinZonig (CasePara cp, boolean waermeVerluste, String brennverlaufsart) {
-		super(cp, new ErgebnisBuffer(cp,"APR_"));
+		super(cp);
 		brennverlauf=new BrennverlaufDaten(cp,brennverlaufsart); 		
 		//ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");		
 		ANZAHL_ZONEN=1;
@@ -99,7 +99,7 @@ public class APR_homogen_EinZonig extends BerechnungsModell{
 	
 	
 	protected APR_homogen_EinZonig (CasePara cp) {
-		super(cp, new ErgebnisBuffer(cp,"APR_"));
+		super(cp);
 		brennverlauf=new BrennverlaufDaten(cp);		
 		//ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");	
 		ANZAHL_ZONEN=1;
@@ -456,6 +456,11 @@ public double t_VerbrennungsBeginn () {
 //	}
 	
 	return 0;
+}
+@Override
+public Zone[] calc_dQburn(Zone[] zonen) {
+	// TODO Auto-generated method stub
+	return zonen;
 }
 
 }

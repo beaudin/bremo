@@ -78,53 +78,6 @@ public double linInterPol(double time, Double [] zeitAchse, Double [] values){
 	}
 }
 
-/**
- * Wenn die Daten entweder KW-Basiert oder Zeitbasiert sind (je nach der Eintrag in
- * den Case Parametern, sollte man linInterPol_IndizierDaten nehmen, da wird die
- * Umwandlung von zeit auf KW und andersrum automatisch gemacht
- * @param time (s nach Rechenbeginn)
- * @param zeitAchse (aus der Datei)
- * @param values (1D Array, aus dem der Wert kommen soll)
- * @return linear interpolierter Wert aus values
- */
-public double linInterPol_IndizierDaten(double time, double[] zeitAchse, double[] values, String limits){
-	double beginn;
-	double ende;
-	String beginn_temp;
-	String ende_temp;
-	if (limits.equalsIgnoreCase("Datensatz")){
-		beginn=CP.convert_KW2SEC(zeitAchse[0]);
-		ende=CP.convert_KW2SEC(zeitAchse[zeitAchse.length-1]);
-		beginn_temp="Beginn der Datensatz";
-		ende_temp="Ende der Datensatz";
-	}else{
-		beginn=CP.SYS.RECHNUNGS_BEGINN_DVA_SEC;
-		ende=CP.SYS.RECHNUNGS_ENDE_DVA_SEC;
-		beginn_temp="Rechenbeginn";
-		ende_temp="Rechenende";
-	}
-	if(time<beginn)
-		try{
-			throw new MiscException("Es wurde versucht Indizierdaten zu einem Zeitpunkt abzufragen, " +
-					"der vor dem " + beginn_temp + " liegt.");
-		}catch(MiscException e){
-			e.log_Warning();				
-		}
-		
-		if(time>ende)
-			try{
-				throw new MiscException("Es wurde versucht Indizierdaten zu einem Zeitpunkt abzufragen, " +
-						"der nach dem " + ende_temp + " liegt.");
-			}catch(MiscException e){
-				e.log_Warning();				
-			}		
-	
-	int index=searchTimeIndexFrom_IndizierDaten(zeitAchse, lastsearchedIndex,time);
-	int index1=index+1;
-	double m=(values[index1]-values[index])/(get_time_convert(zeitAchse,index1)-get_time_convert(zeitAchse, index));		
-	
-	return m*(time-get_time_convert(zeitAchse,index))+values[index];
-}
 
 
 

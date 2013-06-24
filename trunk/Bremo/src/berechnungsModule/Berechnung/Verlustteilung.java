@@ -233,7 +233,7 @@ public class Verlustteilung {
 		l=2;
 		
 		//ideale Ladungswechselverluste
-		IndizierDaten indiDgemittelt=new IndizierDaten(CP,true);
+		IndizierDaten indiDgemittelt=new IndizierDaten(CP);
 		double [] pLWAideal=new double[anzSimWerteLW];
 		
 		
@@ -256,7 +256,7 @@ public class Verlustteilung {
 		
 		//reale gemittelte Ladungswechselverluste
 		
-		LadungsWechselAnalyse LWArealGem = new LadungsWechselAnalyse(CP,true);
+		LadungsWechselAnalyse LWArealGem = new LadungsWechselAnalyse(CP);
 		VektorBuffer LWArealGemBuffer = ladungswechselAnalyseDurchfuehren(LWArealGem);
 		double [] pLWArealGem = LWArealGemBuffer.getValues();
 		

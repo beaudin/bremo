@@ -14,4 +14,9 @@ public class MuellerBertling extends InternesRestgas {
 		return 0;
 	}
 
+	@Override
+	public boolean involvesGasExchangeCalc() {		
+		return false;
+	}
+
 }

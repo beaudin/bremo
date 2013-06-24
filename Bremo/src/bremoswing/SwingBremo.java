@@ -403,14 +403,14 @@ public class SwingBremo extends JFrame {
 					progressBarInd.setVisible(false);
 					stop.setEnabled(true);
 					for (int i = 0; i < bremoThread.length; i++) {
-//						try {
-//							Sum = Sum
-//									+ (bremoThread[i].get_myCase()
-//											.get_aktuelle_Rechenzeit() / bremoThread[i]
-//											.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
-//						} catch (Exception e) {
-//
-//						}
+						try {
+							Sum = Sum
+									+ (bremoThread[i].get_myCase()
+											.get_aktuelle_Rechenzeit() / bremoThread[i]
+											.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
+						} catch (Exception e) {
+
+						}
 					}
 					percent = (int) ((Sum / NrBremoAlive) * 100);
 					progressBar.setValue(percent);

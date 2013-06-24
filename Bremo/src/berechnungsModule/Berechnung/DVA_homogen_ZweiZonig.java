@@ -60,6 +60,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	Zone [] initialZonesWhileRunning;	
 
 	private boolean esBrennt=false,initialiseBurntZone=false,burntZonesAlreadyInitialised=false;
+	
+	private boolean burnt = false;
 
 	private double dQburnMAX=0;
 	private double fortschritt=0;	
@@ -110,7 +112,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		gemischINIT.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);	
 
 
-
+	
 		//Anfangsbedingungen Setzen
 		//p Init
 		double p_init=super.indiD.get_pZyl(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC);
@@ -119,19 +121,22 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		//T Init		
 		Spezies ggZone_init=gemischINIT;
 		double R=ggZone_init.get_R();
-		double T_init=(p_init*V_init)/(mINIT*R);		
+		double T_init=(p_init*V_init)/(mINIT*R);
+		
+		
+		//Initialisierung der Zonen
+		double m1=(1+1e-6)*CP.SYS.MINIMALE_ZONENMASSE;
+		//m1=0.5*mINIT;
+		double m0=mINIT-m1;
 		//unverbrannte Zone
-		this.initialZones[0]=new Zone(CP,p_init, V_init, T_init, 
-				mINIT,ggZone_init , false,0);
+		double V0=m0*R*T_init/p_init;		
+		this.initialZones[0]=new Zone(CP,p_init, V0, T_init, 
+				m0,ggZone_init , false,0);
 
 		//verbrannte Zone--> wird spaeter nochmal initialisiert
-		GasGemisch rauchgas=new GasGemisch("Rauchgas");
-		Hashtable <Spezies,Double> ht=new Hashtable<Spezies,Double>();
-		ht.put(CP.SPEZIES_FABRIK.get_spezCO2(), 1D); //nur als Dummi belegung --> sonst gibt's nen Fehler
-		rauchgas.set_Gasmischung_molenBruch(ht);
-
-		this.initialZones[1]=new Zone(CP,1, 1e-55, 1, 
-				1e-55,rauchgas, true,1);
+		double V1=m1*R*T_init/p_init;	
+		this.initialZones[1]=new Zone(CP,p_init, V1, T_init, 
+				m1,ggZone_init, true,1);
 
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
@@ -167,29 +172,30 @@ public class DVA_homogen_ZweiZonig extends DVA {
 			zonen_IN[1].set_dQ_ein_aus(1*dQburn);
 
 			if(dmZoneBurn>0){
-				try {
-					zonen_IN[0].set_dm_aus(dmZoneBurn,this.get_frischGemisch());
-				} catch (NegativeMassException nmE) {					
-					nmE.log_Warning();
-					dmZoneBurn=0;
-				}	
-
-				GasGemisch rauchgas;				
-				rauchgas=new GasGemisch("Rauchgas");
-
-				rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche
-						(p, Tu, this.get_frischGemisch()));	
-				//				Berechnung der Dissoziation erfolgt in der Zone automatisch				
-				zonen_IN[1].set_dm_ein(dmZoneBurn,Tu,rauchgas);	
-
-				//Wenn nicht dQb sondern die heiße verbrannte Masse zuigefuehrt werden soll
-				//				double T_BurnAdiabat=HeizwertRechner.calcAdiabateFlammenTemp(
-				//						this.get_frischGemisch(), p, Tu); 
-				//				rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche
-				//				(p, T_BurnAdiabat, this.get_frischGemisch()));	
-				////				Berechnung der Dissoziation erfolgt in der Zone automatisch				
-				//				zonen_IN[1].set_dm_ein(dmZoneBurn,T_BurnAdiabat,rauchgas);					
-
+				if(zonen_IN[0].get_m()-CP.SYS.MINIMALE_ZONENMASSE>dmZoneBurn*CP.SYS.WRITE_INTERVAL_SEC){
+					try {
+						zonen_IN[0].set_dm_aus(dmZoneBurn,this.get_frischGemisch());
+					} catch (NegativeMassException nmE) {					
+						nmE.log_Warning();
+						dmZoneBurn=0;
+					}	
+	
+					GasGemisch rauchgas;				
+					rauchgas=new GasGemisch("Rauchgas");
+	
+					rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche
+							(p, Tu, this.get_frischGemisch()));	
+					//				Berechnung der Dissoziation erfolgt in der Zone automatisch				
+					zonen_IN[1].set_dm_ein(dmZoneBurn,Tu,rauchgas);	
+	
+					//Wenn nicht dQb sondern die heiße verbrannte Masse zuigefuehrt werden soll
+					//				double T_BurnAdiabat=HeizwertRechner.calcAdiabateFlammenTemp(
+					//						this.get_frischGemisch(), p, Tu); 
+					//				rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche
+					//				(p, T_BurnAdiabat, this.get_frischGemisch()));	
+					////				Berechnung der Dissoziation erfolgt in der Zone automatisch				
+					//				zonen_IN[1].set_dm_ein(dmZoneBurn,T_BurnAdiabat,rauchgas);					
+				}
 
 			}
 
@@ -271,7 +277,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	}
 
 
-
+	private boolean zoneAusgeblendet = false;
+	private double mZoneMAX = 0;
 
 	public void bufferErgebnisse(double time, Zone[] zn) {			
 		double dQburn=super.get_dQburn();
@@ -289,8 +296,22 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		}
 
 		if(mb>=super.CP.SYS.MINIMALE_ZONENMASSE && burntZonesAlreadyInitialised==false){
+			double ke=super.CP.convert_SEC2KW(time);
 			this.initBurnedZone(time, zn);
+			
 			initialiseBurntZone=true;
+		}
+		
+		//Wenn die unverbrannte Zone weniger als die minimale Zonenmasse enthält wird sie ausgeblendet.
+		//Zunaechst Bestimmung der maximalen Zonenmasse
+		if(zn[0].get_m()>mZoneMAX)
+			mZoneMAX=zn[0].get_m();
+		
+		if(zn[0].get_m()<=0.002*mZoneMAX && this.burnt==false ||
+				this.burnt==true && burntZonesAlreadyInitialised==true && zoneAusgeblendet==false ||
+				zn[0].get_m()<=1.0*CP.SYS.MINIMALE_ZONENMASSE && burntZonesAlreadyInitialised==true && zoneAusgeblendet==false){
+			zoneAusblenden(zn[0],zn[1]);
+			zoneAusgeblendet=true;
 		}
 
 		//Berechnen integraler Werte
@@ -484,8 +505,18 @@ public class DVA_homogen_ZweiZonig extends DVA {
 					+" [kg]" ,mi[idx]/m_ges,iter+idx);
 		}		
 		i+=1;		
-		super.buffer_EinzelErgebnis(" mDieseldampf [kg]",
+		super.buffer_EinzelErgebnis(" mKraftstoffdampf [kg]",
 				this.masterEinspritzung.get_Einspritzung(0).get_mKrst_verdampft(time),i);
+		
+		i+=1;
+		double pV=zn[0].get_p()*zn[0].get_V();
+		double mRT=zn[0].get_m()*zn[0].get_ggZone().get_R()*zn[0].get_T();
+		super.buffer_EinzelErgebnis("pV-mRT zn0", (pV-mRT)/pV*100,i);
+		
+		i+=1;
+		pV=zn[1].get_p()*zn[1].get_V();
+		mRT=zn[1].get_m()*zn[1].get_ggZone().get_R()*zn[1].get_T();
+		super.buffer_EinzelErgebnis("pV-mRT zn1", (pV-mRT)/pV*100,i);	
 	}
 
 
@@ -517,7 +548,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		initialZonesWhileRunning[1]=new Zone(CP,zonen_IN[1].get_p_V_T_mi(),zonen_IN[1].isBurnt(),zonen_IN[1].getID());
 		initialZonesWhileRunning[1].set_p_V_T_mi(p, Vb_init, Tb,ht);
 
-		double mub=zonen_IN[0].get_m()-mb; 
+		double mub=zonen_IN[0].get_m()+zonen_IN[1].get_m()-mb; 
 		double Vub=motor.get_V(time)-Vb_init;
 		double Tub=p*Vub/(mub*zonen_IN[0].get_ggZone().get_R());			
 
@@ -532,6 +563,22 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		burntZonesAlreadyInitialised=true;		
 	}
 
+	
+	private void zoneAusblenden(Zone zUnverbrannt, Zone zVerbrannt) {
+		double vU = 1e-55;
+		this.initialZonesWhileRunning[0] = new Zone(CP, zUnverbrannt.get_p(), vU, 1,
+				zUnverbrannt.get_p()*vU/(zUnverbrannt.get_ggZone().get_R()*1),
+				zUnverbrannt.get_ggZone(), false, 0);
+		if(zUnverbrannt.get_m()>0 && zUnverbrannt.get_V()>0) {
+			double vV = zVerbrannt.get_V() + zUnverbrannt.get_V() - vU;
+			this.initialZonesWhileRunning[1] = new Zone(CP, zVerbrannt.get_p(), vV, zVerbrannt.get_T(),
+					zVerbrannt.get_m() + zUnverbrannt.get_m() - this.initialZonesWhileRunning[0].get_m(),
+					zVerbrannt.get_ggZone(), true, 1);
+		} else
+			this.initialZonesWhileRunning[1] = zVerbrannt;
+		burnt = true;
+	}
+	
 	public Zone[] get_initialZonesWhileRunning() {	
 		initialiseBurntZone=false; //Beim naechsten mal soll es nicht mehr abgefragt werden
 		return initialZonesWhileRunning;
@@ -548,13 +595,13 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	 * Diese Methode ueberprueft ob alle Einspritzungen in die Zone null erfolgen. Wenn nicht bricht das Programm ab
 	 */
 	protected void checkEinspritzungen(MasterEinspritzung me) {
-		for(int i=0;i<me.get_AlleEinspritzungen().length;i++){			
-			if(me.get_AlleEinspritzungen()[i].get_ID_Zone()!=0){
+		for(int i=0;i<me.get_AllInjections().length;i++){			
+			if(me.get_AllInjections()[i].get_ID_Zone()!=0){
 				try {
 					throw new ParameterFileWrongInputException("Für das gwaehlte Berechnungsmodell " +
 							"koennen die Einspritzungen " +
 							"nur in Zone 0 erfolgen.\n Gewaehlt wurde aber Zone "+ 
-							me.get_AlleEinspritzungen()[i].get_ID_Zone());
+							me.get_AllInjections()[i].get_ID_Zone());
 				} catch (ParameterFileWrongInputException e) {				
 					e.stopBremo();
 				}
@@ -579,11 +626,12 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	public VektorBuffer get_dm_buffer() {
 		return this.dmb_buffer;
 	}
-	
+
+
 	@Override
 	public VektorBuffer get_p_buffer() {
-	// TODO Auto-generated method stub
-	return null;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

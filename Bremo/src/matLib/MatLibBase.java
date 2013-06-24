@@ -1,5 +1,6 @@
 package matLib;
 
+import bremoExceptions.MiscException;
 import numal.*;
 
 //Die Klasse MatLib dient als CordonSanitaire für eine beliebige mathmatische Bibliothek. Alle aufrufe 
@@ -210,6 +211,39 @@ public class MatLibBase {
     	for(int i=0;i<v.length;i++) if(v[i]>max) max=v[i];
     	for(int i=0;i<v.length;i++) r[i]=v[i]/max;
     	return r;
+    }
+    
+    public static double crossCorr0(double [] v1, double [] v2){
+    	if(v1.length!=v2.length)    	
+    		throw new IllegalArgumentException("The Vectors must have the same length");
+ 
+    		double cc=0;
+    		
+    		double cv1=0;
+    		for(int i=0; i<v1.length;i++) cv1+=v1[i]*v1[i];
+    		cv1=cv1/v1.length;
+    		
+    		double cv2=0;
+    		for(int i=0; i<v1.length;i++) cv2+=v2[i]*v2[i];
+    		cv2=cv2/v2.length;
+    		
+    		double cv12=0;
+    		for(int i=0; i<v1.length;i++) cv12+=v1[i]*v2[i];
+    		cv12=cv12/v2.length;
+    		
+    		cc=cv12/Math.sqrt(cv1*cv2);
+    		
+    		return cc;    	
+    	
+    }  
+    
+    public static double rms(double []v1, double[] v2){
+    	if(v1.length!=v2.length)    	
+    		throw new IllegalArgumentException("The Vectors must have the same length");
+    	
+    	double rms=0;
+    	for(int i=0; i<v1.length;i++) rms=rms+(v1[i]-v2[i])*(v1[i]-v2[i]);
+    	return Math.sqrt(rms);
     }
 
 }

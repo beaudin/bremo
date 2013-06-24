@@ -18,11 +18,10 @@ public class Chang extends WandWaermeUebergang {
 	private double druck_1;
 	private double volumen_1;
 	private double refPunkt;
-	private double p_mi;
+//	private double p_mi;
 	private double n;
 	private double pZyl_a;
 	private double Vol_a;
-	private double brennraumdachhoehe;
 	private double C_1;
 	private double C_2;
 	private double alpha_scaling;
@@ -37,13 +36,12 @@ public class Chang extends WandWaermeUebergang {
 		mittlereKolbengeschwindigkeit= 2*motor.get_Hub()*cp.get_DrehzahlInUproSec(); //[m/s]
 		temperatur_1=cp.get_T_EinlassSchluss(); //[K]
 		druck_1=indiD.get_pZyl(cp.get_Einlassschluss()); //[bar]
-		volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]
-		brennraumdachhoehe = cp.get_BrennraumdachHoehe();
+		volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]		
 		vDrall=cp.get_DrallGeschwindigkeit();
-		p_mi=indiD.get_pmi();				//[bar]
-		if(p_mi<1){
-			p_mi=1;	//pmi muss > 1 bar sein...
-		}
+//		p_mi=indiD.get_pmi();				//[bar]
+//		if(p_mi<1){
+//			p_mi=1;	//pmi muss > 1 bar sein...
+//		}
 		C_1 = 2.28 + 0.308 * vDrall / mittlereKolbengeschwindigkeit;
 		C_2 = 0.00324;
 		alpha_scaling = 3.4;
@@ -71,7 +69,10 @@ public class Chang extends WandWaermeUebergang {
 		double s_alpha = motor.get_Kolbenweg(time);	
 		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
 
-		double L_char = s_alpha + brennraumdachhoehe;
+		double bdh=motor.get_Kompressionsvolumen()*4/Math.PI/Math.pow(motor.get_Bohrung(), 2);
+		
+		//double L_char = s_alpha + brennraumdachhoehe;
+		double L_char = s_alpha + bdh;
 		if (L_char >= bohrungsdurchmesser)
 		{	
 			L_char = bohrungsdurchmesser;
@@ -79,7 +80,10 @@ public class Chang extends WandWaermeUebergang {
 
 		double v_tuned =  mittlereKolbengeschwindigkeit* C_1 + C_2 / 6 * hubvolumen * temperatur_1 / (druck_1 * volumen_1) * (p - Schleppdruck*1E5);  
 		double alpha = alpha_scaling * 130 *Math.pow( (L_char ),-0.2)*Math.pow(p*1E-5,0.8)*Math.pow(T,-0.73)*Math.pow((v_tuned ),0.8) ;
-
+		if(Double.isNaN(alpha))
+			System.out.println();
+		if(Double.isInfinite(alpha))
+			System.out.println();
 		return alpha;
 	}
 	

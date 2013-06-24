@@ -153,13 +153,11 @@ public class RungeKutta{
     	// Fourth order Runge-Kutta for a single ordinary differential equation (ODE)
     	// Static method
 	    public static double fourthOrder(DglFunction g, double x0, double y0, double xn, double h){
-
 	        RungeKutta rk = new RungeKutta();
 	        rk.setInitialValueOfX(x0);
 	        rk.setFinalValueOfX(xn);
 	        rk.setInitialValueOfY(y0);
 	        rk.setStepSize(h);
-
 	        return rk.fourthOrder(g);
 	    }
 
@@ -184,6 +182,7 @@ public class RungeKutta{
         	double ns = (this.xn - this.x0)/this.step;
         	ns = Math.rint(ns);
         	int nsteps = (int) ns;
+        	if(nsteps==0)throw new IllegalArgumentException("Number of Steps is Zero!");
         	this.nIter = nsteps;
         	double stepUsed = (this.xn - this.x0)/ns;
 

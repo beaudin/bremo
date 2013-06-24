@@ -20,11 +20,11 @@ public abstract class Einspritzung{
 	protected double mKrst;
 	protected double eoi=-1,boi=-1; //Einspritzbeginn und Ende in [s n.Rechenbeginn]
 	protected final int INDEX;	
-	private double T_krst_fl;
+	private double T_fuel_liq_Init=Double.NaN;
 
 	
 	//TODO Checken ob die buffer ueberhaupt gebraucht werden --> Bei LWA kann die bisherige (20111012) implementierung falsch sein
-	protected VektorBuffer mKrst_fluesssig;
+	protected VektorBuffer mKrst_fluessig;
 	protected VektorBuffer mKrst_dampf;
 	public final boolean IS_LWA_EINSPRITZUNG;
 	
@@ -41,8 +41,6 @@ public abstract class Einspritzung{
 		boi=CP.get_BOI(index);
 		eoi=CP.get_EOI(index);	
 		
-	
-		T_krst_fl=CP.get_T_Krst_fl(index);
 
 		double time=-1*CP.SYS.DAUER_ASP_SEC;
 		double inc=CP.SYS.WRITE_INTERVAL_SEC;
@@ -75,7 +73,7 @@ public abstract class Einspritzung{
 		}else
 			IS_LWA_EINSPRITZUNG=false;
 
-		mKrst_fluesssig = new VektorBuffer(cp);
+		mKrst_fluessig = new VektorBuffer(cp);
 		mKrst_dampf=new VektorBuffer(cp);
 	}	
 	
@@ -137,7 +135,7 @@ public abstract class Einspritzung{
 	 * @return
 	 */
 	public  double get_mKrst_fluessig(double time){		
-		return this.mKrst_fluesssig.getValue(time);
+		return this.mKrst_fluessig.getValue(time);
 	}
 
 	
@@ -148,7 +146,7 @@ public abstract class Einspritzung{
 	 * @return
 	 */	
 	public double get_mKrst_DampfUndFluessig(double time){
-		return this.mKrst_fluesssig.getValue(time)+this.mKrst_dampf.getValue(time);
+		return this.mKrst_fluessig.getValue(time)+this.mKrst_dampf.getValue(time);
 	}	
 	
 	
@@ -187,8 +185,14 @@ public abstract class Einspritzung{
 		return ID_ZONE;
 	}
 	
-	public double get_T_Krst_fl(){
-		return 	T_krst_fl;
+	/**
+	 * Temperature of liquid fuel at nozzle exit
+	 * @return T_fuel_liq_Init [K]
+	 */
+	public double get_T_fuel_liq(){
+		if(Double.isNaN(T_fuel_liq_Init))
+			T_fuel_liq_Init=CP.get_T_Krst_fl(INDEX);
+		return 	T_fuel_liq_Init;
 	}
 
 

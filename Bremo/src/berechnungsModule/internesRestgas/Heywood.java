@@ -129,4 +129,10 @@ public class Heywood extends InternesRestgas {
 		return overlapfactor;
 	}
 
+	@Override
+	public boolean involvesGasExchangeCalc() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 }

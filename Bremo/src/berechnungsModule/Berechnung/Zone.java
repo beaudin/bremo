@@ -1,5 +1,6 @@
 package berechnungsModule.Berechnung;
 
+import java.math.BigDecimal;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
@@ -127,22 +128,23 @@ public class Zone {
 
 
 	public void set_p_V_T_mi(double p_init,double V_init, double T_init,Hashtable<Spezies, Double> mi){			
-
-
 		this.p_Zone=p_init;
 		this.V_Zone=V_init;
 		this.T_Zone=T_init;
 		if(p_Zone<=0||V_Zone<=0||T_Zone<=0||(((Double) p_Zone).isNaN())
-				||(((Double) T_Zone).isNaN())||(((Double) V_Zone).isNaN()))
+				||(((Double) T_Zone).isNaN())||(((Double) V_Zone).isNaN())){				
 			try{
 				throw new NegativeMassException("Falsche Werte in Zone " + 
 						this.ID + "\n V= " + V_Zone + "\n p= " + p_Zone+ "\n T= " + T_Zone );
 			}catch(NegativeMassException nmE){
 				nmE.log_Warning();					
 			}
-
-			//ToDo hier sollte loeseChemGleichgwicht0false gesetzt werden und bei jedem aufruf neu ueberprueft werden
-			//Überprüfen ob die Berechnung der Dissoziation Sinn macht
+		}
+	if(CP.get_aktuelle_Rechenzeit()>CP.SYS.WRITE_INTERVAL_SEC){
+	//System.out.println("xsi: "+this.get_xsi());
+	//	System.out.println("eta: " +this.get_eta());
+	}
+		
 			if(T_Zone>T_max_Zone)
 				T_max_Zone=T_Zone;
 
@@ -160,16 +162,18 @@ public class Zone {
 			while(e.hasMoreElements()){
 				spez=e.nextElement();
 				mi_=mi.get(spez);
-				if(mi_<0){				
-					try{
-						throw new NegativeMassException(spez.get_name() +" in Zone " + 
-								this.ID+" hatte eine negative Masse ("
-								+mi_+"kg). Die Masse wurde auf null gesetzt!");
-					}catch(NegativeMassException nmE){
-						mi_=0; 
-						mi.put(spez,mi_);
-						nmE.log_Warning();					
-					}				
+				if(mi_<0){	
+					if(Math.abs(mi_)>=0.00001*CP.SYS.MINIMALE_ZONENMASSE){
+						try{
+							throw new NegativeMassException(spez.get_name() +" in Zone " + 
+									this.ID+" hatte eine negative Masse ("
+									+mi_+"kg). Die Masse wurde auf null gesetzt!");
+						}catch(NegativeMassException nmE){						
+							nmE.log_Warning();					
+						}											
+					}
+					mi_=0; 
+					mi.put(spez,mi_);	
 				}
 				mGes=mGes+mi_;
 			}
@@ -198,6 +202,29 @@ public class Zone {
 				massenBrueche.put(co2,1D); //TODO irgendwie uncool
 				gg_Zone.set_Gasmischung_massenBruch(massenBrueche);	
 			}
+			
+			double pV=p_Zone*V_Zone;						
+			double mRT=m_Zone*gg_Zone.get_R()*T_Zone;  
+			//This accounts for inaccuracy during the integration process. 
+			//The differences in temperature should be very very small!!
+//			if(CP.get_time()>CP.convert_KW2SEC(5.2))
+//				System.out.println();
+			if(pV!=mRT&&m_Zone>0&&V_Zone>0){	
+			//	System.out.println("(pV-mRT)/pV: "+(pV-mRT)/pV*100);
+				double T_temp=pV/m_Zone/gg_Zone.get_R();
+				this.T_Zone=T_temp;
+				double chkPv=pV-m_Zone*gg_Zone.get_R()*T_temp;
+				double chkT=Math.abs((T_Zone-T_temp)/T_temp);
+				if(chkT>7.555e-3&&m_Zone>CP.SYS.MINIMALE_ZONENMASSE){
+					try{
+						throw new MiscException("The temperature of  zone  "+ this.ID+" had to be adjusted too much! " +
+								"chkT= "+chkT);
+					}catch(MiscException me){
+						me.log_Warning();
+					}
+				}				
+			}
+			
 			dmj_ein=new Hashtable<Spezies, Double>();
 			dm_aus=new Hashtable<Spezies, Double>();	
 			sumdQ=0;
@@ -206,9 +233,8 @@ public class Zone {
 			dudp=this.calc_dudp_dRdp()[0];
 			dRdp=this.calc_dudp_dRdp()[1];
 			dudT=this.calc_dudT_dRdT()[0];
-			dRdT=this.calc_dudT_dRdT()[1];		
+			dRdT=this.calc_dudT_dRdT()[1];				
 	}	
-
 
 
 
@@ -238,10 +264,11 @@ public class Zone {
 			if(spez.isGasGemisch()&& CP.SPEZIES_FABRIK.isToIntegrate(spez)==false){
 				Hashtable<Spezies, Double> massenBruchHash_aus=	
 					((GasGemisch)spez).get_speziesMassenBruecheDetailToIntegrate();
+								
 
 				//Erstellen der Hashtable mit den Einzelmassen der Grundspezies (CO2, O2, usw....					
-				einzelMassenHash_aus=this.get_einzelMassenHash(massenBruchHash_aus, dm_a);					
-
+				einzelMassenHash_aus=this.get_einzelMassenHash(massenBruchHash_aus, dm_a);
+				
 			}else{
 				einzelMassenHash_aus.put(spez,dm_a);
 			}
@@ -268,15 +295,27 @@ public class Zone {
 			
 			e=null;
 			e=einzelMassenHash_aus.keys();	
+			spez1=null;
 			while(e.hasMoreElements()){
-				spez1=e.nextElement();	
-				
+				spez1=e.nextElement();					
 				if(this.dm_aus.containsKey(spez1)){
 					this.dm_aus.put(spez1, einzelMassenHash_aus.get(spez1)+dm_aus.get(spez1));			
 				}else{				
 					this.dm_aus.put(spez1, einzelMassenHash_aus.get(spez1));	
 				}
 			}
+			
+//			e=null;
+//			e=einzelMassenHash_aus.keys();	
+//			spez1=null;
+//			double dmCheck=0;
+//			while(e.hasMoreElements()){
+//				spez1=e.nextElement();	
+//				dmCheck+=einzelMassenHash_aus.get(spez1);				
+//			}
+//			if(dmCheck!=dm_a)
+//				System.out.println("Zone.set_dm_aus: dm_a !=dmCheck " + ((dmCheck-dm_a)) );
+			
 			// das hier muss nach der NegativeMassException stehen!! Wenn die Exception geworfen 
 			// wird und dieser Code ist schon ausgefuehrt wuerde die Energie aber nicht dei Masse beruecksichtigt 
 			double dU=spez.get_u_mass(T_Zone)*dm_a;
@@ -296,7 +335,7 @@ public class Zone {
 		if(dm_zu!=0){//wenn die Masse null ist mach garnichts				
 
 			//Berechnen des Energiestroms
-			double dU=spez_zu.get_u_mass(T_Zone)*dm_zu;
+			double dU=spez_zu.get_u_mass(T_Zone)*dm_zu;			
 			sumdU=sumdU+dU;
 			double dH=spez_zu.get_h_mass(T_zu)*dm_zu;
 			sumdH=sumdH+dH;	
@@ -307,7 +346,7 @@ public class Zone {
 
 				Hashtable<Spezies, Double> massenBruchHash_zu=	
 					((GasGemisch)spez_zu).get_speziesMassenBruecheDetailToIntegrate();
-
+								
 				//Erstellen der Hashtable mit den Einzelmassen der Grundspezies (CO2, O2, usw....					
 				einzelMassenHash_zu=this.get_einzelMassenHash(massenBruchHash_zu, dm_zu);					
 
@@ -334,7 +373,17 @@ public class Zone {
 				}else{				
 					dmj_ein.put(spez, einzelMassenHash_zu.get(spez));	
 				}
-			}	
+			}
+//			e=null;
+//			e=einzelMassenHash_zu.keys();			
+//			spez=null;
+//			double dmCheck=0;
+//			while(e.hasMoreElements()){
+//				spez=e.nextElement();
+//				dmCheck+=einzelMassenHash_zu.get(spez);				
+//			}
+//			if(dmCheck!=dm_zu)
+//				System.out.println("Zone.set_dm_ein: dm_zu !=dmCheck " +((dmCheck-dm_zu)));			
 		}
 	}
 
@@ -508,26 +557,65 @@ public class Zone {
 			mi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=mb.get(spez)*m_Zone;				
 		}			
 		return mi;
-	}
-
+	}	
+	
 	public double [] get_dmi(){
 		//TODO mach mich dmi[] zur Klassenvariablen
-		double dmi []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
+		double dmi1 []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
 		Enumeration<Spezies> e=dmj_ein.keys();
 		Spezies spez;
 		while(e.hasMoreElements()){
 			spez=e.nextElement();
-			dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=dmj_ein.get(spez);				
+			dmi1[CP.SPEZIES_FABRIK.get_indexOf(spez)]=dmj_ein.get(spez);				
 		}
+		double dmi2 []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
 		e=null;		
 		e=dm_aus.keys();
 		while(e.hasMoreElements()){
 			spez=e.nextElement();
-			dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=
-				dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]-this.dm_aus.get(spez);	
+			dmi2[CP.SPEZIES_FABRIK.get_indexOf(spez)]=this.dm_aus.get(spez);
+//			dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]=
+//				dmi[CP.SPEZIES_FABRIK.get_indexOf(spez)]-this.dm_aus.get(spez);	
 		}
+		double dmi []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
+		for(int i=0;i<dmi.length;i++)dmi[i]=dmi1[i]-dmi2[i];	
+		double a=dmi2[1];
+		double b=dmi1[1];		
+		
+//		BigDecimal ba=new BigDecimal(a);
+//		BigDecimal bb=new BigDecimal(b);
+//		BigDecimal bc=ba.subtract(bb);
+		//System.out.println(bc.toString());
+		double c=a-b;
+		double d=4.688457271404381E45-4.688457271404382E45;
+			
+		double sumdmi=0;
+		for(int i=0;i<dmi.length;i++)sumdmi+=dmi[i];
+//		if(sumdmi!=0)
+//			System.out.println("sumdmi in Zone " +this.ID +": " +sumdmi);
 		return dmi;
 	}
+
+	public double[] get_MassFractions(){
+		double mi[]=this.get_mi();		
+		for(int i=0;i<mi.length;i++)
+			mi[i]=mi[i]/this.m_Zone;		
+		return mi;		
+	}
+	
+	public double [] get_MoleFractions(){
+		Hashtable<Spezies, Double> mf=gg_Zone.get_speziesMolenBruecheDetailToIntegrate();
+		double x []=new double[CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
+		Enumeration<Spezies> e=mf.keys();
+		Spezies spez;
+		while(e.hasMoreElements()){
+			spez=e.nextElement();
+			x[CP.SPEZIES_FABRIK.get_indexOf(spez)]=mf.get(spez);				
+		}			
+		return x;
+	}
+	
+	
 
 	public double [] get_p_V_T_mi(){			
 		double[]p_V_T_mi=new double [3+CP.SPEZIES_FABRIK.get_NmbrOfAllSpez()];
@@ -561,7 +649,7 @@ public class Zone {
 
 		Enumeration<Spezies>e;		
 		Spezies spez;
-
+		
 		double sum_dmj_Rj=0D;
 		e=dmj_ein.keys();
 		while(e.hasMoreElements()){
@@ -575,7 +663,7 @@ public class Zone {
 			sum_dmj_Rj=sum_dmj_Rj-dm_aus.get(spez)*spez.get_R();
 		}		
 
-		double bY=T_Zone*sum_dmj_Rj;
+		double bY=T_Zone*sum_dmj_Rj;		
 		return 	bY;	
 	}
 
@@ -630,7 +718,6 @@ public class Zone {
 	}
 
 
-
 	/**
 	 * Gibt an ob eine Zone eine verbrannte Zone ist. Nur fuer
 	 * verbrannte Zonen wird die dissoziation berechnet!
@@ -640,14 +727,10 @@ public class Zone {
 
 		return burns;
 	}
-
-
-
-
+	
 	public int getID(){
 		return ID;
 	}
-
 
 	/**
 	 * Liefert die aktuelle Temperatur in der Zone
@@ -937,7 +1020,17 @@ public class Zone {
 		//Dies entspricht der Mischungstemperatur
 		double T0=s0.get_T4u_mass(Umisch/mGes);
 		//Das Volumen beider Zonen wird addiert
-		double V0=V1+V2;
+		double V0=V1+V2;	
+		
+		//Test ob alles stimmt
+		double pV=z1.get_p()*V0;			
+		double mRT=mGes*T0*s0.get_R();		
+		double T=(m1*s1.get_cv_mass(T1)*T1+m2*s2.get_cv_mass(T2)*T2)/(m1*s1.get_cv_mass(T1)+m2*s2.get_cv_mass(T2));
+		double deltaT=(T-T0)/T0*100;	
+		double T3=pV/mGes/s0.get_R();		
+		double mRT2=mGes*T*s0.get_R();
+		double mRT3=mGes*T3*s0.get_R();
+		//Fazit ueber die Gasgleichung geht es auch und zwar viel einfacher und genauer!
 
 		Zone z0=new Zone(cp,p, V0, T0, mGes, s0, burns, ID);		
 		return z0;

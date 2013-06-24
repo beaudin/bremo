@@ -4,6 +4,8 @@ package bremo.sys;
 import kalorik.spezies.Spezies;
 import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.PostProcessor;
+import berechnungsModule.Berechnung.APR;
+import berechnungsModule.Berechnung.APR_Cantera;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.DVA;
 import berechnungsModule.Berechnung.Zone;
@@ -52,20 +54,24 @@ public class Rechnung {
 		dglSys.bufferErgebnisse(x0, zn);
 		
 		Zone [] znTemp = null;
+	
 
 		for(int i=1;i<anzSimWerte;i++){
 
 			time=x0+i*CP.SYS.WRITE_INTERVAL_SEC;	
 			
-			System.out.println("berechne Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");			
-
+			if(CP.SYS.IS_KW_BASIERT)
+				System.out.println("berechne Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");	
+			else
+				System.out.println("berechne Zeitschritt: " +time+ "[sec]");
 			sol.setFinalValueOfX(time);		
 
 			if(dglSys.isDVA()==true){				
 				double pIst=Double.NaN;
 				boolean isConverged=false;			 
 				int idx=0;
-				do{					
+				do{	
+					
 					znTemp=sol.solveRK(zn);					
 					pIst=  znTemp[0].get_p();
 					//Vergleich ob der Berechnete Druck mit dem gemessenen übereinstimmt 
@@ -75,7 +81,7 @@ public class Rechnung {
 				}while (isConverged==false&& idx<100);	
 				
 				if(isConverged==false){
-					System.out.println("mangelnde Knvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
+					System.out.println("mangelnde Konvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
 					((DVA) dglSys).schreibe_DUBUGGING_Ergebnisse("NO_KON_"+
 							CP.get_CaseName()+"_"+CP.convert_SEC2KW(time)+".txt");
 				}
@@ -84,11 +90,10 @@ public class Rechnung {
 				
 				anzGesamtIterationen+=idx-1;				
 							
-			}else{
-				znTemp=sol.solveRK(zn);
-			}			
-
-			CP.set_aktuelle_Rechenzeit(time);
+			}else{				
+				zn=((APR)dglSys).calc_dQburn(zn);			
+				znTemp=sol.solveRK(zn);				
+			}		
 					
 			zn=znTemp;
 			
@@ -96,14 +101,14 @@ public class Rechnung {
 			
 			dglSys.bufferErgebnisse(time,zn);
 			sol.setInitialValueOfX(time);
+			CP.set_aktuelle_Rechenzeit(time);
 			
 			if(dglSys.initialiseBurntZone()){
 				zn=dglSys.get_initialZonesWhileRunning();
 				//Damit die Anfangsbedingungen der Zonen im Ergebnisfile erscheinen
-				dglSys.bufferErgebnisse(time,zn); 
-			}
-			
-			
+				//dglSys.bufferErgebnisse(time,zn); 
+			}			
+
 			if(CP.SYS.DUBUGGING_MODE){					
 				if(Math.abs(time-CP.SYS.DUBUGGING_TIME_SEC)<0.5*CP.SYS.WRITE_INTERVAL_SEC){ //Rechnet bis KW und schreibt dann alle Werte ins txt-file
 					CP.schreibeAlleErgebnisFiles("DEBUG_"+CP.get_CaseName()+".txt");	
@@ -119,7 +124,8 @@ public class Rechnung {
 		PostProcessor pp=new PostProcessor(dglSys.get_dm_buffer(),
 							dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),CP);
 		pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");
-		
+		//CP.CANTERA_CALLER.releaseCantera();
+		//((APR_Cantera)dglSys).releaseCantera();
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + anzGesamtIterationen );
 	}	
 

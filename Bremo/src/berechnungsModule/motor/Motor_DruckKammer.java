@@ -16,10 +16,9 @@ public class Motor_DruckKammer extends Motor {
 	@Override
 	public double get_BrennraumFlaeche(double time) {
 		try{
-			throw new BirdBrainedProgrammerException("Fuer den Motortyp \"DruckKammer\"" +
+			throw new BirdBrainedProgrammerException("Fuer den Motortyp \"DruckKammer\" " +
 					"wurde diese Funktion nicht implementiert. \n Bis jetzt gab es auch keine " +
-					"Wandwaermeuebergangsmodelle" +
-					"die dies unterstuezen");
+					"Wandwaermeuebergangsmodelle fuer Druckkammern!");
 		}catch(BirdBrainedProgrammerException bbpe){
 			bbpe.stopBremo();
 		}
@@ -44,12 +43,11 @@ public class Motor_DruckKammer extends Motor {
 
 	@Override
 	public double get_Verdichtung() {
-		return 0;
+		return 1;
 	}
 
 	@Override
-	public double get_V_MAX() {
-		// TODO Auto-generated method stub
+	public double get_V_MAX() {		
 		return V;
 	}
 

@@ -72,6 +72,7 @@ public class LWA extends InternesRestgas {
 					time=x0_LW+i*cp.SYS.WRITE_INTERVAL_SEC;		
 					LW_SOL.setFinalValueOfX(time);
 					znTemp=LW_SOL.solveRK(zn_LW);
+					
 					cp.set_aktuelle_Rechenzeit(time);
 					zn_LW=znTemp;
 					znTemp=null;	
@@ -108,6 +109,11 @@ public class LWA extends InternesRestgas {
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + (idx2) );	
 		double agrInt=((LadungsWechselAnalyse)dglSys_LW).get_mAGRintern(zn_LW);
 		return agrInt;
+	}
+
+	@Override
+	public boolean involvesGasExchangeCalc() {		
+		return true;
 	}
 	
 	

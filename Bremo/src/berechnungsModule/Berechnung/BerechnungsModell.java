@@ -57,7 +57,6 @@ public abstract class BerechnungsModell  {
 ////////////////////////////////////////////////////////////////////////////////////////////////	
 	
 
-
 	public Zone [] aktualisiereDifferentiale(double time, Zone[] zn) {
 		//Berechnen der aktuellen Differentiale --> Aufstellen des dgl-Systems
 		return ersterHSBrennraum(time,zn);

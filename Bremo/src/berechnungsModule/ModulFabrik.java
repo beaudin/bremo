@@ -14,7 +14,7 @@ public class ModulFabrik {
 	
 	
 	
-	protected  String get_ModulWahl(String modulFlag, String [] moeglicheModelle){			
+	public  String get_ModulWahl(String modulFlag, String [] moeglicheModelle){			
 
 		if(!CP.MODUL_VORGABEN.containsKey(modulFlag)){			
 			try {

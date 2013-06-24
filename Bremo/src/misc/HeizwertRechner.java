@@ -228,11 +228,8 @@ public class HeizwertRechner {
 		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezH2O(),mb_H2O);
 		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezN2(),mb_N2);
 		abgas_MolenbruchHash.put(cp.SPEZIES_FABRIK.get_spezO2(),mb_O2);	
-		return abgas_MolenbruchHash;
-		
-	}
-	
-	
+		return abgas_MolenbruchHash;		
+	}	
 	
 	
 	public static Hashtable<Spezies,Double>calcMolenBruechePerfekteVerbrennung(

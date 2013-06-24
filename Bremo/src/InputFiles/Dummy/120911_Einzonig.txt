@@ -89,7 +89,7 @@ minimaleZonenMasse	[kg]	:=	2.00E-06
 rechenGenauigkeit_DVA	[bar]	:=	0.0005
 polynomKoeffizienten	[-] 	:=	Janaf
 zeit_oder_KW_Basiert	[-]	:=	KW
-rechnungsSchrittweite 	[KW]	:=	0.1
+rechnungsSchrittweite 	[KW]	:=	0.09
 rechnungsBeginn 	[KWnZOT]	:=	-165
 rechnungsEnde	[KWnZOT]	:=	160
 relaxFaktor 	[-]	:=	0.6
@@ -105,7 +105,7 @@ spalte_pAbg	[-]	:=	4
 shift_pEin	[-]	:=	ja
 shift_pAus	[-]	:=	ja
 
-Verlustteilung	[-]	:=	ja
+Verlustteilung	[-]	:=	nein
 burnFileName	[-] 	:= 	Brennverlauf-Vorgabe.txt
 spalte_dQburn	[-]	:=	2
 pmi	[bar]	:=	2.898609681

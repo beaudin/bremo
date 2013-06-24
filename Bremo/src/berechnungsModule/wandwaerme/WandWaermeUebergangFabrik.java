@@ -11,7 +11,7 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 	public static final String WANDWAERME_FLAG="Wandwaermemodell";
 	private static final String WANDWAERME_FLAG_LW="Wandwaermemodell_LW";
 	public  static final String[] WANDWAERMEMODELLE
-	={"WoschniHuber", "Woschni", "Hohenberg", "Hans", "Bargende", "Chang","ohne"};
+	={"WoschniHuber", "Woschni", "Hohenberg", "Hans", "Bargende", "Chang","ohne","FromFile"};
 	public final  WandWaermeUebergang WAND_WAERME_MODUL;
 	public final  WandWaermeUebergang WAND_WAERME_MODUL_LW;
 	
@@ -20,9 +20,12 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 		super(cp);
 		
 		WAND_WAERME_MODUL=this.initializeWandWaermeModul(WANDWAERME_FLAG, WANDWAERMEMODELLE);
-		WAND_WAERME_MODUL_LW
-			=this.initializeWandWaermeModul(WANDWAERME_FLAG_LW, WANDWAERMEMODELLE);
 		
+		if(CP.RESTGASMODELL.involvesGasExchangeCalc())
+			WAND_WAERME_MODUL_LW
+				=this.initializeWandWaermeModul(WANDWAERME_FLAG_LW, WANDWAERMEMODELLE);		
+		else
+			WAND_WAERME_MODUL_LW=null;
 	}
 	
 	
@@ -87,6 +90,9 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 							wandwaermemodellVorgabe+ "\" ist nur fuer Hubkolbenmotoren geeignet.\n" +
 					"Die Rechnung erfolgt ohne Waermeuebergangsmodell");
 				}
+			}
+			else if(wandwaermemodellVorgabe.equals("FromFile")){				
+				temp=new FromFile(CP);				
 			}
 			else if(wandwaermemodellVorgabe.equals("ohne")){
 				temp=new PerfektIsoliert(CP);				

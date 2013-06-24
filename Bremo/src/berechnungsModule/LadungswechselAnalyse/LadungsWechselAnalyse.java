@@ -53,27 +53,16 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	private misc.VektorBuffer p_buffer ;
 	
 	public LadungsWechselAnalyse(CasePara cp) {
-		super(cp,new ErgebnisBuffer(cp,"LWA_"));
-		indiD=new IndizierDaten(cp);
-		createMe(cp);
-		}
-		public LadungsWechselAnalyse(CasePara cp, boolean gemittelt){
-		super(cp,new ErgebnisBuffer(cp,"LWA_"));
-		if (gemittelt == true)
-		indiD=new IndizierDaten(cp,true);
-		else
-		indiD=new IndizierDaten(cp);
-		createMe(cp);
-		}
-		public void createMe(CasePara cp) {
+		super(cp,new ErgebnisBuffer(cp,"LWA_"));	
 		T_buffer = new VektorBuffer(CP);
 		p_buffer = new misc.VektorBuffer(cp);
 		m = CP.MOTOR;
+		indiD=new IndizierDaten(cp);
 		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		anzZonen=1;
 		gAbgasbehaelter =new GasGemisch("AGR_intern_LWA");
 		gAbgasbehaelter.set_Gasmischung_molenBruch(
-				((GasGemisch)CP.get_spezAbgas()).get_speziesMassenBruecheDetailToIntegrate());
+				((GasGemisch)CP.get_spezAbgas()).get_speziesMassenBruecheDetailToIntegrate());		
 		CP.SPEZIES_FABRIK.integrierMich(gAbgasbehaelter);
 		
 		//Kraftstoff aus Saugrohreinspritzungen wird unabhängig 
@@ -84,13 +73,11 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		
 		double mLuft_tr=CP.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
 		double mW=CP.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel			
-		double mAGRex=CP.get_mAGR_extern_ASP();	//Masse externer AGR kg/ASP	
-			
-		
+		double mAGRex=CP.get_mAGR_extern_ASP();	//Masse externer AGR kg/ASP			
 
 		//Bestimmung der Verbrennungsluftzusammensetzung	
 		GasGemisch agrEX=new GasGemisch("AGR_extern_LWA");
-		agrEX.set_Gasmischung_molenBruch(((GasGemisch)CP.get_spezAbgas()).get_speziesMolenBrueche());
+		agrEX.set_Gasmischung_molenBruch(((GasGemisch)CP.get_spezAbgas()).get_speziesMolenBrueche());	
 		CP.SPEZIES_FABRIK.integrierMich(agrEX);
 		
 		//feuchte Luft
@@ -100,8 +87,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		feuchteLuft_MassenBruchHash.put(CP.SPEZIES_FABRIK.get_spezLuft_trocken(),mLuft_tr/mLF);		
 		feuchteLuft_MassenBruchHash.put(CP.SPEZIES_FABRIK.get_spezH2O(),mW/mLF);
 		feuchteLuft=new GasGemisch("feuchteLuft_LWA");
-		feuchteLuft.set_Gasmischung_massenBruch(feuchteLuft_MassenBruchHash);
-		
+		feuchteLuft.set_Gasmischung_massenBruch(feuchteLuft_MassenBruchHash);		
 		CP.SPEZIES_FABRIK.integrierMich(feuchteLuft);		
 		
 		//gesamte Masse 
@@ -381,13 +367,13 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 
 	@Override
 	protected void checkEinspritzungen(MasterEinspritzung me) {
-		for(int i=0;i<me.get_AlleEinspritzungen().length;i++){			
-			if(me.get_AlleEinspritzungen()[i].get_ID_Zone()!=0){
+		for(int i=0;i<me.get_AllInjections().length;i++){			
+			if(me.get_AllInjections()[i].get_ID_Zone()!=0){
 				try {
 					throw new ParameterFileWrongInputException("Fuer die Ladungswechselanalyse " +
 							"koennen die Einspritzungen" +
 							"nur in Zone 0 erfolgen.\n Gewaehlt wurde aber Zone "+ 
-							me.get_AlleEinspritzungen()[i].get_ID_Zone());
+							me.get_AllInjections()[i].get_ID_Zone());
 				} catch (ParameterFileWrongInputException e) {				
 					e.stopBremo();
 				}
@@ -409,9 +395,11 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	public VektorBuffer get_dQb_buffer() {
 		return null;
 	}
+
 	@Override
 	public VektorBuffer get_p_buffer() {
-	return p_buffer;
+		// TODO Auto-generated method stub
+		return p_buffer;
 	}
 	
 //	/**

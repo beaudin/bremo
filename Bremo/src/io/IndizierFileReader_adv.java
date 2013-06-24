@@ -6,6 +6,7 @@ import java.io.*;
 
 import bremo.main.Bremo;
 import bremo.parameter.CasePara;
+import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -105,6 +106,13 @@ public class IndizierFileReader_adv extends IndizierFileReader{
 
 	//Einleseroutine 
 	protected void datei_Einlesen(){
+/*		try{
+			throw new BirdBrainedProgrammerException("This class seems not " +
+					"to work properly. Please contact your local programmer!");			
+		}catch(BirdBrainedProgrammerException bbp){
+			bbp.stopBremo();			
+		}
+*/		
 		try{
 			FileInputStream fis = new FileInputStream(file);
 			int ln = (int)file.length();

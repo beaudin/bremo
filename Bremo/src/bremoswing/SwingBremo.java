@@ -92,6 +92,7 @@ public class SwingBremo extends JFrame {
 	public static Timer timerCalcul;
 	public static int percent;
 	static SelectItemToPlotten plotten;
+	static double startTime ;
 	PrintStream outStream = new PrintStream(System.out) {
 
 		@Override
@@ -150,7 +151,7 @@ public class SwingBremo extends JFrame {
 	private void initComponents() {
 
 		System.setOut(outStream);
-		//System.setErr(errStream);
+		System.setErr(errStream);
 
 		manager = new JPanel(){
 			/**
@@ -227,7 +228,7 @@ public class SwingBremo extends JFrame {
 		NrBremoAlive = 0;
 
 		/****** HAUPT FRAME ****************************************************************/
-		setTitle("Bremo 1.4 beta");
+		setTitle("Bremo 1.4.0 Beta");
 		setBackground(new Color(255, 255, 255));
 		setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo1.png")).getImage());
@@ -402,14 +403,14 @@ public class SwingBremo extends JFrame {
 					progressBarInd.setVisible(false);
 					stop.setEnabled(true);
 					for (int i = 0; i < bremoThread.length; i++) {
-						try {
-							Sum = Sum
-									+ (bremoThread[i].get_myCase()
-											.get_aktuelle_Rechenzeit() / bremoThread[i]
-											.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
-						} catch (Exception e) {
-
-						}
+//						try {
+//							Sum = Sum
+//									+ (bremoThread[i].get_myCase()
+//											.get_aktuelle_Rechenzeit() / bremoThread[i]
+//											.get_myCase().SYS.RECHNUNGS_ENDE_DVA_SEC);
+//						} catch (Exception e) {
+//
+//						}
 					}
 					percent = (int) ((Sum / NrBremoAlive) * 100);
 					progressBar.setValue(percent);
@@ -579,6 +580,7 @@ public class SwingBremo extends JFrame {
 			berechnen.setVisible(true);
 		} else {
 //			LogFileWriter.reinitialisierung();
+			System.err.println(System.currentTimeMillis()+" ms");
 			berechnen.setEnabled(false);
 			wahlFile.setEnabled(false);
 			stop.setEnabled(false);
@@ -753,7 +755,9 @@ public class SwingBremo extends JFrame {
 			ActiveIcon();
 			progressBar.setVisible(false);
 			progressBarInd.setVisible(false);
-			test.setEnabled(true);
+			if (bremoThreadFertig.length > 0) {
+			    test.setEnabled(true);
+			}
 		}
 	}
 	public static void VerlustteilungThread() {

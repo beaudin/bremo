@@ -8,9 +8,11 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
+
 import berechnungsModule.motor.Motor;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.parameter.CasePara;
+
 import kalorik.spezies.Spezies;
 
 public class LittleHelpers {

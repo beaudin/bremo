@@ -54,7 +54,7 @@ public class SaugrohrEinspritzungHomogen extends Einspritzung {
 	@Override
 	public void berechneIntegraleGroessen(double time, Zone zn) {			
 		super.mKrst_dampf.addValue(time,super.mKrst );
-		super.mKrst_fluesssig.addValue(time, super.mKrst);		
+		super.mKrst_fluessig.addValue(time, super.mKrst);		
 	}
 
 

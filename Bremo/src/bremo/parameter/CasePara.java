@@ -1,12 +1,13 @@
 package bremo.parameter;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
-
-import misc.LittleHelpers;
 import misc.PhysKonst;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.SpeziesFabrik;
@@ -15,6 +16,7 @@ import io.InputFileReader;
 import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.BerechnungsModellFabrik;
+import berechnungsModule.Berechnung.CanteraCaller;
 import berechnungsModule.gemischbildung.Kraftstoff_Eigenschaften;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.internesRestgas.InternesRestgas;
@@ -32,24 +34,19 @@ import bremoExceptions.ParameterFileWrongInputException;
 
 
 public class CasePara {	
-	
 
-
-	
-	
 	private final Hashtable<String,String[]> INPUTFILE_PARAMETER;
 	public final Hashtable<String,String> MODUL_VORGABEN;	
 	private  Vector<ErgebnisBuffer> alleErgBuffers=new Vector<ErgebnisBuffer>();
 	private double aktuelle_RZ;	//Aktuelle Rechenzeit
-//	public final BerechnungsModule MODULE;
+	//	public final BerechnungsModule MODULE;
 	public final SysPara SYS; //SystemParameter	
 	private final String WD; //WorkingDirectory
 	/**
 	 * Name des Inputfiles OHNE Dateiendung
 	 */
-	private final String CASE_NAME;	
-	
-	
+	private final String CASE_NAME;		
+
 	public final Motor MOTOR;
 	public final GleichGewichtsRechner OHC_SOLVER;
 	public final WandWaermeUebergang WAND_WAERME;
@@ -58,36 +55,44 @@ public class CasePara {
 	public final BerechnungsModell BERECHNUNGS_MODELL;
 	public final SpeziesFabrik SPEZIES_FABRIK;
 	public final MasterEinspritzung MASTER_EINSPRITZUNG;
+	protected final boolean callsCantera;
 
-
-	public CasePara(File inputFile) throws ParameterFileWrongInputException {	
-		
+	public CasePara(File inputFile) throws ParameterFileWrongInputException {			
 		InputFileReader	ifr =new InputFileReader(inputFile);
 		INPUTFILE_PARAMETER=ifr.get_eingabeParameter();
+
 		MODUL_VORGABEN=ifr.get_berechnungsModule();
-		
-//		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
+
+		//		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
 		System.out.println("Inputfile wurde eingelesen!");
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));
-		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 		
-		SYS=new SysPara(INPUTFILE_PARAMETER);
+		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 
+//		//Is doof aber geht jetzt nicht besser
+		callsCantera=BerechnungsModellFabrik.callsCantera(this);	
 		
+		SYS=new SysPara(INPUTFILE_PARAMETER);	
 		
-		//Erzeugung der verschiedenen BerechnungsModule 
-		//SpeziesFabrik
+		//SpeziesFabrik	
 		SPEZIES_FABRIK=new SpeziesFabrik(this, new MakeMeUnique());	 
 		//MakeMeUnique sorgt dafür, dass es nur eine Instanz der Speziesfabrik geben kann. 
 		//Ansonsten wuerde es Probleme mit der INtegration der einzelnen Speziesmassen geben. 
-		//CO2 ist zwar CO2 aber bei verschiedenen Objekt IDs weiss Bremo das nicht!
-		
+		//CO2 ist zwar CO2 aber bei verschiedenen Objekt IDs weiss Bremo das nicht!			
+
 		//Motor
 		MotorFabrik mf=new MotorFabrik(this);
 		MOTOR=mf.MOTOR;
-		
+
 		//ohc-Solver
 		GleichGewichtsRechnerFabrik ohcf=new GleichGewichtsRechnerFabrik(this);
 		OHC_SOLVER=ohcf.OHC_SOLVER;
+		
+		//MasterEinspritzung
+		MASTER_EINSPRITZUNG=new MasterEinspritzung(this);
+				
+		//Restgas benoetigt MASTER_EINSPRITZUNG
+		InternesRestgasFabrik irgf=new InternesRestgasFabrik(this);
+		RESTGASMODELL=irgf.RESTGAS_MODELL;
 		
 		//Wandwaerme
 		WandWaermeUebergangFabrik wwf=new WandWaermeUebergangFabrik(this);
@@ -95,19 +100,12 @@ public class CasePara {
 		//Die LWA soll mit einem anderen WW-Modell durchgefuehrt werden koennen
 		WAND_WAERME_LW=wwf.WAND_WAERME_MODUL_LW; 
 		
-		//MasterEinspritzung
-		MASTER_EINSPRITZUNG=new MasterEinspritzung(this);
-		
-		//Restgas benoetigt MASTER_EINSPRITZUNG
-		InternesRestgasFabrik irgf=new InternesRestgasFabrik(this);
-		RESTGASMODELL=irgf.RESTGAS_MODELL;
-		
 		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG und RESTGAS_MODELL
 		BerechnungsModellFabrik bmf=new BerechnungsModellFabrik(this);
 		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;	
-		
+
 	}		
-	
+
 	/**
 	 * Dirty Trick damit die Klasse SpeziesFabrik nur ein einziges Mal erzeugt werden kann. 
 	 * @author eichmeier
@@ -115,10 +113,10 @@ public class CasePara {
 	 */
 	public class MakeMeUnique{
 		private MakeMeUnique (){
-			
+
 		}
 	}
-	
+
 	/**
 	 * Für einen BerechnungsCase sind alle ErgebnisBuffer in einem Vector gespeichert. Hiermit wird dem 
 	 * Vector der ErgebnisBuffer ergB hinzugefuegt und kann damit spaeter in ein txt-file geschreiben werden.
@@ -129,7 +127,7 @@ public class CasePara {
 		if(!alleErgBuffers.contains(ergB))//nur wenn der ErgebnisBuffer noch nich tim Vector steht wird er eingecheckt
 			this.alleErgBuffers.add(ergB);		
 	}
-	
+
 	/**
 	 * Diese Funktion ermoeglicht das einfache schreiben aller ErgebnisBuffer, die 
 	 * zuvor  mittels {@link ergBufferCheckIN} eingecheckt wurden.
@@ -141,16 +139,173 @@ public class CasePara {
 			itr.next().schreibeErgebnisFile(name);	
 	}
 
-	
+
 	public String get_workingDirectory(){
 		return WD;
 	}
-	
+
 	public String get_CaseName(){
 		return CASE_NAME;
 	}
-		
+	public boolean callsCantera(){
+		return this.callsCantera;
+	}
 	
+	public boolean compareToExp(){		
+		boolean compareToExp = false;
+		String s = null;
+		String s2 []= {"yes","no"};
+		try {
+			s=this.set_StringPara(INPUTFILE_PARAMETER, "compareToExp",s2);
+		} catch (ParameterFileWrongInputException e){	
+			compareToExp=false;
+			s="no";
+		}
+		if(s.equalsIgnoreCase("yes"))
+			compareToExp=true;		
+		return compareToExp;		
+	}
+	
+	public boolean filterPressureData(){
+		String [] yesno={"ja","nein"};
+		boolean filter=false;
+		try {
+			if(set_StringPara(INPUTFILE_PARAMETER,"filtern",yesno ).equalsIgnoreCase("ja"))
+				filter=true;
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+		}
+		return filter;		
+	}
+	
+	
+	public int get_savitzkyGolayOrder(){
+		double tmpSgolayOrder=5;
+		try{				
+			tmpSgolayOrder=set_doublePara(INPUTFILE_PARAMETER,"sgolayOrder","[-]", 2,12);
+		}catch(ParameterFileWrongInputException e){
+			e.log_Warning();
+			e.log_Warning("The parameter \"sgolayOrder\" for the SavitzkyGolay-Filter has not been defined or was defined in a wrong way! \n" +
+					"The filtering will be performed with a polynomial of order 5.\n");
+		}
+		return (int)tmpSgolayOrder;		
+	}	
+	
+	public int get_savitzkyGolayHalfWidth(){			
+		double tmpSgolayHalfWidth=2*get_savitzkyGolayOrder()+1;
+		try{				
+			tmpSgolayHalfWidth=set_doublePara(INPUTFILE_PARAMETER,"sgolayHalfWidth","[-]", tmpSgolayHalfWidth,50);
+		}catch(ParameterFileWrongInputException e){	
+			e.log_Warning();
+			e.log_Warning("The parameter \"sgolayHalfWidth\" for the SavitzkyGolay-Filter has not been defined or was defined in a wrong way! \n" +
+					"The filtering will be performed with a half-witdh of "+tmpSgolayHalfWidth);
+		}
+		return (int)tmpSgolayHalfWidth;
+	}
+	
+	public boolean shift_pInlet(){
+		String [] yesno={"ja","nein"};
+		boolean shift_pIn=false;
+		try {
+			if(set_StringPara(INPUTFILE_PARAMETER,"shift_pEin",yesno ).equalsIgnoreCase("ja"))
+				shift_pIn=true;
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+		}
+		return shift_pIn;
+	}
+	
+	public boolean shift_pOutlet(){
+		String [] yesno={"ja","nein"};
+		boolean shift_pOut=false;
+		try {
+			if(set_StringPara(INPUTFILE_PARAMETER,"shift_pAus",yesno ).equalsIgnoreCase("ja"))
+				shift_pOut=true;
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+		}
+		return shift_pOut;
+	}
+
+	public String get_pressureAdjustmentMethod(String methodIdentifier){
+		String method=null;
+		try {		
+			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","abgleichKruemmer","ohne"};			
+			method=set_StringPara(this.INPUTFILE_PARAMETER,methodIdentifier,s1);
+		}catch(ParameterFileWrongInputException e){
+			e.stopBremo();
+		}
+		return method;
+	}
+
+	public int get_ColumnToRead(String columnIdentifier){		
+		int column;
+		try {
+			column = (int)set_doublePara(INPUTFILE_PARAMETER, columnIdentifier,"",1,40);
+			return column;
+		} catch (ParameterFileWrongInputException e) {			
+			e.printStackTrace();
+			e.stopBremo();
+			return 0;
+		}		
+	}
+	
+	public double get_relaxFactor(){
+		double tmpRELAX;
+		try{				
+			tmpRELAX=set_doublePara(INPUTFILE_PARAMETER, "relaxFaktor","[-]",0.1,1);	
+		}catch(ParameterFileWrongInputException e){
+			e.log_Warning("The parameter \"relaxFactor\" has not been defined!"+
+					" The run will be performed with 0.7! \n");
+			tmpRELAX=0.7;
+		}
+		return tmpRELAX;	
+	}
+	
+	public double get_precissionPressureTraceAnalysis(){
+		//Einlesen von PUBLIC FINAL doubleDaten
+		double precission=0.0005*1e5;
+		try {
+			precission=1e5*set_doublePara(INPUTFILE_PARAMETER, "rechenGenauigkeit_DVA","[bar]",0,0.1);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+		}	
+		return precission;
+	}
+	
+
+	public File get_FileToRead(String fileIdentifier){		
+		String htfFileName;
+		try {
+			htfFileName = set_FileName(this.INPUTFILE_PARAMETER,fileIdentifier);
+			File file=new File(WD+htfFileName);
+			if (!file.isFile())
+				try{ throw new ParameterFileWrongInputException(
+						"The specified path does not point to a file \n"
+								+ (WD+htfFileName));
+				}catch(ParameterFileWrongInputException e){
+					e.stopBremo();				
+				}
+			return file;
+		} catch (ParameterFileWrongInputException e) {			
+			e.printStackTrace();
+			e.stopBremo();
+			return null;
+		}		
+	}
+	
+	public String get_FileNameToRead(String fileIdentifier){
+		String fileName=null;
+		try {
+			fileName = set_FileName(this.INPUTFILE_PARAMETER,fileIdentifier);
+		}catch(ParameterFileWrongInputException e){
+			e.stopBremo();
+		}
+		return fileName;
+	}
+	
+	
+
 	/**
 	 * Mit dieser Methode wird die aktuelle Rechenzeit in CasePara gespeichert.
 	 * Diese Zeit entspricht einem ganzen Rechenzeitschritt und nicht einem vom
@@ -186,7 +341,7 @@ public class CasePara {
 	 */
 	public double get_verbrennungsBeginnSEC(){
 		double verbrennungsBeginn;	
-		
+
 		if(is_VerbrennungAutoDetect()){
 			try{
 				throw new BirdBrainedProgrammerException("Im InputFile wurde \"VerbrennungsBeginnAutoDetect\" auf \"ja\" " +
@@ -198,7 +353,7 @@ public class CasePara {
 				bbp.stopBremo();
 			}			
 		}		
-			
+
 		try {
 			if(SYS.IS_KW_BASIERT){				
 				verbrennungsBeginn =set_doublePara(
@@ -212,9 +367,9 @@ public class CasePara {
 			e.stopBremo();
 			return Double.NaN;
 		}		
-		
+
 	}
-	
+
 	/**
 	 * Gibt an ob der Zeitpunkt ab dem die Verbrennungbeginnt automatisch ermittelt 
 	 * werden soll oder ob eine Vorgabe vom User erfolgt
@@ -222,7 +377,7 @@ public class CasePara {
 	 * @return
 	 */
 	public boolean is_VerbrennungAutoDetect(){			
-		
+
 		boolean autodetect = false;
 		String s = null;
 		String s2 []= {"ja","nein"};
@@ -231,20 +386,19 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException e) {		
 			e.stopBremo();
 		}
-		
+
 		if(s.equalsIgnoreCase("ja")) autodetect=true;
-		
-//		if(autodetect){
-//			try{
-//				throw new BirdBrainedProgrammerException("Die AutodetectMethode wurde noch nicht Programmiert");
-//			}catch(BirdBrainedProgrammerException bbp){
-//				bbp.stopBremo();
-//			}
-//		}		
-		
+
+		//		if(autodetect){
+		//			try{
+		//				throw new BirdBrainedProgrammerException("Die AutodetectMethode wurde noch nicht Programmiert");
+		//			}catch(BirdBrainedProgrammerException bbp){
+		//				bbp.stopBremo();
+		//			}
+		//		}		
+
 		return autodetect;		
-		
-	}
+}
 	/**
 	* Gibt an ob eine Verlustteilung durchgeführt werden soll.
 	* Die Auswahl erfolgt durch den Bnutzer
@@ -263,13 +417,6 @@ public class CasePara {
 	if(s.equalsIgnoreCase("ja")) verlustteilung=true;
 	return verlustteilung;
 	}
-	
-	
-	
-	
-	
-	
-	
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +425,137 @@ public class CasePara {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	/** 
+	 * @return initial mole fraction of CO2
+	 */	
+	public double get_iniMoleFrac_CO2(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_CO2","[-]",0,1);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
 	
+	/** 
+	 * @return initial mole fraction of O2
+	 */	
+	public double get_iniMoleFrac_O2(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_O2","[-]",0,1);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}	
+	
+	/** 
+	 * @return initial mole fraction of H2O
+	 */	
+	public double get_iniMoleFrac_H2O(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_H2O","[-]",0,1);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}	
+	
+	/** 
+	 * @return initial mole fraction of N2
+	 */	
+	public double get_iniMoleFrac_N2(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_N2","[-]",0,1);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+
+	/** 
+	 * @return initial mole fraction of iC8H18
+	 */	
+	public double get_iniMoleFrac_iC8H18(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_iC8H18","[-]",0,1);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	/** 
+	 * @return initial mole fraction of nC7H16
+	 */	
+	public double get_iniMoleFrac_nC7H16(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_nC7H16","[-]",0,1);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	
+	/** 
+	 * @return initial pressure [Pa]
+	 */	
+	public double get_p_ini(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "p_Ini","[Pa]",0,Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	
+	/** 
+	 * @return initial temperature in [K]
+	 */	
+	public double get_T_ini(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "T_Ini","[K]",0,Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	public double get_C_MixRad() {		
+		try {
+			return 	 set_doublePara(INPUTFILE_PARAMETER, "C_MixRad","[-]",0.001,10); 
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+			return 0;
+		}			
+	}
+	
+	public double get_C_Mix() {		
+		try {
+			return 	 set_doublePara(INPUTFILE_PARAMETER, "C_Mix","[-]",0,500); 
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+			return 0;
+		}			
+	}
+	
+	public int get_mixingProcess() {
+		int a=-1;
+		try {			
+			
+			a=(int)set_doublePara(INPUTFILE_PARAMETER, "mixingProcess","[-]",0,6); 
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+		}
+		return a;
+	}
+
+
+
 	/** 
 	 * @return liefert die Drehzahl in [U/sec]
 	 */	
@@ -290,8 +567,8 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}		
-	
-	
+
+
 	/**
 	 * Berechnet die Zusammensetzung des Abgases auf Basis des chem. Gleichgewichts
 	 * @return abgas vom Typ Spezies Objekt  
@@ -311,12 +588,12 @@ public class CasePara {
 		frischGemisch_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezH2O(),mW/mFG);
 		//Kraftstoff
 		frischGemisch_MassenBruchHash.put(krst,mKrst/mFG);
-		
+
 		//Erstellen der Frischgemischspezies
 		GasGemisch frischGemsich=new GasGemisch("Frischgemisch");
 		frischGemsich.set_Gasmischung_massenBruch(frischGemisch_MassenBruchHash);
-		
-		
+
+
 		//Bestimmen der AGR-Zusammensetzung --> das Hinzufuegen von AGR hat keinen Einfluss auf die 
 		//AGR-Zusammensetzung da die Anzahl der c/h/o-Atome gleich bleibt und nur vom Frischgemisch abhaengt
 		GleichGewichtsRechner gg=this.OHC_SOLVER; //zirkuläre Referenz ;-( naja mal schauen...
@@ -327,16 +604,16 @@ public class CasePara {
 		abgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche(1e5, 1000, frischGemsich)); //T=1000K<T_Freeze
 		return abgas;
 	}
-	
-	
-	
-	
+
+
+
+
 	/*** 
 	 * @return liefert die Frischladung bei Einlassschluss(AGR extern +AGR intern + trockene Luft + Wasser)  
 	 * als Speziesobjekt 
 	 */		
 	public Spezies get_spezVerbrennungsLuft(){
-		
+
 		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....
 		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
 		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
@@ -355,26 +632,26 @@ public class CasePara {
 
 		return verbrennungsLuft;
 	}
-	
-	
+
+
 	/**
 	 * Liefert die Masse der Verbrennungsluft bei Einlassschluss bestehend aus: </br>
 	 * AGR extern +AGR intern + trockene Luft + Wasser
 	 * @return
 	 */
 	public double get_mVerbrennungsLuft_ASP(){
-		
+
 		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....
 		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
 		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
 		double mAGRex=cp.get_mAGR_extern_ASP();
 		double mAGRin=this.RESTGASMODELL.get_mInternesRestgas_ASP();//zirkuläre Referenz ;-( naja mal schauen...
 		double mAGR=mAGRex+mAGRin;		
-		
+
 		return mLuft_tr+mW+mAGR;
 	}
-	
-	
+
+
 	/**
 	 * Liefert die interne AGR-Rate bei Einlassschluss bestehend aus: </br>
 	 * AGR intern / (trockene Luft + Wasser); Kraftstoff wird dabei nicht </br>
@@ -386,11 +663,11 @@ public class CasePara {
 		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
 		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
 		double mAGRin=this.RESTGASMODELL.get_mInternesRestgas_ASP();//zirkuläre Referenz ;-( naja mal schauen...	
-		
+
 		return mAGRin/(mLuft_tr+mW);  //TODO Kraftstoffmasse aus Einspritzung bei Einlassschluss beruecksichtigen
 	}
-	
-	
+
+
 	/*** 
 	 * @return liefert  die externe AGR-Masse pro ASP in [kg]
 	 */	
@@ -403,8 +680,8 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
+
+
 	/**Diese Methode wird benoetigt wenn ohne Modell fuer das interne Restgas gerechnet werden soll
 	 * @return liefert die interne AGR-Masse pro ASP in [kg]
 	 */	
@@ -421,14 +698,14 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
-	
+
+
+
 	/*** 
 	 * @return liefert die feuchte Luftmasse pro Arbeitsspiel in [kg]
 	 */	
 	public double get_mLuft_feucht_ASP(){
-		
+
 		try {
 			return this.convert_ProStunde_2_ProASP(
 					set_doublePara(INPUTFILE_PARAMETER, "mLuft_feucht","[kg/h]",1e-6,Double.POSITIVE_INFINITY));
@@ -437,15 +714,15 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
+
 	/*** 
 	 * @return liefert die trockene Luftmasse pro Arbeitsspiel in [kg]
 	 */	
 	public double get_mLuft_trocken_ASP(){
-		
+
 		return this.get_mLuft_feucht_ASP()-this.get_mWasser_Luft_ASP();			
 	}
-	
+
 	/*** 
 	 * @return liefert die Wassermasse in der Ansaugluft pro Arbeitsspiel in [kg]
 	 */	
@@ -453,11 +730,11 @@ public class CasePara {
 		double x=this.get_WasserbeladungLadeLuft();
 		return this.get_mLuft_feucht_ASP()*x/(1+x);			
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	/*** 
 	 * @return liefert die Wasserbeladung X=mWasser/mluftTrocken der Ansaugluft in [kg/kg]
 	 */	
@@ -468,8 +745,8 @@ public class CasePara {
 		double p=this.get_p_FeuchteMessung();
 		return PhysKonst.get_R_Luft()/PhysKonst.get_R_H2O()*(pws/(p/phi-pws));	
 	}
-	
-	
+
+
 	/*** 
 	 * @return liefert die relative Luftfeuchte in [-]
 	 */	
@@ -477,7 +754,7 @@ public class CasePara {
 		double phi=-1;
 		try {
 			phi= set_doublePara(INPUTFILE_PARAMETER, "relative_Luftfeuchte","[%]",0,100);
-			
+
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();			
 		}	
@@ -485,25 +762,25 @@ public class CasePara {
 			try {
 				throw new ParameterFileWrongInputException("Ein relative Luftfeuchte von: "+
 						phi+ "% ist ungweoehnlich!");
-				
+
 			} catch (ParameterFileWrongInputException e) {
 				e.log_Warning();			
 			}		
 		}
-		
+
 		if(phi>100){
 			try {
 				throw new ParameterFileWrongInputException("Eine relative Luftfeuchte von: "+
 						phi+ "% ist unmoeglich!");
-				
+
 			} catch (ParameterFileWrongInputException e) {
 				e.stopBremo();			
 			}		
 		}
 		return phi/100;
-		
+
 	}
-	
+
 	/***
 	 * @return liefert den trockenen globalen Lambda-Wert aus den angegebenen Luftstrom und Massenstr
 	 */
@@ -516,9 +793,9 @@ public class CasePara {
 		double Lst=krst.get_Lst();	
 		return this.get_mLuft_trocken_ASP()/mKrst/Lst;
 	}
-	
-	
-		
+
+
+
 	/** 
 	 * @return liefert den Zündzeitpunkt in [s] nach Rechnungsbeginn 
 	 */	
@@ -537,14 +814,13 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
+
 	public double get_pmi(){
 		double std_pmi=-7.77;	//Standardwert für pmi (muss negativ sein, siehe z.B. das Wandwärmemodell "WoschniHuber"
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "pmi","[bar]",0,30); 
-		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Keiner oder der falsche pmi-Wert wurde angegeben. "+
-					"Es wird versucht, pmi aus der Indizierdatei zu berechnen ");
+		} catch (ParameterFileWrongInputException e) {				
+			e.stopBremo();
 			return std_pmi;
 		}
 	}
@@ -569,13 +845,27 @@ public class CasePara {
 	 */	
 	public int get_AnzahlEinspritzungen(){		
 		try {
-			return (int) set_doublePara(INPUTFILE_PARAMETER, "anzahlEinspritzungen","",1,Double.POSITIVE_INFINITY);
+			return (int) set_doublePara(INPUTFILE_PARAMETER, "anzahlEinspritzungen","",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {			
 			e.log_Warning();
-			return 1;
+			return -1;
 		}		
 	}
 	
+	/**
+	 * returns the index of the injection that will be used to form the 
+	 * zones for the RCCI multi Zone Combustion model
+	 * @return
+	 */
+	public int get_nbrOfMainInj(){		
+		try {
+			return (int) set_doublePara(INPUTFILE_PARAMETER, "nbrOfMainInj","",1,Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {			
+			e.log_Warning();
+			return -1;
+		}		
+	}
+
 	/**
 	 * Mehrfacheinspritzungen sind möglich --> über den Parameter  wird die Nummer der Einspritzung vorgegeben
 	 * @param  
@@ -593,7 +883,7 @@ public class CasePara {
 				e.stopBremo();				
 			}			
 		}
-		
+
 		if (anzEinspr==1){
 			suchString="BOI";
 		}else{
@@ -607,13 +897,13 @@ public class CasePara {
 			}else {					
 				return set_doublePara(INPUTFILE_PARAMETER, suchString,"[s]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
 			}
-			
+
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
 		}		
 	}	
-	
+
 	/**
 	 * Da Mehrfacheinspritzungen sind möglich --> über den Parameter @param  
 	 * wird die Nummer der Einspritzung vorgegeben
@@ -633,7 +923,7 @@ public class CasePara {
 				e.stopBremo();				
 			}			
 		}		
-		
+
 		if (anzEinspr==1){
 			suchString="EOI";
 		}else{
@@ -647,13 +937,13 @@ public class CasePara {
 			}else {			
 				return set_doublePara(INPUTFILE_PARAMETER, suchString,"[s]",get_BOI(i),SYS.SEC_OBERGRENZE);
 			}	
-			
+
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
 		}		
 	}
-	
+
 	/**
 	 * Liefert die ID der Zone in die die Einspritzung mit der  Nummer einspritzungsNr eingespritzt 
 	 * @param  
@@ -663,13 +953,13 @@ public class CasePara {
 		String  suchString;
 		int anzEinspr=get_AnzahlEinspritzungen();
 		int injZone=-1;
-		
+
 		if (anzEinspr==1){
 			suchString="InjZone";
 		}else{
 			suchString="InjZone_"+einspritzungsNr;
 		}
-		
+
 		if(einspritzungsNr>anzEinspr){
 			try {
 				throw new ParameterFileWrongInputException("Es wurde versucht den Parameter " + suchString + 
@@ -681,16 +971,16 @@ public class CasePara {
 			}			
 		}
 		try {	
-			
+
 			injZone =(int)(set_doublePara(INPUTFILE_PARAMETER, suchString,"[-]",
-														0,Integer.MAX_VALUE));			
+					0,Integer.MAX_VALUE));			
 			return injZone;
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return -1;
 		}		
 	}
-	
+
 	public Spezies get_kraftsoff(int einspritzungsNr){
 		int anzEinspr=this.get_AnzahlEinspritzungen();
 		String krstFlag;
@@ -707,14 +997,14 @@ public class CasePara {
 		moeglicheFlags[0]="ohc";  //jetzt schon ;-)
 		//Wasser kann man ja auch einspritzen
 		moeglicheFlags[1]="Wasser";  //jetzt schon ;-)
-		
+
 		int iter=2;
 		Enumeration<String> e=krstHash.keys();		
 		while(e.hasMoreElements()){
 			moeglicheFlags[iter]=e.nextElement();
 			iter++;
 		}		
-			
+
 
 		String krstAngabe=null;
 		try{
@@ -722,9 +1012,9 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException ex) {				
 			ex.stopBremo();
 		}
-		
-		
-		
+
+
+
 		if (krstAngabe.equals(moeglicheFlags[0])){
 			//TODO Programmieren der Eingabe fuer die Krst-ApproxSpezies nach Grill
 			try{
@@ -739,9 +1029,15 @@ public class CasePara {
 		}else 
 			return krstHash.get(krstAngabe); //die Fehlerabfrage erfolgt bereits innerhalb der Methode 
 		//"set_StringPara" da der hier uebergebene Vektor alle moeglichen krstAngaben enthaelt.
-				
+
 	}	
-	
+
+	/**
+	 * returns the mass of fuel in [kg/cycle] for the injection 
+	 * injection with the index: einspritzungsNr
+	 * @param einspritzungsNr
+	 * @return
+	 */
 	public double get_mKrst_ASP(int einspritzungsNr){
 		int anzEinspr=this.get_AnzahlEinspritzungen();
 		String krstFlag;
@@ -750,7 +1046,7 @@ public class CasePara {
 		}else{
 			krstFlag="mKrst_"+einspritzungsNr;
 		}		
-		
+
 		try {
 			return this.convert_ProStunde_2_ProASP(
 					set_doublePara(INPUTFILE_PARAMETER, krstFlag,"[kg/h]",0,Double.POSITIVE_INFINITY));
@@ -759,8 +1055,8 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
+
+
 	/**
 	 * Liefert die Anzahl axialer Pakete bei einem Einspritzmodell mit Paketansatz 
 	 * (z.B. Hiroyasu)
@@ -775,7 +1071,7 @@ public class CasePara {
 		}else{
 			flag="anzAxialPakete_"+einspritzungsNr;
 		}		
-		
+
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1,1000);
 		} catch (ParameterFileWrongInputException e) {
@@ -783,7 +1079,7 @@ public class CasePara {
 			return 0;
 		}			
 	}
-	
+
 	/**
 	 * Liefert die Anzahl radialer Pakete bei einem Einspritzmodell mit Paketansatz 
 	 * (z.B. Hiroyasu)
@@ -798,7 +1094,7 @@ public class CasePara {
 		}else{
 			flag="anzRadialPakete_"+einspritzungsNr;
 		}		
-		
+
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1,1000);
 		} catch (ParameterFileWrongInputException e) {
@@ -806,7 +1102,7 @@ public class CasePara {
 			return 0;
 		}			
 	}
-	
+
 	/**
 	 * Liefert die Anzahl radialer Pakete bei einem Einspritzmodell mit Paketansatz 
 	 * (z.B. Hiroyasu)
@@ -828,7 +1124,7 @@ public class CasePara {
 			return 0;
 		}			
 	}	
-	
+
 
 
 	public double get_anzSPL(int einspritzungsNr) {
@@ -846,8 +1142,8 @@ public class CasePara {
 			return 0;
 		}			
 	}
-	
-	
+
+
 	public double get_CdFaktor(int einspritzungsNr) {
 		int anzEinspr=this.get_AnzahlEinspritzungen();
 		String flag;
@@ -863,7 +1159,39 @@ public class CasePara {
 			return 0;
 		}			
 	}
-	
+
+	public double get_EntrainmentFaktor(int einspritzungsNr) {
+		int anzEinspr=this.get_AnzahlEinspritzungen();
+		String flag;
+		if(anzEinspr==1){
+			flag="EntrainmentFaktor";	
+		}else{
+			flag="EntrainmentFaktor_"+einspritzungsNr;
+		}			
+		try {
+			return 	 set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1e-9,100); //beliebig gewaehlt
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+			return 0;
+		}			
+	}
+
+	public double get_ProfilFaktor(int einspritzungsNr) {
+		int anzEinspr=this.get_AnzahlEinspritzungen();
+		String flag;
+		if(anzEinspr==1){
+			flag="ProfilFaktor";	
+		}else{
+			flag="ProfilFaktor_"+einspritzungsNr;
+		}			
+		try {
+			return 	 set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1e-9,100); //beliebig gewaehlt
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+			return 0;
+		}			
+	}
+
 	public double get_durchmSPL(int einspritzungsNr) {
 		int anzEinspr=this.get_AnzahlEinspritzungen();
 		String flag;
@@ -930,14 +1258,14 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
+
+
 	/** 
 	 * @return liefert den Heizwert fuer RON91 [J/mol]
 	 */	
 	public double get_Hu_RON_91(){
 		double stdHu=4581231.2590484;//4.5951702590484*1e6; //berechnet passend zu den Koeffizienten
-	
+
 		try {
 			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_RON_91","[MJ/mol]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
@@ -946,62 +1274,62 @@ public class CasePara {
 			return stdHu;
 		}		
 	}
-	
 
-	
+
+
 	/** 
 	 * @return liefert den Heizwert fuer RON95 [J/mol]
 	 */	
 	public double get_Hu_RON_95(){
 		double stdHu=4211277.132508449; //4.247052132508449*1e6; //berechnet  passend zu den Koeffizienten
-		
+
 		try {
 			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_RON_95","[MJ/mol]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftatoff \"RON_95\" wurde kein Heizwert angegeben. \n" +
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"RON_95\" wurde kein Heizwert angegeben. \n" +
 					"Es wird mit dem Standardwert gerechnet: " +stdHu + "[J/mol]");
 			return stdHu;
 		}		
 	}
-	
+
 	/** 
 	 * @return liefert den Heizwert fuer RON98 [J/mol]
 	 */
 	public double get_Hu_RON_98(){
 		double stdHu=4108620.6027614996;//4.1520586027615*1e6; //gerechnet passend zu den Koeffizienten		
-	
+
 		try {
 			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_RON_98","[MJ/mol]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftatoff \"RON_98\" wurde kein Heizwert angegeben. \n" +
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"RON_98\" wurde kein Heizwert angegeben. \n" +
 					"Es wird mit dem Standardwert gerechnet: " +stdHu +  "[J/mol]");			
 			return stdHu;
 		}		
 	}
-	
+
 	/** 
 	 * @return liefert den Heizwert fuer Diesel [J/mol]
 	 */	
 	public double get_Hu_Diesel(){
 		double stdHu=7849471.20749425;//7.803475207494249*1e6; //berechnet passend zu den Koeffizienten
-		
+
 		try {
 			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_Diesel","[MJ/mol]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftatoff \"Diesel\" wurde kein Heizwert angegeben. \n" +
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"Diesel\" wurde kein Heizwert angegeben. \n" +
 					"Es wird mit dem Standardwert gerechnet: " +stdHu + "[J/mol]");
 
 			return stdHu;
 		}		
 	}
-	
-	
-	
+
+
+
 	/** 
 	 * @return liefert den Heizwert fuer eine Krstoffapproximationsspezies [J/mol]
 	 */	
 	public double get_Hu_ohc(){
-		
+
 		double stdHu=Double.NaN; //TODO Heizwertangeben
 		try {
 			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_ohc","[MJ/mol]",0,Double.NaN); 
@@ -1010,8 +1338,38 @@ public class CasePara {
 			return stdHu;
 		}		
 	}
-	
-	
+	/**
+	 * When Cantera is used this method returns
+	 * a factor to adopt the LHV of model fuel(s)
+	 * to the ones of the the experimental fuel(s)
+	 * @return
+	 */
+	public double get_lhvCorr(){
+		double lhvCorr=1;
+		try {
+			lhvCorr= set_doublePara(INPUTFILE_PARAMETER, "lhvCorr","[-]",0,1); 
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();	
+		}					
+		return lhvCorr;
+	}
+
+	/**
+	 * Returns a factor to multiply the wall heat transfer 
+	 * density with and thus the actual wall heat transfer 
+	 * @return
+	 */
+	public double get_whtfMult(){
+		double whtfCorr=1;
+		try {
+			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, "whtfMult","[-]",0,Double.MAX_VALUE); 
+		} catch (ParameterFileWrongInputException e) {			
+			e.stopBremo();	
+		}					
+		return whtfCorr;
+	}
+
+
 	/** 
 	 * @return liefert einen Vektor mit den o/h/c-Atomen fuer eine Krstoffapproximationsspezies 
 	 */	
@@ -1028,10 +1386,10 @@ public class CasePara {
 			return ohc;
 		}		
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * @return liefert den Zeitpunkt, bei dem der Zylinderdruckabgleich beginnen soll [s n. Rechenbegin]
 	 */
@@ -1081,7 +1439,7 @@ public class CasePara {
 			return Double.NaN;
 		}
 	}	
-	
+
 	/**
 	 * Liefert den Volumenbruch der HC-Emissionen
 	 * @return HC oder 0 wenn im inputFile nicht angegeben
@@ -1110,16 +1468,16 @@ public class CasePara {
 			return 0;
 		}
 	}
-	
-	
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
-							private void xxx_AB_HIER_TEMPERATUREN(){}
+	private void xxx_AB_HIER_TEMPERATUREN(){}
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	/** 
 	 * @return Gibt die Temperatur im Zylinder bei Einlassschluss in [K] zurück. 
 	 * Wird diese Temperatur nicht vorgegeben so wird automatisch T_Ladeluft zurück gegeben
@@ -1133,13 +1491,13 @@ public class CasePara {
 			return get_T_LadeLuft();
 		}		
 	}
-	
-	
+
+
 	/** 
 	 * @return Gibt die Temperatur der Ladeluft in [K] zurück
 	 */
 	public double get_T_LadeLuft(){
-		
+
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "T_Ladeluft","[K]",250,1000);
 		} catch (ParameterFileWrongInputException e) {
@@ -1147,12 +1505,12 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
+
 	/** 
 	 * @return Gibt die Temperatur der Ladeluft in [K] zurück
 	 */
 	public double get_T_Abgas(){
-		
+
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "T_Abgas","[K]",400,2000);
 		} catch (ParameterFileWrongInputException e) {
@@ -1160,9 +1518,9 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
+
 	public double get_T_FeuchteMessung(){
-		
+
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "T_FeuchteMessung","[K]",1e-6,1000);
 		} catch (ParameterFileWrongInputException e) {
@@ -1170,9 +1528,9 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
-	
+
+
+
 	/** 
 	 * @return Gibt die Temperatur bei Einlassschluss in [K] zurück
 	 */
@@ -1189,7 +1547,7 @@ public class CasePara {
 			return T_Wand;
 		}
 	}
-	
+
 	/**
 	 * Liefert die Temperatur des FLÜSSIGEN Kraftstoffs	
 	 * @return
@@ -1206,7 +1564,7 @@ public class CasePara {
 				e.stopBremo();				
 			}			
 		}		
-		
+
 		if (anzEinspr==1){
 			suchString="T_Krst_fluessig";
 		}else{
@@ -1214,16 +1572,16 @@ public class CasePara {
 		}
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, suchString,"[K]",-273.15,Double.POSITIVE_INFINITY);			
-			
+
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
 		}		
 	}
-	
-	
-	
-	
+
+
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -1231,12 +1589,12 @@ public class CasePara {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	/*** 
 	 * @return liefert den Druck vor den Einlassventilen in [Pa]
 	 */	
 	public double get_p_LadeLuft(){
-		
+
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "p_Ladeluft","[Pa]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {
@@ -1249,7 +1607,7 @@ public class CasePara {
 	 * @return liefert den Druck vor den Auslassventilen in [Pa]
 	 */	
 	public double get_p_Abgas() {
-		
+
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "p_Abgas","[Pa]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {
@@ -1257,7 +1615,7 @@ public class CasePara {
 			return Double.NaN;
 		}
 	}
-		
+
 	public double get_p_FeuchteMessung(){		
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "p_FeuchteMessung","[Pa]",0,Double.POSITIVE_INFINITY);
@@ -1266,8 +1624,8 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}	
-	
-	
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -1295,13 +1653,13 @@ public class CasePara {
 			return Double.NaN;
 		}
 	}
-	
 
-	
-	
-						
-						
-						
+
+
+
+
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -1316,7 +1674,7 @@ public class CasePara {
 	 */
 	public double get_DruckKammerVolumen() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "DruckKammerVolumen","[m^2]",1e-10,Double.MAX_VALUE); 
+			return set_doublePara(INPUTFILE_PARAMETER, "DruckKammerVolumen","[m^3]",1e-10,Double.MAX_VALUE); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -1334,7 +1692,7 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
+
 	/** 
 	 * @return Gibt den Bohrungsdurchmesser in [m] zurück.	 * 
 	 * */
@@ -1347,7 +1705,7 @@ public class CasePara {
 		}		
 	}	
 
-	
+
 	/** 
 	 * @return Gibt den Kurbelradius in [m] zurück.	Dieser ist nicht unbedingt
 	 * gleich 0.5xHub, z.B. bei einer Desachsierung.* 
@@ -1360,8 +1718,8 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
+
+
 	/** 
 	 * @return Gibt die Verdichtung zurück.
 	 * Die Verdichtung muss zwischen 1 und 30 liegen
@@ -1374,13 +1732,13 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
+
+
 
 	/** 
 	 * @return Gibt die Kolbenflaeche in [m^2]zurück.
 	 * */
-	public double get_Kolbenflaeche(){		
+	public double get_pistonArea(){		
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "Kolbenflaeche","[m^2]",0.00002,5); //aus minimaler Bohrung und aus maximaler Bohrung berechnet
 		} catch (ParameterFileWrongInputException e) {
@@ -1388,12 +1746,12 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
+
+
 	/** 
 	 * @return Gibt die Kolbenflaeche in [m^2]zurück.
 	 * */
-	public double get_Brennraumdachflaeche(){		
+	public double get_fireDeckArea(){		
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "Brennraumdachflaeche","[m^2]",0.00002,5); //aus minimaler Bohrung und aus maximaler Bohrung berechnet
 		} catch (ParameterFileWrongInputException e) {
@@ -1401,7 +1759,7 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
+
 	/** 
 	 * @return Gibt die Feuersteghoehe in [m]zurück.
 	 * */
@@ -1413,7 +1771,7 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
+
 	public double get_Quetschspalthoehe() {
 		double Quetschspalthoehe;		
 		try {
@@ -1424,7 +1782,7 @@ public class CasePara {
 			return Double.NaN;
 		}
 	}	
-	
+
 	/** 
 	 * @return Gibt die Schränkung in [m]zurück.
 	 * */
@@ -1436,9 +1794,9 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
-	
+
+
+
 	/** 
 	 * @return Gibt die Desachsierung in [m]zurück.
 	 * */
@@ -1450,16 +1808,16 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-	
-	
-	
-	
+
+
+
+
 	/** 
 	 * @return Gibt den Zeitpunkt Auslassschluss in [s] nach Rechenbeginn zurück.
 	 * */
 	public double get_Auslassschluss(){		
-//		TODO Grenzwerte richtig setzen auf Basis des ZOT --> wird aber wieder schwierig mit den Zeitbasierten Angaben
-//		und dann noch die umrechnung der Zeit mit convert_KW2SEC
+		//		TODO Grenzwerte richtig setzen auf Basis des ZOT --> wird aber wieder schwierig mit den Zeitbasierten Angaben
+		//		und dann noch die umrechnung der Zeit mit convert_KW2SEC
 		try {
 			if(SYS.IS_KW_BASIERT){			
 				double AV_S;
@@ -1468,72 +1826,72 @@ public class CasePara {
 			}else {			
 				return set_doublePara(INPUTFILE_PARAMETER, "Auslassschluss","[s]",get_Auslassoeffnet(),SYS.SEC_OBERGRENZE);
 			}	
-			
+
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
 		}		
 	}	
-	
-	
+
+
 	/** 
 	 * @return Gibt den Zeitpunkt Auslassoeffnet  in [s] nach Rechenbeginn zurück.
 	 * */
 	public double get_Auslassoeffnet(){		
-//		TODO Grenzwerte richtig setzen auf Basis des ZOT --> wird aber wieder schwierig mit den Zeitbasierten Angaben
-//		und dann noch die umrechnung der Zeit mit convert_KW2SEC
+		//		TODO Grenzwerte richtig setzen auf Basis des ZOT --> wird aber wieder schwierig mit den Zeitbasierten Angaben
+		//		und dann noch die umrechnung der Zeit mit convert_KW2SEC
 		try {
 			if(SYS.IS_KW_BASIERT){					
 				return  convert_KW2SEC(
 						set_doublePara(INPUTFILE_PARAMETER, "Auslassoeffnet","[KWnZOT]",SYS.KW_UNTERGRENZE,SYS.KW_OBERGRENZE));
-				
+
 			}else {			
 				return set_doublePara(INPUTFILE_PARAMETER, "Auslassoeffnet","[s]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
 			}	
-			
+
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
 		}		
 	}
-	
+
 	public double get_Auslassoeffnet_KW(){
 		return convert_SEC2KW(get_Auslassoeffnet());
 	}
-	
-	
+
+
 	/** 
 	 * @return Gibt den Zeitpunkt Einlassoeffnet in [s] nach Rechenbeginn zurück.
 	 * */
 	public double get_Einlassoeffnet(){		
-//		TODO Grenzwerte richtig setzen auf Basis des ZOT --> wird aber wieder schwierig mit den Zeitbasierten Angaben
-//		und dann noch die umrechnung der Zeit mit convert_KW2SEC
+		//		TODO Grenzwerte richtig setzen auf Basis des ZOT --> wird aber wieder schwierig mit den Zeitbasierten Angaben
+		//		und dann noch die umrechnung der Zeit mit convert_KW2SEC
 		try {
 			if(SYS.IS_KW_BASIERT){			
 				return convert_KW2SEC(
 						set_doublePara(INPUTFILE_PARAMETER, "Einlassoeffnet","[KWnZOT]",SYS.KW_UNTERGRENZE,SYS.KW_OBERGRENZE));
-				
+
 			}else {			
 				return set_doublePara(INPUTFILE_PARAMETER, "Einlassoeffnet","[s]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
 			}	
-			
+
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
 		}	
-		
+
 	}
-	
+
 	public double get_Einlassoeffnet_KW(){
 		return convert_SEC2KW(get_Einlassoeffnet());
 	}
-	
+
 	/** 
 	 * @return Gibt den Zeitpunkt Einlassschliesst in [s] nach Rechenbeginn zurück.
 	 * */
 	public double get_Einlassschluss(){		
-//		TODO Grenzwerte richtig setzen auf Basis des ZOT --> wird aber wieder schwierig mit den Zeitbasierten Angaben
-//		und dann noch die umrechnung der Zeit mit convert_KW2SEC. 
+		//		TODO Grenzwerte richtig setzen auf Basis des ZOT --> wird aber wieder schwierig mit den Zeitbasierten Angaben
+		//		und dann noch die umrechnung der Zeit mit convert_KW2SEC. 
 		//Ausserdem ist natuerlich Einlassoeffnet der untere Grenzwert dieser wird aber nur in sec zurueck gegeben
 		try {
 			if(SYS.IS_KW_BASIERT){			
@@ -1543,12 +1901,12 @@ public class CasePara {
 			}else {			
 				return set_doublePara(INPUTFILE_PARAMETER, "Einlassschluss","[s]",get_Einlassoeffnet(),SYS.SEC_OBERGRENZE);
 			}	
-			
+
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
 		}	
-		
+
 	}
 	/** 
 	 * @return Gibt den Einlassventilhub in [m]
@@ -1562,9 +1920,9 @@ public class CasePara {
 			e.stopBremo();
 			return Double.NaN;
 		}
-		
+
 	}
-	
+
 	/** 
 	 * @return Gibt den maximalen erlaubten Einlassventilhub in [m]
 	 * */
@@ -1646,7 +2004,7 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException e) {
 			e.log_Warning("Der Wert fuer \"RefFlaecheAuslass\" wurde im Inputfile nicht angegeben. \n " +
 					"Es wird mit \"Kolbenflaeche\" gerechnet!");
-			return get_Kolbenflaeche();
+			return get_pistonArea();
 		}		
 	}
 	/** 
@@ -1660,11 +2018,11 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException e) {
 			e.log_Warning("Der Wert fuer \"RefFlaecheEinlass\" wurde im Inputfile nicht angegeben. \n " +
 					"Es wird mit \"Kolbenflaeche\" gerechnet!");
-			return get_Kolbenflaeche();
+			return get_pistonArea();
 		}		
 	}
-	
-	
+
+
 	/** 
 	 * @return Gibt den Referenzdurchmesser zurück, der für die
 	 * Durchflusskennzahlen des Einlassventils verwendet werden soll.
@@ -1679,7 +2037,7 @@ public class CasePara {
 			return get_Bohrung();
 		}	
 	}
-	
+
 	/** 
 	 * @return Gibt den Referenzdurchmesser zurück, der für die
 	 * Durchflusskennzahlen des Auslassventils verwendet werden soll.
@@ -1694,8 +2052,32 @@ public class CasePara {
 			return get_Bohrung();
 		}	
 	}	
-	
-	
+
+	/**
+	 * 
+	 * @param ventil
+	 * @return Gibt das Ventilspiel des ensprechenden Ventils zurück.
+	 */
+	public double get_Ventilspiel(String ventil) {
+		double tmpSpiel = 0;
+		if(ventil.equalsIgnoreCase("Einlass")) {
+			try {
+				tmpSpiel = set_doublePara(INPUTFILE_PARAMETER, "ventilspielEV", "[m]",0,0.001);
+			} catch (ParameterFileWrongInputException e) {
+				e.log_Warning("Der Wert für \"ventilspielEV\" wurde im Inputfile nicht oder falsch angegeben. \n " +
+						"Es wird ohne Spiel gerechnet!");
+			}
+		}
+		if(ventil.equalsIgnoreCase("Auslass")) {
+			try {
+				tmpSpiel = set_doublePara(INPUTFILE_PARAMETER, "ventilspielAV", "[m]",0,0.001);
+			} catch (ParameterFileWrongInputException e) {
+				e.log_Warning("Der Wert für \"ventilspielAV\" wurde im Inputfile nicht oder falsch angegeben. \n " +
+						"Es wird ohne Spiel gerechnet!");
+			}
+		}
+		return tmpSpiel;
+	}
 	/**
 	 * @param
 	 * @return liefert den Abstand zwischen dem Brennraumdach und dem Kolben im oberen Totpunkt [m]. Dieser wird
@@ -1712,14 +2094,12 @@ public class CasePara {
 		}
 	}	
 
-	
-	
 
 	private double set_doublePara(Hashtable<String,String []> parameterInHash, 
 			String paraNameToSet, 
 			String [] moeglicheEinheiten, 
 			double min, double max) throws ParameterFileWrongInputException{
-		
+
 		Double temp;
 		boolean found=false;
 
@@ -1737,7 +2117,7 @@ public class CasePara {
 
 		}catch(NullPointerException e){
 			throw new ParameterFileWrongInputException ("Es wurde versucht, den Parameter \"" +  paraNameToSet + "\" zu setzen. \n " +
-			"Dieser ist im Parameterfile aber nicht vorhanden.");	
+					"Dieser ist im Parameterfile aber nicht vorhanden.");	
 		}
 
 		//...und dann wird ueberprüft ob der Wert die richtige Einheit hat...
@@ -1764,9 +2144,9 @@ public class CasePara {
 
 		return temp;
 	}
-	
-	
-	
+
+
+
 
 
 
@@ -1790,8 +2170,8 @@ public class CasePara {
 		return set_doublePara(parameterInHash,paraNameToSet, einheiten, min, max);
 
 	}	
-	
-	
+
+
 	private String set_StringPara(Hashtable<String, String[]> parameterInHash, 
 			String paraNameToSet,String [] possibleParaValues) throws ParameterFileWrongInputException{
 		String temp = null;
@@ -1801,11 +2181,12 @@ public class CasePara {
 		}catch(NullPointerException e){
 			throw new ParameterFileWrongInputException ("Es wurde versucht, den Parameter \"" +  paraNameToSet + 
 					"\" zu setzen. \n" +
-			"Dieser ist im Parameterfile aber nicht vorhanden.");	
+					"Dieser ist im Parameterfile aber nicht vorhanden.");	
 		}			
 
 		for( int i=0;i<possibleParaValues.length;i++){		
-			if(temp.equalsIgnoreCase(possibleParaValues[i]))
+			//if(temp.equalsIgnoreCase(possibleParaValues[i]))
+			if(temp.equals(possibleParaValues[i]))
 				found=true;			
 		}
 
@@ -1819,8 +2200,8 @@ public class CasePara {
 		}		
 		return temp;
 	}	
-	
-	
+
+
 	private String set_FileName(Hashtable<String, String[]> parameterInHash, 
 			String paraNameToSet) throws ParameterFileWrongInputException{
 		String temp = null;
@@ -1829,19 +2210,19 @@ public class CasePara {
 		}catch(NullPointerException e){
 			throw new ParameterFileWrongInputException ("Es wurde versucht, den Parameter \"" +  paraNameToSet + 
 					"\" zu setzen. \n" +
-			"Dieser ist im Parameterfile aber nicht vorhanden.");	
+					"Dieser ist im Parameterfile aber nicht vorhanden.");	
 		}			
 		return temp;
 	}	
 
 
-/**
- * Überprueft ob der angegebene Wert innerhalb der vorgegebenen Grenzen liegt
- * @param wert
- * @param min
- * @param max
- * @return gibt true zurück wenn der Wert innerhalb der Grenzen liegt
- */
+	/**
+	 * Überprueft ob der angegebene Wert innerhalb der vorgegebenen Grenzen liegt
+	 * @param wert
+	 * @param min
+	 * @param max
+	 * @return gibt true zurück wenn der Wert innerhalb der Grenzen liegt
+	 */
 	private boolean checkMinMax(double wert, double min, double max){
 		if(wert>max){			
 			return false;
@@ -1852,7 +2233,7 @@ public class CasePara {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param zeitpunktKW Zeitpunkt in [KWnZOT]
@@ -1861,8 +2242,8 @@ public class CasePara {
 	public double convert_KW2SEC(double zeitpunktKW){		
 		return(zeitpunktKW-SYS.RECHNUNGS_BEGINN_DVA_KW)/(360*get_DrehzahlInUproSec());		 	
 	}
-	
-	
+
+
 	/**
 	 * Liefert den Kurbelwinkel zur angegebenen Zeit
 	 * @param time in [s nach Rechenbeginn]
@@ -1871,24 +2252,23 @@ public class CasePara {
 	public double convert_SEC2KW(double time){
 		return get_DrehzahlInUproSec()*360*time+SYS.RECHNUNGS_BEGINN_DVA_KW;	
 	}
-	
-	
+
+
 	public double convert_ProSEC_2_ProKW(double valueToconvert){
 		double time=1;
 		return valueToconvert/(get_DrehzahlInUproSec()*360*time);
 	}
-	
+
 	public double convert_ProKW_2_ProSEC(double valueToconvert){		
 		return valueToconvert*(get_DrehzahlInUproSec()*360);
 	}
 
-	
+
 	public double convert_ProStunde_2_ProASP(double valueToconvert){
 		double faktor=3600/(SYS.DAUER_ASP_KW/(360*get_DrehzahlInUproSec()));
 		return valueToconvert/faktor;
 	}
-	
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1898,11 +2278,11 @@ public class CasePara {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////	
-	
+
 	public  class SysPara{
 		private final Hashtable<String,String[]> PARAMETER;
-		
-		
+
+
 		public final boolean DUBUGGING_MODE;
 		public final double DUBUGGING_TIME_SEC;
 		
@@ -1915,21 +2295,21 @@ public class CasePara {
 		
 		public final double WRITE_INTERVAL_SEC;
 		public final int ANZ_BERECHNETER_WERTE;
-		
+
 		//je nach gewählter Rechnungsart in [s] oder [KW]
 		public final double RECHNUNGS_BEGINN_DVA_KW;
 		public final double RECHNUNGS_ENDE_DVA_KW;
 		public final double RECHNUNGS_BEGINN_DVA_SEC;
 		public final double RECHNUNGS_ENDE_DVA_SEC;
 		public final double KW_UNTERGRENZE,KW_OBERGRENZE,SEC_UNTERGRENZE, SEC_OBERGRENZE;
-		
+
 		public final double DAUER_ASP_KW;
 		public final double DAUER_ASP_SEC;
 		/**
 		 * Liefert die Umdrehungen pro Arbeitsspiel
 		 */
 		public final double UMD_ASP;
-		
+
 		public final boolean IS_KW_BASIERT;	
 		public final boolean IS_ZEIT_BASIERT;
 		public final boolean IS_ZEIT_BASIERT_START_IN_KW;
@@ -1972,14 +2352,10 @@ public class CasePara {
 		 */
 		public final boolean STD_BILDUNGSENTHALPIE_IS_CHEMIE_STANDARD;
 
-		
-		
-		
-		
 		public SysPara(Hashtable<String, String[]> parameterVorgaben) throws ParameterFileWrongInputException{
-			
+
 			PARAMETER=parameterVorgaben;				
-			
+
 			String [] yesno ={"ja" , "nein"};	
 			if(set_StringPara(PARAMETER,"debuggingMode",yesno ).equalsIgnoreCase("ja"))
 				DUBUGGING_MODE=true;
@@ -2052,9 +2428,9 @@ public class CasePara {
 			NULLLINIEN_METHODE=set_StringPara(PARAMETER,"nullLinienMethode",s1);
 				
 
-			String [] s2 ={"Janaf" , "Burcat"};	
+			String [] s2 ={"Janaf", "NASA9" , "Burcat", "ERC"};	
 			THERMO_POLYNOM_KOEFF_VORGABE=set_StringPara(PARAMETER,"polynomKoeffizienten", s2);
-			
+
 
 			String [] s3 ={"Janaf" , "Burcat","Olikara"};	
 			GLEICHGEWICHTSKONSTANTEN_VORGABE=set_StringPara(PARAMETER,"gleichGewichtsKonstanten", s3);			
@@ -2089,14 +2465,14 @@ public class CasePara {
 				DAUER_ASP_KW=360;
 				UMD_ASP=1;
 			}		
-			
+
 			KW_UNTERGRENZE=-1*this.DAUER_ASP_KW; //gilt für die Definition aller KW Angaben in KWnZOT
 			KW_OBERGRENZE=this.DAUER_ASP_KW;
-			
+
 			//TODO Die Zeitbasierten grenzwerte richtig Definieren
 			SEC_UNTERGRENZE=Double.NEGATIVE_INFINITY;
 			SEC_OBERGRENZE=Double.POSITIVE_INFINITY;
-			
+
 
 			String []s ={"sec","sec_RechenBeginnInKW", "KW"};		
 			if(set_StringPara(PARAMETER,"zeit_oder_KW_Basiert",s).equalsIgnoreCase("KW")){
@@ -2124,55 +2500,55 @@ public class CasePara {
 				//TODO Grenzwerte mittels Einlassoeffnet und Auslassschließt definieren. 
 				//Fuer die Ladungswechselanalyse werden eigene Rechenbeginne und Rechenenden definiert.
 				WRITE_INTERVAL_SEC= WRITE_INTERVAL_KW/(360*get_DrehzahlInUproSec());
-				
+
 				RECHNUNGS_BEGINN_DVA_KW=set_doublePara(PARAMETER, "rechnungsBeginn","[KWnZOT]",
 						KW_UNTERGRENZE,KW_OBERGRENZE);				
-				
+
 				RECHNUNGS_ENDE_DVA_KW=set_doublePara(PARAMETER, "rechnungsEnde","[KWnZOT]",
 						RECHNUNGS_BEGINN_DVA_KW,KW_OBERGRENZE);		
 				//der Anfang zaehlt mit
 				ANZ_BERECHNETER_WERTE=(int)((RECHNUNGS_ENDE_DVA_KW-RECHNUNGS_BEGINN_DVA_KW)/WRITE_INTERVAL_KW)+1;
 
 				RECHNUNGS_ENDE_DVA_SEC=(ANZ_BERECHNETER_WERTE-1)*WRITE_INTERVAL_SEC;			
-				
+
 				RECHNUNGS_BEGINN_DVA_SEC=0;				
-				
+
 				if(DUBUGGING_MODE){
 					double b=set_doublePara(PARAMETER, "debuggingTime","[KWnZOT]",RECHNUNGS_BEGINN_DVA_KW,RECHNUNGS_ENDE_DVA_KW+DAUER_ASP_KW);
-					
+
 					DUBUGGING_TIME_SEC=(b-RECHNUNGS_BEGINN_DVA_KW)/(360*get_DrehzahlInUproSec());	
-					
+
 				}else{
 					DUBUGGING_TIME_SEC=RECHNUNGS_BEGINN_DVA_SEC;
 				}
-				
+
 
 			}else if(IS_ZEIT_BASIERT){
 				//TODO um die gesamte zeitbasierte sache muss sich noch jemand kuemmern!!!
-				
+
 				//min-Wert --> ca. 0.01°KW bei 18000U/min
 				//max-Wert --> ca .2°KW bei 50 U/min
-				WRITE_INTERVAL_SEC=set_doublePara(PARAMETER, "rechnungsSchrittweite","[s]",9.5e-5,6.7e-3);
-				
+				WRITE_INTERVAL_SEC=set_doublePara(PARAMETER, "rechnungsSchrittweite","[s]",9.5e-7,6.7e-3);
+
 				//muss eigentlich nur passend zum MotorFile und DruckFile sein
 				RECHNUNGS_BEGINN_DVA_SEC=set_doublePara(PARAMETER, "rechnungsBeginn","[s]",
 						Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);				
 
 				RECHNUNGS_ENDE_DVA_SEC=set_doublePara(PARAMETER, "rechnungsEnde","[s]",
 						RECHNUNGS_BEGINN_DVA_SEC,Double.POSITIVE_INFINITY);		
-				
+
 				ANZ_BERECHNETER_WERTE=(int)(( RECHNUNGS_ENDE_DVA_SEC-RECHNUNGS_BEGINN_DVA_SEC)/WRITE_INTERVAL_SEC)+1;
-				
+
 				//final Variablen muessen mir Werten belegt werden
 				RECHNUNGS_BEGINN_DVA_KW=555.555;
 				RECHNUNGS_ENDE_DVA_KW=555.555;
-			
+
 				if(DUBUGGING_MODE){
 					DUBUGGING_TIME_SEC=set_doublePara(PARAMETER, "debuggingTime","[s]",RECHNUNGS_BEGINN_DVA_SEC,RECHNUNGS_ENDE_DVA_SEC);
 				}else{
 					DUBUGGING_TIME_SEC=RECHNUNGS_BEGINN_DVA_SEC;
 				}				
-				
+
 			}else if(IS_ZEIT_BASIERT_START_IN_KW){
 				//min-Wert --> ca. 0.01°KW bei 18000U/min
 				//max-Wert --> ca .2°KW bei 50 U/min
@@ -2180,18 +2556,18 @@ public class CasePara {
 
 				RECHNUNGS_BEGINN_DVA_KW=set_doublePara(PARAMETER, "rechnungsBeginn","[KWnZOT]",
 						KW_UNTERGRENZE,KW_OBERGRENZE);	
-				
+
 				RECHNUNGS_BEGINN_DVA_SEC=0;	
 
 				RECHNUNGS_ENDE_DVA_SEC=set_doublePara(PARAMETER, "rechnungsEnde","[s]",
 						RECHNUNGS_BEGINN_DVA_SEC,Double.POSITIVE_INFINITY);	
 				//die Zeitrechnung beginnt hier bei null!
 				ANZ_BERECHNETER_WERTE=(int)(RECHNUNGS_ENDE_DVA_SEC/WRITE_INTERVAL_SEC)+1;
-				
+
 				RECHNUNGS_ENDE_DVA_KW=360*get_DrehzahlInUproSec()*RECHNUNGS_ENDE_DVA_SEC;			
-			
-			
-				
+
+
+
 				if(DUBUGGING_MODE){
 					DUBUGGING_TIME_SEC=set_doublePara(PARAMETER, "debuggingTime","[s]",RECHNUNGS_BEGINN_DVA_SEC,RECHNUNGS_ENDE_DVA_SEC);
 				}else{
@@ -2201,7 +2577,7 @@ public class CasePara {
 				RECHNUNGS_BEGINN_DVA_SEC=0;
 				RECHNUNGS_ENDE_DVA_SEC=0;
 				ANZ_BERECHNETER_WERTE=-1;
-				
+
 				throw new ParameterFileWrongInputException("Die Flags: \"IS_ZEIT_BASIERT_START_IN_KW\", \" IS_ZEIT_BASIERT\" " +
 						"oder \"IS_KW_BASIERT\" wurden nicht richtig gesetzt ");			
 			}

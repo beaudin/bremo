@@ -47,7 +47,7 @@ public class SimpleDirektEinspritzung extends Einspritzung {
 		}		
 		super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,mKrst_verdampft );
 		//Krst verdampft sofort
-		super.mKrst_fluesssig.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, 0);
+		super.mKrst_fluessig.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, 0);
 	}
 	
 	
@@ -60,7 +60,7 @@ public class SimpleDirektEinspritzung extends Einspritzung {
 		//auf die Temperatur der Zone erwärmt und verdampft dann mit dieser Temperatur
 		//Physikalisch ist das nicht richtig da der Krst eine Saettigungstemperatur erreicht
 		double dm=this.get_diff_mKrst_dampf(time, zn);
-		double  Tkrstfl=this.get_T_Krst_fl();
+		double  Tkrstfl=this.get_T_fuel_liq();
 		double dQ=0;
 		if(dm>0){
 			dQ=dm*krstProp.get_L(Tkrstfl);
@@ -85,13 +85,13 @@ public class SimpleDirektEinspritzung extends Einspritzung {
 		super.mKrst_dampf.addValue(time,mKrst_verdampft );
 		
 		//Der Kraftstoff verdampft sofort!
-		super.mKrst_fluesssig.addValue(time, 0);
+		super.mKrst_fluessig.addValue(time, 0);
 	}
 
 	public double get_Tkrst_dampf(double time, Zone zn) {
 		//Der Kraftstoff verdampft bei der Temperatur des flueissigen Krst und kommt dann als Dampf mit dieser Temp in die Zone 
 		//--> ist nicht ganz  richtig passt aber zur bestimmung der Verdampfungsenthalpie
-		return this.get_T_Krst_fl(); 
+		return this.get_T_fuel_liq(); 
 
 	}
 

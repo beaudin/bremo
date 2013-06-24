@@ -42,7 +42,7 @@ public class DVA_DualFuel extends DVA {
 	Zone [] initialZonesWhileRunning;	
 
 	private boolean esBrennt=false,initialiseZonesWhileRunning=false,burntZonesAlreadyInitialised=false,
-					dieselZoneAusgeblendet=false;
+					dieselZoneAusgeblendet=false, ottoZoneAusgeblendet=false;
 
 	private double dQburnMAX=0;
 	private double fortschritt=0;	
@@ -54,7 +54,8 @@ public class DVA_DualFuel extends DVA {
 	private VektorBuffer dmb_buffer;
 	private VektorBuffer dQw_buffer;
 	private boolean dieselIsBurnt=false;
-	private boolean holzHammerOttoZoneNochNichtLeer=true,dieselZoneIstLeer=false; //Wenn die V0 bei Berechnung von reinem Dieselbetrieb zu null wird 
+	private boolean ottoIsBurnt=false;
+	
 
 
 	protected DVA_DualFuel(CasePara cp) {
@@ -136,7 +137,7 @@ public class DVA_DualFuel extends DVA {
 		//verbrannte Zone--> wird spaeter nochmal initialisiert
 		GasGemisch rauchgas=new GasGemisch("Rauchgas");
 		Hashtable <Spezies,Double> ht=new Hashtable<Spezies,Double>();
-		ht.put(CP.SPEZIES_FABRIK.get_spezCO2(), 1D); //nur als Dummi belegung --> sonst gibt's nen Fehler
+		ht.put(ggZone_init, 1D);
 		rauchgas.set_Gasmischung_molenBruch(ht);
 
 		double V2=m1*rauchgas.get_R()*T_init/p_init;
@@ -163,7 +164,8 @@ public class DVA_DualFuel extends DVA {
 		double p=zonen_IN[0].get_p();
 		double T0=zonen_IN[0].get_T();
 		Spezies spez0=zonen_IN[0].get_ggZone();
-		double V0=zonen_IN[0].get_V();		
+		double V0=zonen_IN[0].get_V();
+		double m0=zonen_IN[0].get_m();
 
 		double m1=zonen_IN[1].get_m();
 		double T1=zonen_IN[1].get_T();
@@ -171,56 +173,49 @@ public class DVA_DualFuel extends DVA {
 		double V1=zonen_IN[1].get_V();
 
 		double V2=zonen_IN[2].get_V();	
-		
-		//Wenn V0 einmal kleienr null wird, wird keine Masse mehr aus der Zone entnommen --> Holzhammer
-		if(esBrennt&&V0<=0||esBrennt&&zonen_IN[0].get_m()<=0 ){
-			holzHammerOttoZoneNochNichtLeer=false; 
-			V0=1E-55;
-		}
-		//Wenn V1 einmal kleiner null wird, wird keine Masse mehr aus der Zone entnommen --> Holzhammer
-		if(V1<=0 ||zonen_IN[1].get_m()<=0 ){
-			dieselZoneIstLeer=true;
-			V1=1E-55;
-		}
-
 
 		dmZoneBurn=0;	
 
-		if(esBrennt&&dQburn>0){				
-			if(m1>=CP.SYS.MINIMALE_ZONENMASSE&&dieselIsBurnt==false){//DieselZone hat schon oder immer noch genug Masse
-				dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,spez1,T1,p);
-
-				if(burntZonesAlreadyInitialised){
-					try {
-						zonen_IN[1].set_dm_aus(dmZoneBurn);
-						//Zone 2 wird das verbrannte Massenelement aus Zone 1 zugefuehrt
-						GasGemisch rauchgas;				
-						rauchgas=new GasGemisch("Rauchgas");
-						rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche(p, T1, spez1));	
-						//	Berechnung der Dissoziation erfolgt in der Zone automatisch				
-						zonen_IN[2].set_dm_ein(dmZoneBurn,T1,rauchgas);	
-					} catch (NegativeMassException nmE) {					
-						//Dies bedeutet, dass der Diesel vollst. verbrannt ist.
-						dieselIsBurnt=true;
-						dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,spez0,T0,p);
+		if(esBrennt&&dQburn>0){	
+			dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn, spez1, T1, p);
+			//Dieselzone hat schon oder immer noch genug Masse.
+			if(m1-CP.SYS.MINIMALE_ZONENMASSE>dmZoneBurn*CP.SYS.WRITE_INTERVAL_SEC
+					&&dieselIsBurnt==false&&burntZonesAlreadyInitialised){//DieselZone hat schon oder immer noch genug Masse
+//				dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,spez1,T1,p);
+//				if(burntZonesAlreadyInitialised){				
 						try {
-							zonen_IN[0].set_dm_aus(dmZoneBurn);
-							//Zone 2 wird das verbrannte Massenelement aus Zone 0 zugefuehrt
+							zonen_IN[1].set_dm_aus(dmZoneBurn);
+							//Zone 2 wird das verbrannte Massenelement aus Zone 1 zugefuehrt
 							GasGemisch rauchgas;				
 							rauchgas=new GasGemisch("Rauchgas");
-							rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche(p, T0, spez0));	
+							rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche(p, T1, spez1));	
 							//	Berechnung der Dissoziation erfolgt in der Zone automatisch				
-							zonen_IN[2].set_dm_ein(dmZoneBurn,T0,rauchgas);	
-						} catch (NegativeMassException nmE2) {					
-							nmE.log_Warning();
-							dmZoneBurn=0;
-						}
-					}
-				}
+							zonen_IN[2].set_dm_ein(dmZoneBurn,T1,rauchgas);	
+						} catch (NegativeMassException nmE) {
+							//Dies bedeutet, dass der Diesel vollst. verbrannt ist.
+							dieselIsBurnt=true;
+							dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,spez0,T0,p);
+							try {
+								zonen_IN[0].set_dm_aus(dmZoneBurn);
+								//Zone 2 wird das verbrannte Massenelement aus Zone 0 zugefuehrt
+								GasGemisch rauchgas;				
+								rauchgas=new GasGemisch("Rauchgas");
+								rauchgas.set_Gasmischung_molenBruch(gg.get_GG_molenBrueche(p, T0, spez0));	
+								//	Berechnung der Dissoziation erfolgt in der Zone automatisch				
+								zonen_IN[2].set_dm_ein(dmZoneBurn,T0,rauchgas);	
+							} catch (NegativeMassException nmE2) {					
+								nmE2.log_Warning();
+								dmZoneBurn=0;
+							}
+						}			
+//				}
 			}else{//DieselZone ist verbrannt oder sonst iergendwie leer
+				if(burntZonesAlreadyInitialised)
+					dieselIsBurnt=true;
 				dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,spez0,T0,p);
-
-				if(burntZonesAlreadyInitialised&&holzHammerOttoZoneNochNichtLeer){
+//				dieselIsBurnt=true;				
+				if(burntZonesAlreadyInitialised&&
+						m0-CP.SYS.MINIMALE_ZONENMASSE>dmZoneBurn*CP.SYS.MINIMALE_ZONENMASSE){
 					try {
 						zonen_IN[0].set_dm_aus(dmZoneBurn,spez0);
 						//Zone 2 wird das verbrannte Massenelement aus Zone 0 zugefuehrt
@@ -251,26 +246,26 @@ public class DVA_DualFuel extends DVA {
 			}				
 		}else{			
 				//Verbrennungswaerme zufuehren
-				double dQburn0=dQburn*V0/(V0+V1);
+				//double dQburn0=dQburn*V0/(V0+V1);
 				//OttoZone
-				zonen_IN[0].set_dQ_ein_aus(dQburn0);	
+				//zonen_IN[0].set_dQ_ein_aus(dQburn0);	
 				//DieselZone
 				//Wenn die Diesel Zone ausgeblendet wurde ist das Volumen so klein, 
 				//dass eine Unterscheidung hier unnoetig ist
-				double dQburn1=dQburn*V1/(V0+V1);
-				zonen_IN[1].set_dQ_ein_aus(dQburn1);				
+				//double dQburn1=dQburn*V1/(V0+V1);
+				//zonen_IN[1].set_dQ_ein_aus(dQburn1);				
 
 
-				//				//Verbrennungswaerme zufuehren
-				//				double dQburn0=dQburn*V0/(V0+V1+V2);
-				//				//OttoZone
-				//				zonen_IN[0].set_dQ_ein_aus(dQburn0);	
-				//				//DieselZone
-				//				double dQburn1=dQburn*V1/(V0+V1+V2);
-				//				zonen_IN[1].set_dQ_ein_aus(dQburn1);			
-				//				//verbrannte Zone
-				//				double dQburn2=dQburn*V2/(V0+V1+V2);
-				//				zonen_IN[2].set_dQ_ein_aus(dQburn2);	
+				//Verbrennungswaerme zufuehren
+				double dQburn0=dQburn*V0/(V0+V1+V2);
+				//OttoZone
+				zonen_IN[0].set_dQ_ein_aus(dQburn0);	
+				//DieselZone
+				double dQburn1=dQburn*V1/(V0+V1+V2);
+				zonen_IN[1].set_dQ_ein_aus(dQburn1);			
+				//verbrannte Zone
+				double dQburn2=dQburn*V2/(V0+V1+V2);
+				zonen_IN[2].set_dQ_ein_aus(dQburn2);	
 
 		}
 
@@ -297,8 +292,8 @@ public class DVA_DualFuel extends DVA {
 		if(dieselIsBurnt==false){
 			//Bestimmung des air entrainments in die DieselZone
 			double dma=0;
-			for(int i=0;i<masterEinspritzung.get_AlleEinspritzungen().length;i++){	
-				Einspritzung es=masterEinspritzung.get_AlleEinspritzungen()[i];
+			for(int i=0;i<masterEinspritzung.get_AllInjections().length;i++){	
+				Einspritzung es=masterEinspritzung.get_AllInjections()[i];
 				if(es.get_ID_Zone()==1){
 					dma+=((Spray) es).get_dma(time);
 				}				
@@ -308,7 +303,7 @@ public class DVA_DualFuel extends DVA {
 		
 				
 			//			Abfuehren des air entrainments aus der OttoZone
-			if(zonen_IN[0].get_m()>=CP.SYS.MINIMALE_ZONENMASSE &&holzHammerOttoZoneNochNichtLeer){
+			if(zonen_IN[0].get_m()-CP.SYS.MINIMALE_ZONENMASSE>dma*CP.SYS.WRITE_INTERVAL_SEC){
 				try {
 					zonen_IN[0].set_dm_aus(dma);
 				} catch (NegativeMassException e) {
@@ -330,6 +325,8 @@ public class DVA_DualFuel extends DVA {
 
 
 	private double mDieselZoneMAX=0;
+	private double mOttoZoneMAX=0;
+	
 	public void bufferErgebnisse(double time, Zone[] zn) {			
 		double dQburn=super.get_dQburn();
 		//bei jedem Rechenschritt wird der Buffer mit den dQb-Werten aufgefüllt
@@ -355,13 +352,27 @@ public class DVA_DualFuel extends DVA {
 			mDieselZoneMAX=zn[1].get_m();
 		
 //		dieselZoneIstLeer==true&&burntZonesAlreadyInitialised==true&&dieselZoneAusgeblendet==false||
-		if(zn[1].get_m()<=0.005*mDieselZoneMAX&&this.dieselIsBurnt==false||
+		if(zn[1].get_m()<=0.002*mDieselZoneMAX&&this.dieselIsBurnt==false||
 				this.dieselIsBurnt==true&&burntZonesAlreadyInitialised==true&&dieselZoneAusgeblendet==false||
 				zn[1].get_m()<=1.05*CP.SYS.MINIMALE_ZONENMASSE &&burntZonesAlreadyInitialised==true&&dieselZoneAusgeblendet==false){
-			dieselZoneAusblenden(zn[0],zn[1],zn[2]);
+//			double a=CP.convert_SEC2KW(time);
+			zoneAusblenden(zn[1],zn[0],zn[2]);
 			this.initialiseZonesWhileRunning=true;	
 			dieselZoneAusgeblendet=true;
 		}
+		//Wenn die Ottozone weniger als die minimale Zonenmasse enthält, wird sie der Dieselzone zugemischt, oder ausgeblendet.
+		//Zunaechst Bestimmung der maximalen Zonenmasse der OttoZone
+		if(zn[0].get_m()>mOttoZoneMAX)
+			mOttoZoneMAX=zn[0].get_m();
+		
+		if(zn[0].get_m()<=0.002*mOttoZoneMAX && this.ottoIsBurnt==false ||
+				this.ottoIsBurnt==true && burntZonesAlreadyInitialised==true && ottoZoneAusgeblendet==false ||
+				zn[0].get_m()<=1.0*CP.SYS.MINIMALE_ZONENMASSE && burntZonesAlreadyInitialised==true && ottoZoneAusgeblendet==false){
+			zoneAusblenden(zn[0],zn[1],zn[2]);
+			this.initialiseZonesWhileRunning=true;	
+			ottoZoneAusgeblendet=true;
+		}
+		
 
 		//Berechnen integraler Werte
 //		zonenMasseVerbrannt=zonenMasseVerbrannt+dmZoneBurn*super.CP.SYS.WRITE_INTERVAL_SEC;
@@ -372,7 +383,7 @@ public class DVA_DualFuel extends DVA {
 		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC; 
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
 		double xQ=Qb/Qmax;
-
+		
 		int i=-1;
 		i+=1;
 		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",super.CP.convert_SEC2KW(time),i);
@@ -407,8 +418,8 @@ public class DVA_DualFuel extends DVA {
 		T_buffer.addValue(time, Tm);
 
 		i+=1;
-		double T_BurnAdiabat_0=0;
-		if(zn[0].get_ggZone().get_Hu_mol()>0&& this.holzHammerOttoZoneNochNichtLeer){
+		double T_BurnAdiabat_0=5.55;
+		if(zn[0].get_ggZone().get_Hu_mol()>0&&zn[0].get_T()>300&&zn[0].get_p()>1e5){
 			T_BurnAdiabat_0=HeizwertRechner.calcAdiabateFlammenTemp(CP,
 				zn[0].get_ggZone(), zn[0].get_p(), zn[0].get_T());	
 		}
@@ -417,12 +428,11 @@ public class DVA_DualFuel extends DVA {
 
 		i+=1;
 		double T_BurnAdiabat_1=0;
-		if(zn[1].get_ggZone().get_Hu_mol()>0 &&this.dieselZoneIstLeer==false){		
+		if(zn[1].get_ggZone().get_Hu_mol()>0 ){		
 			T_BurnAdiabat_1=HeizwertRechner.calcAdiabateFlammenTemp(CP,
 					zn[1].get_ggZone(), zn[1].get_p(), zn[1].get_T());	
 		}
-		super.buffer_EinzelErgebnis("T_BurnAdiabat_1 [K]", T_BurnAdiabat_1,i);
-		
+		super.buffer_EinzelErgebnis("T_BurnAdiabat_1 [K]", T_BurnAdiabat_1,i);		
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("Lambda z1 [-]", zn[1].get_ggZone().get_lambda(),i);
@@ -505,15 +515,23 @@ public class DVA_DualFuel extends DVA {
 		super.buffer_EinzelErgebnis("Gesamtmasse [kg]", zn[0].get_m()+zn[1].get_m()+zn[2].get_m(),i);
 
 		i+=1;		
-		super.buffer_EinzelErgebnis("m_0[kg]", zn[0].get_m(),i);
+		super.buffer_EinzelErgebnis("m_0 [kg]", zn[0].get_m(),i);
 
 		i+=1;		
-		super.buffer_EinzelErgebnis("m_1[kg]", zn[1].get_m(),i);
+		super.buffer_EinzelErgebnis("m_1 [kg]", zn[1].get_m(),i);
 
 		i+=1;		
-		super.buffer_EinzelErgebnis("m_2[kg]", zn[2].get_m(),i);
+		super.buffer_EinzelErgebnis("m_2 [kg]", zn[2].get_m(),i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("kappa_0 [-]", zn[0].get_ggZone().get_kappa(zn[0].get_T()), i);
 
-
+		i+=1;
+		super.buffer_EinzelErgebnis("kappa_1 [-]", zn[1].get_ggZone().get_kappa(zn[1].get_T()), i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("kappa_2 [-]", zn[2].get_ggZone().get_kappa(zn[2].get_T()), i);
+		
 		i+=1;
 		int iter=i;		
 		double []mi=zn[0].get_mi();
@@ -555,10 +573,9 @@ public class DVA_DualFuel extends DVA {
 			super.buffer_EinzelErgebnis("m_Diesel_Z0 [kg]", 0,i);
 		}
 		
-
 		double ma=0,s=0,dma=0,mkrstFl=0,T_KRstVap=0;
-		for(int x=0;x<masterEinspritzung.get_AlleEinspritzungen().length;x++){			
-			Einspritzung es=masterEinspritzung.get_AlleEinspritzungen()[x];	
+		for(int x=0;x<masterEinspritzung.get_AllInjections().length;x++){			
+			Einspritzung es=masterEinspritzung.get_AllInjections()[x];	
 			if(es.get_ID_Zone()==1){
 				ma=((Spray)es).get_ma(time);					
 				sumdma+=((Spray)es).get_dma(time)*CP.SYS.WRITE_INTERVAL_SEC;
@@ -568,6 +585,8 @@ public class DVA_DualFuel extends DVA {
 				T_KRstVap=es.get_Tkrst_dampf(time,zn[es.get_ID_Zone()]);
 			}
 		}
+		
+		
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("TKrstVap [K]", T_KRstVap,i);
@@ -581,6 +600,22 @@ public class DVA_DualFuel extends DVA {
 		super.buffer_EinzelErgebnis("s00 [kg]", s,i);
 		i+=1;
 		super.buffer_EinzelErgebnis("dm_a [kg]", dma,i);	
+		
+		i+=1;
+		double pV=zn[0].get_p()*zn[0].get_V();
+		double mRT=zn[0].get_m()*zn[0].get_ggZone().get_R()*zn[0].get_T();
+		super.buffer_EinzelErgebnis("pV-mRT zn0", (pV-mRT)/pV*100,i);
+		
+		i+=1;
+		pV=zn[1].get_p()*zn[1].get_V();
+		mRT=zn[1].get_m()*zn[1].get_ggZone().get_R()*zn[1].get_T();
+		super.buffer_EinzelErgebnis("pV-mRT zn1", (pV-mRT)/pV*100,i);	
+		
+		i+=1;
+		pV=zn[2].get_p()*zn[2].get_V();
+		mRT=zn[2].get_m()*zn[2].get_ggZone().get_R()*zn[2].get_T();
+		super.buffer_EinzelErgebnis("pV-mRT zn2", (pV-mRT)/pV*100,i);
+		
 	}
 	
 double sumdma=0;
@@ -612,7 +647,7 @@ double sumdma=0;
 		initialZonesWhileRunning[2]=new Zone(CP,zonen_IN[2].get_p_V_T_mi(),zonen_IN[2].isBurnt(),zonen_IN[2].getID());
 		initialZonesWhileRunning[2].set_p_V_T_mi(p, V2, Tb,ht);
 
-		double m1=zonen_IN[1].get_m()-mb; 
+		double m1=zonen_IN[1].get_m()+zonen_IN[2].get_m()-mb; 
 
 		double V1=m1*spez1.get_R()*T1/p;//=motor.get_V(time)-V2-zonen_IN[0].get_V();
 		//		T1=p*V1/(m1*spez1.get_R());			
@@ -641,12 +676,90 @@ double sumdma=0;
 		//		initialZonesWhileRunning=zonen_IN;		
 	}
 
-	private void dieselZoneAusblenden( Zone zOtto ,Zone zDiesel,Zone zBurnt){		
-		this.initialZonesWhileRunning[0]=Zone.zonenMischen(CP,zDiesel, zOtto, false, 0);
-		this.initialZonesWhileRunning[1]=new Zone(CP,zDiesel.get_p(), 1e-55, 1, 1e-55, 
+	/*
+	private void dieselZoneAusblenden( Zone zOtto ,Zone zDiesel,Zone zBurnt){
+		if(zDiesel.get_V()>0&&zDiesel.get_m()>0 && !ottoIsBurnt){
+			this.initialZonesWhileRunning[0]=Zone.zonenMischen(CP,zDiesel, zOtto, false, 0);			
+		}
+		else
+			this.initialZonesWhileRunning[0]=zOtto;
+		double vD=1e-55;
+		this.initialZonesWhileRunning[1]=new Zone(CP,zDiesel.get_p(),vD , 1, 
+				zDiesel.get_p()*vD/(zDiesel.get_ggZone().get_R()*1), 
 				zDiesel.get_ggZone(), false, 1);
-		this.initialZonesWhileRunning[2]=zBurnt;
+		if(zDiesel.get_V()>0&&zDiesel.get_m()>0 && ottoIsBurnt){
+			double vB = zBurnt.get_V() + zDiesel.get_V() - vD;
+			this.initialZonesWhileRunning[2] = new Zone(CP, zBurnt.get_p(), vB,
+					zBurnt.get_T(), zBurnt.get_m() + zDiesel.get_m() - this.initialZonesWhileRunning[1].get_m(),
+					zBurnt.get_ggZone(), true, 2);
+		} else
+			this.initialZonesWhileRunning[2]=zBurnt;
 		this.dieselIsBurnt=true;
+	}
+	
+	private void ottoZoneAusblenden( Zone zOtto,Zone zDiesel,Zone zBurnt){
+		if(zOtto.get_V()>0 && zOtto.get_m()>0 && !dieselIsBurnt) {
+			this.initialZonesWhileRunning[1]=Zone.zonenMischen(CP, zOtto, zDiesel, false, 1);
+		} else
+			this.initialZonesWhileRunning[1]=zDiesel;
+		double vO=1e-55;
+		this.initialZonesWhileRunning[0]=new Zone(CP, zOtto.get_p(), vO, 1,
+				zOtto.get_p()*vO/(zOtto.get_ggZone().get_R()*1),
+				zOtto.get_ggZone(), false, 0);
+		if(zOtto.get_m()>0 && zOtto.get_V()>0 && dieselIsBurnt) {
+			double vB = zBurnt.get_V() + zOtto.get_V() - vO;
+			this.initialZonesWhileRunning[2] = new Zone(CP, zBurnt.get_p(), vB,
+					zBurnt.get_T(), zBurnt.get_m() + zOtto.get_m() - this.initialZonesWhileRunning[0].get_m(),
+					zBurnt.get_ggZone(), true, 2);
+		} else
+			this.initialZonesWhileRunning[2]=zBurnt;
+		this.ottoIsBurnt=true;
+	}
+	*/
+	
+	/**
+	 * Diese Methode blendet eine Zone aus und kompensiert dann die wegfallende Masse und Volumen.
+	 *  
+	 * @param zAusblenden = Auszublendende Zone (z.B. Diesel)
+	 * @param zAndereZone = Nicht verbrannte andere Zone (z.B. Otto)
+	 * @param zVerbrannteZone = Verbrannte Zone
+	 */
+	private void zoneAusblenden(Zone zAusblenden, Zone zAndereZone, Zone zVerbrannteZone) {
+		boolean isBurnt;
+		//Abfrage ob Otto- oder Dieselzone
+		if(zAusblenden.getID()==0)
+			isBurnt = dieselIsBurnt;
+		else if(zAusblenden.getID()==1)
+			isBurnt = ottoIsBurnt;
+		else
+			return;
+		
+		//Wenn Masse und Volumen >0 und andere Zone nicht bereits ausgeblendet, dann mischen
+		if(zAusblenden.get_V()>0 && zAusblenden.get_m()>0 && !isBurnt)
+			this.initialZonesWhileRunning[zAndereZone.getID()] = Zone.zonenMischen(CP, zAusblenden, zAndereZone, false, zAndereZone.getID());
+		else
+			this.initialZonesWhileRunning[zAndereZone.getID()] = zAndereZone;
+		
+		//Zone ausblenden, d.h. Volumen auf quasi 0
+		double vAus = 1e-55;
+		this.initialZonesWhileRunning[zAusblenden.getID()]=new Zone(CP, zAusblenden.get_p(), vAus, 1,
+				zAusblenden.get_p()*vAus/(zAusblenden.get_ggZone().get_R()*1),
+				zAusblenden.get_ggZone(), false, zAusblenden.getID());
+		
+		//Wenn Masse und Volumen >0 und andere Zone bereits ausgeblendet, dann Wegfall von Volumen und Masse durch Hinzufügen
+		//zur Verbrannten Zone kompensieren.
+		if(zAusblenden.get_m()>0 && zAusblenden.get_V()>0 && isBurnt) {
+			double vB = zVerbrannteZone.get_V() + zAusblenden.get_V() - vAus;
+			this.initialZonesWhileRunning[2] = new Zone(CP, zVerbrannteZone.get_p(), vB, zVerbrannteZone.get_T(),
+					zVerbrannteZone.get_m() + zAusblenden.get_m() - this.initialZonesWhileRunning[zAusblenden.getID()].get_m(),
+					zVerbrannteZone.get_ggZone(), true, 2);
+		} else
+			this.initialZonesWhileRunning[2]=zVerbrannteZone;
+		
+		if(zAusblenden.getID()==1)
+			dieselIsBurnt = true;
+		else
+			ottoIsBurnt = true;		
 	}
 
 
@@ -667,8 +780,8 @@ double sumdma=0;
 	 * Diesel in Zone 1
 	 */
 	protected void checkEinspritzungen(MasterEinspritzung me) {
-		for(int i=0;i<me.get_AlleEinspritzungen().length;i++){	
-			Einspritzung es=me.get_AlleEinspritzungen()[i];
+		for(int i=0;i<me.get_AllInjections().length;i++){	
+			Einspritzung es=me.get_AllInjections()[i];
 			if(es.get_ID_Zone()==0){
 				if(es.get_Krst().get_name().equalsIgnoreCase("Diesel")){
 					try {
@@ -722,10 +835,12 @@ double sumdma=0;
 	public VektorBuffer get_dm_buffer() {
 		return this.dmb_buffer;
 	}
-	
+
+
+	@Override
 	public VektorBuffer get_p_buffer() {
 		// TODO Auto-generated method stub
 		return null;
-		}
+	}
 
 }

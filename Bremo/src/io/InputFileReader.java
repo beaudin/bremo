@@ -18,7 +18,6 @@ public class InputFileReader {
 	private Hashtable<String, String > berechnungsModule = new Hashtable<String, String>();
 
 	public InputFileReader(File inputFile){
-
 		try {
 			read_InpuFile(inputFile);			
 			//read_ParameterFile(inputFile);

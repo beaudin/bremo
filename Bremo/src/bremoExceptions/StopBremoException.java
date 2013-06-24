@@ -41,6 +41,5 @@ public abstract class StopBremoException extends Exception {
 		//TODO hier kann irgendwann mal ein eintrag is das logFile stehen		
 		System.err.println("WARNING: " + message+ Separator);
 //		LogFileWriter.addItemToLog("WARNING: " + message);	
-	}
-	
+	}	
 }

@@ -29,7 +29,7 @@ public class IndizierDaten {
 	private double [] pAus,pAusRoh;
 	double [] zeitAchse_LW;
 	private final CasePara CP;
-	private double PZYL_MAX;
+	private final double PZYL_MAX;
 	private  double pmi=0;
 	private Motor motor;
 	private LinInterp L_Interp;
@@ -46,41 +46,53 @@ public class IndizierDaten {
 	 * abgeglichen werden.</p>
 	 * Weiterhin wird fuer HubKolbenMotoren in dieser Klasse pmi berechnet.
 	 * @param  CasePara cp
-	 * 
 	 */
-	public IndizierDaten(CasePara cp){
-		CP=cp;
-		filternBitte=CP.SYS.FILTERN;
-		createMe(cp,false);
-	}
-	public IndizierDaten(CasePara cp, boolean gemittelt){
-		CP=cp;
-		filternBitte=CP.SYS.FILTERN;
-		createMe(cp,gemittelt);
-	}
-	public void createMe(CasePara cp, boolean gemittelt){			
+	public IndizierDaten(CasePara cp){			
 
+		CP=cp;
+		File indiFile=CP.get_FileToRead("indizierFileName");	
+		int indexOf=indiFile.getName().indexOf(".");
+		String EINGABEDATEI_FORMAT=indiFile.getName().substring(indexOf+1); //Dateiendung		
+		int pZylNr=CP.get_ColumnToRead("spalte_pZyl");				
+		int pEinNr=CP.get_ColumnToRead("spalte_pEin");		
+		int pAusNr=CP.get_ColumnToRead("spalte_pAbg");	
+		if(pZylNr==pEinNr || pZylNr==pAusNr || pEinNr==pAusNr){
+			try {
+				throw new ParameterFileWrongInputException("Die angegebenen Kanalnummern bzw Spaltennummern " +
+						"für pZyl, pEin und pAbg sind teilweise identisch");
+			} catch (ParameterFileWrongInputException e1) {
+				// TODO Auto-generated catch block
+				e1.stopBremo();
+			}
+		}		
 		
-		File indiFile= CP.SYS.INDIZIER_FILE;		
 		String fileName=indiFile.getName();
 		L_Interp = new LinInterp(CP);
 		motor=CP.MOTOR;		
 		
-		
+		filternBitte=CP.filterPressureData();
 		if(filternBitte){
-			int halbeBreite=(CP.SYS.SGOLAY_BREITE-1)/2;
-			sgol=new SavitzkyGolayFilter(halbeBreite,halbeBreite,CP.SYS.SGOLAY_ORDNUNG);
-		}
-		
-		double dauerASP=CP.SYS.DAUER_ASP_KW;
-		int pZylNr=CP.SYS.KANAL_SPALTEN_NR_PZYL;
-		int pEinNr=CP.SYS.KANAL_SPALTEN_NR_PEIN;
-		int pAusNr=CP.SYS.KANAL_SPALTEN_NR_PABG;		
+			int halfWidth=cp.get_savitzkyGolayHalfWidth();
+			sgol=new SavitzkyGolayFilter(halfWidth,halfWidth,cp.get_savitzkyGolayOrder());
+		}		
 
 		IndizierFileReader indiReader = null;
 
-		if (fileName.endsWith("txt") || fileName.endsWith("TXT"))
-			indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr,dauerASP);
+		if (fileName.endsWith("txt") || fileName.endsWith("TXT")){
+			if(pZylNr==1|| pEinNr==1 || pAusNr==1){
+				String kanal=null;
+				if(pZylNr==1)kanal="spalte_pZyl";
+				if(pEinNr==1)kanal="spalte_pAbg";
+				if(pAusNr==1)kanal="spalte_pEin";
+				try {
+					throw new ParameterFileWrongInputException("Der Wert für \"" + kanal+ "\" wurde auf die erste Spalte des Druckeingabefiles gesetzt. \n " +
+							"In der ersten spalte muss aber immer die Zeit bzw. der Kurbelwinkel stehen.");
+				} catch (ParameterFileWrongInputException e) {					
+					e.stopBremo();
+				}	
+			}			
+			indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr);
+		}
 		if(fileName.endsWith("adv")||fileName.endsWith("ADV"))
 			indiReader=new IndizierFileReader_adv(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr);
 		if(indiReader==null){
@@ -108,10 +120,10 @@ public class IndizierDaten {
 		////////////////////////////////////
 		//Definieren des Einlassdrucks
 		///////////////////////////////////		
-		if(gemittelt == false){
+		
 		pEinRoh=indiReader.get_pEin();
-		//Anpassendes Mittelwertes von Saugrohrdrucksensor und Piezo
-		if(CP.SYS.SHIFT_pEIN){
+		//Anpassendes Mittelwertes von Saugrohrdrucksensor und Piezo		
+		if(CP.shift_pInlet()){
 			double offset=CP.get_p_LadeLuft()-matLib.MatLibBase.mw_aus_1DArray(pEinRoh);
 			pEinRoh=this.shiftMe(pEinRoh, offset);
 		}
@@ -128,7 +140,7 @@ public class IndizierDaten {
 		//Definieren des Auslassdrucks
 		///////////////////////////////////	
 		pAusRoh=indiReader.get_pAbg();
-		if(CP.SYS.SHIFT_pAUS){
+		if(CP.shift_pOutlet()){
 			double offset=CP.get_p_Abgas()-matLib.MatLibBase.mw_aus_1DArray(pAusRoh);
 			pAusRoh=this.shiftMe(pAusRoh, offset);
 		}
@@ -138,45 +150,22 @@ public class IndizierDaten {
 		else
 			pAus=pAusRoh;
 		pAus=misc.LittleHelpers.concat(pAus,pAus);		
-		}
-		if(gemittelt == true){
-			
-			pEinRoh=indiReader.get_pEin();
-			pAusRoh=indiReader.get_pAbg();
-			double summePein=0;
-			double summePaus=0;
-			for (int i = 0; i < pEinRoh.length; i++) {
-			    summePein += pEinRoh[i];
-			}
-			for (int i = 0; i < pAusRoh.length; i++) {
-			    summePaus += pAusRoh[i];
-			}
-			double pEinWert=summePein/pEinRoh.length;
-			double pAusWert=summePaus/pAusRoh.length;
-			
-			pEin = new double[zeitAchse.length];
-			pAus = new double[zeitAchse.length];
-			
-			for (int i = 0; i < zeitAchse.length; i++) {
-			    pEin [i]= pEinWert;
-			    pAus [i]= pAusWert;
-			}
-			
-		}
+		
 		////////////////////////////////////
 		//Definieren des Zylidnerdrucks
 		///////////////////////////////////
 		pZylRoh=indiReader.get_pZyl();
 		//Abgleich der Zylinderdruckkorrektur
-		if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("polytropenMethode")){
+		String nlm=CP.get_pressureAdjustmentMethod("nullLinienMethode");
+		if(nlm.equalsIgnoreCase("polytropenMethode")){
 			pZylRoh=this.polytropenMethode(pZylRoh);	
-		}else if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("abgleichSaugrohr")){
+		}else if(nlm.equalsIgnoreCase("abgleichSaugrohr")){
 			pZylRoh=this.kanalMethode(pZylRoh,pEinRoh);	
-		}else if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("abgleichKruemmer")){
+		}else if(nlm.equalsIgnoreCase("abgleichKruemmer")){
 			pZylRoh=this.kanalMethode(pZylRoh,pAusRoh);	
-		}else if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("referenzWert")){
+		}else if(nlm.equalsIgnoreCase("referenzWert")){
 			pZylRoh=this.referenzWertMethode();	
-		}else if(CP.SYS.NULLLINIEN_METHODE.equalsIgnoreCase("ohne")){
+		}else if(nlm.equalsIgnoreCase("ohne")){
 			
 		}else{
 			try {
@@ -199,11 +188,12 @@ public class IndizierDaten {
 			int pktProAS = pZylRoh.length;
 			double kw=0.0;
 			pmi=0;
-			for(int i=0; i < pktProAS-1; i++){
-				kw = i*CP.SYS.DAUER_ASP_KW/pktProAS-360;
-				pmi+=0.5*(pZylRoh[i]+pZylRoh[i+1])*(motor.get_V(CP.convert_KW2SEC(kw+CP.SYS.DAUER_ASP_KW/pktProAS))
-						-motor.get_V(CP.convert_KW2SEC(kw)));
+			for(int i=0; i < pktProAS-2; i++){
+				 kw = CP.convert_SEC2KW(zeitAchse[i]);
+				 pmi+=0.5*(this.get_pZylRoh(CP.convert_KW2SEC(kw))+this.get_pZylRoh(CP.convert_KW2SEC(kw+CP.SYS.DAUER_ASP_KW/pktProAS)))
+						 *(motor.get_V(CP.convert_KW2SEC(kw+CP.SYS.DAUER_ASP_KW/pktProAS))-motor.get_V(CP.convert_KW2SEC(kw)));
 			}
+
 			pmi=pmi/((Motor_HubKolbenMotor) motor).get_Hubvolumen();	// Wert wird in [Pa] ausgegeben	
 		}
 		
@@ -219,7 +209,6 @@ public class IndizierDaten {
 		L_Interp.set_lastsearchedIndex(0); 		
 
 	}
-	
 
 	/**
 	 * Liefert den maximalen Zylinderdruck
@@ -287,8 +276,6 @@ public class IndizierDaten {
 			return 0;
 		}
 	}
-	
-	
 
 	/**
 	 * Diese Methode fuert einen Nulllinienabgleich nach der KanalMethode durch

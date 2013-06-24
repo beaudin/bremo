@@ -42,12 +42,6 @@ public class WoschniHuber extends WandWaermeUebergang {
 		Volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]
 		vDrall=cp.get_DrallGeschwindigkeit();
 		p_mi=cp.get_pmi();	//Falls der Benutzer einen Wert vorgeben möchte
-		if(p_mi<0){	//Wenn kein Wert vorliegt wird pmi auf -7.77 gesetzt (nicht schön aber geht)
-			p_mi=indiD.get_pmi()*1e-5; //[bar], wird aus der Indizierdatei gerechnet
-		}
-		if(p_mi<1){
-			p_mi=1;	//pmi muss > 1 bar sein...
-		}
 		//Polytropenexponent für die Schleppdruckberechnung ermitteln.
 		//Dies wird in den 10°KW vorm Referenzpunkt gemacht...
 		refPunkt=cp.get_refPunkt_WoschniHuber();

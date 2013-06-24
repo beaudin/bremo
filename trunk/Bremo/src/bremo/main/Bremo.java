@@ -118,13 +118,13 @@ public class Bremo extends Thread {
 			System.err.println("Verlustteilung fertig");
 			if (calledFromGUI) {
 			    SwingBremo.StateBremoThread();
-			    System.err.println(System.currentTimeMillis()+" ms");
+			    System.err.println("Rechungszeit:"+(System.currentTimeMillis()-SwingBremo.startTime)+" ms");
 			}
 			}
 		else {
 			if (calledFromGUI) {
 			    SwingBremo.StateBremoThread();
-			    System.err.println(System.currentTimeMillis()+" ms");
+			    System.err.println("Rechungszeit:"+(System.currentTimeMillis()-SwingBremo.startTime)+" ms");
 			}
 		}
 	}	

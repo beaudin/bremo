@@ -92,7 +92,7 @@ public class SwingBremo extends JFrame {
 	public static Timer timerCalcul;
 	public static int percent;
 	static SelectItemToPlotten plotten;
-	static double startTime ;
+	public static double startTime ;
 	PrintStream outStream = new PrintStream(System.out) {
 
 		@Override
@@ -580,7 +580,7 @@ public class SwingBremo extends JFrame {
 			berechnen.setVisible(true);
 		} else {
 //			LogFileWriter.reinitialisierung();
-			System.err.println(System.currentTimeMillis()+" ms");
+			startTime = System.currentTimeMillis();
 			berechnen.setEnabled(false);
 			wahlFile.setEnabled(false);
 			stop.setEnabled(false);

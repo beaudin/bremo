@@ -245,11 +245,11 @@ public class LWA_Graphik extends BremoModellGraphik{
 	ChartPanel Druckverlauf() throws IOException {
 		// TODO Auto-generated method stub
 		  BufferedReader br = new  BufferedReader(new FileReader(inputfile.getParent()+"/"+berechnungModell+"_"+inputfile.getName().replace(".txt", "_ERGEBNISSE_LW.txt")));
-	        XYSeries serie1 =  new XYSeries("pZyl-Berech_2",false) ;
-	        XYSeries serie5 =  new XYSeries("pZyl-Berech_1",false) ;
+	        XYSeries serie1 =  new XYSeries("pZyl-Berech_2") ;
+	        XYSeries serie5 =  new XYSeries("pZyl-Berech_1") ;
 	        XYSeries serie4 =  new XYSeries("p") ;
-	        XYSeries serie2 = new XYSeries("Ventillehub_EV") ;
-	        XYSeries serie3 = new XYSeries("Ventillehub_AV") ;
+	        XYSeries serie2 = new XYSeries("Ventillehub_EV",false) ;
+	        XYSeries serie3 = new XYSeries("Ventillehub_AV",false) ;
 	        XYDataset datasetDruckVerlauf ;
 	        XYDataset datasetDruckVerlauf2 ;
 	        
@@ -279,26 +279,26 @@ public class LWA_Graphik extends BremoModellGraphik{
 					double x = Double.parseDouble(value[0]);
 					double y = Double.parseDouble(value[index_1]);
 					
-					double y_E = Double.parseDouble(value[index_2]);
-					double y_A = Double.parseDouble(value[index_3]);
+					double y_E = Double.parseDouble(value[index_2])*100;
+					double y_A = Double.parseDouble(value[index_3])*100;
 				
 					if (x <= 360){
 					    serie1.add(x,y);//  KW  p_soll
 					if (y_E > 0) {
-					    serie2.add(x,y_E);
+						 XYSerieCutLine(serie2,x,y_E);
 					}
 					if (y_A > 0) {
-					    serie3.add(x,y_A);
+						 XYSerieCutLine(serie3,x,y_A);
 					}
 					}else{
 					  if (x-720 < -165){
 				          serie5.add(x-720,y);
 					  }
 					  if (y_E > 0) {
-					      serie2.add(x-720,y_E);
+						  XYSerieCutLine(serie2,x-720,y_E);
 					  }
 					  if (y_A > 0) {
-					  serie3.add(x-720,y_A);
+						  XYSerieCutLine(serie3,x-720,y_A);
 					  }
 					}
 					//serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_2])); // KW  p
@@ -339,6 +339,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 						//serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[index_2])); // Zeit p
 					}
 				}
+				
 			br.close();
 			
 			XYSeriesCollection collectionDruckVerlauf = new XYSeriesCollection();
@@ -354,7 +355,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 			ChartPanel chartDruckVerlauf = null;
 			if (zeit_oder_KW.equals("KW")){
 				//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
-				chartDruckVerlauf = createChartPanel(null, zeit_oder_KW , "Bar", "Meter" , datasetDruckVerlauf,datasetDruckVerlauf2);
+				chartDruckVerlauf = createChartPanel(null, zeit_oder_KW , "Bar", "Cm" , datasetDruckVerlauf,datasetDruckVerlauf2);
 			}
 			else {
 				//chartDruckVerlauf = createChartPanel(null, "[s n. Rechenbeginn]",null , datasetDruckVerlauf);
@@ -449,6 +450,31 @@ public class LWA_Graphik extends BremoModellGraphik{
 		chartVerlauf.setBorder(BorderFactory.createTitledBorder("p-V-Diagramm P_soll und P"));
 		
 		return chartVerlauf;
+	}
+	/**
+	 * use  to cut a XYSerie
+	 * @param s
+	 * @param x
+	 * @param y
+	 */
+	void XYSerieCutLine (XYSeries s , double x , double y ) {
+		
+		if (s.getItemCount() >= 1) {
+			
+			double x_last = (Double) s.getX(s.getItemCount()-1);
+			
+			if (Math.abs(x-x_last) > 1){
+				s.add(x, null);
+				s.add(x, y);
+			}
+			else {
+				s.add(x, y);
+			}		
+		}
+		else {
+			s.add(x, y);
+		}
+		
 	}
 
 }

@@ -151,7 +151,7 @@ public class SwingBremo extends JFrame {
 	private void initComponents() {
 
 		System.setOut(outStream);
-		System.setErr(errStream);
+		//System.setErr(errStream);
 
 		manager = new JPanel(){
 			/**

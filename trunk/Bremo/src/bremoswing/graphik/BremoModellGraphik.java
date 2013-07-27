@@ -62,6 +62,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
@@ -127,6 +128,7 @@ public abstract class BremoModellGraphik extends JFrame{
      String zeit_oder_KW;
      String [] header ;
      String Name;
+     String RevisonNr;
    
      BremoModellGraphik (File file, String berechnungModell, boolean is_RestgasVorgabe_LWA ) throws ParameterFileWrongInputException, IOException {
     	 
@@ -683,6 +685,9 @@ public abstract class BremoModellGraphik extends JFrame{
 		numberaxisX.setLabelFont(new Font("Arial", Font.BOLD, 10));
 		numberaxisX.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
 		numberaxisX.setPositiveArrowVisible(false);
+		if (XLabel!= null && XLabel.equals("KW")){
+			 numberaxisX.setTickUnit(new NumberTickUnit(30));
+		 }
    
 		final ChartPanel chartPanel = new ChartPanel(chart);
     		
@@ -719,7 +724,10 @@ public abstract class BremoModellGraphik extends JFrame{
     		 numberaxisX.setLabelFont(new Font("Arial", Font.BOLD, 10));
     		 numberaxisX.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
     		 numberaxisX.setPositiveArrowVisible(false);
-    	   
+    		 if (XLabel!= null && XLabel.equals("KW")){
+    			 numberaxisX.setTickUnit(new NumberTickUnit(30));
+    		 }
+    		 
     	     NumberAxis numberaxis1 = new NumberAxis();
     	     numberaxis1.setLabelPaint(Color.black);
     	     numberaxis1.setTickLabelPaint(Color.blue);
@@ -727,7 +735,7 @@ public abstract class BremoModellGraphik extends JFrame{
     	     numberaxis1.setTickLabelFont(new Font("Arial", Font.PLAIN, 10));
     	     numberaxis1.setPositiveArrowVisible(false);
     	     numberaxis1.setLabel(YLabel2);
-    	     
+    	         	     
     	     xyplot.setRangeAxis(1, numberaxis1);
     	     xyplot.setDataset(1, data2);
     	     xyplot.setRangeAxis(1, numberaxis1);

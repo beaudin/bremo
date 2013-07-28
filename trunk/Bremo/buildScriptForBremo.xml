@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-<project basedir="." default="build" name="BremoOriginal">
+<project basedir="." default="build" name="Bremo">
 	<property environment="env" />
 	<property name="debuglevel" value="source,lines,vars" />
 	<property name="target" value="1.7" />
 	<property name="source" value="1.7" />
-	<path id="BremoOriginal.classpath">
+	<path id="Bremo.classpath">
 		<pathelement location="bin" />
 		<pathelement location="bibliothek/jcommon-1.0.18/jcommon-1.0.18.jar" />
 		<pathelement location="bibliothek/jfreechart-1.0.15/jfreechart-1.0.15.jar" />
@@ -86,8 +86,8 @@
 			storepass="${password}" preservelastmodified="true">
 			<path>
 				<file file="dist/Bremo.jar" />
-				<file file="bibliothek/jcommon-1.0.16/jcommon-1.0.16.jar" />
-				<file file="bibliothek/jfreechart-1.0.13/jfreechart-1.0.13.jar" />
+				<file file="bibliothek/jcommon-1.0.18/jcommon-1.0.18.jar" />
+				<file file="bibliothek/jfreechart-1.0.15/jfreechart-1.0.15.jar" />
 				<file file="bibliothek/itext-5.3.2/itextpdf-5.3.2.jar" />
 			</path>
 			<flattenmapper />

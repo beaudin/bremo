@@ -248,8 +248,8 @@ public class LWA_Graphik extends BremoModellGraphik{
 	        XYSeries serie1 =  new XYSeries("pZyl-Berech_2") ;
 	        XYSeries serie5 =  new XYSeries("pZyl-Berech_1") ;
 	        XYSeries serie4 =  new XYSeries("p") ;
-	        XYSeries serie2 = new XYSeries("Ventillehub_EV",false) ;
-	        XYSeries serie3 = new XYSeries("Ventillehub_AV",false) ;
+	        XYSeries serie2 = new XYSeries("Ventillehub_EV") ;
+	        XYSeries serie3 = new XYSeries("Ventillehub_AV") ;
 	        XYDataset datasetDruckVerlauf ;
 	        XYDataset datasetDruckVerlauf2 ;
 	        
@@ -282,25 +282,45 @@ public class LWA_Graphik extends BremoModellGraphik{
 					double y_E = Double.parseDouble(value[index_2])*100;
 					double y_A = Double.parseDouble(value[index_3])*100;
 				
+//					if (x <= 360){
+//					    serie1.add(x,y);//  KW  p_soll
+//					if (y_E > 0) {
+//						 XYSerieCutLine(serie2,x,y_E);
+//					}
+//					if (y_A > 0) {
+//						 XYSerieCutLine(serie3,x,y_A);
+//					}
+//					}else{
+//					  if (x-720 < -165){
+//				          serie5.add(x-720,y);
+//					  }
+//					  if (y_E > 0) {
+//						  XYSerieCutLine(serie2,x-720,y_E);
+//					  }
+//					  if (y_A > 0) {
+//						  XYSerieCutLine(serie3,x-720,y_A);
+//					  }
+//					}
 					if (x <= 360){
-					    serie1.add(x,y);//  KW  p_soll
-					if (y_E > 0) {
-						 XYSerieCutLine(serie2,x,y_E);
-					}
-					if (y_A > 0) {
-						 XYSerieCutLine(serie3,x,y_A);
-					}
-					}else{
-					  if (x-720 < -165){
-				          serie5.add(x-720,y);
-					  }
-					  if (y_E > 0) {
-						  XYSerieCutLine(serie2,x-720,y_E);
-					  }
-					  if (y_A > 0) {
-						  XYSerieCutLine(serie3,x-720,y_A);
-					  }
-					}
+						  serie1.add(x,y);//  KW  p_soll
+						  if (y_E > 0 ) {
+							    XYSerieCutLine(serie2,x-720,y_E);
+							    XYSerieCutLine(serie2,x,y_E);
+							}
+						  if (y_A > 0 ) {
+							  XYSerieCutLine(serie3,x,y_A);
+							}
+						}else{
+						  if (x-720 < -165){
+					          serie5.add(x-720,y);
+						  }
+						  if (y_E > 0) {
+							  XYSerieCutLine(serie2,x-720,y_E);
+						  }
+						  if (y_A > 0) {
+							  XYSerieCutLine(serie3,x-720,y_A);
+						  }
+						}
 					//serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_2])); // KW  p
 				}
 				else {
@@ -459,22 +479,49 @@ public class LWA_Graphik extends BremoModellGraphik{
 	 */
 	void XYSerieCutLine (XYSeries s , double x , double y ) {
 		
-		if (s.getItemCount() >= 1) {
-			
-			double x_last = (Double) s.getX(s.getItemCount()-1);
-			
-			if (Math.abs(x-x_last) > 1){
-				s.add(x, null);
-				s.add(x, y);
+//		if (s.getItemCount() >= 1) {
+//			
+//			double x_last = (Double) s.getX(s.getItemCount()-1);
+//			
+//			if (Math.abs(x-x_last) > 1){
+//				s.add(x, null);
+//				s.add(x, y);
+//			}
+//			else {
+//				s.add(x, y);
+//			}		
+//		}
+//		else {
+//			s.add(x, y);
+//		}
+//		
+		s.add(x, y);
+		if (s.getItemCount() > 1) {
+			int lenght = s.getItemCount() - 1;
+
+			int index = s.indexOf(x);
+			if (index == 0 ) {
+				double x_r = (Double) s.getX(index + 1);
+				if (Math.abs(x - x_r) > 1) {
+					s.add(x + 0.5, null);
+				}
+			} else if (index == lenght) {
+				double x_l = (Double) s.getX(index - 1);
+				if (Math.abs(x - x_l) > 1) {
+					s.add(x - 0.5, null);
+				}
+			} else {
+				double x_r = (Double) s.getX(index + 1);
+				if (Math.abs(x - x_r) > 1) {
+					s.add(x + 0.5, null);
+				}
+				double x_l = (Double) s.getX(index - 1);
+				if (Math.abs(x - x_l) > 1) {
+					s.add(x - 0.5, null);
+				}
+
 			}
-			else {
-				s.add(x, y);
-			}		
 		}
-		else {
-			s.add(x, y);
-		}
-		
 	}
 
 }

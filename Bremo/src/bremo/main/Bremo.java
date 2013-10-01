@@ -91,12 +91,6 @@ public class Bremo extends Thread {
 			SwingBremo.StateBremoThread();
 		  } 
 			e.stopBremo();			
-		}catch (Exception e) {
-			if(calledFromGUI){
-				SwingBremo.setNrOfBremoAlive();
-				SwingBremo.StateBremoThread();
-			}
-			((StopBremoException) e).stopBremo();
 		}
 		try {
 			r.berechnungDurchfuehren();

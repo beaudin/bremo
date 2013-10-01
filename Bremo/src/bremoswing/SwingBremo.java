@@ -62,7 +62,7 @@ public class SwingBremo extends JFrame {
 	public static boolean ConsloseModeActive = false;
 	/************************** Variables declaration ****************************************/
 	private boolean control = false;
-	private File[] files;
+	private static File[] files;
 	public Double[] percentBremo;
 	public static  String path;
 	private static SucheBremo suche;
@@ -70,12 +70,13 @@ public class SwingBremo extends JFrame {
 	public static Bremo[] bremoThread;
 	public static String[] bremoThreadFertig;
 	public static JButton berechnen;
-	public static JButton test ;
+	public static JButton sehen ;
+	public static JButton docfile;
 	// public JCheckBox konsole;
-	public JTextArea grosArea;
+	public static JTextArea grosArea;
 	private JScrollPane jScrollPane1;
 	private JScrollPane jScrollPane2;
-	public JTextArea kleinArea;
+	public static JTextArea kleinArea;
 	private JPanel konsole2;
 	private JPanel manager;
 	public static JButton stop;
@@ -181,8 +182,8 @@ public class SwingBremo extends JFrame {
 		berechnen = new JButton();
 		wahlFile = new JButton();
 		stop = new JButton();
-		test = new JButton();
-
+		sehen = new JButton();
+        docfile = new JButton();
 		textFile = new JTextField();
 
 		// konsole = new JCheckBox();
@@ -273,7 +274,8 @@ public class SwingBremo extends JFrame {
 		berechnen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				stop.setVisible(true);
-				test.setEnabled(false);
+				sehen.setEnabled(false);
+				docfile.setEnabled(false);
 				percent = 0;
 				BerechnungPush(e);
 
@@ -325,10 +327,11 @@ public class SwingBremo extends JFrame {
 		
 		manager.add(stop, gc);
 		
-		test.setIcon(new ImageIcon(getClass().getResource(
+		/************ BUTTON Graphic ************************************/
+		sehen.setIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/see_graphik.png")));
-		test.setToolTipText("Schauen Sie Ergebniss als Graphik");
-		test.addActionListener(new ActionListener() {
+		sehen.setToolTipText("Schauen Sie Ergebniss als Graphik");
+		sehen.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -347,8 +350,31 @@ public class SwingBremo extends JFrame {
 		gc.gridx = 3;
 		gc.gridy = 0;
 		gc.ipadx = 0;
-		test.setEnabled(false);
-		manager.add(test, gc);
+		sehen.setEnabled(false);
+		manager.add(sehen, gc);
+		
+		/************ BUTTON File ************************************/
+		docfile.setIcon(new ImageIcon(getClass().getResource(
+				"/bremoswing/bild/doc-icon.png")));
+		docfile.setRolloverIcon(new ImageIcon(getClass().getResource(
+				"/bremoswing/bild/doc-icon2.png")));
+		docfile.setToolTipText("Erzeugen/Editieren InputFile");
+		docfile.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+								
+			}
+		});
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.weightx = 0;
+		gc.gridx = 4;
+		gc.gridy = 0;
+		gc.ipadx = 0;
+		docfile.setEnabled(true);
+		manager.add(docfile, gc);
 
 		/************ LABEL ************************************/
 //		label.setOpaque(true);
@@ -357,7 +383,7 @@ public class SwingBremo extends JFrame {
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(5, 10, 0, 155);
 		gc.weightx = 0.5;
-		gc.gridx = 4;
+		gc.gridx = 5;
 		gc.gridy = 0;
 		gc.ipadx = 0;
 		gc.ipady = 0;
@@ -578,6 +604,7 @@ public class SwingBremo extends JFrame {
 //					JOptionPane.WARNING_MESSAGE);
 			wahlFile.setVisible(true);
 			berechnen.setVisible(true);
+			docfile.setVisible(true);
 		} else {
 //			LogFileWriter.reinitialisierung();
 			startTime = System.currentTimeMillis();
@@ -733,13 +760,12 @@ public class SwingBremo extends JFrame {
 		}
 	}
 
-	/****** SEE IF THE RUNNING OPERATION ARE FINISHED *******************************/
+	/****** sehen IF THE RUNNING OPERATION ARE FINISHED *******************************/
 	public static void StateBremoThread() {
 
 		if (group.activeCount() <= 1) {
 			timerCalcul.stop();
 			
-			JFrame popup = new JFrame();
 			if (bremoThreadFertig[0] != null) {
 				
 				label.setText(" Berechnung Fertig ! ");
@@ -755,8 +781,9 @@ public class SwingBremo extends JFrame {
 			ActiveIcon();
 			progressBar.setVisible(false);
 			progressBarInd.setVisible(false);
+			docfile.setEnabled(true);
 			if (bremoThreadFertig.length > 0) {
-			    test.setEnabled(true);
+			    sehen.setEnabled(true);
 			}
 		}
 	}
@@ -766,6 +793,32 @@ public class SwingBremo extends JFrame {
 		progressBarInd.setVisible(true);
 		stop.setEnabled(false);
 		label.setText("Verlustteilung wird berechnet...");
+	}
+	
+	/**  Schnittstelle für Externe Auswahl der InputFile */
+	public static void ExtAuswahlFile(File [] fileSaver) {
+		grosArea.setText("");
+		kleinArea.setText("");
+		berechnen.setEnabled(false);
+		label.setText("");
+		DebuggingMode = false;
+		progressBar.setValue(0);
+		
+		files = fileSaver;
+		textFile.setText(files[0].getPath());
+		path = files[0].getParent();
+		bremoThread = new Bremo[files.length];
+		group = new ThreadGroup("BremoFamily");
+		for (int i = 0; i < bremoThread.length; i++) {
+			bremoThread[i] = new Bremo(group, files[i]);
+		}
+		bremoThreadFertig = new String[files.length];
+		NrOfFile = files.length;
+		NrBremoAlive = files.length;
+		if (NrOfFile == 1)
+			SetDebbugingMode(true);
+		label.setText(" Externe Datei mit Erfolg Importiert ! ");
+		
 	}
 	/************************ place Frame to the center ************************/
 	public static void placeFrame(JFrame frame) {
@@ -819,7 +872,7 @@ public class SwingBremo extends JFrame {
 		/* Set the Nimbus look and feel */
 		/*
 		 * If Nimbus (introduced in Java SE 6) is not available, stay with the
-		 * default look and feel. For details see
+		 * default look and feel. For details sehen
 		 * http://download.oracle.com/javase
 		 * /tutorial/uiswing/lookandfeel/plaf.html
 		 */

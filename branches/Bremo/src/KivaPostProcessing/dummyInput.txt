@@ -1,0 +1,73 @@
+[Bremo::Input::Start]					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+Mode 7 -- 3-Aug-12 -- run 9
+	
+[Motor: HubKolbenMotor]					
+Bohrung	[m]	:=	0.082		
+Kurbelradius	[m]	:=	0.0452		
+Pleuellaenge	[m]	:=	0.14554		
+Verdichtung	[-]	:=	16.7		
+Schraenkung 	[m]        	:=	0		
+Desachsierung 	[m]	:=	0		
+Einlassschluss   	[KWnZOT]   	:=	-132		
+Einlassoeffnet    	[KWnZOT]   	:=	-376		
+Auslassoeffnet    	[KWnZOT]   	:=	112		
+Auslassschluss   	[KWnZOT]   	:=	376		
+
+[internesRestgasModell: RestgasVorgabe ]
+[berechnungsModell: APR_CanteraMultiZoneHomogeneous ]	
+Drehzahl	[min^-1]	:=	1					
+	
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+
+multiZoneInitFile	[-]	:=	dummyInitZones.txt
+//diese Angaben MUESSEN stimmen!!!!	
+canteraInputFileName [-]	:=	ERCmech.cti			
+canteraThermophase	[-]	:=	gas	
+			
+anzahlEinspritzungen	[-]	:= 	0			
+lhvCorr	[-]			:= 1				
+					
+Woschni					
+FromFile
+Hans					
+[Wandwaermemodell:   Hohenberg]
+htfFileName	[-] 	:= 	htfFileM7.txt	
+refPunktWoschniHuber [KWnZOT] := -65		
+					
+
+_whtfMult	[-]			:= 1
+T_Wand	[K]		:=	450
+_brennraumDachHoehe	[m]	:=	0	
+				
+_drallgeschwindigkeit  [m/s] := 0					
+					
+_[Wandwaermemodell_LW: ohne]				
+					
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+compareToExp	[-] 		:=	no						
+[OHC_Solver: Grill ]
+gleichGewichtsKonstanten	[-] 	:=	Burcat
+T_freeze	[K]			:=	1600	
+						
+arbeitsverfahren	[-]	:=	4T		
+minimaleZonenMasse	[kg]	:=	2.00E-07		
+polynomKoeffizienten	[-]		:=	ERC		
+zeit_oder_KW_Basiert	[-]		:=	KW		
+rechnungsSchrittweite 	[KW]	:=	0.1		
+rechnungsBeginn 	[KWnZOT]	:=	0.01		
+rechnungsEnde	[KWnZOT]		:=50		
+debuggingMode	[-]	:=	nein		
+_debuggingTime 	[KWnZOT]	:=	-37.5					
+
+	
+
+		

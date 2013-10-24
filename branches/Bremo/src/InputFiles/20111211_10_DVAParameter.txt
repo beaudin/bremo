@@ -1,0 +1,129 @@
+[Bremo::Input::Start]			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+			20.10.2010
+[Motor: HubKolbenMotor]			
+Bohrung	[m]	:=	0.13
+Kurbelradius	[m]	:=	0.075
+Pleuellaenge	[m]	:=	0.251
+Verdichtung	[-]	:=	11.75
+Schraenkung 	[m]        	:=	0
+Desachsierung 	[m]	:=	0
+Einlassschluss   	[KWnZOT]   	:=	-175
+Einlassoeffnet    	[KWnZOT]   	:=	-370
+Auslassoeffnet    	[KWnZOT]   	:=	130
+Auslassschluss   	[KWnZOT]   	:=	370
+EV_Hub_max 	[m]	:=	0.01075
+EV_Hub 	[m]	:=	0.01075
+Abgeschätzt als Kreisfläche			
+Brennraumdachflaeche	[m^2]   	:=	0.013273229
+Kolbenflaeche   	[m^2]       	:=	0.013273229
+Feuersteghoehe	[m]	:=	0.015
+Quetschspalthoehe	[m]	:=	0.008
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 			
+
+Drehzahl 	[min^-1]	:=	1175
+mLuft_feucht	[kg/h]	:=	151.4
+			18.9
+T_Ladeluft	[K] 	:=	292.05
+			336
+T_Abgas	[K] 	:=	609.15
+relative_Luftfeuchte 	[%] 	:=	9.5
+			21.6
+T_FeuchteMessung 	[K] 	:=	294.75
+p_FeuchteMessung	[Pa] 	:=	2.03E+05
+p_Ladeluft	[Pa] 	:=	2.03E+05
+p_Abgas	[Pa] 	:=	1.93E+05
+mAGR_extern	[kg/h]	:=	0
+
+RestgasVorgabe			
+[internesRestgasModell:   LWA     ]			
+mAGR_intern_ASP	[kg] 	:=	3.57E-04
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+
+anzahlEinspritzungen	[-]	:= 	2
+[einspritzModell_1 : Hiroyasu   ]			
+krst_1	[-]	:= 	Diesel
+InjZone_1	[-]	:=	1
+Hu_Diesel	[MJ/mol] 	:=	8.26176
+mKrst_1	[kg/h] 	:=	0.262727095
+BOI_1 	[KWnZOT] 	:=	-25
+EOI_1	[KWnZOT] 	:=	-22.8991
+T_Krst_fluessig_1	[K] 	:=	360
+anzAxialPakete_1	[-]	:=	15
+anzRadialPakete_1	[-]	:=	10
+vergleichsKrstVerdampfung_1	[-]	:=	ndodecan
+einspritzDruck_1	[Pa]	:=	1.20E+08
+anzSpritzloecher_1	[-]	:=	8
+durchmSpritzloch_1	[m]	:=	0.0001
+cdFaktor_1	[-]	:=	0.7
+
+[einspritzModell_2 : SRE]			
+krst_2	[-]	:=	RON_95
+InjZone_2	[-]	:=	0
+Hu_RON_95 	[MJ/mol] 	:=	4.1602275
+mKrst_2	[kg/h] 	:=	3.42
+BOI_2 	[KWnZOT] 	:=	-177
+EOI_2	[KWnZOT] 	:=	-176
+T_Krst_fluessig_2	[K] 	:=	330
+
+
+[Wandwaermemodell: Hans]			
+T_Wand	[K] 	:=	473.15
+
+[Wandwaermemodell_LW: ohne]			
+T_Wand 	[K] 	:=	473.15
+refPunktWoschniHuber 	[KWnZOT]	:=	-60
+drallgeschwindigkeit	[m/s] 	:=	0
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+nullLinienMethode	[-] 	:= 	abgleichSaugrohr
+KW_Beginn_Druckabgleich	[KWnZOT]	:= 	-100
+KW_Ende_Druckabgleich 	[KWnZOT]	:=	-65
+
+[berechnungsModell: DVA_DualFuel]			
+
+[OHC_Solver: Grill ]			
+standardBildungsEnthalpien	[-] 	:=	ChemieStandard
+VerbrennungsBeginnAutoDetect	[-]	:=	nein
+verbrennungsBeginn 	[KWnZOT] 	:=	-13.8
+arbeitsverfahren	[-]	:=	4T
+minimaleZonenMasse	[kg]	:=	2.00E-06
+rechenGenauigkeit_DVA	[bar]	:=	0.0005
+polynomKoeffizienten	[-] 	:=	Janaf
+zeit_oder_KW_Basiert	[-]	:=	KW
+rechnungsSchrittweite 	[KW]	:=	0.2
+rechnungsBeginn 	[KWnZOT]	:=	-175
+rechnungsEnde	[KWnZOT]	:=	74
+relaxFaktor 	[-]	:=	0.6
+gleichGewichtsKonstanten	[-] 	:=	Burcat
+T_freeze	[K]	:=	1600
+debuggingMode	[-]	:=	ja
+debuggingTime 	[KWnZOT]	:=	50
+
+indizierFileName	[-] 	:= 	20111211_10_IndizierDaten.txt
+spalte_pZyl	[-]	:=	2
+spalte_pEin	[-]	:=	3
+spalte_pAbg	[-]	:=	4
+shift_pEin	[-]	:=	ja
+shift_pAus	[-]	:=	ja
+
+durchflusskennzahlEinFileName 	[-] 	:= 	Durchflusskennzahl_Ein_BR2000.txt
+RefDurchmesserEV	[m]	:=	0.13
+durchflusskennzahlAusFileName 	[-] 	:=	Durchflusskennzahl_Aus_BR2000.txt
+RefDurchmesserAV	[m]	:=	0.13
+spalte_alphaVor	[-] 	:= 	2
+spalte_alphaRueck	[-] 	:= 	3
+VentilhubEinFileName 	[-] 	:= 	Ventilhub_EV_BR2000.txt
+VentilhubAusFileName	[-] 	:= 	Ventilhub_AV_BR2000.txt
+
+[Bremo::Input::Stop]

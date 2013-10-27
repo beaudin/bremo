@@ -1,0 +1,75 @@
+[Bremo::Input::Start]					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+			20.10.2010		
+[Motor: HubKolbenMotor]					
+Bohrung	[m]	:=	0.082		
+Kurbelradius	[m]	:=	0.0452		
+Pleuellaenge	[m]	:=	0.14554		
+Verdichtung	[-]	:=	16.7		
+Schraenkung 	[m]        	:=	0		
+Desachsierung 	[m]	:=	0		
+Einlassschluss   	[KWnZOT]   	:=	-132		
+Einlassoeffnet    	[KWnZOT]   	:=	-376		
+Auslassoeffnet    	[KWnZOT]   	:=	112		
+Auslassschluss   	[KWnZOT]   	:=	376		
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 					
+					
+Drehzahl 	[min^-1]	:=	1899
+[internesRestgasModell: RestgasVorgabe ]					
+	
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+[berechnungsModell: APR_CanteraMultiZoneHomogeneous]
+multiZoneInitFile	[-]	:=	initialConditions.txt	
+canteraInputFileName [-]	:=	ERCmech.cti			
+canteraThermophase	[-]	:=	gas	
+lhvCorr	[-]			:= 1						
+anzahlEinspritzungen	[-]	:= 	0		
+					
+[Wandwaermemodell:   ohne]	
+htfFileName	[-] 	:= 	htfFile.txt		
+column_dQw [-]	:=	2	
+whtfMult	[-]			:= 1				
+					
+					
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+compareToExp	[-] 	:=	yes		
+filtern	[-] 	:= 	nein		
+pressureAdjustmentMethod	[-] 	:= 	ohne	
+indizierFileName	[-] 	:= 	p_Exp_Exp.txt		
+spalte_pZyl	[-]	:=	2		
+spalte_pEin	[-]	:=	3		
+spalte_pAbg	[-]	:=	4		
+shift_pEin	[-]	:=	nein		
+shift_pAus	[-]	:=	nein		
+					
+					
+[OHC_Solver: Grill ]
+gleichGewichtsKonstanten	[-] 	:=	Burcat	
+T_freeze	[K]	:=	1600	
+					
+arbeitsverfahren	[-]	:=	4T		
+minimaleZonenMasse	[kg]	:=	2.00E-07		
+polynomKoeffizienten	[-] 	:=	ERC		
+zeit_oder_KW_Basiert	[-]	:=	KW		
+
+rechnungsSchrittweite 	[KW]	:=	0.5	
+Rechenbeginn sobald die Verdampfung abgeschlossen ist!	
+rechnungsBeginn 	[KWnZOT]	:=	-10.98		
+rechnungsEnde	[KWnZOT]	:=50		
+debuggingMode	[-]	:=	nein		
+debuggingTime 	[KWnZOT]	:=	-37.5					
+
+					
+
+

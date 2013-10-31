@@ -1,6 +1,0 @@
-Line 1 C1	 L1 C2
-Line 2 C1	 L2 C2
-Line 1 C1	 L1 C2
-Line 2 C1	 L2 C2
-Line 1 C1	 L1 C2
-Line 2 C1	 L2 C2

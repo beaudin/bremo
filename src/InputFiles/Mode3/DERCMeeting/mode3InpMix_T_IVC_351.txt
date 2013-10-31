@@ -1,0 +1,178 @@
+[Bremo::Input::Start]					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+Mode 3 -- 9-Aug-12 -- run 1
+[Motor: HubKolbenMotor]					
+Bohrung	[m]	:=	0.082		
+Kurbelradius	[m]	:=	0.0452		
+Pleuellaenge	[m]	:=	0.14554		
+Verdichtung	[-]	:=	16.7		
+Schraenkung 	[m]        	:=	0		
+Desachsierung 	[m]	:=	0		
+Einlassschluss   	[KWnZOT]   	:=	-132		
+Einlassoeffnet    	[KWnZOT]   	:=	-376		
+Auslassoeffnet    	[KWnZOT]   	:=	112		
+Auslassschluss   	[KWnZOT]   	:=	376	
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 					
+					
+Drehzahl 	[min^-1]	:=	1900		
+
+[internesRestgasModell: RestgasVorgabe ]					
+_mAGR_intern_ASP	[kg] 	:=	-5		
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+[berechnungsModell: APR_CanteraMultiZoneRCCI ]
+lhvCorr	[-]			:= 1	
+canteraInputFileName [-]	:=	ERCmech.cti			
+canteraThermophase	[-]	:=	gas	
+iniMoleFrac_O2	[-]	:=	0.208795				
+iniMoleFrac_N2	[-]	:=	0.787954	
+iniMoleFrac_CO2	[-]	:=	0		
+iniMoleFrac_H2O	[-]	:=	0		
+iniMoleFrac_iC8H18	[-]	:=	0.003251		
+iniMoleFrac_nC7H16	[-]	:=	0		
+p_Ini	[Pa]	:=	1.229459584E+05		
+T_Ini	[K]	:=	351
+	
+[turbModel:	k]
+_PistonBowlDiameter	[m]	:=	0.02073
+_PistonBowlDepth		[m]	:=	0.015405
+TurbKineticEnergy_Ini	[m^2/s^2]	:=	16.3897
+if turbModel is switched to FromFile	
+turbulenceFileName [-] 	:= 	turbFile_KivaFixed.txt			
+column_TKE [-]	:=	2			
+column_EPS [-]	:=	3			
+column_TI [-]	:=	4	
+
+compareToExp	[-] 	:=	yes	
+indizierFileName	[-] 	:= 	p_KivaFixed.txt
+spalte_pZyl	[-]	:=	2		
+spalte_pEin	[-]	:=	3		
+spalte_pAbg	[-]	:=	4		
+shift_pEin	[-]	:=	nein		
+shift_pAus	[-]	:=	nein
+filtern	[-] 	:= 	nein		
+pressureAdjustmentMethod	[-] 	:= 	ohne					
+	
+					
+anzahlEinspritzungen	[-]	:= 	1		
+indexOfMainInj	[-]	:= 	0	
+swirlRatio		[-]	:=	1.5	
+					
+[einspritzModell_0 :  Hiroyasu]					
+krst	[-]	:= 	nC7H16		
+InjZone	[-]	:=	30
+Aus Messung				
+mKrst	[kg/h] 	:=	0.168062402		
+Aus Kiva				
+mKrst	[kg/h] 	:=	0.16815	
+Aus Kiva
+BOI 	[KWnZOT] 	:=	-43		
+EOI	[KWnZOT] 	:=	-38.7
+T_Krst_fluessig	[K] 	:=	322		
+anzAxialPakete	[-]	:=	2		
+anzRadialPakete	[-]	:=	15			
+vergleichsKrstVerdampfung	[-]	:=	tetradecan		
+einspritzDruck	[Pa]	:=	5.00E+07		
+anzSpritzloecher	[-]	:=	7		
+durchmSpritzloch	[m]	:=	0.000128	
+Vielleicht auch 0.7	
+cdFaktor	[-]	:=	0.7	
+					
+Hohenberg Woschni Chang  Hans FromFile				
+[Wandwaermemodell: Chang   ]	
+FromFile Chang Hohenberg
+whtfMult	[-]		:= 1
+T_Cyl		[K]		:=	400	
+T_Head		[K]		:=	450	
+T_Piston	[K]		:=	450	
+Hans	
+_whtfMult	[-]		:= 1.58	
+Woschni
+_whtfMult	[-]		:= 1.65	
+Quetschspalthoehe	[m]	:=	0.0015
+Feuersteghoehe	[m]	:=	0	
+Brennraumdachflaeche	[m^2]	:=	0.00528	
+gemessen am CAD-Modell
+Kolbenflaeche	[m^2]	:=	0.007264
+
+if Wandwaermemodell is switched to FromFile
+htfFileName	[-] 	:= 	htfFile_KivaFixed.txt		
+column_dQw [-]	:=	2	
+
+if Wandwaermemodell ist switched to Hans
+es kommt nur auf das Verhaeltnis der Beiden werte an
+EV_Hub_max [m]	:=	0.05
+EV_Hub [m]	:=	0.05
+	
+					
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+	
+					
+					
+[OHC_Solver: Grill ]
+gleichGewichtsKonstanten	[-] 	:=	Burcat		
+T_freeze	[K]	:=	1600
+					
+arbeitsverfahren	[-]	:=	4T		
+minimaleZonenMasse	[kg]	:=	2.00E-07		
+polynomKoeffizienten	[-] 	:=	ERC		
+zeit_oder_KW_Basiert	[-]	:=	KW		
+rechnungsSchrittweite 	[KW]	:=	0.5		
+rechnungsBeginn 	[KWnZOT]	:=	-132		
+rechnungsEnde	[KWnZOT]	:=50	
+
+		
+debuggingMode	[-]	:=	nein		
+debuggingTime 	[KWnZOT]	:=	-37.5	
+
+
+
+
+Optimum fuer mix 1 + Chang/Hohenberg
+mixingProcess	 [-]	 :=	 1
+C_Mix [-]	 :=	0.175
+C_MixRad [-]	 :=	0.475
+C_MixRad [-]	 :=	0.46
+
+Optimum fuer mix 6 + Chang/Hohenberg
+mixingProcess	 [-]	 :=	 6
+C_Mix [-]	 :=	0.65
+
+Optimum fuer mix 5 + Chang/Hohenberg
+mixingProcess	 [-]	 :=	 5
+EntrainmentFaktor	[-]	 :=	 0.47
+ProfilFaktor		[-]		:=0.525
+
+
+
+Optimum fuer mix 1_b + Chang/Hohenberg
+mixingProcess	 [-]	 :=	 1
+war 0.1875
+C_Mix [-]	 :=	0.185
+C_MixRad [-]	 :=	0.2
+
+Optimum fuer mix 3_c + Chang/Hohenberg
+mixingProcess	 [-]	 :=	 3
+_InjZone	[-]	:=	45
+_anzAxialPakete	[-]	:=	3		
+_anzRadialPakete	[-]	:=	15	
+C_Mix [-]	 :=	2.58
+
+Optimum fuer mix 3_d + Chang/Hohenberg
+mixingProcess	 [-]	 :=	 3
+C_Mix		[-]		:=		1
+C_MixRad		[-]		:=		1.48
+
+
+
+

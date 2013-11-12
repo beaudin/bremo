@@ -51,8 +51,8 @@ public class IndizierDaten {
 
 		CP=cp;
 		File indiFile=CP.get_FileToRead("indizierFileName");	
-		int indexOf=indiFile.getName().indexOf(".");
-		String EINGABEDATEI_FORMAT=indiFile.getName().substring(indexOf+1); //Dateiendung		
+//		int indexOf=indiFile.getName().indexOf(".");
+//		String EINGABEDATEI_FORMAT=indiFile.getName().substring(indexOf+1); //Dateiendung		
 		int pZylNr=CP.get_ColumnToRead("spalte_pZyl");				
 		int pEinNr=CP.get_ColumnToRead("spalte_pEin");		
 		int pAusNr=CP.get_ColumnToRead("spalte_pAbg");	

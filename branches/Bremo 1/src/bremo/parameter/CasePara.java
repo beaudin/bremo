@@ -1,9 +1,6 @@
 package bremo.parameter;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -182,7 +179,7 @@ public class CasePara {
 	public int get_savitzkyGolayOrder(){
 		double tmpSgolayOrder=5;
 		try{				
-			tmpSgolayOrder=set_doublePara(INPUTFILE_PARAMETER,"sgolayOrder","[-]", 2,12);
+			tmpSgolayOrder=set_doublePara(INPUTFILE_PARAMETER,"sgolayOrdnung","[-]", 2,12);
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning();
 			e.log_Warning("The parameter \"sgolayOrder\" for the SavitzkyGolay-Filter has not been defined or was defined in a wrong way! \n" +
@@ -194,7 +191,7 @@ public class CasePara {
 	public int get_savitzkyGolayHalfWidth(){			
 		double tmpSgolayHalfWidth=2*get_savitzkyGolayOrder()+1;
 		try{				
-			tmpSgolayHalfWidth=set_doublePara(INPUTFILE_PARAMETER,"sgolayHalfWidth","[-]", tmpSgolayHalfWidth,50);
+			tmpSgolayHalfWidth=set_doublePara(INPUTFILE_PARAMETER,"sgolayBreite","[-]", tmpSgolayHalfWidth,50);
 		}catch(ParameterFileWrongInputException e){	
 			e.log_Warning();
 			e.log_Warning("The parameter \"sgolayHalfWidth\" for the SavitzkyGolay-Filter has not been defined or was defined in a wrong way! \n" +
@@ -227,7 +224,7 @@ public class CasePara {
 		return shift_pOut;
 	}
 
-	public String get_pressureAdjustmentMethod(String methodIdentifier){
+	String get_pressureAdjustmentMethod(String methodIdentifier){
 		String method=null;
 		try {		
 			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","abgleichKruemmer","ohne"};			
@@ -386,37 +383,21 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException e) {		
 			e.stopBremo();
 		}
-
+		
 		if(s.equalsIgnoreCase("ja")) autodetect=true;
-
-		//		if(autodetect){
-		//			try{
-		//				throw new BirdBrainedProgrammerException("Die AutodetectMethode wurde noch nicht Programmiert");
-		//			}catch(BirdBrainedProgrammerException bbp){
-		//				bbp.stopBremo();
-		//			}
-		//		}		
-
+		
+//		if(autodetect){
+//			try{
+//				throw new BirdBrainedProgrammerException("Die AutodetectMethode wurde noch nicht Programmiert");
+//			}catch(BirdBrainedProgrammerException bbp){
+//				bbp.stopBremo();
+//			}
+//		}		
+		
 		return autodetect;		
-}
-	/**
-	* Gibt an ob eine Verlustteilung durchgeführt werden soll.
-	* Die Auswahl erfolgt durch den Bnutzer
-	*
-	* @return
-	*/
-	public boolean is_Verlustteilung(){
-	boolean verlustteilung = false;
-	String s = null;
-	String s2 []= {"ja","nein"};
-	try {
-	s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2);
-	} catch (ParameterFileWrongInputException e) {
-	e.stopBremo();
+
 	}
-	if(s.equalsIgnoreCase("ja")) verlustteilung=true;
-	return verlustteilung;
-	}
+	
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -555,7 +536,33 @@ public class CasePara {
 	}
 
 
-
+	/**
+	* Gibt an ob eine Verlustteilung durchgeführt werden soll.
+	* Die Auswahl erfolgt durch den Bnutzer
+	*
+	* @return
+	*/
+	public boolean is_Verlustteilung(){
+	boolean verlustteilung = false;
+	String s = null;
+	String s2 []= {"ja","nein"};
+	try {
+	s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2);
+	} catch (ParameterFileWrongInputException e) {
+	e.stopBremo();
+	}
+	if(s.equalsIgnoreCase("ja")) verlustteilung=true;
+	return verlustteilung;
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////private void xxx_AB_HIER_ALLGEMEINE_BETRIEBS_PARAMETER(){}	
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
+	
 	/** 
 	 * @return liefert die Drehzahl in [U/sec]
 	 */	
@@ -819,8 +826,9 @@ public class CasePara {
 		double std_pmi=-7.77;	//Standardwert für pmi (muss negativ sein, siehe z.B. das Wandwärmemodell "WoschniHuber"
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "pmi","[bar]",0,30); 
-		} catch (ParameterFileWrongInputException e) {				
-			e.stopBremo();
+		} catch (ParameterFileWrongInputException e) {			
+			e.log_Warning("Keiner oder der falsche pmi-Wert wurde angegeben. "+
+					"Es wird versucht, pmi aus der Indizierdatei zu berechnen ");
 			return std_pmi;
 		}
 	}
@@ -1738,7 +1746,7 @@ public class CasePara {
 	/** 
 	 * @return Gibt die Kolbenflaeche in [m^2]zurück.
 	 * */
-	public double get_pistonArea(){		
+	public double get_KolbenFlaeche(){		
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "Kolbenflaeche","[m^2]",0.00002,5); //aus minimaler Bohrung und aus maximaler Bohrung berechnet
 		} catch (ParameterFileWrongInputException e) {
@@ -1751,7 +1759,7 @@ public class CasePara {
 	/** 
 	 * @return Gibt die Kolbenflaeche in [m^2]zurück.
 	 * */
-	public double get_fireDeckArea(){		
+	public double get_Brennraumdachflaeche(){		
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "Brennraumdachflaeche","[m^2]",0.00002,5); //aus minimaler Bohrung und aus maximaler Bohrung berechnet
 		} catch (ParameterFileWrongInputException e) {
@@ -1763,7 +1771,7 @@ public class CasePara {
 	/** 
 	 * @return Gibt die Feuersteghoehe in [m]zurück.
 	 * */
-	public double get_Feuersteghoehe(){		
+	public double get_Feuersteighoehe(){		
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "Feuersteghoehe","[m]",0,0.5); 
 		} catch (ParameterFileWrongInputException e) {
@@ -1794,12 +1802,9 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-
-
-
 	/** 
 	 * @return Gibt die Desachsierung in [m]zurück.
-	 * */
+	 */
 	public double get_Desachsierung(){		
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "Desachsierung","[m]",-0.005,0.005); 
@@ -1808,10 +1813,7 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
-
-
-
-
+	
 	/** 
 	 * @return Gibt den Zeitpunkt Auslassschluss in [s] nach Rechenbeginn zurück.
 	 * */
@@ -2004,7 +2006,7 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException e) {
 			e.log_Warning("Der Wert fuer \"RefFlaecheAuslass\" wurde im Inputfile nicht angegeben. \n " +
 					"Es wird mit \"Kolbenflaeche\" gerechnet!");
-			return get_pistonArea();
+			return get_KolbenFlaeche();
 		}		
 	}
 	/** 
@@ -2018,7 +2020,7 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException e) {
 			e.log_Warning("Der Wert fuer \"RefFlaecheEinlass\" wurde im Inputfile nicht angegeben. \n " +
 					"Es wird mit \"Kolbenflaeche\" gerechnet!");
-			return get_pistonArea();
+			return get_KolbenFlaeche();
 		}		
 	}
 
@@ -2147,9 +2149,6 @@ public class CasePara {
 
 
 
-
-
-
 	private double set_doublePara(Hashtable<String,String []> parameterInHash, 
 			String paraNameToSet, 
 			String moeglicheEinheit, 
@@ -2185,7 +2184,6 @@ public class CasePara {
 		}			
 
 		for( int i=0;i<possibleParaValues.length;i++){		
-			//if(temp.equalsIgnoreCase(possibleParaValues[i]))
 			if(temp.equals(possibleParaValues[i]))
 				found=true;			
 		}
@@ -2286,13 +2284,9 @@ public class CasePara {
 		public final boolean DUBUGGING_MODE;
 		public final double DUBUGGING_TIME_SEC;
 		
-		public final double RECHENGENAUIGKEIT_DVA;
 		public final double MINIMALE_ZONENMASSE;
 		public final double T_FREEZE;
-		public final double RELAX; //Relaxationsfaktor fuer Iteration
-		public final int SGOLAY_ORDNUNG;
-		public final int SGOLAY_BREITE;
-		
+
 		public final double WRITE_INTERVAL_SEC;
 		public final int ANZ_BERECHNETER_WERTE;
 
@@ -2314,10 +2308,9 @@ public class CasePara {
 		public final boolean IS_ZEIT_BASIERT;
 		public final boolean IS_ZEIT_BASIERT_START_IN_KW;
 		public final boolean SHIFT_pEIN,SHIFT_pAUS;
-		public final boolean FILTERN;
 
 		//vielleicht besser als get methode	
-		public final File INDIZIER_FILE;
+		//public final File INDIZIER_FILE;
 		public final int KANAL_SPALTEN_NR_PZYL;
 		public final int KANAL_SPALTEN_NR_PEIN;
 		public final int KANAL_SPALTEN_NR_PABG;
@@ -2370,63 +2363,14 @@ public class CasePara {
 			else
 				SHIFT_pAUS=false;
 			
-			
-			
-			//Einlesen von PUBLIC FINAL doubleDaten
-			RECHENGENAUIGKEIT_DVA=1e5*set_doublePara(PARAMETER, "rechenGenauigkeit_DVA","[bar]",0,0.1);
-
 			MINIMALE_ZONENMASSE=set_doublePara(PARAMETER, "minimaleZonenMasse","[kg]",0,0.5); 
 
 			//sollten sinnvolle Grenzen sein...Grill gibt 1600K an das alte Bremo verwendet 1700K
 			T_FREEZE=set_doublePara(PARAMETER, "T_freeze","[K]",1400,1900);	
 			
-			double tmpRELAX;
-			try{				
-				tmpRELAX=set_doublePara(PARAMETER, "relaxFaktor","[-]",0.1,1);	
-			}catch(ParameterFileWrongInputException e){
-				e.log_Warning("Es wurde kein Relaxationsfaktor angegeben. " +
-						"Es wird mit 0.7 gerechnet. \n" +
-						"Der Relaxationsfaktor kann über den Parameter \"relaxFaktor\" definiert werden.");
-				tmpRELAX=0.7;
-			}
-			
-			RELAX=tmpRELAX;	
-			
-			if(set_StringPara(PARAMETER,"filtern",yesno ).equalsIgnoreCase("ja"))
-				FILTERN=true;
-			else
-				FILTERN=false;
-			
-			double tmpSGOLAY_ORDNUNG=5;
-			double tmpSGOLAY_BREITE=2*tmpSGOLAY_ORDNUNG+1;
-			if(FILTERN){
-				try{				
-					tmpSGOLAY_ORDNUNG=set_doublePara(PARAMETER,"sgolayOrdnung","[-]", 2,12);
-				}catch(ParameterFileWrongInputException e){
-					e.log_Warning("Die Ordnung fuer den SavitzkyGolay-Filter wurde nicht angegeben. \n" +
-					"Es wird mit einem Polynom 5ter Ordnung gerechnet.\n" +
-					"Eine hoehere Ordnung kann mittles der Vorgabe des Parameters \"sgolayOrdnung\" erfolgen.");
-					tmpSGOLAY_ORDNUNG=5;
-				}
-				
-				try{				
-					tmpSGOLAY_BREITE=set_doublePara(PARAMETER,"sgolayBreite","[-]", 2*tmpSGOLAY_ORDNUNG+1,50);
-				}catch(ParameterFileWrongInputException e){
-					tmpSGOLAY_BREITE=(2*tmpSGOLAY_ORDNUNG+1)*2; //zweifache Mindestbreite
-					e.log_Warning("Die Breite fuer den SavitzkyGolay-Filter wurde nicht angegeben. \n" +
-					"Es wird mit einer Breite von " + tmpSGOLAY_BREITE + " gerechnet. \n" +
-					"Eine andere Breite kann mittles der Vorgabe des Parameters \"sgolayBreite\" erfolgen.");
-					
-				}
-			}
-			
-			SGOLAY_ORDNUNG=(int)tmpSGOLAY_ORDNUNG;
-			SGOLAY_BREITE=(int)tmpSGOLAY_BREITE;
-			
 			//Einlesen von PUBLIC FINAL StringDaten
 			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","abgleichKruemmer","ohne"};			
 			NULLLINIEN_METHODE=set_StringPara(PARAMETER,"nullLinienMethode",s1);
-				
 
 			String [] s2 ={"Janaf", "NASA9" , "Burcat", "ERC"};	
 			THERMO_POLYNOM_KOEFF_VORGABE=set_StringPara(PARAMETER,"polynomKoeffizienten", s2);
@@ -2590,7 +2534,7 @@ public class CasePara {
 			String indizierFileName=set_FileName(PARAMETER,"indizierFileName");
 			int indexOf=indizierFileName.indexOf(".");
 			EINGABEDATEI_FORMAT=indizierFileName.substring(indexOf+1); //Dateiendung
-			INDIZIER_FILE=new File(WD+indizierFileName);
+//			INDIZIER_FILE=new File(WD+indizierFileName);
 
 			KANAL_SPALTEN_NR_PZYL=(int)set_doublePara(PARAMETER, "spalte_pZyl","",1,40); //bis zu fünf kaskadierte CombiWF
 			KANAL_SPALTEN_NR_PEIN=(int)set_doublePara(PARAMETER, "spalte_pEin","",1,40);
@@ -2622,9 +2566,7 @@ public class CasePara {
 				}
 				catch (ParameterFileWrongInputException e) {
 					e.log_Warning("Es wurde kein Brennverlaufsfile angegeben! Es kann keine APR durchgeführt werden!");
-					
-				
-		
+			
 				}
 		
 			

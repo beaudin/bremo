@@ -134,13 +134,13 @@ public class Motor_HubKolbenMotor extends Motor{
 	 */
 	public double get_fireDeckArea() {
 		if(Double.isNaN(fireDeckArea))
-			fireDeckArea =CP.get_fireDeckArea(); //m^2		
+			fireDeckArea =CP.get_Brennraumdachflaeche(); //m^2		
 		return fireDeckArea;
 	}
 
 	public double get_Feuersteghoehe(){
 		if(Double.isNaN(feuerstegHoehe))
-			feuerstegHoehe =CP.get_Feuersteghoehe();		//m
+			feuerstegHoehe =CP.get_Feuersteighoehe();		//m
 		return feuerstegHoehe;
 	}
 
@@ -152,7 +152,7 @@ public class Motor_HubKolbenMotor extends Motor{
 
 	public double get_Kolbenflaeche() {
 		if(Double.isNaN(pistonArea))
-			pistonArea =CP.get_pistonArea(); 		//m^2
+			pistonArea =CP.get_KolbenFlaeche(); 		//m^2
 		return pistonArea;
 	}
 

@@ -34,13 +34,13 @@ public class DurchflusskennzahlFileReader {
 
 
 	public DurchflusskennzahlFileReader(CasePara CP, String neutyp){
-		try{
+	/*	try{
 			throw new BirdBrainedProgrammerException("This class has not been changed and not tested yet!" +
 					"Contact your local programmer");			
 		}catch(BirdBrainedProgrammerException bbp){
 			bbp.stopBremo();
 		}
-
+*/
 		this.typ=neutyp;
 		this.cp=CP;
 		L_Interp = new LinInterp(CP);			

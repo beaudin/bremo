@@ -29,13 +29,13 @@ public class VentilhubFileReader {
 
 	
 	public VentilhubFileReader(CasePara CP, String typ){		
-		try{
+/*		try{
 			throw new BirdBrainedProgrammerException("This class has not been changed and not tested yet!" +
 					"Contact your local programmer");			
 		}catch(BirdBrainedProgrammerException bbp){
 			bbp.stopBremo();
 		}
-		
+*/		
 		this.cp=CP;
 		L_Interp = new LinInterp(CP);			
 

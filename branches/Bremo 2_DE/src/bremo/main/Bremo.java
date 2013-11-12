@@ -4,7 +4,6 @@ import io.FileWriter_txt;
 import io.SimpleTXTFileReader;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -19,13 +18,6 @@ import javax.swing.JOptionPane;
 import matLib.ConstantsOptimizer;
 import matLib.MatLibBase;
 import matLib.Optimizer;
-import misc.LinInterp;
-
-import kalorik.spezies.SpeziesFabrik;
-
-import p2.CPPCaller;
-
-import funktionenTests.FunktionsTester;
 import KivaPostProcessing.KivaPostProcessor;
 import berechnungsModule.Berechnung.CanteraCaller;
 import bremo.parameter.CasePara;
@@ -33,6 +25,7 @@ import bremo.sys.Rechnung;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
 import bremoswing.SwingBremo;
+import bremoswing.util.FertigMeldungFrame;
 
 
 /**
@@ -131,34 +124,27 @@ public class Bremo extends Thread {
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {
 			if(calledFromGUI){
-				SwingBremo.setNrOfBremoAlive();
-				JFrame popup = new JFrame();
-				JOptionPane.showMessageDialog(popup,
-						"Thread : Eine Fehler ist in der File "+this.getName()+" \n aufgetreten !!!" +
-						"\n"+e.getMessage(), this.getName(),
-						JOptionPane.ERROR_MESSAGE);
-				//SwingBremo.NrOfFile--;
-				SwingBremo.StateBremoThread();
-			}
-			e.printStackTrace();
+			SwingBremo.setNrOfBremoAlive();
+			
+			new FertigMeldungFrame(this.getName(),"<html><u>Thread</u> : Eine Fehler ist in der File <b>"+this.getName()+"</b> aufgetreten !!! <p>" +
+					"\n "+e.getMessage()+"</p></html>", JOptionPane.ERROR_MESSAGE);
+			SwingBremo.StateBremoThread();
+		  } 
 			e.stopBremo();			
 		}
 		try {
 			r.berechnungDurchfuehren();
-			//SwingBremo.StateBremoThread();
-			//System.err.println("Thread : "+this.getName()+"   is Fertig !!!");		
-			
 			if(calledFromGUI){
-				JFrame popup = new JFrame();
-				JOptionPane.showMessageDialog(popup,
-						"Thread "+this.getName()+" ist fertig!", this.getName(),
-						JOptionPane.INFORMATION_MESSAGE);
-				SwingBremo.PutInBremoThreadFertig("Thread "+this.getName()+" ist fertig!");
-				SwingBremo.StateBremoThread();
+			new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
+			SwingBremo.PutInBremoThreadFertig(this.getName());
 			}
 		} catch (Exception  e) {
 			this.interrupt();
 			e.printStackTrace();
+		}
+		if (calledFromGUI) {
+		    SwingBremo.StateBremoThread();
+		    System.err.println("Rechungszeit:"+(System.currentTimeMillis()-SwingBremo.startTime)+" ms");
 		}
 	}	
 
@@ -191,6 +177,14 @@ public class Bremo extends Thread {
 
 		return caseParaerzeugt;
 	}
+	/**
+	 * Gibt die InputFile Von Bremo
+	 * @return inpuFile
+	 */
+	public File get_myFile() {
+		
+		return inputFile;
+	}
 
 
 	/**
@@ -205,11 +199,16 @@ public class Bremo extends Thread {
 		System.out.println(System.getProperty("java.library.path"));		
 		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
 		//Hier einige Beisspile wie Funktionen getestet werden können
-//		File fileCP = new File("src//InputFiles//FunktionsTester//FunktionsTester.txt");	
-//		File fileCP = new File("src//InputFiles//Mode3_MultiZoneInitFromKiva//mode3MultiZoneInp_10Z_HTF.txt");			
-//		File fileCP = new File("src//InputFiles//DVA_Flori//setup_2010_11_04_0026.txt");	
-
-		//		CasePara privateCP = new CasePara(fileCP);
+		System.out.println(System.getProperty("home"));
+		File fileCP = new File("C://Users//Martibeaux//HIWI_workspace//BremoOriginale//src//InputFiles//Dummy//120911_Einzonig.txt");
+		double startTime = System.currentTimeMillis();
+		Bremo bremo=new Bremo(fileCP,false);
+		bremo.run();
+		double finishTime = System.currentTimeMillis();
+		bremo=null;
+		System.out.println(finishTime-startTime+" ms");
+//		File fileCP = new File("src//InputFiles//Mode7_MultiZoneInitFromKiva//mode7InpFromKiva_0.txt");	
+//		CasePara privateCP = new CasePara(fileCP);
 //		FunktionsTester ft=new FunktionsTester(privateCP);
 //		ft.estimateEGR();
 //		ft.getInitialConditions_2();

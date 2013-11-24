@@ -1,0 +1,165 @@
+[Bremo::Input::Start]					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+Mode 3 -- 9-Aug-12 -- run 1
+[Motor: reciprocatingPistonEngine]					
+bore	[m]	:=	0.082		
+crankRadius	[m]	:=	0.0452		
+conRodLength	[m]	:=	0.14554		
+compressionRatio	[-]	:=	16.7		
+pistonPinOffset 	[m]        	:=	0		
+axialOffset 	[m]	:=	0		
+IVC   	[CAaTDCF]   	:=	-132		
+IVO		[CAaTDCF]   	:=	-376		
+EVO    	[CAaTDCF]   	:=	112		
+EVC   	[CAaTDCF]   	:=	376	
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 					
+					
+rotationalSpeed 	[min^-1]	:=	1900		
+
+[residualGasModel: userInput ]					
+_mRG_perCycle	[kg] 	:=	-5		
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+[simulationModel: APR_CanteraMultiZoneRCCI ]
+lhvCorr	[-]			:= 0.964	
+canteraInputFileName [-]	:=	ERCmech.cti			
+canteraThermophase	[-]	:=	gas	
+T_StartKinetics	[K]	:= 555
+
+iniMoleFrac_CO2	[-]	:=	0.001535
+iniMoleFrac_H2O	[-]	:=	0.001493
+iniMoleFrac_N2	[-]	:=	0.786246
+iniMoleFrac_O2	[-]	:=	0.207269
+iniMoleFrac_nC7H16	[-]	:=	0.000000
+iniMoleFrac_iC8H18	[-]	:=	0.003457
+iniMoleFrac_CO	[-]	:=	0.000000
+iniMoleFrac_H2	[-]	:=	0.000000
+iniMoleFrac_H	[-]	:=	0.000000
+iniMoleFrac_O	[-]	:=	0.000000
+iniMoleFrac_OH	[-]	:=	0.000000
+iniMoleFrac_NO	[-]	:=	0.000000
+iniMoleFrac_N	[-]	:=	0.000000
+p_Ini	[Pa]	:=	122872.040000
+T_Ini	[K]	:=	357.716190
+
+
+[turbModel:	k]
+_PistonBowlDiameter	[m]	:=	0.02073
+_PistonBowlDepth		[m]	:=	0.015405
+_TurbKineticEnergy_Ini	[m^2/s^2]	:=	16.3897
+if turbModel is switched to FromFile	
+_turbulenceFileName [-] 	:= 	turbFile_KivaFixed.txt			
+column_TKE [-]	:=	2			
+column_EPS [-]	:=	3			
+column_TI [-]	:=	4	
+
+compareToExp	[-] 	:=	yes	
+indicatorFileName	[-] 	:=	p_Exp_Exp.txt
+column_pCyl	[-]	:=	2		
+column_pIn	[-]	:=	3		
+column_pEx	[-]	:=	4		
+shift_pIn	[-]	:=	no	
+shift_pEx	[-]	:=	no 
+filterExperimentalPressureData	[-] 	:= 	no		
+pressureAdjustmentMethod	[-] 	:= 	without				
+	
+					
+nbrOfInjections	[-]	:= 	1		
+indexOfMainInj	[-]	:= 	0	
+swirlRatio		[-]	:=	1.5	
+					
+[injectionModel _0 :  Hiroyasu]					
+fuel	[-]	:= 	nC7H16		
+InjZone	[-]	:=	30
+Aus Messung				
+mFuel	[kg/h] 	:=	0.168062402		
+Aus Kiva				
+_mFuel	[kg/h] 	:=	0.16815	
+
+Aus Kiva
+BOI 	[CAaTDCF] 	:=	-43		
+EOI	[CAaTDCF] 	:=	-38.7
+T_Fuel_liquid	[K] 	:=	322		
+nbrOfAxialPackets	[-]	:=	2		
+nbrOfRadialPackets	[-]	:=	15			
+modelFuelForEvaporation	[-]	:=	tetradecane		
+injectionPressure	[Pa]	:=	5.00E+07		
+nbrOfNozzleHoles	[-]	:=	7		
+diameterNozzleHole	[m]	:=	0.000128	
+Vielleicht auch 0.7	
+cdFactor	[-]	:=	0.7	
+					
+Hohenberg Woschni Chang  Hensel fromFile	without			
+[wallHeatTransferModel: Chang   ]	
+fromFile
+_whtfMult	[-]		:= 1.0
+Chang Hohenberg
+whtfMult	[-]		:= 1.1
+Woschni Hans	
+_whtfMult	[-]		:= 1.75	
+
+T_Cyl		[K]		:=	400	
+T_Head		[K]		:=	450	
+T_Piston	[K]		:=	450	
+
+squishHeight	[m]	:=	0.0015
+topRingLandHeight	[m]	:=	0	
+cobustionChamberRoofSurfArea	[m^2]	:=	0.00528	
+fromvCAD-Model
+pistonSurfaceArea	[m^2]	:=	0.007264
+
+if Wandwaermemodell is switched to FromFile
+_htfFileName	[-] 	:= 	htfFile_KivaFixed.txt		
+column_dQw [-]	:=	2	
+
+if Wandwaermemodell ist switched to Hans
+es kommt nur auf das Verhaeltnis der Beiden werte an
+IV_Stroke_max [m]	:=	0.05
+IV_Stroke [m]	:=	0.05
+	
+					
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+	
+					
+					
+[chemEquilibriumSolver: Grill ]
+chemEquilibriumConstants	[-] 	:=	Burcat		
+T_freeze	[K]	:=	1600
+					
+twoOrFourStroke	[-]	:=	4Stroke		
+minimumZoneMass	[kg]	:=	2.00E-07		
+polynomKoeffizienten	[-] 	:=	ERC		
+timeOrCrankAngleBased	[-]	:=	CA		
+timeStepSize 	[CA]	:=	0.5		
+simulationStart 	[CAaTDCF]	:=	-132		
+simulationEnd	[CAaTDCF]	:=50	
+
+		
+debuggingMode	[-]	:=	nein		
+debuggingTime 	[CAaTDCF]	:=	-37.5	
+
+Optimum fuer mix 1_b + Chang/Hohenberg + whtf 1.1
+mixingProcess	 [-]	 :=	 1
+Best Match mit Standard Hiroyasu Konstanten
+entrainmentFactor	[-]	 :=	 2.9
+profilFactor		[-]		:=0.55
+verwendet fuer ERC
+C_Mix [-]	 :=	0.1875
+C_MixRad [-]	 :=	0.3
+
+
+
+
+
+
+

@@ -1,0 +1,173 @@
+[Bremo::Input::Start]					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+Mode 3 -- 9-Aug-12 -- run 1
+[Motor: reciprocatingPistonEngine]					
+bore	[m]	:=	0.082		
+crankRadius	[m]	:=	0.0452		
+conRodLength	[m]	:=	0.14554		
+compressionRatio	[-]	:=	16.7		
+pistonPinOffset 	[m]        	:=	0		
+axialOffset 	[m]	:=	0		
+IVC   	[CAaTDCF]   	:=	-132		
+IVO		[CAaTDCF]   	:=	-376		
+EVO    	[CAaTDCF]   	:=	112		
+EVC   	[CAaTDCF]   	:=	376	
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 					
+					
+rotationalSpeed 	[min^-1]	:=	1900		
+
+[residualGasModel: userInput ]					
+_mRG_perCycle	[kg] 	:=	-5		
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+[simulationModel: APR_CanteraMultiZoneRCCI ]
+if you want to account for the difference in heating value of 
+neheptane vs diesel and isooctane vs gasoline
+lhvCorr	[-]			:= 0.964
+lhvCorr	[-]			:= 1	
+canteraInputFileName [-]	:=	ERCmech.cti			
+canteraThermophase	[-]	:=	gas	
+T_StartKinetics	[K]	:= 555
+
+iniMoleFrac_nC7H16	[-]	:=	0.0
+iniMoleFrac_iC8H18	[-]	:=	0.003318
+iniMoleFrac_O2	[-]	:=	0.203873
+iniMoleFrac_CO2	[-]	:=	0.002915
+iniMoleFrac_H2O	[-]	:=	0.003295
+iniMoleFrac_N2	[-]	:=	0.786599
+iniMoleFrac_OH	[-]	:=	0.0
+iniMoleFrac_CO	[-]	:=	0.0
+iniMoleFrac_H	[-]	:=	0.0
+iniMoleFrac_H2	[-]	:=	0.0
+iniMoleFrac_O	[-]	:=	0.0
+iniMoleFrac_NO	[-]	:=	0.0
+iniMoleFrac_N	[-]	:=	0.0
+p_Ini	[Pa]	:=	122945.9584
+T_Ini	[K]	:=	358.01485188435265
+residualFraction	[-]	:=	0.07227905273437499
+
+
+
+[turbModel:	k]
+If you want to specify the initial value of the turbulence model
+_TurbKineticEnergy_Ini	[m^2/s^2]	:=	16.3897
+If turbModel is switched to FromFile this will be the fiel name and the columns
+_turbulenceFileName [-] 	:= 	turbFile_KivaFixed.txt			
+_column_TKE [-]	:=	2			
+_column_EPS [-]	:=	3			
+_column_TI [-]	:=	4	
+
+If yes you need to specify the name of the indicator file.
+all that happens is that the exp pressure will be in the result file
+compareToExp	[-] 	:=	yes	
+indicatorFileName	[-] 	:=	p_Exp_Exp.txt
+column_pCyl	[-]	:=	2		
+column_pIn	[-]	:=	3		
+column_pEx	[-]	:=	4	
+shifts the instatntaneous pressure data to match the slowly measured pressure 	
+shift_pIn	[-]	:=	no	
+shift_pEx	[-]	:=	no 
+filterExperimentalPressureData	[-] 	:= 	no		
+Indicated pressure is relative only. Choose the method to get it absolute
+pressureAdjustmentMethod	[-] 	:= 	without				
+	
+					
+nbrOfInjections	[-]	:= 	1		
+indexOfMainInj	[-]	:= 	0	
+swirlRatio		[-]	:=	1.5	
+					
+[injectionModel _0 :  Hiroyasu]					
+fuel	[-]	:= 	nC7H16		
+InjZone	[-]	:=	30
+experimental value		
+mFuel	[kg/h] 	:=	0.168062402		
+from Kiva				
+_mFuel	[kg/h] 	:=	0.16815	
+
+Aus Kiva
+BOI 	[CAaTDCF] 	:=	-43		
+EOI	[CAaTDCF] 	:=	-38.7
+T_Fuel_liquid	[K] 	:=	322		
+nbrOfAxialPackets	[-]	:=	2		
+nbrOfRadialPackets	[-]	:=	15			
+modelFuelForEvaporation	[-]	:=	tetradecane		
+injectionPressure	[Pa]	:=	5.00E+07		
+nbrOfNozzleHoles	[-]	:=	7		
+diameterNozzleHole	[m]	:=	0.000128	
+cdFactor	[-]	:=	0.7	
+					
+Hohenberg Woschni Chang  Hensel fromFile	without			
+[wallHeatTransferModel: Chang   ]	
+fromFile
+_whtfMult	[-]		:= 1.0
+Chang Hohenberg
+whtfMult	[-]		:= 1.1
+Woschni Hans	
+_whtfMult	[-]		:= 1.75	
+
+T_Cyl		[K]		:=	400	
+T_Head		[K]		:=	450	
+T_Piston	[K]		:=	450	
+
+squishHeight	[m]	:=	0.0015
+topRingLandHeight	[m]	:=	0	
+combustionChamberRoofSurfArea	[m^2]	:=	0.00528	
+from CAD-Model
+pistonSurfaceArea	[m^2]	:=	0.007264
+
+if wallHeatTransferModel is switched to FromFile
+_htfFileName	[-] 	:= 	htfFile_KivaFixed.txt		
+column_dQw [-]	:=	2	
+
+if wallHeatTransferModel ist switched to Hensel
+it is only the ratio that is imortant
+IV_Stroke_max [m]	:=	0.05
+IV_Stroke [m]	:=	0.05
+	
+					
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+	
+					
+					
+[chemEquilibriumSolver: Grill ]
+chemEquilibriumConstants	[-] 	:=	Burcat		
+T_freeze	[K]	:=	1600
+					
+twoOrFourStroke	[-]	:=	4Stroke		
+minimumZoneMass	[kg]	:=	2.00E-07		
+polynomialCoeffs	[-] 	:=	ERC		
+timeOrCrankAngleBased	[-]	:=	CA		
+timeStepSize 	[CA]	:=	0.5		
+simulationStart 	[CAaTDCF]	:=	-132		
+simulationEnd	[CAaTDCF]	:=50	
+
+		
+debuggingMode	[-]	:=	no		
+debuggingTime 	[CAaTDCF]	:=	-37.5	
+
+
+MixApproach_1_dmFluxScheme_1
+mixingProcess	 [-]	 :=	 1
+InjZone	[-]	:=	40
+nbrOfAxialPackets	[-]	:=	8		
+nbrOfRadialPackets	[-]	:=	5	
+entrainmentFactor	[-]	 :=	 2.9
+profilFactor		[-]		:=0.55
+C_Mix		[-]		:=		2.750028700000
+C_MixRad		[-]		:=		1
+
+
+
+
+
+

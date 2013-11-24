@@ -1,0 +1,48 @@
+package berechnungsModule.turbulence;
+
+import berechnungsModule.ModuleFactory;
+import bremo.parameter.CasePara;
+import bremo.parameter.CasePara.MakeMeUnique;
+import bremoExceptions.BirdBrainedProgrammerException;
+
+public class TurbulenceModelFactory extends ModuleFactory {
+	
+	public static final String MODEL_FLAG="turbModel";
+	public static final  String[] TURBLMODELS={"fromFile" , "k", "k-eps"};
+	private TurbulenceModel turbModel=null;
+	
+	public TurbulenceModelFactory(CasePara cp, MakeMeUnique mmu) {
+		super(cp);
+	}
+	
+	private void createTurbulenceModel(){
+		String modelFlagInput=super.get_ModulWahl(MODEL_FLAG, TURBLMODELS);
+
+		if(modelFlagInput.equals("fromFile"))
+			turbModel=new Turbulence_FromFile(super.CP) ;
+		else if(modelFlagInput.equals("k"))
+			turbModel=new Turbulence_k(super.CP);
+		else if(modelFlagInput.equals("k-eps"))
+			turbModel=null;
+		else{
+			try {
+				throw new BirdBrainedProgrammerException(
+						"The chosen turbulence model \"" +modelFlagInput + " \" was considered to be valid  " +
+						"during the preprocessing of the input file but the model has not been implemented yet! \n" +
+						"Blame the german!");
+			} catch (BirdBrainedProgrammerException e) {
+				e.stopBremo();
+			}
+			turbModel=null;
+		}
+	}
+	
+	
+	public TurbulenceModel get_TurbulenceModel(){
+		if(turbModel==null){
+			createTurbulenceModel();
+		}
+		return turbModel;
+	}
+
+}

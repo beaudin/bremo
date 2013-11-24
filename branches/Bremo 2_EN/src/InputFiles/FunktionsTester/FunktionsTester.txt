@@ -1,0 +1,73 @@
+[Bremo::Input::Start]					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+Mode 3 -- 9-Aug-12 -- run 1
+[Motor: reciprocatingPistonEngine]					
+bore	[m]	:=	0.082		
+crankRadius	[m]	:=	0.0452		
+conRodLength	[m]	:=	0.14554		
+compressionRatio	[-]	:=	16.7		
+pistonPinOffset 	[m]        	:=	0		
+axialOffset 	[m]	:=	0		
+IVC   	[CAaTDCF]   	:=	-132		
+IVO		[CAaTDCF]   	:=	-376		
+EVO    	[CAaTDCF]   	:=	112		
+EVC   	[CAaTDCF]   	:=	376	
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 					
+					
+rotationalSpeed 	[min^-1]	:=	1900		
+
+[residualGasModel: userInput ]					
+_mRG_perCycle	[kg] 	:=	-5		
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+[simulationModel: APR_CanteraMultiZoneHomogeneous ]
+	
+canteraInputFileName [-]	:=	ERCmech.cti			
+canteraThermophase	[-]	:=	gas	
+T_StartKinetics	[K]	:= 555
+
+multiZoneInitFile	[-]	:=	dummyInitFile.txt
+
+nbrOfInjections	[-]	:=	0
+lhvCorr	[-]	:=	1
+
+If yes you need to specify the name of the indicator file.
+all that happens is that the exp pressure will be in the result file
+compareToExp	[-] 	:=	no	
+
+					
+Hohenberg Woschni Chang  Hensel fromFile	without			
+[wallHeatTransferModel: without   ]						
+					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+					
+					
+[chemEquilibriumSolver: Grill ]
+chemEquilibriumConstants	[-] 	:=	Burcat		
+T_freeze	[K]	:=	1600
+					
+twoOrFourStroke	[-]	:=	4Stroke		
+minimumZoneMass	[kg]	:=	2.00E-07		
+polynomialCoeffs	[-] 	:=	ERC		
+timeOrCrankAngleBased	[-]	:=	CA		
+timeStepSize 	[CA]	:=	0.5		
+simulationStart 	[CAaTDCF]	:=	-132		
+simulationEnd	[CAaTDCF]	:=50	
+
+		
+debuggingMode	[-]	:=	no		
+debuggingTime 	[CAaTDCF]	:=	-37.5	
+
+
+					
+
+

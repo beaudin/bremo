@@ -1,0 +1,148 @@
+[Bremo::Input::Start]				
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+			20.10.2010	
+[Motor: HubKolbenMotor]				
+Bohrung	[m]	:=	0.0820000000	
+Kurbelradius	[m]	:=	0.0452000000	
+Pleuellaenge	[m]	:=	0.1455400000	
+Verdichtung	[-]	:=	16.7000000000	
+Schraenkung 	[m]        	:=	0.0000000000	
+Desachsierung 	[m]	:=	0.0000000000	
+Einlassschluss   	[KWnZOT]   	:=	-132.0000000000	
+Einlassoeffnet    	[KWnZOT]   	:=	-376.0000000000	
+Auslassoeffnet    	[KWnZOT]   	:=	112.0000000000	
+Auslassschluss   	[KWnZOT]   	:=	376.0000000000	
+EV_Hub_max 	[m]	:=	0.0079500000	
+EV_Hub 	[m]	:=	0.0079500000	
+Abgeschätzt als Kreisfläche				
+Brennraumdachflaeche	[m^2]   	:=	0.0052810170	
+Kolenflaeche =1.5*Bohrungsflaeche =0.007921525				
+Kolbenflaeche   	[m^2]       	:= 0.007921525		
+Feuersteghoehe	[m]	:=	0.0050000000	
+Quetschspalthoehe	[m]	:=	0.0006715000	
+				
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 				
+				
+Drehzahl 	[min^-1]	:=	1899.0000000000	
+mLuft_feucht	[kg/h]	:=	5.0000000000	
+T_Ladeluft	[K] 	:=	348.0000000000	
+T_Abgas	[K] 	:=	555.0000000000	
+relative_Luftfeuchte 	[%] 	:=	5.0000000000	
+T_FeuchteMessung 	[K] 	:=	305.5500000000	
+p_FeuchteMessung	[Pa] 	:=	555.0000000000	
+p_Ladeluft	[Pa] 	:=	555.0000000000	
+p_Abgas	[Pa] 	:=	555.0000000000	
+mAGR_extern	[kg/h]	:=	5.0000000000	
+[internesRestgasModell: RestgasVorgabe ]				
+mAGR_intern_ASP	[kg] 	:=	0.0000000000	
+				
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+[berechnungsModell: APR_CanteraMultiZone ]				
+iniMoleFrac_O2	[-]	:=	0.2093240000	
+iniMoleFrac_N2	[-]	:=	0.7874560000	
+iniMoleFrac_CO2	[-]	:=	0.0000000000	
+iniMoleFrac_H2O	[-]	:=	0.0000000000	
+iniMoleFrac_iC8H18	[-]	:=	0.0032200000	
+iniMoleFrac_nC7H16	[-]	:=	0.0000000000	
+p_Ini	[Pa]	:=	123000.0000000000	
+T_Ini	[K]	:=	348.0000000000	
+				
+anzahlEinspritzungen	[-]	:= 	1.0000000000	
+nbrOfMainInj	[-]	:= 	1.0000000000	
+				
+SRE				
+Hiroyasu				
+[einspritzModell_1 :  Hiroyasu]				
+krst	[-]	:= 	nC7H16	
+InjZone	[-]	:=	40.0000000000	
+Hu_Dies	[MJ/mol] 	:=	5.0000000000	
+0.146*(1-0.055)=0.13797				
+mKrst	[kg/h] 	:=	0.1680624020	
+_mKrst	[kg/h] 	:=	0.0000000000	
+BOI 	[KWnZOT] 	:=	-46.0000000000	
+EOI	[KWnZOT] 	:=	-41.0000000000	
+T_Krst_fluessig	[K] 	:=	335.0000000000	
+anzAxialPakete	[-]	:=	8.0000000000	
+anzRadialPakete	[-]	:=	5.0000000000	
+vergleichsKrstVerdampfung	[-]	:=	tetradecan	
+einspritzDruck	[Pa]	:=	50000000.0000000000	
+anzSpritzloecher	[-]	:=	8.0000000000	
+durchmSpritzloch	[m]	:=	0.0001280000	
+cdFaktor	[-]	:=	0.8000000000		
+lhvCorr	[-]			:= 1
+				
+				
+				
+Woschni				
+FromFile				
+Hans				
+[Wandwaermemodell:   FromFile]				
+whtfMult	[-]			:= 2.7
+whtfMult	[-]			:= 1
+brennraumDachHoehe	[m]	:=	0.0000000000	
+T_Wand	[K] 	:=	450.0000000000	
+refPunktWoschniHuber [KWnZOT] := -65				
+drallgeschwindigkeit  [m/s] := 0				
+				
+[Wandwaermemodell_LW: ohne]				
+				
+				
+				
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+filtern	[-] 	:= 	ja	
+nullLinienMethode	[-] 	:= 	ohne	
+				
+				
+[OHC_Solver: Grill ]				
+arbeitsverfahren	[-]	:=	4T	
+minimaleZonenMasse	[kg]	:=	0.0000002000	
+polynomKoeffizienten	[-] 	:=	ERC	
+zeit_oder_KW_Basiert	[-]	:=	KW	
+rechenGenauigkeit_DVA	[bar]	:=	0.0005000000	
+rechnungsSchrittweite 	[KW]	:=	1.0000000000	
+rechnungsBeginn 	[KWnZOT]	:=	-132.0000000000	
+rechnungsEnde	[KWnZOT]	:=50		
+relaxFaktor 	[-]	:=	0.6000000000	
+gleichGewichtsKonstanten	[-] 	:=	Burcat	
+T_freeze	[K]	:=	1600.0000000000	
+debuggingMode	[-]	:=	nein	
+debuggingTime 	[KWnZOT]	:=	-37.5000000000	
+				
+compareToExp	[-] 	:=	yes	
+indizierFileName	[-] 	:= 	p_Exp_Exp.txt	
+spalte_pZyl	[-]	:=	2.0000000000	
+spalte_pEin	[-]	:=	3.0000000000	
+spalte_pAbg	[-]	:=	4.0000000000	
+shift_pEin	[-]	:=	ja	
+shift_pAus	[-]	:=	ja	
+canteraInputFileName [-]	:=	ERCmech.cti		
+canteraThermophase	[-]	:=	gas	
+turbulenceFileName [-] 	:= 	turbFile.txt		
+column_TKE [-]	:=	2		
+column_EPS [-]	:=	3		
+column_TI [-]	:=	4		
+				
+htfFileName	[-] 	:= 	htfFile.txt	
+column_dQw [-]	:=	2		
+				
+durchflusskennzahlEinFileName 	[-] 	:= 	dummyCd.txt	
+RefDurchmesserEV	[m]	:=	0.1220000000	
+durchflusskennzahlAusFileName 	[-] 	:=	dummyCd.txt	
+RefDurchmesserAV	[m]	:=	0.1220000000	
+spalte_alphaVor	[-] 	:= 	2.0000000000	
+spalte_alphaRueck	[-] 	:= 	3.0000000000	
+VentilhubEinFileName 	[-] 	:= 	dummyValveLift.txt	
+VentilhubAusFileName	[-] 	:= 	dummyValveLift.txt				
+				
+EntrainmentFaktor 	[-] 	 := 	2.9
+ProfilFaktor	[-]	:=	0.5	
+C_Mix	[-]	:=	1.50028700000	
+C_MixRad	[-]	:=	1.65164440000	

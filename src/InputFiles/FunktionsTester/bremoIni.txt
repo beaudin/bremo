@@ -1,0 +1,16 @@
+ 
+iniMoleFrac_iC8H18	[-]	:=	0.004758
+iniMoleFrac_O2	[-]	:=	0.205999
+iniMoleFrac_CO2	[-]	:=	0.001475
+iniMoleFrac_H2O	[-]	:=	0.001663
+iniMoleFrac_N2	[-]	:=	0.786105
+iniMoleFrac_OH	[-]	:=	0.0
+iniMoleFrac_CO	[-]	:=	0.0
+iniMoleFrac_H	[-]	:=	0.0
+iniMoleFrac_H2	[-]	:=	0.0
+iniMoleFrac_O	[-]	:=	0.0
+iniMoleFrac_NO	[-]	:=	0.0
+iniMoleFrac_N	[-]	:=	0.0
+p_Ini	[Pa]	:=	151563.4497
+T_Ini	[K]	:=	374.9692112451754
+residualFraction	[-]	:=	0.0320859375

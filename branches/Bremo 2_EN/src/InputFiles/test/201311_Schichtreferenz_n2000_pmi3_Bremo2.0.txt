@@ -1,0 +1,126 @@
+[Bremo::Input::Start]			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+			25.11.2013
+[Motor: reciprocatingPistonEngine]			
+bore	[m]	:=	0.083
+crankRadius	[m]	:=	0.04153
+conRodLength	[m]	:=	0.144
+compressionRatio	[-]	:=	12.14
+axialOffset	[m]        	:=	0
+pistonPinOffset	[m]	:=	0.001
+IVC 	[CAaTDCF]   	:=	-134
+IVO 	[CAaTDCF]   	:=	-389
+EVO 	[CAaTDCF]   	:=      	124
+EVC 	[CAaTDCF]   	:=	385
+EV_Hub_max 	[m]	:=	0.008083618
+EV_Hub 	[m]	:=	0.008083618
+EV_durchmesser 	[m]	:=	0.027
+AV_durchmesser	[m]	:=	0.027
+			
+combustionChamberRoofSurfArea	[m^2]   	:=	0.007404218
+pistonSurfaceArea	[m^2]       	:=	0.00541061
+topRingLandHeight	[m]	:=	0.005
+squishHeight	[m]	:=	0.000725
+			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 			
+			
+rotationalSpeed	[min^-1]	:=	1999.517
+mLuft_feucht	[kg/h]	:=	26.737
+			
+T_Ladeluft	[K] 	:=	294.708
+			
+T_Abgas	[K] 	:=	497.793
+relative_Luftfeuchte	[%] 	:=	37.953
+T_IVC_WHT	[K] 	:=	294.708
+polyExp_WHT	[-]	:=	1.37
+p_IVC	[Pa]	:=	94866.7
+T_Cyl	[K] 	:=	523.15
+T_Piston	[K] 	:=	523.15
+T_Head	[K] 	:=	523.15
+			
+T_FeuchteMessung	[K] 	:=	294.708
+p_FeuchteMessung	[Pa] 	:=	100723.3
+p_Ladeluft	[Pa] 	:=	94866.7
+p_Abgas	[Pa] 	:=	100531.7
+mAGR_extern	[kg/h]	:=	0
+			
+[residualGasModel: fillAndEmpty]			
+mRG_perCycle	[kg] 	=	0
+			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+			
+nbrOfInjections	[-]	:= 	1
+			
+[injectionModel_0: homogeneous]			
+fuel	[-]	:=	RON_95
+InjZone	[-]	:=	0
+Hu_RON_95 	[MJ/mol] 	:=	4.12815
+mFuel	[kg/h] 	:=	0.495
+BOI 	[CAaTDCF] 	:=	-33
+EOI	[CAaTDCF] 	:=      	-30.6
+T_Krst_fluessig	[K] 	:=	293
+			
+modelFuelForEvaporation 	[-]	:=	tetradecane
+			
+[wallHeatTransferModel: Woschni]			
+T_Wand	[K] 	:=	523.15
+			
+[wallHeatTransferModel_FillAndEmpty: without]			
+refTimeWoschniHuber	[KWnZOT]	:=	-59.9
+swirlRatio	[-]	:=	0
+			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+filterExperimentalPressureData	[-] 	:= 	yes
+sgolayOrder	[-]	:=	15
+sgolayHalfWidth	[-]	:=	50
+pressureAdjustmentMethod	[-] 	:= 	without
+KW_Beginn_Druckabgleich	[KWnZOT]	:= 	
+KW_Ende_Druckabgleich 	[KWnZOT]	:=	
+[simulationModel: DVA_1Zone]			
+			
+[chemEquilibriumSolver: Grill]			
+standardBildungsEnthalpien	[-] 	:=	ChemieStandard
+VerbrennungsBeginnAutoDetect	[-]	:=	ja
+verbrennungsBeginn 	[KWnZOT] 	=	-20
+twoOrFourStroke	[-]	:=	4Stroke
+minimumZoneMass	[kg]	:=	2.00E-06
+precissionPressureTraceAnalysis 	[bar]	:=	0.0005
+polynomialCoeffs	[-] 	:=	Burcat
+timeOrCrankAngleBased	[-]	:=	CA
+timeStepSize 	[CA]	:=	0.1
+simulationStart 	[CAaTDCF]	:=	-134
+simulationEnd	[CAaTDCF]	:=	124
+			
+relaxFaktor 	[-]	:=	0.7
+chemEquilibriumConstants	[-] 	:=	Burcat
+T_freeze	[K]	:=	1600
+debuggingMode	[-]	:=	no
+debuggingTime 	[KWnZOT]	:=	8
+			
+indicatorFileName	[-] 	:= 	Schicht.txt
+column_pCyl	[-]	:=	7
+column_pIn	[-]	:=	3
+column_pEx	[-]	:=	4
+shift_pIn	[-]	:=	yes
+shift_pEx	[-]	:=	yes
+			
+spalte_alphaVor	[-] 	:= 	2
+spalte_alphaRueck	[-] 	:= 	3
+			
+durchflusskennzahlEinFileName 	[-] 	:= 	Durchflusskennzahl_Einlass.txt
+RefDurchmesserEV	[m]	:=	0.027
+durchflusskennzahlAusFileName 	[-] 	:=	Durchflusskennzahl_Auslass.txt
+RefDurchmesserAV	[m]	:=	0.027
+VentilhubEinFileName 	[-] 	:= 	Ventilhub_Einlass_Final_VS015.txt
+VentilhubAusFileName	[-] 	:= 	Ventilhub_Auslass_Final_VS015.txt
+			
+			
+[Bremo::Input::Stop]			

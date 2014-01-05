@@ -95,7 +95,7 @@ minimumZoneMass	[kg]	:=	2.00E-06
 precissionPressureTraceAnalysis 	[bar]	:=	0.0005
 polynomialCoeffs	[-] 	:=	Burcat
 timeOrCrankAngleBased	[-]	:=	CA
-timeStepSize 	[CA]	:=	0.1
+timeStepSize 	[CA]	:=	1
 simulationStart 	[CAaTDCF]	:=	-134
 simulationEnd	[CAaTDCF]	:=	124
 			

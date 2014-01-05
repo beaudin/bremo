@@ -174,9 +174,10 @@ public  class SelectItemToPlotten extends JFrame {
 				while((zeile = in.readLine()) != null) {
 					zeile=zeile.replaceAll(" ", "");
 					zeile=zeile.replaceAll("\t", "");
+					zeile=zeile.replace("[", "");
+					zeile=zeile.replace("]", "");
 					header = zeile.split(":");
-					header[0] = header[0].replace("[", "");
-					if (header[0].equals("berechnungsModell")){
+					if (header[0].equals("simulationModel")){
 						String[] tmp =  header[1].split("_");
 						if (tmp[0].equals("DVA")){
 							berechnungModell = "DVA";
@@ -185,14 +186,17 @@ public  class SelectItemToPlotten extends JFrame {
 							berechnungModell = "APR";
 						}
 					}
-					if (header[0].equals("RestgasVorgabeLWA")){
-						is_RestgasVorgabe_LWA = true;
+					if (header[0].equals("residualGasModel")){
+						if (header[1].equals("fillAndEmpty")){
+						    is_RestgasVorgabe_LWA = true;
+						    }
 					}
 				}
 				// new bremoGraphik(input);
 				if (berechnungModell.equals("DVA")){
 					
 					new DVA_ModellGraphik(input,is_RestgasVorgabe_LWA);
+					//new JPanel().setVisible(true);
 				}
 				else if  (berechnungModell.equals("APR")){
 					
@@ -243,7 +247,7 @@ public  class SelectItemToPlotten extends JFrame {
         } catch (UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(SelectItemToPlotten.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
+        
 
         /*
          * Create and display the form
@@ -255,7 +259,7 @@ public  class SelectItemToPlotten extends JFrame {
             }
         });
     }
-    // Variables declaration - do not modify
+    // Variables declaration 
     private JComboBox fileComboBox;
     private JPanel jPanel1;
     private JButton ButtonOK;

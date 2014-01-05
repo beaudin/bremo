@@ -33,7 +33,7 @@ import bremoExceptions.ParameterFileWrongInputException;
 
 public class LWA_Graphik extends BremoModellGraphik{
 
-	private static final long serialVersionUID = -673633318746544253L;
+	private static final long serialVersionUID = 1L;
     private String berechnungModell_Parent;
     JPanel OberePanel ;
     JPanel UnterePanel ;
@@ -267,7 +267,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 			}
 			while ((zeile = br.readLine()) != null){
 				value = zeile.split(" ");
-				if (zeit_oder_KW.equals("KW")) {
+				if (zeit_oder_KW.equals("CA")) {
 					double x = Double.parseDouble(value[0]);
 					double y = Double.parseDouble(value[index_1]);
 					
@@ -342,7 +342,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 				}
 				while ((zeile = br.readLine()) != null){
 					value = zeile.split(" ");
-					if (zeit_oder_KW.equals("KW")) {
+					if (zeit_oder_KW.equals("CA")) {
 						serie4.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_1]));//  KW  p_soll
 						//serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_2])); // KW  p
 					}
@@ -365,7 +365,7 @@ public class LWA_Graphik extends BremoModellGraphik{
 			datasetDruckVerlauf = collectionDruckVerlauf;
 			datasetDruckVerlauf2 = collectionDruckVerlauf2;
 			ChartPanel chartDruckVerlauf = null;
-			if (zeit_oder_KW.equals("KW")){
+			if (zeit_oder_KW.equals("CA")){
 				//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
 				chartDruckVerlauf = createChartPanel(null, zeit_oder_KW , "Bar", "Cm" , datasetDruckVerlauf,datasetDruckVerlauf2);
 			}

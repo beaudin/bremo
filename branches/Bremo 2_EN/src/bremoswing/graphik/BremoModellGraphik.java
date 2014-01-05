@@ -87,9 +87,9 @@ import bremoswing.util.PdfFilePrinting;
  */
 @SuppressWarnings("rawtypes")
 public abstract class BremoModellGraphik extends JFrame{
-	
-	 private static final long serialVersionUID = 3116616946658017906L;
-	 static JLabel KITLabel;
+
+	private static final long serialVersionUID = 1L;
+	static JLabel KITLabel;
 	 static JLabel IFKMLabel;
 	 static JLabel TitelLabel;
      static JLabel datumLabel;
@@ -171,7 +171,7 @@ public abstract class BremoModellGraphik extends JFrame{
         
         this.berechnungModell = berechnungModell;
         this.is_RestgasVorgabe_LWA = is_RestgasVorgabe_LWA;
-        zeit_oder_KW = zeit_oder_KW() ;
+        zeit_oder_KW = time_or_CA() ;
         
         Name = berechnungModell +"_"+ (inputfile.getName().replaceFirst(".txt", ""));
         /********************************************************************************/
@@ -597,7 +597,7 @@ public abstract class BremoModellGraphik extends JFrame{
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
-			if (zeit_oder_KW.equals("KW")) {
+			if (zeit_oder_KW.equals("CA")) {
 				serie1.setKey(itemSelected );
 				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index]));//  KW  T_mittel
 			}
@@ -610,7 +610,7 @@ public abstract class BremoModellGraphik extends JFrame{
 		collectionVerlauf.addSeries(serie1);
 		datasetVerlauf = collectionVerlauf;
 		ChartPanel chartVerlauf = null;
-		if (zeit_oder_KW.equals("KW")){
+		if (zeit_oder_KW.equals("CA")){
 			chartVerlauf = createChartPanel(null, zeit_oder_KW, itemSelected.split(" ")[1] , datasetVerlauf);
 		}
 		else {
@@ -1002,61 +1002,61 @@ public abstract class BremoModellGraphik extends JFrame{
 				zeile=zeile.replaceAll("\t", "");
 				header1 = zeile.split(":=");
 				
-				if (header1[0].equals("Einlassschluss[KWnZOT]")){
+				if (header1[0].equals("IVC[CAaTDCF]")){
 					header2[0]=header1[0].replace("[", " [");
 					header2[1]=NumberCuter(header1[1]);
 					
 				}
-				if (header1[0].equals("Einlassoeffnet[KWnZOT]")){
+				if (header1[0].equals("IVO[CAaTDCF]")){
 					header2[2]=header1[0].replace("[", " [");
 					header2[3]=NumberCuter(header1[1]);
 					
 				}
-				if (header1[0].equals("Auslassoeffnet[KWnZOT]")){
+				if (header1[0].equals("EVO[CAaTDCF]")){
 					header2[4]=header1[0].replace("[", " [");
 					header2[5]=NumberCuter(header1[1]);
 					
 				}
-				if (header1[0].equals("Auslassschluss[KWnZOT]")){
+				if (header1[0].equals("EVC[CAaTDCF]")){
 					header2[6]=header1[0].replace("[", " [");
 					header2[7]=NumberCuter(header1[1]);
 					
 				}
-				if (header1[0].equals("Drehzahl[min^-1]")){
+				if (header1[0].equals("rotationalSpeed[min^-1]")){
 					header2[8]=header1[0].replace("[", " [");
 					header2[9]=NumberCuter(header1[1]);
 					
 				}
-				if (header1[0].equals("BOI[KWnZOT]")){
+				if (header1[0].equals("BOI[CAaTDCF]")){
 					header2[10]=header1[0].replace("[", " [");
 					header2[11]=NumberCuter(header1[1]);
 				}
-				if (header1[0].equals("BOI_1[KWnZOT]")){
+				if (header1[0].equals("BOI_1[CAaTDCF]")){
 					header2[12]=header1[0].replace("[", " [");
 					header2[13]=NumberCuter(header1[1]);
 				}
-				if (header1[0].equals("EOI[KWnZOT]")){
+				if (header1[0].equals("EOI[CAaTDCF]")){
 					header2[14]=header1[0].replace("[", " [");
 					header2[15]=NumberCuter(header1[1]);
 				}
-				if (header1[0].equals("EOI_1[KWnZOT]")){
+				if (header1[0].equals("EOI_1[CAaTDCF]")){
 					header2[16]=header1[0].replace("[", " [");
 					header2[17]=NumberCuter(header1[1]);
 				}
-				if (header1[0].equals("BOI_2[KWnZOT]")){
+				if (header1[0].equals("BOI_2[CAaTDCF]")){
 					header2[18]=header1[0].replace("[", " [");
 					header2[19]=NumberCuter(header1[1]);
 				}
-				if (header1[0].equals("EOI_2[KWnZOT]")){
+				if (header1[0].equals("EOI_2[CAaTDCF]")){
 					header2[20]=header1[0].replace("[", " [");
 					header2[21]=NumberCuter(header1[1]);
 			    }
-				if (header1[0].equals("rechnungsBeginn[KWnZOT]")){
+				if (header1[0].equals("simulationStart[CAaTDCF]")){
 					header2[22]=header1[0].replace("[", " [");
 					header2[23]=NumberCuter(header1[1]);
 					
 				}
-				if (header1[0].equals("rechnungsEnde[KWnZOT]")){
+				if (header1[0].equals("simulationEnd[CAaTDCF]")){
 					header2[24]=header1[0].replace("[", " [");
 					header2[25]=NumberCuter(header1[1]);
 				}
@@ -1121,7 +1121,8 @@ public abstract class BremoModellGraphik extends JFrame{
 	  * @throws IOException
 	  */
      public static JLabel TabellePostFIle() throws IOException {
-    	
+    	String tabelle = ""; 
+    	try {
     	String parent = inputfile.getParent();
     	
     	BufferedReader in = new BufferedReader(new FileReader(parent+"/DVA_Post_"+inputfile.getName()));
@@ -1140,7 +1141,7 @@ public abstract class BremoModellGraphik extends JFrame{
 			
 		}
 		in.close();
-		String tabelle ="<html>"+
+		tabelle ="<html>"+
 				        "<table border = 0 width = 200 >"+ /*bgcolor=#FFFFFF*/
 				        "<tr>"+
 		                "<th colspan=\"2\" bgcolor=#848484><font size =-1>Tabelle Post File</font></th>"+
@@ -1175,13 +1176,22 @@ public abstract class BremoModellGraphik extends JFrame{
 		                "</tr>"+
 		                "</table>"+
 		                "</html>";
-		
-		JLabel post = new JLabel(tabelle);
+		} catch (FileNotFoundException e) {
+			tabelle = "<html>"+
+					"<table>"+
+			        "<tr>"+
+	                "<th colspan=\"2\" bgcolor=#848484><font size =-1>Post File No Found</font></th>"+
+	                "</tr>"+
+	                "</table>"+
+	                "</html>";
+		}
+    	
+       JLabel post = new JLabel(tabelle);
 		
 		return post ;
-			
 	}
-     public String zeit_oder_KW() throws IOException{
+     
+     public String time_or_CA() throws IOException{
     	 
     	 @SuppressWarnings("resource")
 		BufferedReader in = new BufferedReader(new FileReader(inputfile));
@@ -1191,10 +1201,10 @@ public abstract class BremoModellGraphik extends JFrame{
  			zeile=zeile.replaceAll(" ", "");
  			zeile=zeile.replaceAll("\t", "");
          	 St = zeile.split(":=");
-         	 if (St[0].equals("zeit_oder_KW_Basiert[-]")){
-         		 if (St[1].equals("KW")) return "KW" ;
+         	 if (St[0].equals("timeOrCrankAngleBased[-]")){
+         		 if (St[1].equals("CA")) return "CA" ;
          		 
-         		 else   return "zeit" ;
+         		 else   return "time" ;
          	 }
          }
  		 return null ;

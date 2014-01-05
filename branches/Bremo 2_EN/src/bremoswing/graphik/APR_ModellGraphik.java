@@ -253,7 +253,7 @@ public class APR_ModellGraphik extends BremoModellGraphik {
 			}
 			while ((zeile = br.readLine()) != null){
 				value = zeile.split(" ");
-				if (zeit_oder_KW.equals("KW")) {
+				if (zeit_oder_KW.equals("CA")) {
 					serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index_2])); // KW  p
 				}
 				else {

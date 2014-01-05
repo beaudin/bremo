@@ -78,7 +78,7 @@ public class Bremo extends Thread {
 				JOptionPane.showMessageDialog(popup,
 						"Thread "+this.getName()+" ist fertig!", this.getName(),
 						JOptionPane.INFORMATION_MESSAGE);
-				SwingBremo.PutInBremoThreadFertig("Thread "+this.getName()+" ist fertig!");
+				SwingBremo.PutInBremoThreadFertig(this.getName());
 				SwingBremo.StateBremoThread();
 			}
 		} catch (Exception  e) {

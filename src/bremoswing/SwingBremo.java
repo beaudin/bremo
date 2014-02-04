@@ -53,7 +53,6 @@ import bremoswing.util.FertigMeldungFrame;
  */
 
 /**
- * 
  * @author Ngueneko Steve
  */
 public class SwingBremo extends JFrame {

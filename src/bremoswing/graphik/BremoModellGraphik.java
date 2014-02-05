@@ -23,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.TileObserver;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,6 +41,7 @@ import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -48,6 +50,7 @@ import javax.swing.Popup;
 import javax.swing.PopupFactory;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -69,13 +72,16 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+
 import com.itextpdf.awt.DefaultFontMapper;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import bremo.main.Bremo;
 import bremoExceptions.ParameterFileWrongInputException;
+import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.FertigMeldungFrame;
 import bremoswing.util.PdfFilePrinting;
 
@@ -89,39 +95,51 @@ import bremoswing.util.PdfFilePrinting;
 public abstract class BremoModellGraphik extends JFrame{
 	
 	 private static final long serialVersionUID = 3116616946658017906L;
+	 
 	 static JLabel KITLabel;
 	 static JLabel IFKMLabel;
 	 static JLabel TitelLabel;
      static JLabel datumLabel;
+     static JLabel pathLabel; 
+     static JLabel Tabelle_InLabel;
+     static JLabel Tabelle_PostLabel;
+     
      JButton druckenButton;
      JButton LWAButton;
      JButton SwitchButton;
-    
+     JButton speichernButton;
+     JButton openFileButton;
+     JButton favoriteButon;
+     
 	 JComboBox graphik2ComboBox1;
      JComboBox graphik2ComboBox2;
      JComboBox graphik3ComboBox1;
      JComboBox graphik3ComboBox2;
-     static JLabel pathLabel;
-     JButton speichernButton;
+     
+    
      static File  inputfile ;
+     
      JPanel TitelPanel;
      JPanel GraphikPanel;
      JPanel GroupPanel;
      static JPanel TabellePanel;
+     
      boolean is_P_V_Diagramm;
      boolean is_Verlustteilung_Digramm;
      boolean is_Wirkungsgrade_Diagramm;
-     static boolean is_verlust_berechnen;
      boolean is_RestgasVorgabe_LWA;
-     static JLabel Tabelle_InLabel;
-     static JLabel Tabelle_PostLabel;
+     boolean is_freiMode;
+     static boolean is_verlust_berechnen;
+     
      String berechnungModell;
      String zeit_oder_KW;
      String [] header ;
      String Name;
      String RevisonNr;
+     String currentPath;
+     
      BremoUltimateView freiMode ;
-     boolean is_freiMode;
+     
    
      BremoModellGraphik (File file, String berechnungModell, boolean is_RestgasVorgabe_LWA ) throws ParameterFileWrongInputException, IOException {
     	 
@@ -152,10 +170,12 @@ public abstract class BremoModellGraphik extends JFrame{
         pathLabel  = new JLabel();
         datumLabel = new JLabel();
         
-        druckenButton   = new JButton();
-        speichernButton = new JButton();
-        LWAButton = new JButton();
-        SwitchButton = new JButton();
+        druckenButton   = new JButton("Print");
+        speichernButton = new JButton("Save");
+        LWAButton = new JButton(" LWA ");
+        SwitchButton = new JButton("Mode-");
+        openFileButton = new JButton(" Open ");
+        favoriteButon = new JButton("Favs");
         
         graphik3ComboBox1 = new JComboBox();
         graphik3ComboBox2 = new JComboBox();
@@ -166,7 +186,9 @@ public abstract class BremoModellGraphik extends JFrame{
         
         is_verlust_berechnen = false;
         
-        is_freiMode = false ;
+        is_freiMode = true ;
+        
+        currentPath = ".";
         
         
         this.berechnungModell = berechnungModell;
@@ -179,7 +201,7 @@ public abstract class BremoModellGraphik extends JFrame{
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setPreferredSize(new Dimension (1280,800));
         setIconImage(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/bremo2.png")).getImage());
+				"/bremoswing/bild/bremo1.png")).getImage());
         setResizable(false);
         
         /** Size and Border of All Panel of the Frame************************************/
@@ -198,27 +220,16 @@ public abstract class BremoModellGraphik extends JFrame{
         
         /** TitelLabel Processing  ******************************************************/
         
-        TitelPanel.setLayout(new GridBagLayout());
-		GridBagConstraints gc = new GridBagConstraints();
-		gc.fill = GridBagConstraints.NONE;
-		gc.insets = new Insets(0, 0, 0, 0);
-		gc.ipadx = 0;
-		gc.ipady = 0;
-		gc.weightx = 0;
-    
         URL urlKit= getClass().getResource("/bremoswing/bild/KIT.png");
         ImageIcon iconKIT = new ImageIcon(urlKit);
         Image imageKit = iconKIT.getImage();
         imageKit  = imageKit.getScaledInstance(95, 45,java.awt.Image.SCALE_SMOOTH);
         iconKIT = new ImageIcon(imageKit);
         KITLabel.setIcon(iconKIT);
-//        Border KitBorder = new LineBorder(Color.black, 1, true);
-//        KITLabel.setBorder(KitBorder);
        
-        
         TitelLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         TitelLabel.setText(Name);
-        URL url = getClass().getResource("/bremoswing/bild/bremo2.png");
+        URL url = getClass().getResource("/bremoswing/bild/bremo1.png");
         ImageIcon icon = new ImageIcon(url);
         Image image = icon.getImage();
         image  = image.getScaledInstance(40, 40,java.awt.Image.SCALE_SMOOTH);
@@ -233,23 +244,7 @@ public abstract class BremoModellGraphik extends JFrame{
         iconIFKM = new ImageIcon(imageIFKM);
         IFKMLabel.setIcon(iconIFKM);
         
-        int links = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-KITLabel.getPreferredSize().width-5;
-        int right = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-IFKMLabel.getPreferredSize().width-5;
-       // System.err.println(links+" "+ right);
-        gc.insets = new Insets(0, 0, 0, links);
-        gc.gridx = 0;
-		gc.gridy = 0;
-        TitelPanel.add(KITLabel,gc);
-        
-        gc.insets = new Insets(0, 0, 0, 0);
-        gc.gridx = 1;
-		gc.gridy = 0;
-        TitelPanel.add(TitelLabel,gc);
-        
-        gc.insets = new Insets(0,right , 0, 0);
-        gc.gridx = 2;
-		gc.gridy = 0;
-        TitelPanel.add(IFKMLabel,gc);
+        TitelPanelUpdate();
         
         /********************************************************************************/
         
@@ -265,6 +260,7 @@ public abstract class BremoModellGraphik extends JFrame{
         /********************************************************************************/
         /** Layout of TabellePanel  and TabellePanel Processing *************************/ 
         
+        
 
       Tabelle_InLabel = TabelleInputFile();
       Tabelle_PostLabel = TabellePostFIle();
@@ -278,15 +274,17 @@ public abstract class BremoModellGraphik extends JFrame{
       b2.add(Box.createHorizontalStrut(5));
       b2.add(Tabelle_InLabel);
       
-      Box b3 = Box.createHorizontalBox();
-      b3.add(Box.createHorizontalStrut(5));
-      LWAButton.setText("LWA");
-      b3.add(LWAButton);
+      JPanel virtualPanel = new JPanel(new GridLayout(2, 2, 5, 10));
       
-      Box b4 = Box.createHorizontalBox();
-      b4.add(Box.createHorizontalStrut(5));
-      SwitchButton.setText("Mode+");
-      b4.add(SwitchButton);
+      LWAButton.setToolTipText("LWA Graphic available.");
+      SwitchButton.setToolTipText("Switch to another Mode of View");
+      openFileButton.setToolTipText("Open other file to show on the Graphic.");
+      favoriteButon.setToolTipText("Save this Graphic Setting as Favorite.");
+      
+      virtualPanel.add(LWAButton); 
+      virtualPanel.add(openFileButton);
+      virtualPanel.add(SwitchButton);
+      virtualPanel.add(favoriteButon);
       
       if (berechnungModell.equals("DVA")|| berechnungModell.equals("APR")) {
     	  if (!is_RestgasVorgabe_LWA){
@@ -301,14 +299,13 @@ public abstract class BremoModellGraphik extends JFrame{
       }
       
       Box b5 = Box.createVerticalBox();
-      b5.add(Box.createVerticalStrut(10));
+      b5.add(Box.createVerticalStrut(9));
       b5.add(b1);
       b5.add(Box.createVerticalStrut(60));
       b5.add(b2);
       b5.add(Box.createVerticalStrut(50));
-      b5.add(b3);
-      b5.add(Box.createVerticalStrut(15));
-      b5.add(b4);
+      b5.add(virtualPanel);
+      
       TabellePanel.add(b5);
         
         String str = "<html><b>\" Bitte Wählen : \"</b></html>";
@@ -425,6 +422,7 @@ public abstract class BremoModellGraphik extends JFrame{
 					is_freiMode = true ;
 					setPanelBorderToNull();
 					pane.repaint();
+					pane.revalidate();
 				}else {
 					pane.removeAll();
 					pane.add(TitelPanel,BorderLayout.PAGE_START);
@@ -435,7 +433,14 @@ public abstract class BremoModellGraphik extends JFrame{
 					is_freiMode = false ;
 					setPanelBorderToBlack();
 					pane.repaint();
+					pane.revalidate();
 				}
+			}
+		});
+		openFileButton.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				OpenFileToShowOnBremoView();
 			}
 		});
 		
@@ -487,15 +492,24 @@ public abstract class BremoModellGraphik extends JFrame{
         );
         
         Container pane = getContentPane();
+        
         pane.add(TitelPanel,BorderLayout.PAGE_START);
-        pane.add(GraphikPanel,BorderLayout.CENTER);
-        pane.add(TabellePanel,BorderLayout.LINE_END);
-        pane.add(GroupPanel,BorderLayout.PAGE_END);
         if (!(this instanceof LWA_Graphik)) {
             freiMode = new BremoUltimateView(new File (inputfile.getParent()+"/"+berechnungModell +"_"+ (inputfile.getName())));
+            pane.add(freiMode.GraphikPanel,BorderLayout.CENTER);
+            pane.add(freiMode.GroupPanel,BorderLayout.PAGE_END);
+            setPanelBorderToNull();
+        } 
+        else {
+        	pane.add(GraphikPanel,BorderLayout.CENTER);
+            pane.add(GroupPanel,BorderLayout.PAGE_END);
         }
+        pane.add(TabellePanel,BorderLayout.LINE_END);
+        
 	}
 	
+	
+
 	abstract void graphik2ComboBox1ActionPerformed(ActionEvent evt) throws IOException;
 	
 	abstract void graphik2ComboBox2ActionPerformed(ActionEvent evt) throws IOException;
@@ -1646,22 +1660,37 @@ public abstract class BremoModellGraphik extends JFrame{
 	 		return header;
 	 	}
      
+     /**
+      * Black Boder for the Panel
+      */
     public void setPanelBorderToBlack () {
     	
     	TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         TabellePanel.setBorder(BorderFactory.createLineBorder(Color.black));
         GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        if (freiMode != null) {
+        	freiMode.setPanelBorderToBlack();
+        }
     }
     
+    /**
+     * No Border for The Panel
+     */
     public void setPanelBorderToNull () {
     	
     	TitelPanel.setBorder(null);
         GraphikPanel.setBorder(null);
         TabellePanel.setBorder(null);
         GroupPanel.setBorder(null);
+        if (freiMode != null) {
+        	freiMode.setPanelBorderToNull();
+        }
     }
     
+    /**
+     * White Boder for the Panel
+     */
    public void setPanelBorderToWhite () {
 	   
 	   TitelPanel.setBorder(BorderFactory.createLineBorder(Color.white));
@@ -1681,7 +1710,7 @@ public abstract class BremoModellGraphik extends JFrame{
    	    	
    	int nbrOfItem = graphik2ComboBox2.getItemCount();
    	
-   	int random = (int) (Math.random()*nbrOfItem);
+   	int random = (int) (Math.random()*nbrOfItem-1);
    	
    	String item = (String)graphik2ComboBox2.getItemAt(random);
    	
@@ -1708,5 +1737,86 @@ public abstract class BremoModellGraphik extends JFrame{
 	return new Object [] {item , Auswahl_Diagramm(item)};
    	
    }
+   /**
+    * open a FileChoser to select result file to show on the view
+    */
+   void OpenFileToShowOnBremoView() {
+	   
+	    JFileChooser fileChooser = new JFileChooser(currentPath);
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setMultiSelectionEnabled(false);
+		ExtensionFileFilter txtFilter = new ExtensionFileFilter(null,
+				new String[] { "txt" });
+
+		fileChooser.addChoosableFileFilter(txtFilter);
+		try {
+			int status = fileChooser.showOpenDialog(getRootPane());
+
+			if (status == JFileChooser.APPROVE_OPTION) {
+				if (fileChooser.getSelectedFile() != null) {
+					File file = fileChooser.getSelectedFile();
+					String fileName = file.getName();
+					freiMode = new BremoUltimateView(file);
+					currentPath = file.getParent();
+					TitelLabel.setText(fileName.substring(0,fileName.indexOf(".")));
+					BremoGraphicUpdate();
+				}
+			} else if (status == JFileChooser.CANCEL_OPTION) {
+
+				fileChooser.cancelSelection();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+   
+   /**
+    * Update All the Panel
+    */
+    void BremoGraphicUpdate() {
+    	
+    	Container pane = getContentPane();
+    	    pane.removeAll();
+    	    TitelPanelUpdate();
+	        pane.add(TitelPanel, BorderLayout.PAGE_START);
+	        pane.add(freiMode.GraphikPanel,BorderLayout.CENTER);
+	        pane.add(TabellePanel,BorderLayout.LINE_END);
+	        pane.add(freiMode.GroupPanel,BorderLayout.PAGE_END);
+	        pane.revalidate();
+    }
+    
+    /**
+     * Update the TitelPanel
+     */
+    void TitelPanelUpdate () {
+    	
+    	TitelPanel.removeAll();
+    	TitelPanel.setLayout(new GridBagLayout());
+		GridBagConstraints gc = new GridBagConstraints();
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.ipadx = 0;
+		gc.ipady = 0;
+		gc.weightx = 0;
+		
+        int links = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-KITLabel.getPreferredSize().width-5;
+        int right = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-IFKMLabel.getPreferredSize().width-5;
+      
+        gc.insets = new Insets(0, 0, 0, links);
+        gc.gridx = 0;
+		gc.gridy = 0;
+        TitelPanel.add(KITLabel,gc);
+        
+        gc.insets = new Insets(0, 0, 0, 0);
+        gc.gridx = 1;
+		gc.gridy = 0;
+        TitelPanel.add(TitelLabel,gc);
+        
+        gc.insets = new Insets(0,right , 0, 0);
+        gc.gridx = 2;
+		gc.gridy = 0;
+        TitelPanel.add(IFKMLabel,gc);
+    	TitelPanel.revalidate();
+    }
 }
 	

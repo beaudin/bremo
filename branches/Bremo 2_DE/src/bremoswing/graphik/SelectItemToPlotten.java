@@ -21,6 +21,7 @@ import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,8 +33,10 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.JComboBox;
 
+import bremo.main.Bremo;
 import bremoExceptions.ParameterFileWrongInputException;
 import bremoswing.SwingBremo;
+import bremoswing.util.ExtensionFileFilter;
 
 /**
  *
@@ -89,14 +92,19 @@ public  class SelectItemToPlotten extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-        		    plott();
+        		if (fileComboBox.getSelectedItem().toString().equals("Calculation not made! Choose a file to show ?")) {
+        			
+        		}
+        		else {
+				        plott();
+        		}
 			}
 		});
         setResizable(false);
         setIconImage(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/bremo2.png")).getImage());
+				"/bremoswing/bild/bremo1.png")).getImage());
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
+        setTitle("Choose to plott");
         jPanel1.setBorder(BorderFactory.createTitledBorder("Bitte Input File zu plotten wählen"));
 
        // fileComboBox.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -116,7 +124,13 @@ public  class SelectItemToPlotten extends JFrame {
         	public void keyPressed (KeyEvent e){
             	 
             	if (e.getKeyCode() == KeyEvent.VK_ENTER){
-            		    plott();
+            		if (fileComboBox.getSelectedItem().toString().equals("Calculation not made! Choose a file to show ?")) {
+            			
+            		}
+            		else {
+    				        plott();
+            		}
+
             	}
              }
 		});
@@ -159,7 +173,11 @@ public  class SelectItemToPlotten extends JFrame {
 	 */
 	public void addFileItemToComboBox(JComboBox cb, String[] item) {
 		cb.removeAllItems();
+		if (item[0] == null) {
+			item[0] = "Calculation not made! Choose a file to show ?";
+		}
 		cb.setModel(new JComboBox(item).getModel());
+		  
 	}
 	
 	public void plott(){
@@ -211,6 +229,38 @@ public  class SelectItemToPlotten extends JFrame {
 			} catch (NullPointerException e){
 				
 			}
+	}
+	
+	void choose_and_ploot() {
+		
+//		JFileChooser fileChooser = new JFileChooser(".");
+//		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		fileChooser.setMultiSelectionEnabled(false);
+//		ExtensionFileFilter txtFilter = new ExtensionFileFilter(null,
+//				new String[] { "txt" });
+//
+//		fileChooser.addChoosableFileFilter(txtFilter);
+//		try {
+//			int status = fileChooser.showOpenDialog(getRootPane());
+//
+//			if (status == JFileChooser.APPROVE_OPTION) {
+//				if (fileChooser.getSelectedFile() != null) {
+//					File file = fileChooser.getSelectedFile();
+//					String fileName = file.getName();
+//					String Modell = fileName.split("_")[0];
+//					
+//					freiMode = new BremoUltimateView(file);
+//					currentPath = file.getParent();
+//					TitelLabel.setText(fileName.substring(0,fileName.indexOf(".")));
+//					BremoGraphicUpdate();
+//				}
+//			} else if (status == JFileChooser.CANCEL_OPTION) {
+//
+//				fileChooser.cancelSelection();
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 	

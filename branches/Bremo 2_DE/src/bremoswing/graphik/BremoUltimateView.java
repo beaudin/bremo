@@ -1,30 +1,18 @@
 package bremoswing.graphik;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.border.Border;
-
 import org.jfree.chart.ChartPanel;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -35,7 +23,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  * @author Ngueneko Steve
  *
  */
-public class BremoUltimateView {
+public class BremoUltimateView implements ActionListener {
 
 	JPanel GraphikPanel;
     JPanel GroupPanel;
@@ -62,6 +50,8 @@ public class BremoUltimateView {
     
     String[] Header ;
     
+  
+    
     
 	BremoUltimateView (File file ) throws IOException {
     	
@@ -78,8 +68,6 @@ public class BremoUltimateView {
     	
     	GraphikPanel = new JPanel();
     	GroupPanel   = new JPanel();
-    	
-		
     	
     	x_achse_label   = new JLabel("X-Achse :");
         y_achse_1_label = new JLabel("1. Y-Achse :") ;
@@ -99,12 +87,12 @@ public class BremoUltimateView {
         achse_to_log = new JComboBox<String>();
         nbr_of_Achse = new JComboBox<Integer>();
         
-        BremoModellGraphik.addItemToComboBox(x_achse, new String [] {Header[0],Header[1]});
+        BremoModellGraphik.addItemToComboBox(x_achse, Header);
         BremoModellGraphik.addItemToComboBox(y_achse_1, Header);
         BremoModellGraphik.addItemToComboBox(y_achse_2, Header);
         BremoModellGraphik.addItemToComboBox(y_achse_3, Header);
         BremoModellGraphik.addItemToComboBox(y_achse_4, Header);
-        BremoModellGraphik.addItemToComboBox(achse_to_log, new String [] {"keine Log", "mit Log"});
+        BremoModellGraphik.addItemToComboBox(achse_to_log, new String [] {"No Log","Log auf X-Achse","Log auf Y-Achse","Doppel Log"});
         BremoModellGraphik.addItemToComboBox(nbr_of_Achse, new Integer [] {1,2,3,4});
         
         y_achse_2.setEnabled(false);
@@ -119,217 +107,24 @@ public class BremoUltimateView {
         nbr_of_Achse.setBackground(Color.white);
         achse_to_log.setBackground(Color.white);
         
-        x_achse.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(1)) {
-					try {
-					    GraphikPanel.removeAll();
-						GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString()));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					GraphikPanel.revalidate();
-				} else if (nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(2)) {
-					GraphikPanel.removeAll();
-	   				try {
-	   					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString()));
-	   				} catch (IOException e) {
-	   					e.printStackTrace();
-	   				}
-	   				GraphikPanel.revalidate();
-					
-				} else if (nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(3)) {
-					GraphikPanel.removeAll();
-      				try {
-      					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString(), y_achse_4.getSelectedItem().toString()));
-      				} catch (IOException e) {
-      					e.printStackTrace();
-      				}
-      				GraphikPanel.revalidate();
-				} else {
-			        try {
-			        	GraphikPanel.removeAll();
-						GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString()));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-			        GraphikPanel.revalidate();
-				}
-				
-			}
-		});
+        x_achse.addActionListener(this);
         
-        nbr_of_Achse.
-        addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(1)) {
-					y_achse_2.setEnabled(true);
-					y_achse_3.setEnabled(false);
-					y_achse_4.setEnabled(false);
-					try {
-					    GraphikPanel.removeAll();
-						GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString()));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					GraphikPanel.revalidate();
-				} else if (nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(2)) {
-					y_achse_2.setEnabled(true);
-					y_achse_3.setEnabled(true);
-					y_achse_4.setEnabled(false);
-					GraphikPanel.removeAll();
-	   				try {
-	   					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString()));
-	   				} catch (IOException e) {
-	   					e.printStackTrace();
-	   				}
-	   				GraphikPanel.revalidate();
-					
-				} else if (nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(3)) {
-					y_achse_2.setEnabled(true);
-					y_achse_3.setEnabled(true);
-					y_achse_4.setEnabled(true);
-					GraphikPanel.removeAll();
-      				try {
-      					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString(), y_achse_4.getSelectedItem().toString()));
-      				} catch (IOException e) {
-      					e.printStackTrace();
-      				}
-      				GraphikPanel.revalidate();
-				} else {
-					y_achse_2.setEnabled(false);
-			        y_achse_3.setEnabled(false);
-			        y_achse_4.setEnabled(false);
-			        try {
-			        	GraphikPanel.removeAll();
-						GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString()));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-			        GraphikPanel.revalidate();
-				}
-				
-			} });
+        nbr_of_Achse.addActionListener(this);
         
-       y_achse_1.
-        addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(0)) {
-					GraphikPanel.removeAll();
-					try {
-						GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString()));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					GraphikPanel.revalidate();
-			} else if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(1)) {
-				GraphikPanel.removeAll();
-				try {
-					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString()));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				GraphikPanel.revalidate();
-			} else if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(2)) {
-   				GraphikPanel.removeAll();
-   				try {
-   					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString()));
-   				} catch (IOException e) {
-   					e.printStackTrace();
-   				}
-   				GraphikPanel.revalidate();
-   			 } else if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(3)) {
-   				GraphikPanel.removeAll();
-   				try {
-   					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString(), y_achse_4.getSelectedItem().toString()));
-   				} catch (IOException e) {
-   					e.printStackTrace();
-   				}
-   				GraphikPanel.revalidate();
-   			}
-			}
-         });
+        achse_to_log.addActionListener(this);
         
-       y_achse_2.addActionListener(new ActionListener() {
-		
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			// TODO Auto-generated method stub
-			if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(1)) {
-				GraphikPanel.removeAll();
-				try {
-					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString()));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				GraphikPanel.revalidate();
-			} else if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(2)) {
-   				GraphikPanel.removeAll();
-   				try {
-   					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString()));
-   				} catch (IOException e) {
-   					e.printStackTrace();
-   				}
-   				GraphikPanel.revalidate();
-   			} else if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(3)) {
-  				GraphikPanel.removeAll();
-  				try {
-  					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString(), y_achse_4.getSelectedItem().toString()));
-  				} catch (IOException e) {
-  					e.printStackTrace();
-  				}
-  				GraphikPanel.revalidate();
-  			}			
-		}
-	});
+        y_achse_1.addActionListener(this);
+        
+        y_achse_2.addActionListener(this);
        
-       y_achse_3.addActionListener(new ActionListener() {
-   		
-   		@Override
-   		public void actionPerformed(ActionEvent arg0) {
-   			// TODO Auto-generated method stub
-   			if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(2)) {
-   				GraphikPanel.removeAll();
-   				try {
-   					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString()));
-   				} catch (IOException e) {
-   					e.printStackTrace();
-   				}
-   				GraphikPanel.revalidate();
-   			} else if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(3)) {
-  				GraphikPanel.removeAll();
-  				try {
-  					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString(), y_achse_4.getSelectedItem().toString()));
-  				} catch (IOException e) {
-  					e.printStackTrace();
-  				}
-  				GraphikPanel.revalidate();
-  			}
-   		}
-   	});
+        y_achse_3.addActionListener(this);
        
-       y_achse_4.addActionListener(new ActionListener() {
-      		
-      		@Override
-      		public void actionPerformed(ActionEvent arg0) {
-      			// TODO Auto-generated method stub
-      			if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(3)) {
-      				GraphikPanel.removeAll();
-      				try {
-      					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString(), y_achse_4.getSelectedItem().toString()));
-      				} catch (IOException e) {
-      					e.printStackTrace();
-      				}
-      				GraphikPanel.revalidate();
-      			}
-      		}
-      	});
+        y_achse_4.addActionListener(this);
         
         GraphikPanel.setPreferredSize(new Dimension (1010,675));
+        //GraphikPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         GroupPanel.setPreferredSize(new Dimension (1280,75));
-        
+        //GroupPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         //GroupPanel.setBorder(BorderFactory.createTitledBorder(""));
         
         /**  Layout of GraphikPanel  ****************************************************/
@@ -457,31 +252,41 @@ public class BremoUltimateView {
     	BufferedReader br;
             br = new  BufferedReader(new FileReader(file));
        
-       XYSeries serie1 = new XYSeries(selected) ;
+       XYSeries serie1 = new XYSeries(selected,false,true) ;
         XYDataset datasetVerlauf ;
         
         String zeile = null;
 		String [] header = null;
 		String [] value = null;
-		int index = -1;
+		int y_index = -1;
+		int x_index = -1;
 		if ((zeile = br.readLine()) != null){
 			header = zeile.split("\t");
 			for (int i = 0; i < header.length; i++){
 				if (header[i].equals(selected)){
-					index = i;
+					y_index = i;
+				}
+				if (header[i].equals(x_achse.getSelectedItem().toString())){
+					x_index = i;
 				}
 			}
 		}
 		while ((zeile = br.readLine()) != null){
 			value = zeile.split(" ");
-			if (x_achse.getSelectedItem() == x_achse.getItemAt(0)) {
-				serie1.setKey(selected );
-				serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index]));
+			serie1.setKey(selected );
+			if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(1)){
+				serie1.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index]));
+			}
+			else if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(2)){
+				serie1.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index])));
+			}
+			else if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(3)){
+				serie1.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index])));
 			}
 			else {
-				serie1.setKey(selected);
-				serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index]));
+				serie1.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index]));
 			}
+			
 		}
 		XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
 		collectionVerlauf.addSeries(serie1);
@@ -508,8 +313,8 @@ public class BremoUltimateView {
     	BufferedReader br;
         br = new  BufferedReader(new FileReader(file));
    
-   XYSeries serie1 = new XYSeries(selected1) ;
-   XYSeries serie2 = new XYSeries(selected2) ;
+   XYSeries serie1 = new XYSeries(selected1,false,true) ;
+   XYSeries serie2 = new XYSeries(selected2,false,true) ;
    
    XYDataset datasetVerlauf ;
    XYDataset datasetVerlauf2 ;
@@ -517,38 +322,46 @@ public class BremoUltimateView {
     String zeile = null;
 	String [] header = null;
 	String [] value = null;
-	int index = -1;
-	int index2 = -1;
+	int y_index = -1;
+	int y_index2 = -1;
+	int x_index = -1;
 	if ((zeile = br.readLine()) != null){
 		header = zeile.split("\t");
 		for (int i = 0; i < header.length; i++){
 			if (header[i].equals(selected1)){
-				index = i;
+				y_index = i;
 			}
 			if (header[i].equals(selected2)){
-				index2 = i;
+				y_index2 = i;
+			}
+			if (header[i].equals(x_achse.getSelectedItem().toString())){
+				x_index = i;
 			}
 		}
 	}
-	while ((zeile = br.readLine()) != null){
-		value = zeile.split(" ");
-		if (x_achse.getSelectedItem() == x_achse.getItemAt(0)) {
-			serie1.setKey(selected1);
-			serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index]));
+	while ((zeile = br.readLine()) != null) {
+			value = zeile.split(" ");
 			
-			serie2.setKey(selected2);
-			serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index2]));
-		
-		}
-		else {
 			serie1.setKey(selected1);
-			serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index]));
-			
 			serie2.setKey(selected2);
-			serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[index2]));
-		
+			
+			if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(1)){
+				serie1.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index]));
+				serie2.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index2]));
+			}
+			else if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(2)){
+				serie1.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index])));
+				serie2.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index2])));
+			}
+			else if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(3)){
+				serie1.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index])));
+				serie2.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index2])));
+			}
+			else {
+				serie1.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index]));
+				serie2.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index2]));
+			}
 		}
-	}
 	XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
 	collectionVerlauf.addSeries(serie1);
 	datasetVerlauf = collectionVerlauf;
@@ -580,9 +393,9 @@ public class BremoUltimateView {
     	BufferedReader br;
         br = new  BufferedReader(new FileReader(file));
    
-   XYSeries serie1 = new XYSeries(selected1) ;
-   XYSeries serie2 = new XYSeries(selected2) ;
-   XYSeries serie3 = new XYSeries(selected3) ;
+   XYSeries serie1 = new XYSeries(selected1,false,true) ;
+   XYSeries serie2 = new XYSeries(selected2,false,true) ;
+   XYSeries serie3 = new XYSeries(selected3,false,true) ;
    
    XYDataset datasetVerlauf;
    XYDataset datasetVerlauf2;
@@ -591,46 +404,53 @@ public class BremoUltimateView {
     String zeile = null;
 	String [] header = null;
 	String [] value = null;
-	int index = -1;
-	int index2 = -1;
-	int index3 = -1;
+	int y_index = -1;
+	int y_index2 = -1;
+	int y_index3 = -1;
+	int x_index = -1;
 	if ((zeile = br.readLine()) != null){
 		header = zeile.split("\t");
 		for (int i = 0; i < header.length; i++) {
 			if (header[i].equals(selected1)){
-				index = i;
+				y_index = i;
 			}
 			if (header[i].equals(selected2)) {
-				index2 = i;
+				y_index2 = i;
 			}
 			if (header[i].equals(selected3)) {
-				index3 = i;
+				y_index3 = i;
+			}
+			if (header[i].equals(x_achse.getSelectedItem().toString())){
+				x_index = i;
 			}
 		}
 	}
 	while ((zeile = br.readLine()) != null){
 		value = zeile.split(" ");
-		if (x_achse.getSelectedItem() == x_achse.getItemAt(0)) {
-			serie1.setKey(selected1);
-			serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index]));
-			
-			serie2.setKey(selected2);
-			serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index2]));
 		
-			serie3.setKey(selected3);
-			serie3.add(Double.parseDouble(value[0]),Double.parseDouble(value[index3]));
+		serie1.setKey(selected1);
+		serie2.setKey(selected2);
+		serie3.setKey(selected3);
 		
+		if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(1)){
+			serie1.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index]));
+			serie2.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index2]));
+			serie3.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index3]));
+		}
+		else if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(2)){
+			serie1.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index])));
+			serie2.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index2])));
+			serie3.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index3])));
+		}
+		else if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(3)){
+			serie1.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index])));
+			serie2.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index2])));
+			serie3.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index3])));
 		}
 		else {
-			serie1.setKey(selected1);
-			serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index]));
-			
-			serie2.setKey(selected2);
-			serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[index2]));
-		
-			serie3.setKey(selected3);
-			serie3.add(Double.parseDouble(value[1]),Double.parseDouble(value[index3]));
-		
+			serie1.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index]));
+			serie2.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index2]));
+			serie3.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index3]));
 		}
 	}
 	XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
@@ -668,10 +488,10 @@ public class BremoUltimateView {
     	BufferedReader br;
         br = new  BufferedReader(new FileReader(file));
    
-   XYSeries serie1 = new XYSeries(selected1) ;
-   XYSeries serie2 = new XYSeries(selected2) ;
-   XYSeries serie3 = new XYSeries(selected3) ;
-   XYSeries serie4 = new XYSeries(selected4) ;
+   XYSeries serie1 = new XYSeries(selected1,false,true) ;
+   XYSeries serie2 = new XYSeries(selected2,false,true) ;
+   XYSeries serie3 = new XYSeries(selected3,false,true) ;
+   XYSeries serie4 = new XYSeries(selected4,false,true) ;
    
    XYDataset datasetVerlauf;
    XYDataset datasetVerlauf2;
@@ -681,56 +501,62 @@ public class BremoUltimateView {
     String zeile = null;
 	String [] header = null;
 	String [] value = null;
-	int index = -1;
-	int index2 = -1;
-	int index3 = -1;
-	int index4 = -1;
+	int y_index = -1;
+	int y_index2 = -1;
+	int y_index3 = -1;
+	int y_index4 = -1;
+	int x_index = -1;
 	if ((zeile = br.readLine()) != null){
 		header = zeile.split("\t");
 		for (int i = 0; i < header.length; i++) {
 			if (header[i].equals(selected1)){
-				index = i;
+				y_index = i;
 			}
 			if (header[i].equals(selected2)) {
-				index2 = i;
+				y_index2 = i;
 			}
 			if (header[i].equals(selected3)) {
-				index3 = i;
+				y_index3 = i;
 			}
 			if (header[i].equals(selected4)) {
-				index4 = i;
+				y_index4 = i;
+			}
+			if (header[i].equals(x_achse.getSelectedItem().toString())){
+				x_index = i;
 			}
 		}
 	}
 	while ((zeile = br.readLine()) != null){
 		value = zeile.split(" ");
-		if (x_achse.getSelectedItem() == x_achse.getItemAt(0)) {
-			serie1.setKey(selected1);
-			serie1.add(Double.parseDouble(value[0]),Double.parseDouble(value[index]));
-			
-			serie2.setKey(selected2);
-			serie2.add(Double.parseDouble(value[0]),Double.parseDouble(value[index2]));
 		
-			serie3.setKey(selected3);
-			serie3.add(Double.parseDouble(value[0]),Double.parseDouble(value[index3]));
+		serie1.setKey(selected1);
+		serie2.setKey(selected2);
+		serie3.setKey(selected3);
+		serie4.setKey(selected4);
 		
-			serie4.setKey(selected4);
-			serie4.add(Double.parseDouble(value[0]),Double.parseDouble(value[index4]));
-		
+		if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(1)){
+			serie1.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index]));
+			serie2.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index2]));
+			serie3.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index3]));
+			serie4.add(Math.log(Double.parseDouble(value[x_index])),Double.parseDouble(value[y_index4]));
+		}
+		else if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(2)){
+			serie1.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index])));
+			serie2.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index2])));
+			serie3.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index3])));
+			serie4.add(Double.parseDouble(value[x_index]),Math.log(Double.parseDouble(value[y_index4])));
+		}
+		else if (achse_to_log.getSelectedItem() == achse_to_log.getItemAt(3)){
+			serie1.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index])));
+			serie2.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index2])));
+			serie3.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index3])));
+			serie4.add(Math.log(Double.parseDouble(value[x_index])),Math.log(Double.parseDouble(value[y_index4])));
 		}
 		else {
-			serie1.setKey(selected1);
-			serie1.add(Double.parseDouble(value[1]),Double.parseDouble(value[index]));
-			
-			serie2.setKey(selected2);
-			serie2.add(Double.parseDouble(value[1]),Double.parseDouble(value[index2]));
-		
-			serie3.setKey(selected3);
-			serie3.add(Double.parseDouble(value[1]),Double.parseDouble(value[index3]));
-		
-			serie4.setKey(selected4);
-			serie4.add(Double.parseDouble(value[1]),Double.parseDouble(value[index4]));
-		
+			serie1.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index]));
+			serie2.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index2]));
+			serie3.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index3]));
+			serie4.add(Double.parseDouble(value[x_index]),Double.parseDouble(value[y_index4]));
 		}
 	}
 	XYSeriesCollection collectionVerlauf = new XYSeriesCollection();
@@ -763,4 +589,64 @@ public class BremoUltimateView {
 	return chartVerlauf;
 	
     }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		if(nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(1)) {
+			if (e.getSource().equals(nbr_of_Achse)){
+			   y_achse_2.setEnabled(true);
+			   y_achse_3.setEnabled(false);
+			   y_achse_4.setEnabled(false);
+			}
+			try {
+			    GraphikPanel.removeAll();
+				GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString()));
+			} catch (IOException exp) {
+				exp.printStackTrace();
+			}
+			GraphikPanel.revalidate();
+		} else if (nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(2)) {
+			if (e.getSource().equals(nbr_of_Achse)){
+			    y_achse_2.setEnabled(true);
+			    y_achse_3.setEnabled(true);
+			    y_achse_4.setEnabled(false);
+			}
+			try {
+					GraphikPanel.removeAll();
+					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString()));
+				} catch (IOException exp) {
+					exp.printStackTrace();
+				}
+				GraphikPanel.revalidate();
+			
+		} else if (nbr_of_Achse.getSelectedItem() == nbr_of_Achse.getItemAt(3)) {
+			if (e.getSource().equals(nbr_of_Achse)){
+			   y_achse_2.setEnabled(true);
+			   y_achse_3.setEnabled(true);
+			   y_achse_4.setEnabled(true);
+			}
+			GraphikPanel.removeAll();
+				try {
+					GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString(),y_achse_2.getSelectedItem().toString(), y_achse_3.getSelectedItem().toString(), y_achse_4.getSelectedItem().toString()));
+				} catch (IOException exp) {
+					exp.printStackTrace();
+				}
+				GraphikPanel.revalidate();
+		} else {
+			if (e.getSource().equals(nbr_of_Achse)){
+			   y_achse_2.setEnabled(false);
+	           y_achse_3.setEnabled(false);
+	           y_achse_4.setEnabled(false);
+			}
+	        try {
+	        	GraphikPanel.removeAll();
+				GraphikPanel.add(auswahl_Diagramm(y_achse_1.getSelectedItem().toString()));
+			} catch (IOException exp) {
+				exp.printStackTrace();
+			}
+	        GraphikPanel.revalidate();
+	        
+		}
+	}
 }

@@ -6,7 +6,6 @@ import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Insets;
-
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
@@ -42,7 +41,12 @@ import javax.swing.JTextField;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
 import bremo.main.Bremo;
+import bremoswing.graphik.BremoView;
+import bremoswing.graphik.BremoViewController;
+import bremoswing.graphik.BremoViewModel;
+import bremoswing.graphik.ItemChooseFrame;
 import bremoswing.graphik.SelectItemToPlotten;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.SucheBremo;
@@ -273,7 +277,7 @@ public class SwingBremo extends JFrame {
 		berechnen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				stop.setVisible(true);
-				sehen.setEnabled(false);
+				sehen.setEnabled(true);
 				docfile.setEnabled(false);
 				percent = 0;
 				BerechnungPush(e);
@@ -334,14 +338,17 @@ public class SwingBremo extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				if(plotten != null ) {
-				  plotten.dispose();
-				}
-			    plotten = new SelectItemToPlotten();
-				plotten.setVisible(true);
+//				// TODO Auto-generated method stub
+//				if(plotten != null ) {
+//				  plotten.dispose();
+//				}
+//			    plotten = new SelectItemToPlotten();
+//				plotten.setVisible(true);
+				callBremoView();
+				
 				
 			}
+	
 		});
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(0, 0, 0, 0);
@@ -349,7 +356,7 @@ public class SwingBremo extends JFrame {
 		gc.gridx = 3;
 		gc.gridy = 0;
 		gc.ipadx = 0;
-		sehen.setEnabled(false);
+		sehen.setEnabled(true);
 		manager.add(sehen, gc);
 		
 		/************ BUTTON File ************************************/
@@ -582,6 +589,16 @@ public class SwingBremo extends JFrame {
 		/*****************************************************************************************/
 		pack();
 
+	}
+
+	public void callBremoView() {
+		
+       BremoView view = new BremoView(new BremoViewModel());
+       
+       view.getController().getModel().addObserver(view);
+       
+       view.setVisible(true);
+		
 	}
 
 	/** Warning Massage **********/

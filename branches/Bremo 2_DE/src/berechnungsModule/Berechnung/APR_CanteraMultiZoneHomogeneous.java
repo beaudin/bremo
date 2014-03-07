@@ -1390,6 +1390,13 @@ public class APR_CanteraMultiZoneHomogeneous extends APR_Cantera {
 		// TODO Auto-generated method stub
 		return this.dQb_buffer;
 	}
+	
+	//fuer Verlustteilung Frank Haertel
+		@Override 
+		public VektorBuffer get_p_buffer() { 
+			// TODO Auto-generated method stub 
+			return null; 
+	}
 
 	@Override
 	protected void checkEinspritzungen(MasterEinspritzung me) {

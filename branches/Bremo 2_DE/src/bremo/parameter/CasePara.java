@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
+
 import misc.PhysKonst;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.SpeziesFabrik;
@@ -241,7 +242,7 @@ public class CasePara {
 	public String get_pressureAdjustmentMethod(String methodIdentifier){
 		String method=null;
 		try {		
-			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","abgleichKruemmer","ohne"};			
+			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","kanalMethode","abgleichKruemmer","ohne"};			
 			method=set_StringPara(this.INPUTFILE_PARAMETER,methodIdentifier,s1);
 		}catch(ParameterFileWrongInputException e){
 			e.stopBremo();
@@ -403,11 +404,27 @@ public class CasePara {
 
 	}
 
-
-
-
-
-
+	/** 
+	   * Gibt an ob eine Verlustteilung durchgeführt werden soll. 
+	   * Die Auswahl erfolgt durch den Bnutzer 
+	   * 
+	   * @return 
+	   */ 
+	//fuer Verlustteilung Frank Haertel  
+	public boolean is_Verlustteilung(){
+	    boolean verlustteilung = false; 
+	    String s = null; 
+	    String s2 []= {"ja","nein"}; 
+	    try { 
+	      s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2); 
+	    } catch (ParameterFileWrongInputException e) { 
+	      e.stopBremo(); 
+	    } 
+	    if(s.equalsIgnoreCase("ja")) verlustteilung=true; 
+	    return verlustteilung;
+		} 
+	
+	      
 
 
 
@@ -709,7 +726,41 @@ public class CasePara {
 		return verbrennungsLuft;
 	}
 
-
+//	//LWA-Problem Zirkuläre Referenz bei Restgas-Aufruf (Polytropenmethode ruft Restgas, ruft LWA, ruft Polytropenmethode...)
+//	public Spezies get_spezVerbrennungsLuftPolytropenmethode(){
+//
+//		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....
+//		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
+//		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
+//		Spezies abgas=this.get_spezAbgas();
+//		//Bestimmung der Verbrennungsluftzusammensetzung		
+//		double mAGRex=cp.get_mAGR_extern_ASP();
+//		double mAGRin=0.000000001;//HART auf NULL gesetzt => besser Polytropenmethode falsch als Absturz?
+//		double mAGR=mAGRex+mAGRin;
+//		double mGes=mLuft_tr+mW+mAGR; //gesamte Masse im Zylinder (ohne Kraftstoff)
+//		Hashtable<Spezies,Double>verbrennungsLuft_MassenBruchHash=new Hashtable<Spezies,Double>();
+//		verbrennungsLuft_MassenBruchHash.put(abgas, mAGR/mGes);
+//		verbrennungsLuft_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezLuft_trocken(),mLuft_tr/mGes);		
+//		verbrennungsLuft_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezH2O(),mW/mGes);
+//		GasGemisch verbrennungsLuft=new GasGemisch("Verbrennungsluft");
+//		verbrennungsLuft.set_Gasmischung_massenBruch(verbrennungsLuft_MassenBruchHash);		
+//
+//		return verbrennungsLuft;
+//	}
+//	
+//	//LWA-Problem Zirkuläre Referenz bei Restgas-Aufruf (Polytropenmethode ruft Restgas, ruft LWA, ruft Polytropenmethode...)
+//	public double get_mVerbrennungsLuft_ASP_Polytropenmethode(){
+//
+//		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....
+//		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
+//		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
+//		double mAGRex=cp.get_mAGR_extern_ASP();
+//		double mAGRin=0.000000001;//HART auf NULL gesetzt => besser Polytropenmethode falsch als Absturz?
+//		double mAGR=mAGRex+mAGRin;		
+//
+//		return mLuft_tr+mW+mAGR;
+//	}	
+	
 	/**
 	 * Liefert die Masse der Verbrennungsluft bei Einlassschluss bestehend aus: </br>
 	 * AGR extern +AGR intern + trockene Luft + Wasser
@@ -900,7 +951,18 @@ public class CasePara {
 		}
 	}	
 
-
+	//fuer Verlustteilung Frank Haertel
+	public double get_pme(){ 
+	    double std_pme=0; 
+	    try { 
+	      return set_doublePara(INPUTFILE_PARAMETER,"pme","[bar]",0,30); 
+	    } catch (ParameterFileWrongInputException e) { 
+	      e.log_Warning("Keiner oder der falsche pme-Wert wurde angegeben. "+ 
+	          "Dieser wird nicht in der Verlustteilung angezeigt"); 
+	      return std_pme; 
+	    } 
+	  } 	
+	
 	/**
 	 * Mehrfacheinspritzungen sind möglich --> über den Parameter  wird die Anzahl der Einspritzungen vorgegeben \br
 	 * Wird dieser Parameter nicht angegeben, wird er auf eins gesetzt und eine Warnung wird ins LogFile geschrieben
@@ -1534,9 +1596,44 @@ public class CasePara {
 			return ohc;
 		}		
 	}
-
-
-
+	
+	/**
+	 * @return liefert den Wert, der für den Zylinderdruckabgleich mit der referenzMethode verwendet werden soll
+	 */
+	public double get_Referenzwert(){
+//		double std_rw=1.0;	//Standardwert für Referenzwert ca. Umgebungsdruck
+//		try {
+//			return set_doublePara(INPUTFILE_PARAMETER, "Referenzwert","[bar]",0,300); 
+//		} catch (ParameterFileWrongInputException e) {			
+//			e.log_Warning("Fuer die referenzMethode wurde kein Referenzwert angegeben. \n" +
+//					"Es wird mit dem Referenzwert" +std_rw + "[bar] gerechnet.");
+//			return std_rw;
+//		}
+		double std_rw=-7.77;	//Standardwert für pmi (muss negativ sein, siehe z.B. das Wandwärmemodell "WoschniHuber"
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "Referenzwert","[bar]",0,300); 
+		} catch (ParameterFileWrongInputException e) {				
+			e.stopBremo();
+			return std_rw;
+		}	
+	
+	}
+	
+	
+	/**
+	 * @return liefert den Kanal, der für den Zylinderdruckabgleich mit der kanalMethode verwendet werden soll
+	 */
+	public boolean get_Referenzkanal(){
+		String [] yesno={"pEin","pAbg"};
+		boolean pIn=false;
+		try {
+			if(set_StringPara(INPUTFILE_PARAMETER,"Referenzkanal",yesno ).equalsIgnoreCase("pEin"))
+				pIn=true;
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+		}
+		return pIn;
+	}
 
 	/**
 	 * @return liefert den Zeitpunkt, bei dem der Zylinderdruckabgleich beginnen soll [s n. Rechenbegin]
@@ -1544,8 +1641,9 @@ public class CasePara {
 	public double get_DruckabgleichBeginn(){
 		double KW_beginnAbgleich;		
 		try {
-			if(SYS.IS_KW_BASIERT){				
-				KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Beginn_Druckabgleich","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+			if(SYS.IS_KW_BASIERT){
+				//KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Beginn_Druckabgleich","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+				KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Beginn_Druckabgleich","[KWnZOT]",-720,720);
 				KW_beginnAbgleich=convert_KW2SEC(KW_beginnAbgleich);
 			}else {				
 				KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Beginn_Druckabgleich","[s]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
@@ -1562,8 +1660,9 @@ public class CasePara {
 	public double get_DruckabgleichEnde(){
 		double KW_endeAbgleich;		
 		try {
-			if(SYS.IS_KW_BASIERT){				
-				KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Ende_Druckabgleich","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+			if(SYS.IS_KW_BASIERT){
+				//KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Ende_Druckabgleich","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+				KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Ende_Druckabgleich","[KWnZOT]",-720,720);
 				KW_endeAbgleich=convert_KW2SEC(KW_endeAbgleich);
 			}else {				
 				KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Ende_Druckabgleich","[s]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
@@ -2170,7 +2269,7 @@ public class CasePara {
 		}		
 	}
 	/** 
-	 * @return Gibt die Referenzfläche zurück, die für die
+	 * @return Gibt die Referenzfläche zurück, die für die RefDurchmesserEV
 	 * Durchflusskennzahlen des Einlassventils verwendet werden soll.
 	 * Wenn nichts angegeben wird, dann wird mit der Kolbenfläche gerechnet.
 	 * */
@@ -2434,6 +2533,12 @@ public class CasePara {
 		public final String THERMO_POLYNOM_KOEFF_VORGABE;
 		public final String GLEICHGEWICHTSKONSTANTEN_VORGABE;	
 
+		
+		// Brennverlaufsvariablen 
+		//fuer Verlustteilung Frank Haertel
+//	    public File BRENNVERLAUF_FILE; 
+//	    public int KANAL_SPALTEN_NR_DQBURN; 
+//	    public String EINGABEDATEI_FORMAT_BURN; 
 
 		public SysPara(Hashtable<String, String[]> parameterVorgaben) throws ParameterFileWrongInputException{
 
@@ -2593,6 +2698,25 @@ public class CasePara {
 
 
 			DAUER_ASP_SEC=(DAUER_ASP_KW)/(360*get_DrehzahlInUproSec());
+			
+			//fuer Verlustteilung Frank Haertel
+//			try{ 
+//				  File BRENNVERLAUF_FILE=get_FileToRead("burnFileName");
+//				  int indexOf=BRENNVERLAUF_FILE.getName().indexOf(".");
+//				  String EINGABEDATEI_FORMAT_BURN=BRENNVERLAUF_FILE.getName().substring(indexOf+1); //Dateiendung
+//				  String burnFileName=BRENNVERLAUF_FILE.getName();
+				  
+//				  String burnFileName=set_FileName(PARAMETER,"burnFileName"); 
+//			      int indexOf_burn=burnFileName.indexOf("."); 
+//			      EINGABEDATEI_FORMAT_BURN=burnFileName.substring(indexOf_burn+1); 
+//			      //Dateiendung 
+//			      BRENNVERLAUF_FILE=new File(WD+burnFileName); 
+//			      KANAL_SPALTEN_NR_DQBURN=(int)set_doublePara(PARAMETER, "spalte_dQburn","",1,40); //bis zu fünf kaskadierte CombiWF 
+//				  KANAL_SPALTEN_NR_DQBURN=get_ColumnToRead("spalte_dQburn"); //bis zu fünf kaskadierte CombiWF
+//			      } 
+//			      catch (ParameterFileWrongInputException e) { 
+//			        e.log_Warning("Es wurde kein Brennverlaufsfile (\"spalte_dQburn\") angegeben! Es kann keine APR durchgeführt werden!"); 
+//			      } 
 
 		}//Konstruktor SysPara	
 

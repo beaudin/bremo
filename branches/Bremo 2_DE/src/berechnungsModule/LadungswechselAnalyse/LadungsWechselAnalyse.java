@@ -50,11 +50,28 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	private VentilhubFileReader VH_Datei_Ein;
 	private VentilhubFileReader VH_Datei_Aus;
 	
+	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen 
+	private misc.VektorBuffer p_buffer ;							//fuer Verlustteilung Frank Haertel 
 	public LadungsWechselAnalyse(CasePara cp) {
-		super(cp,new ErgebnisBuffer(cp,"LWA_"));	
+		super(cp,new ErgebnisBuffer(cp,"LWA_"));
+		
+		indiD=new IndizierDaten(cp); 								//fuer Verlustteilung Frank Haertel 
+	    createMe(cp); 												//fuer Verlustteilung Frank Haertel 
+	  } //fuer Verlustteilung Frank Haertel 
+	  public LadungsWechselAnalyse(CasePara cp, boolean gemittelt){	//fuer Verlustteilung Frank Haertel  
+	    super(cp,new ErgebnisBuffer(cp,"LWA_"));					//fuer Verlustteilung Frank Haertel  
+	    if (gemittelt == true) 										//fuer Verlustteilung Frank Haertel 
+	      indiD=new IndizierDaten(cp,true); 						//fuer Verlustteilung Frank Haertel 
+	    else 														//fuer Verlustteilung Frank Haertel 
+	      indiD=new IndizierDaten(cp); 								//fuer Verlustteilung Frank Haertel 
+	    createMe(cp); 												//fuer Verlustteilung Frank Haertel 
+	  } 															//fuer Verlustteilung Frank Haertel 
+	  public void createMe(CasePara cp) { 							//fuer Verlustteilung Frank Haertel 	
+		
 		T_buffer = new VektorBuffer(CP);
+		p_buffer = new misc.VektorBuffer(cp); 						//fuer Verlustteilung Frank Haertel 
 		m = CP.MOTOR;
-		indiD=new IndizierDaten(cp);
+		//indiD=new IndizierDaten(cp);								//fuer Verlustteilung Frank Haertel 
 		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		anzZonen=1;
 		gAbgasbehaelter =new GasGemisch("AGR_intern_LWA");
@@ -240,6 +257,8 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	}
 
 	public void bufferErgebnisse(double time, Zone [] zonen) {
+		double p = zonen[0].get_p(); 	//fuer Verlustteilung Frank Haertel
+	    p_buffer.addValue(time, p); 	//fuer Verlustteilung Frank Haertel
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zonen);
 		int i=0;
 		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",super.CP.convert_SEC2KW(time),i);
@@ -390,6 +409,12 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	public VektorBuffer get_dQb_buffer() {
 		return null;
 	}
+	
+	//fuer Verlustteilung Frank Haertel
+	@Override 
+	public VektorBuffer get_p_buffer() { 
+	    return p_buffer; 
+	} 
 	
 //	/**
 //	 * Liefert die Verbrennungsluft analog zu der Funktion aus CasePara ausser, 

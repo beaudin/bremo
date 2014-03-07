@@ -410,7 +410,9 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		double Vol_b = 0;
 		int cnt=0;
 
-		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
+//		Abbruch ohne doppelte Umwandlung. Evtl. durch Vergleich mit Rechenschrittweite?
+//		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
+		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
 			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
 			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
 			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
@@ -595,4 +597,10 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		return this.dmb_buffer;
 	}
 
+	//fuer Verlustteilung Frank Haertel
+	@Override 
+	public VektorBuffer get_p_buffer() { 
+		// TODO Auto-generated method stub 
+		return null; 
+	}
 }

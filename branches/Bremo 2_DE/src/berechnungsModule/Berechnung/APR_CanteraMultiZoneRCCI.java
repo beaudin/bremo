@@ -1,6 +1,8 @@
 package berechnungsModule.Berechnung;
 import io.TurbulenceFileReader;
+
 import java.util.Hashtable;
+
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 import misc.VektorBuffer;
@@ -2820,6 +2822,13 @@ public class APR_CanteraMultiZoneRCCI extends APR_Cantera {
 	@Override
 	public VektorBuffer get_dQb_buffer() {
 		return this.dQb_buffer;
+	}
+	
+	//fuer Verlustteilung Frank Haertel
+		@Override 
+		public VektorBuffer get_p_buffer() { 
+			// TODO Auto-generated method stub 
+			return null; 
 	}
 
 	@Override

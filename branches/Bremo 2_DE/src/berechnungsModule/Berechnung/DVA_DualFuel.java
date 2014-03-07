@@ -730,5 +730,11 @@ double sumdma=0;
 	public VektorBuffer get_dm_buffer() {
 		return this.dmb_buffer;
 	}
-
+	
+	//fuer Verlustteilung Frank Haertel
+	@Override 
+	  public VektorBuffer get_p_buffer() { 
+	    // TODO Auto-generated method stub 
+	    return null; 
+	  }
 }

@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.swing.JFileChooser;
 
+import org.jfree.chart.JFreeChart;
+
 import bremoswing.util.ExtensionFileFilter;
 
 public class BremoViewController  {
@@ -35,7 +37,7 @@ public class BremoViewController  {
 		model.hideChooseFrame();
 	}
     /**
-     * Controller controll Data and send it to the model to store
+     * Controller control Data and send it to the model to store
      * @param allselectedItem
      */
 	public void bremoViewData(String[] allselectedItem) {
@@ -63,6 +65,12 @@ public class BremoViewController  {
 
 	public BremoViewModel getModel() {
 		return model;
+	}
+
+	public void favs(BremoView view) {
+	
+		model.saveFavs();
+		
 	}
 	
 	

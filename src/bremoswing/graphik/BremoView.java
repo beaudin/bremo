@@ -138,7 +138,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         y_achse_3 = new JComboBox<String>();
         y_achse_4 = new JComboBox<String>();
         nbr_of_Achse = new JComboBox<Integer>(new Integer [] {1,2,3,4});
-        achse_to_log = new JComboBox<String>(new String [] {"No Log","Log auf X-Achse","Log auf Y-Achse","Doppel Log"});
+        achse_to_log = new JComboBox<String>(new String [] {"No Log","Log X-Axe","Log Y-Axe","Double Log"});
        
         x_achse.setName("x_achse"); 
         nbr_of_Achse.setName("nbr_of_Achse");
@@ -155,6 +155,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         chooseFrame = new ItemChooseFrame(this);
       
         openFileButton.addActionListener(this);
+        favoriteButton.addActionListener(this);
         
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setPreferredSize(new Dimension (1280,800));
@@ -484,6 +485,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			break;
 
 		case "favoriteButon":
+			controller.favs(this);
 			break;
 
 		default:

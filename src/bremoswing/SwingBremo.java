@@ -155,7 +155,7 @@ public class SwingBremo extends JFrame {
 	private void initComponents() {
 
 		System.setOut(outStream);
-		//System.setErr(errStream);
+		//System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
 
 		manager = new JPanel(){
 			/**

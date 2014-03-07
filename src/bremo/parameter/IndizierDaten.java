@@ -5,17 +5,14 @@ import java.util.Hashtable;
 
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
-
 import matLib.MatLibBase;
 import matLib.filter.SavitzkyGolayFilter;
 import misc.LinInterp;
-
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
-
 import io.IndizierFileReader;
 import io.IndizierFileReader_adv;
 import io.IndizierFileReader_txt;
@@ -29,7 +26,7 @@ public class IndizierDaten {
 	private double [] pAus,pAusRoh;
 	double [] zeitAchse_LW;
 	private final CasePara CP;
-	private final double PZYL_MAX;
+	private final double PZYL_MAX=0;//vorher ohne NULL
 	private  double pmi=0;
 	private Motor motor;
 	private LinInterp L_Interp;
@@ -39,7 +36,7 @@ public class IndizierDaten {
 	
 	
 	/**
-	 * <p>Klasse die Indizeirdaten wie pZyl, pEin, und pAus 
+	 * <p>Klasse die Indizierdaten wie pZyl, pEin, und pAus 
 	 * fuer alle uebrigen Module zur verfuegung stellt. </p>
 	 * <p>Der Zylinderdruck wird mit einer der Vorgabe im Parameterfile entsprechenden Methode
 	 * abgeglichen. Auch Saugrohr und Abgasgegenndruck koennen mit die langsam messenden Sensoren 
@@ -50,6 +47,21 @@ public class IndizierDaten {
 	public IndizierDaten(CasePara cp){			
 
 		CP=cp;
+		
+		filternBitte=CP.filterPressureData();
+		//filternBitte=CP.SYS.FILTERN; 							//fuer Verlustteilung Frank Haertel
+	    createMe(cp,false); 									//fuer Verlustteilung Frank Haertel
+	 } 															//fuer Verlustteilung Frank Haertel
+	
+	 public IndizierDaten(CasePara cp, boolean gemittelt){ 		//fuer Verlustteilung Frank Haertel
+	    CP=cp; 													//fuer Verlustteilung Frank Haertel
+	    filternBitte=CP.filterPressureData();
+	    //filternBitte=CP.SYS.FILTERN; 							//fuer Verlustteilung Frank Haertel
+	    createMe(cp,gemittelt); 								//fuer Verlustteilung Frank Haertel
+	 }															//fuer Verlustteilung Frank Haertel 	
+	 
+	 public void createMe(CasePara cp, boolean gemittelt){ 		//fuer Verlustteilung Frank Haertel
+		
 		File indiFile=CP.get_FileToRead("indizierFileName");	
 		int indexOf=indiFile.getName().indexOf(".");
 		String EINGABEDATEI_FORMAT=indiFile.getName().substring(indexOf+1); //Dateiendung		
@@ -70,7 +82,7 @@ public class IndizierDaten {
 		L_Interp = new LinInterp(CP);
 		motor=CP.MOTOR;		
 		
-		filternBitte=CP.filterPressureData();
+		//filternBitte=CP.filterPressureData(); //fuer Verlustteilung Frank Haertel
 		if(filternBitte){
 			int halfWidth=cp.get_savitzkyGolayHalfWidth();
 			sgol=new SavitzkyGolayFilter(halfWidth,halfWidth,cp.get_savitzkyGolayOrder());
@@ -121,6 +133,7 @@ public class IndizierDaten {
 		//Definieren des Einlassdrucks
 		///////////////////////////////////		
 		
+		if(gemittelt == false){ //fuer Verlustteilung Frank Haertel
 		pEinRoh=indiReader.get_pEin();
 		//Anpassendes Mittelwertes von Saugrohrdrucksensor und Piezo		
 		if(CP.shift_pInlet()){
@@ -151,6 +164,30 @@ public class IndizierDaten {
 			pAus=pAusRoh;
 		pAus=misc.LittleHelpers.concat(pAus,pAus);		
 		
+		//fuer Verlustteilung Frank Haertel
+		} 
+	    if(gemittelt == true){ 
+	      pEinRoh=indiReader.get_pEin(); 
+	      pAusRoh=indiReader.get_pAbg(); 						//fuer Verlustteilung Frank Haertel
+	      double summePein=0; 
+	      double summePaus=0; 
+	      for (int i = 0; i < pEinRoh.length; i++) { 
+	          summePein += pEinRoh[i]; 
+	      } 
+	      for (int i = 0; i < pAusRoh.length; i++) { 			//fuer Verlustteilung Frank Haertel
+	          summePaus += pAusRoh[i]; 
+	      } 
+	      double pEinWert=summePein/pEinRoh.length; 
+	      double pAusWert=summePaus/pAusRoh.length; 
+	      pEin = new double[zeitAchse.length]; 
+	      pAus = new double[zeitAchse.length]; 
+	      for (int i = 0; i < zeitAchse.length; i++) { 			//fuer Verlustteilung Frank Haertel
+	          pEin [i]= pEinWert; 
+	          pAus [i]= pAusWert; 
+	      } 
+	    } 
+	    //fuer Verlustteilung Frank Haertel
+		
 		////////////////////////////////////
 		//Definieren des Zylidnerdrucks
 		///////////////////////////////////
@@ -160,11 +197,14 @@ public class IndizierDaten {
 		if(nlm.equalsIgnoreCase("polytropenMethode")){
 			pZylRoh=this.polytropenMethode(pZylRoh);	
 		}else if(nlm.equalsIgnoreCase("abgleichSaugrohr")){
-			pZylRoh=this.kanalMethode(pZylRoh,pEinRoh);	
+			pZylRoh=this.kanalMethodeSaugrohr(pZylRoh,pEinRoh);	
+		}else if(nlm.equalsIgnoreCase("kanalMethode")){
+			pZylRoh=this.kanalMethode(pZylRoh,pEinRoh,pAusRoh);	
 		}else if(nlm.equalsIgnoreCase("abgleichKruemmer")){
-			pZylRoh=this.kanalMethode(pZylRoh,pAusRoh);	
+			pZylRoh=this.kanalMethodeKruemmer(pZylRoh,pAusRoh);	
 		}else if(nlm.equalsIgnoreCase("referenzWert")){
-			pZylRoh=this.referenzWertMethode();	
+			//pZylRoh=this.referenzWertMethode();	
+			pZylRoh=this.referenzWertMethode(pZylRoh);	
 		}else if(nlm.equalsIgnoreCase("ohne")){
 			
 		}else{
@@ -172,7 +212,7 @@ public class IndizierDaten {
 				throw new ParameterFileWrongInputException(
 						"Die gewaehlte Methode zur Nullinienkorrektur des Zylinderdrucks " +
 						"ist nicht zulaessig. Moegliche Methoden sind: \n" +
-						"polytropenMethode \n abgleichSaugrohr \n abgleichKruemmer \n " +
+						"polytropenMethode \n abgleichSaugrohr \n kanalMethode \n abgleichKruemmer \n " +
 						"referenzWert \n ohne");
 			} catch (ParameterFileWrongInputException e) {				
 				e.stopBremo();
@@ -203,7 +243,7 @@ public class IndizierDaten {
 			pZyl=pZylRoh;
 		//Verdoppeln des Zylinderdrucks damit dieser fuer die LWA das naechste ASP umfasst
 		pZyl=misc.LittleHelpers.concat(pZyl, pZyl);
-		PZYL_MAX=indiReader.get_pZylMAX();		
+		//PZYL_MAX=indiReader.get_pZylMAX();		
 		
 		L_Interp.set_lastsearchedIndex(0); 		
 
@@ -277,17 +317,99 @@ public class IndizierDaten {
 	}
 
 	/**
-	 * Diese Methode fuert einen Nulllinienabgleich nach der KanalMethode durch
+	 * Diese Methode fuert einen Nulllinienabgleich nach der KanalMethode durch (Einlass- oder Aulasskanal, Zeitpunkt variabel)
+	 * @param pZyl
+	 * @param pEinlass
+	 * @param pAbgas
+	 * @return
+	 */
+	private double [] kanalMethode(double [] pZyl, double[] pEinlass, double[] pAbgas){	
+		if(motor.isHubKolbenMotor()){
+			double deltat=zeitAchse[0]-zeitAchse[1];
+			double dab=CP.get_DruckabgleichBeginn();
+			double dae=CP.get_DruckabgleichEnde();
+			double abgleichDauer=dae-dab;
+			double schrittZahl=(-abgleichDauer)/deltat;
+			double [] pAbgleich=pAbgas;
+			if(CP.get_Referenzkanal()){
+				pAbgleich=pEinlass;
+			}
+			double pZyl_temp []=new double [(int)Math.round(schrittZahl)];
+			double pEin_temp []=new double [(int)Math.round(schrittZahl)];
+			for(int i=0;i<=schrittZahl;i++){
+				double time=dab-(i*deltat);			
+				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
+				pEin_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
+			}
+			double pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
+								MatLibBase.mw_aus_1DArray(pEin_temp);
+
+			for(int xx=0;xx<pZyl.length;xx++){
+				pZyl[xx]=pZyl[xx]-pOffset;
+			}
+		}else{
+			try{
+				throw new ParameterFileWrongInputException(
+						"Die Zylinderdruckkorrektur nach der Kanalmethode ist nur mit Motoren" +
+				"vom Typ HubKolbenMotor moeglich!");
+			}catch(ParameterFileWrongInputException pfwie){
+				pfwie.stopBremo();
+
+			}
+		}
+		return pZyl;
+	}
+	
+	/**
+	 * Diese Methode fuert einen Nulllinienabgleich nach der KanalMethode durch (Saugrohr)
 	 * @param pZyl
 	 * @param pAbgleich
 	 * @return
 	 */
-	private double [] kanalMethode(double [] pZyl, double[] pAbgleich){	
+	private double [] kanalMethodeSaugrohr(double [] pZyl, double[] pAbgleich){	
 		if(motor.isHubKolbenMotor()){
 			double deltat=zeitAchse[0]-zeitAchse[1];
 			double es=((Motor_HubKolbenMotor) motor).get_Einlass_schliesst();
 			double eo=((Motor_HubKolbenMotor) motor).get_Einlass_oeffnet();
 			double tAbgleich=(es+eo)/2;
+			double pZyl_temp []=new double [11];
+			double pEin_temp []=new double [11];
+			for(int i=0;i<11;i++){
+				double time=tAbgleich+(i-5)*deltat;				
+				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
+				pEin_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
+			}
+			double pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
+								MatLibBase.mw_aus_1DArray(pEin_temp);
+
+			for(int xx=0;xx<pZyl.length;xx++){
+				pZyl[xx]=pZyl[xx]-pOffset;
+			}
+		}else{
+			try{
+				throw new ParameterFileWrongInputException(
+						"Die Zylinderdruckkorrektur nach der Kanalmethode ist nur mit Motoren" +
+				"vom Typ HubKolbenMotor moeglich!");
+			}catch(ParameterFileWrongInputException pfwie){
+				pfwie.stopBremo();
+
+			}
+		}
+		return pZyl;
+	}
+	
+	/**
+	 * Diese Methode fuert einen Nulllinienabgleich nach der KanalMethode durch (Kruemmer)
+	 * @param pZyl
+	 * @param pAbgleich
+	 * @return
+	 */
+	private double [] kanalMethodeKruemmer(double [] pZyl, double[] pAbgleich){	
+		if(motor.isHubKolbenMotor()){
+			double deltat=zeitAchse[0]-zeitAchse[1];
+			double as=((Motor_HubKolbenMotor) motor).get_Auslass_schliesst();
+			double ao=((Motor_HubKolbenMotor) motor).get_Auslass_oeffnet();
+			double tAbgleich=(as+ao)/2;
 			double pZyl_temp []=new double [11];
 			double pEin_temp []=new double [11];
 			for(int i=0;i<11;i++){
@@ -328,7 +450,7 @@ public class IndizierDaten {
 		double v1= motor.get_V(t_Beginn);
 		double v2= motor.get_V(t_Ende);
 		
-		//Berechnen des Zylinderdrucks auf Basis mehrerer Wert --> Rauschunterdrückung
+		//Berechnen des Zylinderdrucks auf Basis mehrerer Werte --> Rauschunterdrückung
 		double pZyl_temp_1_ []=new double [5];
 		double pZyl_temp_2_ []=new double [5];
 		
@@ -342,23 +464,29 @@ public class IndizierDaten {
 		
 		double pZyl_temp_2=MatLibBase.mw_aus_1DArray(pZyl_temp_2_);
 		
-		//Frischgemisch als Spezies Objekt erstellen
-		Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuft();	
-		MasterEinspritzung me=CP.MASTER_EINSPRITZUNG;
-		Spezies krst=me.get_spezKrstALL();	
-		Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
-		double mKrst=me.get_mKrst_Sum_ASP();
-		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
-		double mGes= mVerbrennungsLuft+mKrst;
-		frischGemisch_MassenbruchHash.put(verbrennungsLuft, mVerbrennungsLuft/mGes);
-		frischGemisch_MassenbruchHash.put(krst, mKrst/mGes);		
-
-		GasGemisch frischGemisch=new GasGemisch("Frischgemisch");	
-		frischGemisch.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);
-		double T=300;
-		double kappa = frischGemisch.get_kappa(T); //CP.get_Kappa_Druckabgleich();//(polyIdy)
+//		//Frischgemisch als Spezies Objekt erstellen
+//		//Ersatz des Verbrennungsluftaufrufes mit AGRintern=0
+//		//Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuft();
+//		Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuftPolytropenmethode();	
+//		MasterEinspritzung me=CP.MASTER_EINSPRITZUNG;
+//		Spezies krst=me.get_spezKrstALL();	
+//		Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
+//		double mKrst=me.get_mKrst_Sum_ASP();
+//		//Aufruf ohne zirkuläre Referenz
+//		//double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();
+//		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP_Polytropenmethode();	
+//		double mGes= mVerbrennungsLuft+mKrst;
+//		frischGemisch_MassenbruchHash.put(verbrennungsLuft, mVerbrennungsLuft/mGes);
+//		frischGemisch_MassenbruchHash.put(krst, mKrst/mGes);		
+//
+//		GasGemisch frischGemisch=new GasGemisch("Frischgemisch");	
+//		frischGemisch.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);
+//		//double T=300; //Temperatur statisch bei 300K, gewählt von Juwe
+//		double T=pZyl_temp_1*v1/(mGes*frischGemisch.get_R()); //Temperatur zu Beginn des Abgleichs aus idealer Gasgleichung
+//		double kappa = frischGemisch.get_kappa(T); //CP.get_Kappa_Druckabgleich();//(polyIdy)
 		
-        
+		double kappa = CP.get_Kappa_Druckabgleich();//(polyIdy)
+		
 		double pZyl_temp_1_ABS = 
 		(pZyl_temp_2-pZyl_temp_1)/(Math.pow((v1/v2),kappa)-1);
 		
@@ -369,18 +497,52 @@ public class IndizierDaten {
 		return pZyl;
 	}
 
-	private double[] referenzWertMethode() {
-		try{
-			throw new BirdBrainedProgrammerException(
-					"Diese Methode wurde leider noch nicht implementiert --> NICHT aufregen! \n" +
-					" Selber Hand anlegen!! \n " +
-					"Gruß Juwe");
-		}catch(BirdBrainedProgrammerException bbp){
-			bbp.stopBremo();
-		}
-		return null;
-	}
+	/**
+	 * Diese Methode fuert einen Nulllinienabgleich nach der referenzWertMethode durch
+	 * @return pZyl
+	 */
+	private double[] referenzWertMethode(double [] pZyl) {
+//		try{
+//			throw new BirdBrainedProgrammerException(
+//					"Diese Methode wurde leider noch nicht implementiert --> NICHT aufregen! \n" +
+//					" Selber Hand anlegen!! \n " +
+//					"Gruß Juwe");
+//		}catch(BirdBrainedProgrammerException bbp){
+//			bbp.stopBremo();
+//		}
+//		return null;
+//	}
 
+		if(motor.isHubKolbenMotor()){
+			double deltat=zeitAchse[0]-zeitAchse[1];
+			double dab=CP.get_DruckabgleichBeginn();
+			double dae=CP.get_DruckabgleichEnde();
+			double abgleichDauer=dae-dab;
+			double schrittZahl=(-abgleichDauer)/deltat;
+			double pZyl_temp []=new double [(int)Math.round(schrittZahl)];
+			double pRef_temp =1e5*CP.get_Referenzwert(); //Referenzwert einlesen und von [bar] nach [Pa] konvertieren
+			for(int i=0;i<=schrittZahl;i++){
+				double time=dab-(i*deltat);			
+				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
+			}
+			double pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-pRef_temp;
+
+			for(int xx=0;xx<pZyl.length;xx++){
+				pZyl[xx]=pZyl[xx]-pOffset;
+			}
+		}else{
+			try{
+				throw new ParameterFileWrongInputException(
+						"Die Zylinderdruckkorrektur mit der Methode \"referenzWert\" ist nur mit Motoren" +
+				"vom Typ HubKolbenMotor moeglich!");
+			}catch(ParameterFileWrongInputException pfwie){
+				pfwie.stopBremo();
+
+			}
+		}
+		return pZyl;
+	}	
+	
 	/**
 	 * Addiert den angegebenen Offset zu jedem Wert des Vektors
 	 * @param pVec

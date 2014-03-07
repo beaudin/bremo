@@ -20,8 +20,7 @@ public class LWA extends InternesRestgas {
 			mAGRint=ladungswechselAnalyseDurchfuehren(super.CP);
 		
 		return mAGRint;
-	}	
-	
+	}		
 	
 	private double ladungswechselAnalyseDurchfuehren(CasePara cp){
 		
@@ -45,7 +44,7 @@ public class LWA extends InternesRestgas {
 		LW_SOL.setStepSize(schrittweite_LW);
 
 		//While --> LW-Analyse wird wiederholt, bis die Masse im Zylinder konvergiert hat
-		//Schliefe über °KW (Auslassöffnet bis Einlassschluss)
+		//Schleife über °KW (Auslassöffnet bis Einlassschluss)
 		int anzSimWerte=(int) ((xn_LW-x0_LW)/schrittweite_LW+1);
 		Zone [] znTemp = null;
 		zn_LW=dglSys_LW.get_initialZones();
@@ -58,7 +57,7 @@ public class LWA extends InternesRestgas {
 		double VInit=zn_LW[0].get_V(); 
 		Spezies abgas=zn_LW[0].get_ggZone();//CP.get_spezAbgas();
 		int idx2=0;	
-		do{//Iterationsschleife um auf den sleben Massenstrom zu kommen wie am PS gemessen --> Variation der Ladelufttemperatur
+		do{//Iterationsschleife um auf den selben Massenstrom zu kommen wie am PS gemessen --> Variation der Ladelufttemperatur
 			double f_mInit=0.1;
 			int idx=1;
 			while(f_mInit>0.0005&&idx<=50){
@@ -100,12 +99,13 @@ public class LWA extends InternesRestgas {
 
 			System.out.println("Masse bei Iteration " + idx2 + " = "+ m_neu + " kg");
 			mLuftFeucht=((LadungsWechselAnalyse)dglSys_LW).get_mLuftFeucht(zn_LW);
-			//Anpassung der Laelufttemperatur um auf die gemessenen Luftmasse zu kommen
+			//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
 			((LadungsWechselAnalyse)dglSys_LW).set_TSaug(mLuftFeucht);				
 			idx2+=1;
 		}while(Math.abs((mLuftFeucht_mess-mLuftFeucht)/mLuftFeucht_mess)>0.005&&idx2<=50);
 //		 "_" + (idx-1) +
-		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ "_ERGEBNISSE_LW.txt");		
+//		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ "_ERGEBNISSE_LW.txt");				
+		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ ".txt");		
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + (idx2) );	
 		double agrInt=((LadungsWechselAnalyse)dglSys_LW).get_mAGRintern(zn_LW);
 		return agrInt;

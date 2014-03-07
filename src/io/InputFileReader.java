@@ -19,7 +19,7 @@ public class InputFileReader {
 
 	public InputFileReader(File inputFile){
 		try {
-			read_InpuFile(inputFile);			
+			read_InputFile(inputFile);			
 			//read_ParameterFile(inputFile);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -82,7 +82,7 @@ public class InputFileReader {
 
 						if(idxParamNameEnde-1<0 || idxParamEinheitEnde<=idxParamNameEnde){
 							String paramNameTemp=zeilenText.substring(0,idxTrennung-1);
-							throw new ParameterFileWrongInputException("Fuer den Parameter " + paramNameTemp+ " wurden keine Einheiten angegeben \n" 
+							throw new ParameterFileWrongInputException("Fuer den Parameter " + paramNameTemp+ " wurden keine Einheiten angegeben \n"
 									+"Diese müssen in rechteckigen Klammern [] angegeben werden"); 
 						}
 
@@ -99,7 +99,7 @@ public class InputFileReader {
 								e.log_Message();
 							}
 						}
-
+						//Schreibt bei jedem Durchlauf (bzw. für jede Zeile) den Parameter in Hashtable "eingabeParameter"
 						eingabeParameter.put(paramName, paraWertEinheit);	    					
 					}		    		 
 
@@ -137,7 +137,11 @@ public class InputFileReader {
 	}
 
 
-	private void read_InpuFile(File inputFile) throws ParameterFileWrongInputException{	
+	/**
+	 * @param inputFile
+	 * @throws ParameterFileWrongInputException
+	 */
+	private void read_InputFile(File inputFile) throws ParameterFileWrongInputException{	
 		String modulFlag=null,modulWahl=null;
 		String inputStartFlag="[Bremo::Input::Start]";
 		String inputStopFlag="[Bremo::Input::Stop]";
@@ -157,13 +161,17 @@ public class InputFileReader {
 				//Leerzeichen entfernen
 				currentLine=currentLine.replaceAll(" ", "");
 				currentLine=currentLine.replaceAll("\t", "");
+				//Handelt es sich um ein Inputfile?
 				if(inputBlockFound){
 					//Ist diese Zeile der Anfang einer Modulvorgabe?
 					if (currentLine.startsWith("[")  && !currentLine.equals(inputStopFlag) ){		    		  
 
+						//wo steht die offene eckige Klammer?
 						int idxModulNameAnfang=currentLine.indexOf("[")+1;
+						//Wo steht der Doppelpunkt?
 						int idxModulNameEnde=currentLine.indexOf(":");
-
+						
+						//Wenn kein Name ODER keine geschlossene eckige Klammer
 						if(idxModulNameEnde-1<0 || idxModulNameEnde<=idxModulNameAnfang || currentLine.endsWith("]")==false) {
 							try{
 								throw new ParameterFileWrongInputException("Falsche Eingabe im Inputfile: "+ currentLine +"\n"+
@@ -201,7 +209,7 @@ public class InputFileReader {
 							currentLine = br.readLine();
 							continue;
 						}								
-						//Leerzeichen entfernen
+						//Komma durch Punkt ersetzen
 						currentLine = currentLine.replace(',','.');		    		 
 
 
@@ -219,12 +227,16 @@ public class InputFileReader {
 							}
 
 						}
-
-						String paraEinheit=currentLine.substring(idxParamNameEnde,idxParamEinheitEnde);		    		 
+						//liest die Einheit
+						String paraEinheit=currentLine.substring(idxParamNameEnde,idxParamEinheitEnde);
+						//liest den Wert
 						String paraWert=currentLine.substring(idxTrennung+2);
-						String paramName=currentLine.substring(0,idxParamNameEnde);		    		  
+						//List den Namen
+						String paramName=currentLine.substring(0,idxParamNameEnde);
+						//
 						String [] paraWertEinheit={paraWert,paraEinheit};
-
+						
+						//fragt in Hashtable "eingabeParameter" ab, ob der gerade gelesene Parameter schon existiert
 						if(eingabeParameter.containsKey(paramName))	{
 							try{	
 								throw new ParameterFileWrongInputException("Der Parameter \"" +paramName+"\" wurde mehrmals definiert " +
@@ -233,19 +245,32 @@ public class InputFileReader {
 								e.log_Message();
 							}
 						}
+						//Schreibt bei jedem Durchlauf (bzw. für jede Zeile) den Parameter in Hashtable "eingabeParameter"
 						eingabeParameter.put(paramName, paraWertEinheit);	    					
 					}		
 
 				}
-
-				if(currentLine.equals(inputStartFlag))
+				
+				//Erkennt, ob es sich um ein Input-File handelt, sonst Fehlermeldung s.u.
+				if(currentLine.equals(inputStartFlag))					
 					inputBlockFound=true;
-				//Naechste Zeile einlesen
-						
-
+				
+				//Abbruchkriterium für Inputfile-Ende erreicht
 				if(currentLine.equals(inputStopFlag))  
 					break;
 				
+				//Falls der InputBlock fehlt
+				if(inputBlockFound==false){
+					try{
+						throw new ParameterFileWrongInputException("Es handelt sich nicht um ein gültiges Inputfile. Ein Inputfile muss mit der Zeile \"" +inputStartFlag+"\" " +
+								"beginnen und mit der Zeile \"" +inputStopFlag+ "\" enden.");
+					}catch(ParameterFileWrongInputException e){
+						e.log_Message();
+					}
+					break;
+				}
+				
+				//Naechste Zeile einlesen
 				currentLine = br.readLine();	
 			}  //End while
 

@@ -44,7 +44,17 @@ public class Rechnung {
 		sol.setStepSize(schrittweite);
 		
 		int anzGesamtIterationen=0;
-		int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
+		
+		//Anzahl simWerte muss für eine APR (minus 1) angepasst werden um einen Interpolationsfehler zu vermeiden 
+		int anzSimWerte; 								//fuer Verlustteilung Frank Haertel
+		if(dglSys.isDVA()==true){ 						//fuer Verlustteilung Frank Haertel
+		
+			anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
+		//int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE; 
+		}
+		else 											 //fuer Verlustteilung Frank Haertel
+		    anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE-1;  //fuer Verlustteilung Frank Haertel
+		
 		double time;
 		Zone[] zn=dglSys.get_initialZones();
 		dglSys.bufferErgebnisse(x0, zn);
@@ -117,9 +127,9 @@ public class Rechnung {
 		else
 			dglSys.schreibeErgebnisFile(CP.get_CaseName()+".txt");
 		
-//		PostProcessor pp=new PostProcessor(dglSys.get_dm_buffer(),
-//							dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),CP);
-//		pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");
+		PostProcessor pp=new PostProcessor(dglSys.get_dm_buffer(),					//war bei Juwe auskommentiert
+							dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),CP);	//war bei Juwe auskommentiert
+		pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");							//war bei Juwe auskommentiert
 		//CP.CANTERA_CALLER.releaseCantera();
 		//((APR_Cantera)dglSys).releaseCantera();
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + anzGesamtIterationen );

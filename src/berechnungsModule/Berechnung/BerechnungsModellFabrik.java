@@ -9,6 +9,7 @@ public class BerechnungsModellFabrik extends ModulFabrik {
 	public static final String [] DVA_MODULE={"DVA_1Zonig", 
 		"DVA_2Zonig",
 		"DVA_DualFuel",
+		"APR_1Zonig",//fuer Verlustteilung Frank Haertel
 		"APR_CanteraMultiZoneHomogeneous",
 		"APR_Cantera2Zone",
 	"APR_CanteraMultiZoneRCCI"};	
@@ -28,6 +29,10 @@ public class BerechnungsModellFabrik extends ModulFabrik {
 			
 		}else if(berechnungsModellVorgabe.equals("DVA_DualFuel")){			
 			BERECHNUNGS_MODELL=new DVA_DualFuel(cp);	
+			
+		//fuer Verlustteilung Frank Haertel
+		}else if(berechnungsModellVorgabe.equals("APR_1Zonig")){ 
+		      BERECHNUNGS_MODELL=new APR_homogen_EinZonig(cp); 
 			
 		}else if(berechnungsModellVorgabe.equals("APR_CanteraMultiZoneHomogeneous")){			
 			BERECHNUNGS_MODELL=new APR_CanteraMultiZoneHomogeneous(cp);	

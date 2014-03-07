@@ -236,7 +236,9 @@ public class VentilhubFileReader {
 		letzterWert=zeitAchse[zeitAchse.length-1];
 		ersterWert=zeitAchse[0];
 		
-		if(time>=(ersterWert+dauerASP_SEC) && time<=(letzterWert+dauerASP_SEC)){
+		//Schleifenabbruch nicht direkt sondern über rechnungsSchrittweite
+		//if(time>=(ersterWert+dauerASP_SEC) && time<=(letzterWert+dauerASP_SEC)){
+		if(time-(ersterWert+dauerASP_SEC)>=cp.SYS.WRITE_INTERVAL_SEC && time-(letzterWert+dauerASP_SEC)<=cp.SYS.WRITE_INTERVAL_SEC){
 			return L_Interp.linInterPol(time-dauerASP_SEC, zeitAchse, hub);
 		}else if(time>=ersterWert && time<=letzterWert){
 			return L_Interp.linInterPol(time, zeitAchse, hub);

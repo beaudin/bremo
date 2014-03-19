@@ -128,15 +128,19 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 	}
 
 	private double dm;
-	private double dmAusgabe;
+	private double dmAusgabe, dmEVTemp;
+	private double dmAuslass, dmEinlass;
 	public Zone[] ersterHSBrennraum(double time, Zone[] zonen) {
-		double kw=CP.convert_SEC2KW(time);
+//		double kw=CP.convert_SEC2KW(time);
 		
 //		zonen[0].set_p_V_T_mi(indiD.get_pZyl(time), zonen[0].get_V(), zonen[0].get_T(), zonen[0].get_mi_DetailToIntegrate());
 		
 		//Initialisierung
 		dm=0;
-		dmAusgabe=0;	
+		dmAusgabe=0;
+		dmEinlass = 0;
+		dmAuslass = 0;
+		dmEVTemp = 0;
 		pSaug=indiD.get_pEin(time);
 		pAbg=indiD.get_pAus(time);
 		TZyl=zonen[0].get_T();
@@ -173,21 +177,33 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 				kappa=zonen[0].get_ggZone().get_kappa(TZyl);	//Gemisch kommt aus dem Zylinder
 				Rgas=zonen[0].get_ggZone().get_R();
 				dm=A_E*alpha_E_rueck*this.get_Massenstromdichte(pZyl,TZyl, pSaug, kappa, Rgas);
+				dmEVTemp += dm; //Ausgeschobene Masse speichern, um sie später zurückzuführen -- mn03.14
 				try {
 					zonen[0].set_dm_aus(dm);
-					//TODO: masse wird dem Frischluftbehälter hinzugefügt
 				} catch (NegativeMassException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				dmAusgabe+=-1*dm;			
+				dmAusgabe+=-1*dm;
+				dmEinlass+=-1*dm;
 	
 			}else if(pSaug>pZyl){	//Saugrohrdruck > Zylinderdruck, Masse strömt durch den Einlasskanal hinein
-				kappa=gFrischluftbehaelter.get_kappa(TSaug);	//Gemisch kommt aus dem Frischluftbehälter
-				Rgas=gFrischluftbehaelter.get_R();
-				dm=A_E*alpha_E_vor*this.get_Massenstromdichte(pSaug,TSaug, pZyl, kappa, Rgas);
-				zonen[0].set_dm_ein(dm, TSaug, gFrischluftbehaelter);
+				if(dmEVTemp > 0) { //Ausgeschobene Masse berücksichtigen -- mn03.14
+					GasGemisch gAusschiebebehaelter = zonen[0].get_ggZone();
+					kappa=gAusschiebebehaelter.get_kappa(zonen[0].get_T()); //Annahme, dass adiabat ausgeschoben und angesaugt wird.
+					Rgas=gAusschiebebehaelter.get_R();
+					dm=A_E*alpha_E_vor*this.get_Massenstromdichte(pSaug, zonen[0].get_T(), pZyl, kappa, Rgas);
+					zonen[0].set_dm_ein(dm, zonen[0].get_T(), gAusschiebebehaelter);
+				}else{ 	//Wenn nichts ausgeschoben wurde oder ausgeschobene Masse aufgebraucht ist, dann
+						// erfolgt die Entnahme aus dem Frischgemischbehälter				
+					kappa=gFrischluftbehaelter.get_kappa(TSaug);	//Gemisch kommt aus dem Frischluftbehälter
+					Rgas=gFrischluftbehaelter.get_R();
+					dm=A_E*alpha_E_vor*this.get_Massenstromdichte(pSaug,TSaug, pZyl, kappa, Rgas);
+					zonen[0].set_dm_ein(dm, TSaug, gFrischluftbehaelter);
+				}
+				dmEVTemp-=dm;
+				if(dmEVTemp<0) dmEVTemp=0; //Zum Auffangen von Fehlern
 				dmAusgabe+=dm;
+				dmEinlass+=dm;
 			}else{
 			}
 		}
@@ -199,6 +215,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 				dm=A_A*alpha_A_rueck*this.get_Massenstromdichte(pAbg,TAbg, pZyl, kappa, Rgas);
 				zonen[0].set_dm_ein(dm, TAbg, gAbgasbehaelter);
 				dmAusgabe+=dm;
+				dmAuslass+=dm;
 			}else if(pAbg<pZyl){ //Abgasdruck < Zyldruck, Masse strömt aus dem Auslasskanal heraus
 				kappa=zonen[0].get_ggZone().get_kappa(TZyl);	//Gemisch kommt aus dem Zylinder
 				Rgas=zonen[0].get_ggZone().get_R();
@@ -210,6 +227,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 					e.log_Warning();
 				}
 				dmAusgabe+=-1*dm;
+				dmAuslass+=-1*dm;
 			}else{
 			}
 		}
@@ -289,6 +307,10 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		super.buffer_EinzelErgebnis("V_motor [m^3]",m.get_V(time),i);
 		i++;
 		super.buffer_EinzelErgebnis("dm [kg/s]", dmAusgabe,i);		
+		i++;
+		super.buffer_EinzelErgebnis("dmEV [kg/s]", dmEinlass,i);		
+		i++;
+		super.buffer_EinzelErgebnis("dmAV [kg/s]", dmAuslass,i);		
 		i++;
 		super.buffer_EinzelErgebnis("Hub_E [m]", hub_E,i);
 		i++;

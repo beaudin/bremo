@@ -31,7 +31,7 @@ public class SimpleDirektEinspritzung extends Einspritzung {
 //			dm_krst=0;
 //			mKrst_verdampft=super.mKrst;								
 //		}else 
-		if(super.boi<super.CP.SYS.RECHNUNGS_BEGINN_DVA_SEC&&!super.IS_LWA_EINSPRITZUNG){	
+		if(super.boi<super.CP.SYS.RECHNUNGS_BEGINN_DVA_SEC&&!super.IS_LWA_EINSPRITZUNG){	//Nur für den Fall, dass der Rechenbeginn später gelegt wird!
 			try {
 				throw new ParameterFileWrongInputException("" +
 						"Fuer das gewaehlte Einspritzmodell " +this.FLAG+ " der " +index+
@@ -42,13 +42,22 @@ public class SimpleDirektEinspritzung extends Einspritzung {
 			}
 			dm_krst=0;
 			mKrst_verdampft=super.mKrst;
+			
+			super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,mKrst_verdampft );
+			//Krst verdampft sofort
+			super.mKrst_fluessig.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, 0);
 		}else{
 			//der Kraftstoff der eingespritzt wird verdampft sofort dm_krst=dm_dampf	
 			dm_krst=super.mKrst/(super.eoi-super.boi); 
+			
+			//mKrstDampf wird nun mit mehreren Werten belegt und wird bei einer LWA-Einspr. nun korrekt ausgelesen
+			super.mKrst_dampf.addValue(CP.get_Auslassoeffnet()-CP.SYS.DAUER_ASP_SEC, 0);
+			super.mKrst_dampf.addValue(super.boi,0);
+			super.mKrst_dampf.addValue(super.eoi, super.mKrst);
+			super.mKrst_dampf.addValue(CP.get_Auslassoeffnet()-CP.SYS.WRITE_INTERVAL_SEC, super.mKrst);
+			super.mKrst_dampf.addValue(CP.get_Auslassoeffnet(), 0);
 		}		
-		super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,mKrst_verdampft );
-		//Krst verdampft sofort
-		super.mKrst_fluessig.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, 0);
+
 	}
 	
 	

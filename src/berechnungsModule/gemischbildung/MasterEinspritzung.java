@@ -362,8 +362,8 @@ public class MasterEinspritzung extends ModulFabrik{
 
 			return mixKrst;
 		}else
-//			return CP.SPEZIES_FABRIK.get_spezCO2(); //Damit was zurückgegeben wird!
-			return null;
+			return CP.SPEZIES_FABRIK.get_spezCO2(); //Damit was zurückgegeben wird, sonst Fehler bei der Zoneninitialisierung! -- mn03.14
+//			return null;
 	}
 
 

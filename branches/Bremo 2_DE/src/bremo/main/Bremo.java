@@ -99,12 +99,12 @@ public class Bremo extends Thread {
 //	FunktionsTester ft=new FunktionsTester(privateCP);
 //	ft.testCantera3Zone();
 	
-//	File fileCP 
-////	= new File("src//InputFiles//FunktionstesterCT.txt");	
-//	= new File("c://Documents and Settings//eichmeier//jniWorkspace2//CallMeFromMatlab//src//InputFiles//Mode3//mode3.txt");
-//	Bremo bremo=new Bremo(fileCP,false);
-//	bremo.run();
-//	bremo=null;
+	File fileCP 
+//	= new File("src//InputFiles//FunktionstesterCT.txt");	
+	= new File("c://Documents and Settings//eichmeier//jniWorkspace2//CallMeFromMatlab//src//InputFiles//Mode3//mode3.txt");
+	Bremo bremo=new Bremo(fileCP,false);
+	bremo.run();
+	bremo=null;
 	}
 
 	public  Bremo(String absolutePath2InputFile) {
@@ -141,6 +141,14 @@ public class Bremo extends Thread {
 			new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
 			SwingBremo.PutInBremoThreadFertig(this.getName());
 			}
+			//fuer Verlustteilung Frank Haertel
+//			boolean VERLUST=casePara.is_Verlustteilung();
+			if(casePara.is_Verlustteilung() == true){ 
+			      Verlustteilung verl = new Verlustteilung(casePara); 
+			      verl.berechneVerluste(); 
+			      System.out.println("Verlustteilung fertig"); 
+			}
+		  
 		} catch (Exception  e) {
 			this.interrupt();
 			e.printStackTrace();
@@ -150,13 +158,13 @@ public class Bremo extends Thread {
 		    System.err.println("Rechungszeit:"+(System.currentTimeMillis()-SwingBremo.startTime)+" ms");
 		}
 		
-		//fuer Verlustteilung Frank Haertel
-		boolean VERLUST=casePara.is_Verlustteilung();
-		if(casePara.is_Verlustteilung() == true){ 
-		      Verlustteilung verl = new Verlustteilung(casePara); 
-		      verl.berechneVerluste(); 
-		      System.out.println("Verlustteilung fertig"); 
-		} 
+//		//fuer Verlustteilung Frank Haertel
+//		boolean VERLUST=casePara.is_Verlustteilung();
+//		if(casePara.is_Verlustteilung() == true){ 
+//		      Verlustteilung verl = new Verlustteilung(casePara); 
+//		      verl.berechneVerluste(); 
+//		      System.out.println("Verlustteilung fertig"); 
+//		} 
 	}	
 
 	/**
@@ -211,7 +219,7 @@ public class Bremo extends Thread {
 		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
 		//Hier einige Beisspile wie Funktionen getestet werden können
 		System.out.println(System.getProperty("home"));
-		File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//PhH//Messpunkt_10_Schichtreferenz//Bremo_Inputfile_Messpunkt_99.txt");
+		File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//PhH//20140225/49//Inputfile_P_202_Huegel_20140225_0049-p_m.txt");
 		double startTime = System.currentTimeMillis();
 		Bremo bremo=new Bremo(fileCP,false);
 		bremo.run();
@@ -232,7 +240,7 @@ public class Bremo extends Thread {
 		else{
 			String [] ifn={	
 
-					"PhH/Messpunkt_10_Schichtreferenz/Bremo_Inputfile_Messpunkt_10.txt"
+//					"PhH/Messpunkt_10_Schichtreferenz/Bremo_Inputfile_Messpunkt_10.txt"
 //					"Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/withMixing/mode3_Mix.txt",
 //					"Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/withDiffusion/KivaFixed/mode3_DiffusionInp.txt",
 //					"Mode7/Rasterfahndung/mode7InpRF.txt"

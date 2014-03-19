@@ -330,6 +330,7 @@ public class IndizierDaten {
 			double dae=CP.get_DruckabgleichEnde();
 			double abgleichDauer=dae-dab;
 			double schrittZahl=(-abgleichDauer)/deltat;
+			if (schrittZahl>1){
 			double [] pAbgleich=pAbgas;
 			if(CP.get_Referenzkanal()){
 				pAbgleich=pEinlass;
@@ -346,6 +347,17 @@ public class IndizierDaten {
 
 			for(int xx=0;xx<pZyl.length;xx++){
 				pZyl[xx]=pZyl[xx]-pOffset;
+			}
+			
+			}else {
+	    		try{
+	    			throw new ParameterFileWrongInputException(
+	    					"Beginn und Ende des Druckabgleiches dürfen nicht identisch sein. Der Beginn muss vor dem Ende liegen.");
+	    		}catch(ParameterFileWrongInputException pfwie){
+	    			pfwie.stopBremo();
+
+	    		}
+			
 			}
 		}else{
 			try{
@@ -445,6 +457,9 @@ public class IndizierDaten {
 
 		double t_Beginn = CP.get_DruckabgleichBeginn();
         double t_Ende = CP.get_DruckabgleichEnde();
+        
+        if (t_Beginn-t_Ende<0){
+        
         double deltat=zeitAchse[0]-zeitAchse[1];
 		
 		double v1= motor.get_V(t_Beginn);
@@ -494,7 +509,19 @@ public class IndizierDaten {
 
 		 for(int i=0;i<pZyl.length;i++){pZyl[i]= pZyl[i]+pDelta;}  
 	
+    	}
+    	else {
+    		try{
+    			throw new ParameterFileWrongInputException(
+    					"Beginn und Ende des Druckabgleiches dürfen nicht identisch sein. Der Beginn muss vor dem Ende liegen.");
+    		}catch(ParameterFileWrongInputException pfwie){
+    			pfwie.stopBremo();
+
+    		}
+    	}
+		 
 		return pZyl;
+
 	}
 
 	/**
@@ -519,6 +546,7 @@ public class IndizierDaten {
 			double dae=CP.get_DruckabgleichEnde();
 			double abgleichDauer=dae-dab;
 			double schrittZahl=(-abgleichDauer)/deltat;
+			if (schrittZahl>1){
 			double pZyl_temp []=new double [(int)Math.round(schrittZahl)];
 			double pRef_temp =1e5*CP.get_Referenzwert(); //Referenzwert einlesen und von [bar] nach [Pa] konvertieren
 			for(int i=0;i<=schrittZahl;i++){
@@ -529,6 +557,16 @@ public class IndizierDaten {
 
 			for(int xx=0;xx<pZyl.length;xx++){
 				pZyl[xx]=pZyl[xx]-pOffset;
+			}
+			}
+			else {
+				try{
+					throw new ParameterFileWrongInputException(
+							"Beginn und Ende des Druckabgleiches dürfen nicht identisch sein. Der Beginn muss vor dem Ende liegen.");
+				}catch(ParameterFileWrongInputException pfwie){
+					pfwie.stopBremo();
+
+				}
 			}
 		}else{
 			try{

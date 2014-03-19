@@ -294,13 +294,13 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		i++;
 		super.buffer_EinzelErgebnis("Hub_A [m]", hub_A,i);
 		i++;
-		super.buffer_EinzelErgebnis("alpha_E_vor",alpha_E_vor,i);
+		super.buffer_EinzelErgebnis("alpha_E_vor [-]",alpha_E_vor,i);
 		i++;
-		super.buffer_EinzelErgebnis("alpha_E_rück",alpha_E_rueck,i);
+		super.buffer_EinzelErgebnis("alpha_E_rück [-]",alpha_E_rueck,i);
 		i++;
-		super.buffer_EinzelErgebnis("alpha_A_vor",alpha_A_vor,i);
+		super.buffer_EinzelErgebnis("alpha_A_vor [-]",alpha_A_vor,i);
 		i++;
-		super.buffer_EinzelErgebnis("alpha_A_rück",alpha_A_rueck,i);
+		super.buffer_EinzelErgebnis("alpha_A_rück [-]",alpha_A_rueck,i);
 		i++;
 		super.buffer_EinzelErgebnis("T_Saug [K]",this.TSaug,i);
 		i++;

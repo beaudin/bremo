@@ -726,41 +726,6 @@ public class CasePara {
 		return verbrennungsLuft;
 	}
 
-//	//LWA-Problem Zirkuläre Referenz bei Restgas-Aufruf (Polytropenmethode ruft Restgas, ruft LWA, ruft Polytropenmethode...)
-//	public Spezies get_spezVerbrennungsLuftPolytropenmethode(){
-//
-//		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....
-//		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
-//		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
-//		Spezies abgas=this.get_spezAbgas();
-//		//Bestimmung der Verbrennungsluftzusammensetzung		
-//		double mAGRex=cp.get_mAGR_extern_ASP();
-//		double mAGRin=0.000000001;//HART auf NULL gesetzt => besser Polytropenmethode falsch als Absturz?
-//		double mAGR=mAGRex+mAGRin;
-//		double mGes=mLuft_tr+mW+mAGR; //gesamte Masse im Zylinder (ohne Kraftstoff)
-//		Hashtable<Spezies,Double>verbrennungsLuft_MassenBruchHash=new Hashtable<Spezies,Double>();
-//		verbrennungsLuft_MassenBruchHash.put(abgas, mAGR/mGes);
-//		verbrennungsLuft_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezLuft_trocken(),mLuft_tr/mGes);		
-//		verbrennungsLuft_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezH2O(),mW/mGes);
-//		GasGemisch verbrennungsLuft=new GasGemisch("Verbrennungsluft");
-//		verbrennungsLuft.set_Gasmischung_massenBruch(verbrennungsLuft_MassenBruchHash);		
-//
-//		return verbrennungsLuft;
-//	}
-//	
-//	//LWA-Problem Zirkuläre Referenz bei Restgas-Aufruf (Polytropenmethode ruft Restgas, ruft LWA, ruft Polytropenmethode...)
-//	public double get_mVerbrennungsLuft_ASP_Polytropenmethode(){
-//
-//		CasePara cp=this; //wenn die funktion mal wo anders stehen soll.....
-//		double mLuft_tr=cp.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
-//		double mW=cp.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel		
-//		double mAGRex=cp.get_mAGR_extern_ASP();
-//		double mAGRin=0.000000001;//HART auf NULL gesetzt => besser Polytropenmethode falsch als Absturz?
-//		double mAGR=mAGRex+mAGRin;		
-//
-//		return mLuft_tr+mW+mAGR;
-//	}	
-	
 	/**
 	 * Liefert die Masse der Verbrennungsluft bei Einlassschluss bestehend aus: </br>
 	 * AGR extern +AGR intern + trockene Luft + Wasser
@@ -1726,7 +1691,7 @@ public class CasePara {
 	////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Returns the temperature at IVC 
+	 * Returns the given temperature at IVC (Intake Valve Closing)
 	 * (needed for WHT models like Woschni if simulation 
 	 * does not start at IVC)
 	 * @return T_IVC_WHT [K]
@@ -1759,7 +1724,7 @@ public class CasePara {
 	public double get_T_Abgas(){
 
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "T_Abgas","[K]",400,2000);
+			return set_doublePara(INPUTFILE_PARAMETER, "T_Abgas","[K]",290,2000); //früher T_min 400, ist aber zu wenig wegen Schleppmessungen
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;

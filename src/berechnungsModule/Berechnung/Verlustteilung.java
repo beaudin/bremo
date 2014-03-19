@@ -87,7 +87,7 @@ public class Verlustteilung {
 		double pmiIdeal = berechnePmiIdeal();
 		double etaIdeal = berechneEtaIdeal();
 		
-		//Mit Wanwdwärmeverlust
+		//Mit Wandwärmeverlust
 		APR_homogen_EinZonig wandwaermeverlust = new APR_homogen_EinZonig(CP, true,"Vorgabe");
 		VektorBuffer mitWandwaermeverlust = berechnungDurchfuehren(wandwaermeverlust);
 		double [] pMit = mitWandwaermeverlust.getValues();
@@ -272,7 +272,7 @@ public class Verlustteilung {
 		l+=1;
 				
 		for(int j=0; j<pLWA.length; j++){
-		ErgebnisLWA.buffer_EinzelErgebnis("LWA[Pa]",pLWA[j],l);
+		ErgebnisLWA.buffer_EinzelErgebnis("LWA [Pa]",pLWA[j],l);
 		}
 		double pmiLWA = LittleHelpers.berechnePmi (CP, pLWA );
 		double etaLWA = pmi2etaLW(pmiMit,pmiLWA);
@@ -347,6 +347,7 @@ public class Verlustteilung {
 		double x0, xn,schrittweite;
 		//Solver sol=new Solver(CP, dglSys);
 		Solver sol=CP.SOLVER;
+		sol.set_BerechnungsModell(dglSys); //sonst wird nicht mit dglSys gerechnet 
 		// initial value of x
 		x0 =CP.SYS.RECHNUNGS_BEGINN_DVA_SEC; //sollte normalerweise null sein aber man weiss ja nie
 		sol.setInitialValueOfX(x0);
@@ -430,9 +431,10 @@ private VektorBuffer ladungswechselAnalyseDurchfuehren(BerechnungsModell dglSys_
 
 		Zone[] zn_LW;
 		
-//		dglSys_LW=new LadungsWechselAnalyse(CP);
+		//dglSys_LW=new LadungsWechselAnalyse(CP);
 		//SolverSolver LW_SOL= new Solver(CP,dglSys_LW);
 		Solver LW_SOL=CP.SOLVER;
+		LW_SOL.set_BerechnungsModell(dglSys_LW); //sonst wird nicht mit dglSys_LW gerechnet 
 		x0_LW=CP.get_Auslassoeffnet(); //initial value of x in [s]
 		LW_SOL.setInitialValueOfX(x0_LW);
 		xn_LW = CP.get_Einlassschluss()+CP.SYS.DAUER_ASP_SEC; //final value of x in [s]
@@ -455,7 +457,7 @@ private VektorBuffer ladungswechselAnalyseDurchfuehren(BerechnungsModell dglSys_
 		Spezies abgas=zn_LW[0].get_ggZone();//CP.get_spezAbgas();
 		int idx2=0;
 //		if(real==true){
-		do{//Iterationsschleife um auf den sleben Massenstrom zu kommen wie am PS gemessen --> Variation der Ladelufttemperatur
+		do{//Iterationsschleife um auf den selben Massenstrom zu kommen wie am PS gemessen --> Variation der Ladelufttemperatur
 			double f_mInit=0.1;
 			int idx=1;
 			while(f_mInit>0.0005&&idx<=50){
@@ -494,7 +496,7 @@ private VektorBuffer ladungswechselAnalyseDurchfuehren(BerechnungsModell dglSys_
 
 			System.out.println("Masse bei Iteration " + idx2 + " = "+ m_neu + " kg");
 			mLuftFeucht=((LadungsWechselAnalyse)dglSys_LW).get_mLuftFeucht(zn_LW);
-			//Anpassung der Laelufttemperatur um auf die gemessenen Luftmasse zu kommen
+			//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
 			((LadungsWechselAnalyse)dglSys_LW).set_TSaug(mLuftFeucht);				
 			idx2+=1;
 		}while(Math.abs((mLuftFeucht_mess-mLuftFeucht)/mLuftFeucht_mess)>0.005&&idx2<=50);

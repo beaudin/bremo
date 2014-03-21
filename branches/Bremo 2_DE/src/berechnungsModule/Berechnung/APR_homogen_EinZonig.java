@@ -26,7 +26,7 @@ import bremoExceptions.StopBremoException;
  * Dabei wird mit vorgegebenem Brennverlauf, der entsprechende Zylinderdruck berechnet.
  */ 
 
-public class APR_homogen_EinZonig extends BerechnungsModell{
+public class APR_homogen_EinZonig extends APR{
 	
 	private  WandWaermeUebergang wandWaermeModell;
 	private Motor motor;
@@ -73,14 +73,16 @@ public class APR_homogen_EinZonig extends BerechnungsModell{
 	private misc.VektorBuffer p_buffer;
 	
 	protected APR_homogen_EinZonig (CasePara cp, boolean waermeVerluste, String brennverlaufsart, double wertQ , double startQ) {
-		super(cp, new ErgebnisBuffer(cp,"APR_"));
+		//super(cp, new ErgebnisBuffer(cp,"APR_")); //alt, ohne Klasse "APR"
+		super(cp);
 		brennverlauf=new BrennverlaufDaten(cp,brennverlaufsart, wertQ, startQ); 		
 		//ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");		
 		ANZAHL_ZONEN=1;
 		this.createMe(cp, waermeVerluste);
 	}
 	protected APR_homogen_EinZonig (CasePara cp, boolean waermeVerluste, String brennverlaufsart, double wertQ) {
-		super(cp, new ErgebnisBuffer(cp,"APR_"));
+		//super(cp, new ErgebnisBuffer(cp,"APR_")); //alt, ohne Klasse "APR"
+		super(cp);
 		brennverlauf=new BrennverlaufDaten(cp,brennverlaufsart, wertQ); 		
 		//ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");		
 		ANZAHL_ZONEN=1;
@@ -89,7 +91,8 @@ public class APR_homogen_EinZonig extends BerechnungsModell{
 	}
 	
 	protected APR_homogen_EinZonig (CasePara cp, boolean waermeVerluste, String brennverlaufsart) {
-		super(cp, new ErgebnisBuffer(cp,"APR_"));
+		//super(cp, new ErgebnisBuffer(cp,"APR_")); //alt, ohne Klasse "APR"
+		super(cp);
 		brennverlauf=new BrennverlaufDaten(cp,brennverlaufsart); 		
 		//ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");		
 		ANZAHL_ZONEN=1;
@@ -99,7 +102,8 @@ public class APR_homogen_EinZonig extends BerechnungsModell{
 	
 	
 	protected APR_homogen_EinZonig (CasePara cp) {
-		super(cp, new ErgebnisBuffer(cp,"APR_"));
+		//super(cp, new ErgebnisBuffer(cp,"APR_")); //alt, ohne Klasse "APR"
+		super(cp);
 		brennverlauf=new BrennverlaufDaten(cp);		
 		//ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");	
 		ANZAHL_ZONEN=1;
@@ -174,6 +178,10 @@ public class APR_homogen_EinZonig extends BerechnungsModell{
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
 		
+	}
+	
+	public Zone [] calc_dQburn(Zone [] zonen){
+		return zonen;
 	}
 	
 	/**
@@ -355,6 +363,11 @@ public class APR_homogen_EinZonig extends BerechnungsModell{
 
 		i+=1;		
 		super.buffer_EinzelErgebnis("Qb [J]", Qb,i);
+		
+		i+=1;
+		double Tm=wandWaermeModell.get_Tmb(zn);
+		super.buffer_EinzelErgebnis("T_mittel [K]",Tm,i);
+		T_buffer.addValue(time, Tm);
 		
 		i+=1;
 		super.buffer_EinzelErgebnis(" kappa [-]", zn[0].get_ggZone().get_kappa(zn[0].get_T()),i);

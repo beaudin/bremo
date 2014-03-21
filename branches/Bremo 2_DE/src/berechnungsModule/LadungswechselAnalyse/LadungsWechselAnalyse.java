@@ -38,6 +38,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 //	Spezies spezZU;
 	private GasGemisch gAbgasbehaelter;
 	private GasGemisch gFrischluftbehaelter, feuchteLuft;
+	private double dmEVTemp;
 
 
 	private double pSaug, TSaug,TSaug_alt, pAbg, TAbg, kappa, pZyl, TZyl, Rgas,mLF_mess;
@@ -124,11 +125,13 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		DF_Datei_Ein=new DurchflusskennzahlFileReader(super.CP,"Einlass");
 		DF_Datei_Aus=new DurchflusskennzahlFileReader(super.CP,"Auslass");
 		VH_Datei_Ein=new VentilhubFileReader(super.CP, "Einlass");
-		VH_Datei_Aus=new VentilhubFileReader(super.CP, "Auslass");		
+		VH_Datei_Aus=new VentilhubFileReader(super.CP, "Auslass");
+		
+		dmEVTemp = 0;
 	}
 
 	private double dm;
-	private double dmAusgabe, dmEVTemp;
+	private double dmAusgabe;
 	private double dmAuslass, dmEinlass;
 	public Zone[] ersterHSBrennraum(double time, Zone[] zonen) {
 //		double kw=CP.convert_SEC2KW(time);
@@ -140,7 +143,6 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		dmAusgabe=0;
 		dmEinlass = 0;
 		dmAuslass = 0;
-		dmEVTemp = 0;
 		pSaug=indiD.get_pEin(time);
 		pAbg=indiD.get_pAus(time);
 		TZyl=zonen[0].get_T();
@@ -312,6 +314,8 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 		i++;
 		super.buffer_EinzelErgebnis("dmAV [kg/s]", dmAuslass,i);		
 		i++;
+		super.buffer_EinzelErgebnis("dmEV aus Zylinder [kg/s]", dmEVTemp,i);		
+		i++;
 		super.buffer_EinzelErgebnis("Hub_E [m]", hub_E,i);
 		i++;
 		super.buffer_EinzelErgebnis("Hub_A [m]", hub_A,i);
@@ -352,7 +356,7 @@ public class LadungsWechselAnalyse extends BerechnungsModell {
 
 			TSaug=TSaug-relax*mLF_DIFF/dmLF_DIFF;
 		}
-		//		System.out.println("TSaug:" +TSaug);
+				System.out.println("TSaug:" +TSaug);
 	}
 
 	public Zone[] get_initialZones() {

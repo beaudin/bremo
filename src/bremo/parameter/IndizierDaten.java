@@ -32,6 +32,7 @@ public class IndizierDaten {
 	private LinInterp L_Interp;
 	private SavitzkyGolayFilter sgol;
 	private final boolean filternBitte;
+	private double pOffset; //Offset Zylinderdruck für PostProcessor
 	
 	
 	
@@ -345,12 +346,10 @@ public class IndizierDaten {
 				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
 				pEin_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
 			}
-			double pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
+			pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
 								MatLibBase.mw_aus_1DArray(pEin_temp);
 
-			for(int xx=0;xx<pZyl.length;xx++){
-				pZyl[xx]=pZyl[xx]-pOffset;
-			}
+			pZyl = this.shiftMe(pZyl, pOffset);
 			
 			}else {
 	    		try{
@@ -394,12 +393,10 @@ public class IndizierDaten {
 				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
 				pEin_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
 			}
-			double pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
+			pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
 								MatLibBase.mw_aus_1DArray(pEin_temp);
 
-			for(int xx=0;xx<pZyl.length;xx++){
-				pZyl[xx]=pZyl[xx]-pOffset;
-			}
+			pZyl = this.shiftMe(pZyl, pOffset);
 		}else{
 			try{
 				throw new ParameterFileWrongInputException(
@@ -432,12 +429,10 @@ public class IndizierDaten {
 				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
 				pEin_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
 			}
-			double pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
+			pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
 								MatLibBase.mw_aus_1DArray(pEin_temp);
 
-			for(int xx=0;xx<pZyl.length;xx++){
-				pZyl[xx]=pZyl[xx]-pOffset;
-			}
+			pZyl = this.shiftMe(pZyl, pOffset);
 		}else{
 			try{
 				throw new ParameterFileWrongInputException(
@@ -514,10 +509,9 @@ public class IndizierDaten {
 		double pZyl_temp_1_ABS = 
 		(pZyl_temp_2-pZyl_temp_1)/(Math.pow((v1/v2),kappa)-1);
 		
-		double pDelta = pZyl_temp_1_ABS-pZyl_temp_1;
+		pOffset = pZyl_temp_1_ABS-pZyl_temp_1;
 
-		 for(int i=0;i<pZyl.length;i++){pZyl[i]= pZyl[i]+pDelta;}  
-	
+		pZyl = this.shiftMe(pZyl, pOffset);
     	}
     	else {
     		try{
@@ -562,11 +556,9 @@ public class IndizierDaten {
 				double time=dab-(i*deltat);			
 				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
 			}
-			double pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-pRef_temp;
+			pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-pRef_temp;
 
-			for(int xx=0;xx<pZyl.length;xx++){
-				pZyl[xx]=pZyl[xx]-pOffset;
-			}
+			pZyl = this.shiftMe(pZyl, pOffset);
 			}
 			else {
 				try{
@@ -602,6 +594,10 @@ public class IndizierDaten {
 			pVec[xx]=pVec[xx]+offset;
 		}
 		return pVec;
+	}
+	
+	public double get_pOffset(){
+		return pOffset;
 	}
 
 }

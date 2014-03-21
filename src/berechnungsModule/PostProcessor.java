@@ -155,7 +155,8 @@ public class PostProcessor {
 			i+=1;
 			ergB.buffer_EinzelErgebnis("delta_h_Ladungswechsel [-]",h[6],i);
 			
-						
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Offset Zylinderdruck [Pa]", indi.get_pOffset(), i);		
 			
 	}
 	

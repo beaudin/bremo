@@ -1,6 +1,9 @@
 package berechnungsModule.wandwaerme;
 
+import java.security.InvalidParameterException;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Set;
 
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
@@ -28,6 +31,7 @@ public class Hensel extends WandWaermeUebergang {
     double dichte;
     double x_rg;
     double lambda;
+    double xCO2_Ex;
 
 
 	
@@ -38,7 +42,8 @@ public class Hensel extends WandWaermeUebergang {
 		mittlereKolbengeschwindigkeit=cp.get_DrehzahlInUproSec()*motor.get_Hub()*2; //[m/s]
 		Twall=cp.get_T_Cyl();
 	    t_zzp = 0;
-	    p_zzp = 0;	       
+	    p_zzp = 0;
+	    xCO2_Ex = 1;
 	}
 
 	public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN,double fortschritt) {
@@ -68,16 +73,36 @@ public class Hensel extends WandWaermeUebergang {
 			gg.set_Gasmischung_massenBruch(ht);	
 			Spezies co2=cp.SPEZIES_FABRIK.get_spezCO2();
 			double xCO2=0;
-			if(gg.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2))
+			if(gg.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2)) {
 				xCO2=gg.get_speziesMolenBruecheDetailToIntegrate().get(co2);
+			}else{ //Für die LWA, dort wird die Zone mit gAbgasbehaelter initialisiert, in dem es kein "CO2", nur "AGR intern" gibt
+				if(((GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0]).get_speziesMolenBruecheDetailToIntegrate().containsKey(co2))
+					xCO2 = ((GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0]).get_speziesMolenBruecheDetailToIntegrate().get(co2);
+			}
 			Hashtable<Spezies,Double> abg=HeizwertRechner.calcMolenBruechePerfekteVerbrennung(cp, gg);
-			double xCO2_Ex=abg.get(cp.SPEZIES_FABRIK.get_spezCO2());			
-			x_rg=xCO2/xCO2_Ex;	
-			
+			xCO2_Ex=abg.get(cp.SPEZIES_FABRIK.get_spezCO2());			
+			x_rg=xCO2/xCO2_Ex;
+		
 			lambda=gg.get_lambda();		
+		} else {
+			double mTot=0;
+			for(int i=0; i<zonen_IN.length;i++)mTot+=zonen_IN[i].get_m();	
+			Hashtable <Spezies,Double> ht=new Hashtable <Spezies,Double>();
+			for(int i=0; i<zonen_IN.length;i++)
+				ht.put(zonen_IN[i].get_ggZone(), zonen_IN[i].get_m()/mTot);		
+			GasGemisch gg =new GasGemisch("gg");
+			gg.set_Gasmischung_massenBruch(ht);	
+			Spezies co2=cp.SPEZIES_FABRIK.get_spezCO2();
+			double xCO2=0;
+			if(gg.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2)) {
+				xCO2=gg.get_speziesMolenBruecheDetailToIntegrate().get(co2);
+			}else{ //Für die LWA, dort wird die Zone mit gAbgasbehaelter initialisiert, in dem es kein "CO2", nur "AGR intern" gibt
+				GasGemisch ggTemp = (GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0]; //notwendig, da sonst Absturz ?! mn
+				if(ggTemp.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2))
+					xCO2 = ggTemp.get_speziesMolenBruecheDetailToIntegrate().get(co2);
+			}
+			x_rg=xCO2/xCO2_Ex;
 		}
-		
-		
 		double p=zonen_IN[0].get_p()*1E-5;	//Zylinderdruck in bar (das Modell wurde dementsprechend entwickelt)
 		double T=get_Tmb(zonen_IN);		//Mittlere Brennraumtemperatur
 		double gaskonstante = get_R_brennraum(time, zonen_IN);
@@ -227,7 +252,14 @@ public class Hensel extends WandWaermeUebergang {
 		double T=0;
 		double ficticious_time=cp.convert_KW2SEC((cp.convert_SEC2KW(time)-phi_Delay));
 		if(ficticious_time>=cp.get_time()){
-			T=tBuffer.getValue(cp.get_time());
+			try{
+				T=tBuffer.getValue(cp.get_time());
+			}catch(InvalidParameterException ipe){
+				System.err.println("Fehler bei Berechnung der Wärmestromdichte nach Hensel.\n" +
+						"Dieser Fehler tritt normalerweise im ersten Durchlauf der LWA auf.");
+			}catch(ArrayIndexOutOfBoundsException aiob){
+				System.err.println("Fehler bei Berechnung der Wärmestromdichte nach Hensel in der APR.");
+			}
 		}else if(ficticious_time<=0){
 			T=tBuffer.getValue(0);
 		}else{

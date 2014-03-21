@@ -242,14 +242,24 @@ public class CasePara {
 	public String get_pressureAdjustmentMethod(String methodIdentifier){
 		String method=null;
 		try {		
-			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","kanalMethode","abgleichKruemmer","ohne"};			
+			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","kanalMethode","abgleichKruemmer","offset","ohne"};			
 			method=set_StringPara(this.INPUTFILE_PARAMETER,methodIdentifier,s1);
 		}catch(ParameterFileWrongInputException e){
 			e.stopBremo();
 		}
 		return method;
 	}
-
+	
+	public double get_pressureOffset(){
+		try{
+			double offset = set_doublePara(INPUTFILE_PARAMETER, "offset", "[Pa]",-1e6,1e6);
+			return offset;
+		} catch (ParameterFileWrongInputException p) {
+			p.log_Warning("Der Parameter \"offset\" wurde nicht gesetzt, es wird ohne gerechnet.");
+			return 0;
+		}
+	}
+	
 	public int get_ColumnToRead(String columnIdentifier){		
 		int column;
 		try {
@@ -416,11 +426,11 @@ public class CasePara {
 	    String s = null; 
 	    String s2 []= {"ja","nein"}; 
 	    try { 
-	      s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2); 
+	      s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2);
+	      if(s.equalsIgnoreCase("ja")) verlustteilung=true;
 	    } catch (ParameterFileWrongInputException e) { 
-	      e.stopBremo(); 
+	    	e.log_Warning("Der Parameter \"Verlustteilung\" wurde nicht gesetzt, es wird keine durchgeführt."); //Die DVA muss ja nicht gleich abbrechen.
 	    } 
-	    if(s.equalsIgnoreCase("ja")) verlustteilung=true; 
 	    return verlustteilung;
 		} 
 	

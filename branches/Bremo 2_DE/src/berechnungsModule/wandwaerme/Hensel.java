@@ -15,6 +15,7 @@ import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.parameter.CasePara;
 import bremo.parameter.IndizierDaten;
 import bremoExceptions.BirdBrainedProgrammerException;
+import bremoExceptions.StopBremoException;
 
 public class Hensel extends WandWaermeUebergang {
 
@@ -97,19 +98,11 @@ public class Hensel extends WandWaermeUebergang {
 			if(gg.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2)) {
 				xCO2=gg.get_speziesMolenBruecheDetailToIntegrate().get(co2);
 			}else{ //Für die LWA, dort wird die Zone mit gAbgasbehaelter initialisiert, in dem es kein "CO2", nur "AGR intern" gibt
-				GasGemisch ggTemp;
+				GasGemisch ggTemp = null;
 				try{
 					ggTemp = (GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0]; //notwendig, da sonst Absturz ?! mn
 				} catch (ClassCastException c){
-					System.err.println("***** Noch ein Fehler, der die Rechnung verlangsamt. Sonst nix! *****");
-					try {
-						Thread.sleep(30);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					Hashtable<Spezies, Double> Temp2 = gg.get_speziesMolenBruecheDetailToIntegrate();
-					Object Temp = Temp2.keySet().toArray()[0];
-					ggTemp = (GasGemisch)Temp; //notwendig, da sonst Absturz ?! mn
+					System.err.println("***** Fehler, der vermutlich von der Rechenleistung kommt.\n Rechnung bitte neustarten!*****\n");
 				}
 				if(ggTemp.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2))
 					xCO2 = ggTemp.get_speziesMolenBruecheDetailToIntegrate().get(co2);

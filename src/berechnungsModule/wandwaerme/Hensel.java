@@ -15,6 +15,7 @@ import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.parameter.CasePara;
 import bremo.parameter.IndizierDaten;
 import bremoExceptions.BirdBrainedProgrammerException;
+import bremoExceptions.ParameterFileWrongInputException;
 import bremoExceptions.StopBremoException;
 
 public class Hensel extends WandWaermeUebergang {
@@ -102,7 +103,12 @@ public class Hensel extends WandWaermeUebergang {
 				try{
 					ggTemp = (GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0]; //notwendig, da sonst Absturz ?! mn
 				} catch (ClassCastException c){
-					System.err.println("***** Fehler, der vermutlich von der Rechenleistung kommt.\n Rechnung bitte neustarten!*****\n");
+					try{ //Abfangen eines Fehlers, der vermutlich vom Rechner abhängig ist. Tritt sporadisch auf. --mn
+						throw new ParameterFileWrongInputException("Fehler, der vermutlich von der Rechenleistung kommt!\n"+
+								"Rechnung bitte neustarten!");
+					}catch(ParameterFileWrongInputException e){
+						e.stopBremo();
+					}
 				}
 				if(ggTemp.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2))
 					xCO2 = ggTemp.get_speziesMolenBruecheDetailToIntegrate().get(co2);

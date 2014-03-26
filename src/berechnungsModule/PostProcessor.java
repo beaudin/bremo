@@ -61,6 +61,14 @@ public class PostProcessor {
 			i+=1;
 			ergB.buffer_EinzelErgebnis("AGR_intern [%]",100*mAGR_inter/mGes,i);	
 			
+			double temp = cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst();
+			double lambda_abgas = cp.get_mLuft_feucht_ASP() / (cp.MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP() * cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() );
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Lambda_Abgas [-]", lambda_abgas,i);
+			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Lambda_Brennraum [-]",(mAGR_inter/mGes - lambda_abgas) / (mAGR_inter/mGes - 1) ,i);	
+			
 			double umsp[]=findUmsatzPunkte(dm_buffer);
 			String s;
 			if(CP.SYS.IS_KW_BASIERT)

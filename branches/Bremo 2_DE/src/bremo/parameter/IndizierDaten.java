@@ -33,6 +33,7 @@ public class IndizierDaten {
 	private SavitzkyGolayFilter sgol;
 	private final boolean filternBitte;
 	private double pOffset; //Offset Zylinderdruck für PostProcessor
+	private double kappa_druckabgleich=0;
 	
 	
 	
@@ -505,7 +506,7 @@ public class IndizierDaten {
 		kappa = frischGemisch.get_kappa(T); //CP.get_Kappa_Druckabgleich();//(polyIdy)
 
 		}
-		
+		kappa_druckabgleich = kappa;
 		double pZyl_temp_1_ABS = 
 		(pZyl_temp_2-pZyl_temp_1)/(Math.pow((v1/v2),kappa)-1);
 		
@@ -522,7 +523,7 @@ public class IndizierDaten {
 
     		}
     	}
-		 
+		
 		return pZyl;
 
 	}
@@ -598,6 +599,10 @@ public class IndizierDaten {
 	
 	public double get_pOffset(){
 		return pOffset;
+	}
+	
+	public double get_kappa_druckabgleich(){
+		return kappa_druckabgleich;
 	}
 
 }

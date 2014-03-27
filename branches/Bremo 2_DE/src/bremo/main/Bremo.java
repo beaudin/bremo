@@ -219,7 +219,7 @@ public class Bremo extends Thread {
 		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
 		//Hier einige Beisspile wie Funktionen getestet werden können
 		System.out.println(System.getProperty("home"));
-		File fileCP = new File("d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140314//Ref//bremo_setup_140128_00002_zyklus0.txt"); //TODO Filename
+		File fileCP = new File("d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//bremo_setup_140123_00009_zyklus163.txt"); //TODO Filename
 		double startTime = System.currentTimeMillis();
 		Bremo bremo=new Bremo(fileCP,false);
 		bremo.run();

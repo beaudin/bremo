@@ -164,7 +164,10 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("delta_h_Ladungswechsel [-]",h[6],i);
 			
 			i+=1;
-			ergB.buffer_EinzelErgebnis("Offset Zylinderdruck [Pa]", indi.get_pOffset(), i);		
+			ergB.buffer_EinzelErgebnis("Offset Zylinderdruck [Pa]", indi.get_pOffset(), i);
+			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Kappa Druckabgleich Polytropenmethode", indi.get_kappa_druckabgleich(), i);
 			
 	}
 	

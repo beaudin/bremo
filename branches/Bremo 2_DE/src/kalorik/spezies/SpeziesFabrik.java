@@ -77,6 +77,7 @@ public class SpeziesFabrik {
 	private Spezies CH3O2H;
 	private Spezies soot;
 	private Spezies NOx;
+	private Spezies spezOHCGrill;
 	
 
 	private  int nmbrOfSpez=0; //dann wirds bei der ersten Spezies null
@@ -448,6 +449,8 @@ public class SpeziesFabrik {
 			speciesByName.put(get_CH3O2H().get_name(), get_CH3O2H());
 		else if(speciesName.equalsIgnoreCase("soot"))
 			speciesByName.put(get_soot().get_name(), get_soot());
+		else if(speciesName.equalsIgnoreCase("ohc"))
+			speciesByName.put(get_spezGrill().get_name(), get_spezGrill());
 		else {
 			try{
 				throw new BirdBrainedProgrammerException("" +
@@ -571,6 +574,8 @@ public Spezies get_SpeciesByName(String speciesName){
 			return get_soot();
 		else if(speciesName.equalsIgnoreCase("NOx"))
 			return get_NOx();
+		else if(speciesName.equalsIgnoreCase("ohc"))
+			return get_spezGrill();
 		else {
 			try{
 				throw new BirdBrainedProgrammerException("Trying to create " + speciesName+ 
@@ -1617,8 +1622,23 @@ public Spezies get_SpeciesByName(String speciesName){
 			koeffs[2]=Koeffs_KrstFVV.get_TemperaturGrenze();
 			spezDiesel=new KoeffizientenSpezies(koeffs,hf,
 					lhv,0,12.60179278,23.52813985,0,"Diesel");
+			
 		}
 		return spezDiesel;
+	}
+	
+	public Spezies get_spezGrill() {
+		if(spezOHCGrill==null){
+			double lhv = CP.get_Hu_ohc();
+			double[] anzAtome = CP.get_krstApprox_ohc();
+			double anzO_Atome = anzAtome[0];
+			double anzH_Atome = anzAtome[1];
+			double anzC_Atome = anzAtome[2];
+			double anzN_Atome = anzAtome[3];
+			
+			spezOHCGrill = new KrstApproxSpezies(lhv, anzO_Atome, anzC_Atome, anzH_Atome, anzN_Atome, "ohc");
+		}
+	return spezOHCGrill;
 	}
 	
 	///////////////////////////////////////////////////////////////////////

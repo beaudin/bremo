@@ -13,7 +13,7 @@ import misc.PhysKonst;
  * Ansatz von Grill. Ansonsten entspricht das Verhalten einer KrstApproxSpezies 
  * dem einer KoeffizientenSpezies.
  *
- *@author eichmeier
+ *@author eichmeier, neurohr
  */
 public class KrstApproxSpezies extends Spezies  {
 	//TODO Ueberpruefen ob das Modell stimmt!!!
@@ -24,17 +24,17 @@ public class KrstApproxSpezies extends Spezies  {
 	
 	/**
 	 * 
-	 * @param molekularGewicht
-	 * @param h_evap_mol -->molare Verdampfungsenthalpie
-	 * @param Hu_mol --> unterer Heizwert in J/mol
+	 * @param molekularGewicht (auskommentiert)
+	 * @param h_evap_mol -->molare Verdampfungsenthalpie (auskommentiert)
+	 * @param Hu_mol --> unterer Heizwert in J/mol 
 	 * @param anzO_Atome --> Anzahl der o-Atome
 	 * @param anzC_Atome
 	 * @param anzH_Atome
 	 * @param anzN_Atome
 	 * @param name
 	 */
-	protected KrstApproxSpezies(double molekularGewicht,							
-			double h_evap_mol,
+	protected KrstApproxSpezies(//double molekularGewicht,							
+			//double h_evap_mol,
 			double Hu_mol,
 			double anzO_Atome,
 			double anzC_Atome,
@@ -49,7 +49,7 @@ public class KrstApproxSpezies extends Spezies  {
 		this.anzH_Atome=anzH_Atome;
 		this.anzN_Atome=anzN_Atome;
 		 //so wird sichergestellt, dass der Name nicht mit dem einer KoeffSpezies uebereinstimmt
-		this.name=name+"krstApprox";
+		this.name=name;//+"_krstApprox";
 		
 		this.molarWeight=this.anzC_Atome*PhysKonst.get_M_C()+
 				this.anzH_Atome*PhysKonst.get_M_H()+
@@ -57,7 +57,8 @@ public class KrstApproxSpezies extends Spezies  {
 				this.anzO_Atome*PhysKonst.get_M_O();
 		
 		N_Hn=anzH_Atome/anzC_Atome;
-		N_On=anzO_Atome/anzC_Atome;
+//		N_On=anzO_Atome/anzC_Atome;//Eichmeier
+		N_On=anzO_Atome/anzH_Atome;//lt. Paper
 		
 		K_H=-0.0265*N_Hn*N_Hn*N_Hn*N_Hn*N_Hn
 			+0.3783*N_Hn*N_Hn*N_Hn*N_Hn
@@ -88,14 +89,13 @@ public class KrstApproxSpezies extends Spezies  {
 				e.stopBremo();		
 			}
 		}
-		
 		this.delta_hf298_mol=-1*calc_h_mol(298.15);		
 	}
 
 	public double get_h_mol(double T) {	
 		double h=-1;
 		if(T<=2000){		
-			h=calc_h_mol(T)-delta_hf298_mol;
+			h=calc_h_mol(T) + delta_hf298_mol;
 		}else{
 			try{
 			throw new IllegalArgumentException(
@@ -127,7 +127,8 @@ public class KrstApproxSpezies extends Spezies  {
 				2.235*0.00000001*T*T*T*T
 				-5.587*0.0001*T*T*T
 				+1.763*T*T
-				-46.506*T-126575.419))*get_M();	
+				//-46.506*T-126575.419))*get_M();	//Eichmeister
+				-46.506*T))*get_M();		//Neurohr2014, nach SAE Paper2007-01-0936 
 		
 	}
 

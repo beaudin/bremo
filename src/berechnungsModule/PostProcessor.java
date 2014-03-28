@@ -169,6 +169,9 @@ public class PostProcessor {
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Kappa Druckabgleich Polytropenmethode", indi.get_kappa_druckabgleich(), i);
 			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("L_St [MJ/mol]", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);
+			
 	}
 	
 	

@@ -1124,18 +1124,7 @@ public class CasePara {
 
 
 		if (krstAngabe.equals(moeglicheFlags[0])){
-			//TODO Programmieren der Eingabe fuer die Krst-ApproxSpezies nach Grill
 			krstHash.put(this.SPEZIES_FABRIK.get_spezGrill().get_name(), this.SPEZIES_FABRIK.get_spezGrill());
-			
-//			try{
-//				throw new BirdBrainedProgrammerException("Die Eingabe fuer die Rechnung mit der Approximation " +
-//						"der Krafstoffkalorik nach Grill wurde noch nicht implementiert." +
-//						"Es wird wohl noetig sein, einen der vordefinierten Krafstoffe zu nehmen, " +
-//						"oder selber Hand ans Programm zu legen! Gruﬂ Juwe");
-//			}catch(BirdBrainedProgrammerException ex){
-//				ex.stopBremo();
-//			}
-//			return null;
 		}else {}
 			return krstHash.get(krstAngabe); //die Fehlerabfrage erfolgt bereits innerhalb der Methode 
 		//"set_StringPara" da der hier uebergebene Vektor alle moeglichen krstAngaben enthaelt.
@@ -1490,12 +1479,10 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException e) {			
 			e.log_Warning("Fuer den ausgewaehlten Kraftatoff \"Diesel\" wurde kein Heizwert angegeben. \n" +
 					"Es wird mit dem Standardwert gerechnet: " +stdHu + "[J/mol]");
-
 			return stdHu;
 		}		
 	}
-
-
+	
 
 	/** 
 	 * @return liefert den Heizwert fuer eine Krstoffapproximationsspezies [J/mol]
@@ -1563,10 +1550,10 @@ public class CasePara {
 	public double [] get_krstApprox_ohc(){
 		double ohc[]=new double [4];
 		try {			
-			ohc[0]= 1e6*set_doublePara(INPUTFILE_PARAMETER, "krst_oAtome","[-]",0,Double.POSITIVE_INFINITY); 
-			ohc[1]= 1e6*set_doublePara(INPUTFILE_PARAMETER, "krst_hAtome","[-]",0,Double.POSITIVE_INFINITY);
-			ohc[2]= 1e6*set_doublePara(INPUTFILE_PARAMETER, "krst_cAtome","[-]",0,Double.POSITIVE_INFINITY);
-			ohc[3]= 1e6*set_doublePara(INPUTFILE_PARAMETER, "krst_nAtome","[-]",0,Double.POSITIVE_INFINITY);
+			ohc[0]= set_doublePara(INPUTFILE_PARAMETER, "krst_oAtome","[-]",0,Double.POSITIVE_INFINITY); 
+			ohc[1]= set_doublePara(INPUTFILE_PARAMETER, "krst_hAtome","[-]",0,Double.POSITIVE_INFINITY);
+			ohc[2]= set_doublePara(INPUTFILE_PARAMETER, "krst_cAtome","[-]",0,Double.POSITIVE_INFINITY);
+			ohc[3]= set_doublePara(INPUTFILE_PARAMETER, "krst_nAtome","[-]",0,Double.POSITIVE_INFINITY);
 			return ohc;
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();

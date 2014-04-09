@@ -9,7 +9,7 @@ import berechnungsModule.Berechnung.APR_Cantera;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.DVA;
 import berechnungsModule.Berechnung.Zone;
-import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse;
+import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse_ohneQb;
 import bremo.parameter.CasePara;
 
 
@@ -77,7 +77,6 @@ public class Rechnung {
 				boolean isConverged=false;			 
 				int idx=0;
 				do{	
-					
 					znTemp=sol.solveRK(zn);					
 					pIst=  znTemp[0].get_p();
 					//Vergleich ob der Berechnete Druck mit dem gemessenen übereinstimmt 
@@ -126,10 +125,11 @@ public class Rechnung {
 			CP.schreibeAlleErgebnisFiles(CP.get_CaseName()+".txt");
 		else
 			dglSys.schreibeErgebnisFile(CP.get_CaseName()+".txt");
-		
-		PostProcessor pp=new PostProcessor(dglSys.get_dm_buffer(),					//war bei Juwe auskommentiert
-							dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),CP);	//war bei Juwe auskommentiert
-		pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");							//war bei Juwe auskommentiert
+		if(CP.BERECHNUNGS_MODELL.isDVA()){
+			PostProcessor pp=new PostProcessor(dglSys.get_dm_buffer(),					//war bei Juwe auskommentiert
+								dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),CP);	//war bei Juwe auskommentiert
+			pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");							//war bei Juwe auskommentiert
+		}
 		//CP.CANTERA_CALLER.releaseCantera();
 		//((APR_Cantera)dglSys).releaseCantera();
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + anzGesamtIterationen );

@@ -13,24 +13,18 @@ import berechnungsModule.Berechnung.Zone;
 import misc.VektorBuffer;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
-import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
 import bremo.parameter.CasePara;
 import bremo.parameter.IndizierDaten;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
-/**
- * Ladungswechselanalyse, bei der ein Kraftstoffumsatz in der Zwischenkompression berücksichtigt werden kann.
- * @author neurohr
- *
- */
-public class LadungsWechselAnalyse extends MasterLWA {
+public class LadungsWechselAnalyse_ohneQb extends BerechnungsModell {
 	
 	private  WandWaermeUebergang wandWaermeModell;
 	private Motor m;
 	private MasterEinspritzung masterEinspritzung;
-	private IndizierDaten indiD;
+	protected final IndizierDaten indiD;
 	private double pInit,VInit;
 	private double A_E;	//Referenzfläche für den Durchflusskennwert des Einlassventils
 	private double A_A; //Referenzfläche für den Durchflusskennwert des Auslassventils
@@ -40,12 +34,6 @@ public class LadungsWechselAnalyse extends MasterLWA {
 	private double alpha_A_rueck; //Durchflusskennwert des Auslassventils, rückwärts
 	private double hub_A, hub_E;
 	private double dQw;
-	private double Qburn;
-	private double Qmax;
-	private boolean krstVerbrannt;
-	boolean firstEB=false;
-	private double dmZoneBurn;
-	private double mInit,fortschritt,zonenMasseVerbrannt=0;
 	private int anzZonen; 
 //	Spezies spezZU;
 	private GasGemisch gAbgasbehaelter;
@@ -65,14 +53,13 @@ public class LadungsWechselAnalyse extends MasterLWA {
 	
 	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen 
 	private misc.VektorBuffer p_buffer ;							//fuer Verlustteilung Frank Haertel 
-	public LadungsWechselAnalyse(CasePara cp) {
+	public LadungsWechselAnalyse_ohneQb(CasePara cp) {
 		super(cp,new ErgebnisBuffer(cp,"LWA_"));
 		
-		indiD=super.indiD; 											//fuer Verlustteilung Frank Haertel
-		Qburn = 0;
+		indiD=new IndizierDaten(cp); 								//fuer Verlustteilung Frank Haertel 
 	    createMe(cp); 												//fuer Verlustteilung Frank Haertel 
-	  } 															//fuer Verlustteilung Frank Haertel 
-	public LadungsWechselAnalyse(CasePara cp, boolean gemittelt){//fuer Verlustteilung Frank Haertel  
+	  } //fuer Verlustteilung Frank Haertel 
+	  public LadungsWechselAnalyse_ohneQb(CasePara cp, boolean gemittelt){	//fuer Verlustteilung Frank Haertel  
 	    super(cp,new ErgebnisBuffer(cp,"LWA_"));					//fuer Verlustteilung Frank Haertel  
 	    if (gemittelt == true) 										//fuer Verlustteilung Frank Haertel 
 	      indiD=new IndizierDaten(cp,true); 						//fuer Verlustteilung Frank Haertel 
@@ -80,7 +67,7 @@ public class LadungsWechselAnalyse extends MasterLWA {
 	      indiD=new IndizierDaten(cp); 								//fuer Verlustteilung Frank Haertel 
 	    createMe(cp); 												//fuer Verlustteilung Frank Haertel 
 	  } 															//fuer Verlustteilung Frank Haertel 
-	public void createMe(CasePara cp) { 							//fuer Verlustteilung Frank Haertel 	
+	  public void createMe(CasePara cp) { 							//fuer Verlustteilung Frank Haertel 	
 		
 		T_buffer = new VektorBuffer(CP);
 		p_buffer = new misc.VektorBuffer(cp); 						//fuer Verlustteilung Frank Haertel 
@@ -141,10 +128,6 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		VH_Datei_Aus=new VentilhubFileReader(super.CP, "Auslass");
 		
 		dmEVTemp = 0;
-		
-		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
-		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
-		krstVerbrannt = false;
 	}
 
 	private double dm;
@@ -184,38 +167,9 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		//Waermestrom abfuehren
 		zonen[0].set_dQ_ein_aus(-1*dQw);
 		
-		//Verbrennungswärme zuführen
-		double dQburn = super.get_dQburn();
-		Spezies ggZone = zonen[0].get_ggZone();
-		double TZone = zonen[0].get_T();
-		double pZone = zonen[0].get_p();
-		zonen[0].set_dQ_ein_aus(dQburn);
-		dmZoneBurn = 0;
-		double umsatzStartVorgabe = CP.get_verbrennungsBeginnLWASEC();
-		
-		//Einspritzung läuft?
-		if(masterEinspritzung.get_dm_krstDampf(time, zonen)>0){
-			firstEB = true;
-		}
-		
-		if(dQburn>0 && !krstVerbrannt && firstEB && time>=umsatzStartVorgabe){
-			dmZoneBurn = super.convert_dQburn_2_dmKrstBurn(dQburn,ggZone,TZone,pZone);
-		}
-		//Verbrennendes Masseelement entnehmen
-		if(dmZoneBurn>0){
-			try {
-				zonen[0].set_dm_aus(dmZoneBurn,ggZone);
-				//Massenelement wieder zumischen
-				zonen[0].set_dm_ein(dmZoneBurn, TZone, gAbgasbehaelter);
-			} catch (NegativeMassException nmE) {					
-				nmE.log_Warning();
-				krstVerbrannt=true;
-			}	
-		}
-		
 		//Direkteinspritzung
 		//Verdampfungswaerme abfuehren
-		zonen=masterEinspritzung.entnehme_dQ_krstDampf(time, zonen);
+		zonen=masterEinspritzung.entnehme_dQ_krstDampf(time, zonen); //TODO Stimmt die Zeit  da die Rechnung bei auslassöffnet beginnt
 //		Einspritzung des Kraftstoffs
 		zonen=masterEinspritzung.fuehre_diff_mKrst_dampffoermig_zu(time, zonen);
 		
@@ -322,20 +276,10 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		return mLF;
 	}
 
-	private double time_alt=0;
 	public void bufferErgebnisse(double time, Zone [] zonen) {
 		double p = zonen[0].get_p(); 	//fuer Verlustteilung Frank Haertel
 	    p_buffer.addValue(time, p); 	//fuer Verlustteilung Frank Haertel
-		
-	    //Berechnen integraler Werte
-	    if(time>time_alt){
-		    Qburn+=super.get_dQburn()*super.CP.SYS.WRITE_INTERVAL_SEC;
-		  	zonenMasseVerbrannt=zonenMasseVerbrannt+dmZoneBurn*super.CP.SYS.WRITE_INTERVAL_SEC;
-		  	fortschritt=zonenMasseVerbrannt/mInit;
-		  	time_alt = time;
-	    }
-	    this.masterEinspritzung.berechneIntegraleGroessen(time, zonen);
-	    
+		this.masterEinspritzung.berechneIntegraleGroessen(time, zonen);
 		int i=0;
 		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",super.CP.convert_SEC2KW(time),i);
 		i++;
@@ -351,18 +295,6 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		i++;
 		super.buffer_EinzelErgebnis("dQw [J/s]",dQw,i);
 		T_buffer.addValue(time, zonen[0].get_T());
-		i++;
-		super.buffer_EinzelErgebnis("dQb [J/s]", super.get_dQburn(), i);
-		i++;
-		super.buffer_EinzelErgebnis("Qb [J]", Qburn, i);
-		i++;
-		super.buffer_EinzelErgebnis("Qb/Qmax [-]", Qburn/Qmax, i);
-		i++;
-		super.buffer_EinzelErgebnis("dmb [kg/s]", dmZoneBurn, i);
-		i++;
-		super.buffer_EinzelErgebnis("mb [kg]", zonenMasseVerbrannt, i);
-		i++;
-		super.buffer_EinzelErgebnis("Xb [-]", fortschritt, i);
 		i++;
 		super.buffer_EinzelErgebnis("V [m3]",zonen[0].get_V(),i);
 		i++;
@@ -441,14 +373,6 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		double mVerbrennungsLuft=mLuft_tr+mW+mAGRex;
 		double mKrst=masterEinspritzung.get_mKrst_Sum_ASP(); 
 		double mInit= mVerbrennungsLuft+mKrst;	//Gesamtmasse
-		
-		//Startwert für interne AGR-Masse auslesen, falls angegeben. Dadurch können falsche Zonenwerte
-		//während der ersten Schleifen umgangen werden.
-		try{
-			double mAGR = CP.get_mAGR_intern_ASP_aus_InputFile();
-			mInit+=mAGR;
-		}catch(Exception p){
-		}
 				
 		double TInit =pInit*VInit/(mInit*sInit.get_R());
 		
@@ -518,18 +442,35 @@ public class LadungsWechselAnalyse extends MasterLWA {
 	    return p_buffer; 
 	} 
 	
-	/** 
-	 * Setzen der Startmasse für die Berechnung von Xb. Zudem setzen der Startbedingungen von Qburn, mb und Xb
-	 * @param m_neu
-	 */
-	public void set_mInit(double m_neu){
-		this.mInit = m_neu;
-		this.time_alt = 0;
-		Qburn=0;
-	  	zonenMasseVerbrannt=0;
-	  	fortschritt=0;
-	  	firstEB=false;
-	}
+//	/**
+//	 * Liefert die Verbrennungsluft analog zu der Funktion aus CasePara ausser, 
+//	 * dass hier die interne AGR nicht beruecksichtigt wird
+//	 * @return
+//	 */
+//	private Spezies get_spezVerbrennungsLuft_LWA(){
+//		double mLuft_tr=CP.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
+//		double mW=CP.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel			
+//		double mAGRex=CP.get_mAGR_extern_ASP();		
+//		double mGes=mLuft_tr+mW+mAGRex; //gesamte Masse im Zylinder (ohne Kraftstoff)
+//		//Bestimmung der Verbrennungsluftzusammensetzung	
+//		Spezies abgas=CP.get_spezAbgas();	
+//		Hashtable<Spezies,Double>verbrennungsLuft_MassenBruchHash=new Hashtable<Spezies,Double>();
+//		verbrennungsLuft_MassenBruchHash.put(abgas, mAGRex/mGes);
+//		verbrennungsLuft_MassenBruchHash.put(KoeffizientenSpeziesFabrik.get_spezLuft_trocken(),mLuft_tr/mGes);		
+//		verbrennungsLuft_MassenBruchHash.put(KoeffizientenSpeziesFabrik.get_spezH2O(),mW/mGes);
+//		GasGemisch verbrennungsLuft=new GasGemisch("Verbrennungsluft_LWA");
+//		verbrennungsLuft.set_Gasmischung_massenBruch(verbrennungsLuft_MassenBruchHash);	
+//		return verbrennungsLuft;
+//	}
+//	
+//	private double get_mVerbrennungsLuft_ASP(){
+//		double mLuft_tr=CP.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
+//		double mW=CP.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel			
+//		double mAGRex=CP.get_mAGR_extern_ASP();		
+//		double mGes=mLuft_tr+mW+mAGRex; //gesamte Masse im Zylinder (ohne Kraftstoff)
+//		return mGes;
+//	}	
+
 }
 
 

@@ -3,15 +3,19 @@ package berechnungsModule.internesRestgas;
 import kalorik.spezies.Spezies;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.Zone;
+import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse_ohneQb;
 import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse;
+import berechnungsModule.LadungswechselAnalyse.MasterLWA;
 import bremo.parameter.CasePara;
 import bremo.sys.Solver;
 
 public class LWA extends InternesRestgas {
 	private double mAGRint=-5.55;
+	private boolean mitZwiKo;
 
-	protected LWA(CasePara cp) {
-		super(cp);		
+	protected LWA(CasePara cp, boolean zwiko) {
+		super(cp);
+		this.mitZwiKo = zwiko;
 	}
 
 	@Override
@@ -33,7 +37,11 @@ public class LWA extends InternesRestgas {
 
 		Zone[] zn_LW;
 		BerechnungsModell dglSys_LW;
-		dglSys_LW=new LadungsWechselAnalyse(cp);
+		if(mitZwiKo){
+			dglSys_LW=new LadungsWechselAnalyse(cp);
+		}else{
+			dglSys_LW=new LadungsWechselAnalyse_ohneQb(cp);
+		}
 		Solver LW_SOL= new Solver(cp);
 		LW_SOL.set_BerechnungsModell(dglSys_LW);
 		x0_LW=cp.get_Auslassoeffnet(); //initial value of x in [s]
@@ -70,8 +78,24 @@ public class LWA extends InternesRestgas {
 				for(int i=1;i<anzSimWerte;i++){
 					time=x0_LW+i*cp.SYS.WRITE_INTERVAL_SEC;		
 					LW_SOL.setFinalValueOfX(time);
-					znTemp=LW_SOL.solveRK(zn_LW);
-					
+					if(mitZwiKo){
+						double pIst=Double.NaN;
+						boolean converged=false;
+						int idxlwa = 0;
+						do{
+							znTemp=LW_SOL.solveRK(zn_LW);
+							pIst = znTemp[0].get_p();
+							if(pIst<0 || Double.isNaN(pIst)){
+								dglSys_LW.bufferErgebnisse(time,zn_LW);	
+								dglSys_LW.schreibeErgebnisFile("DEBUG_ZONENFEHLER.txt");
+								throw new NullPointerException();
+							}
+							converged = ((MasterLWA)dglSys_LW).is_pSoll_Gleich_pIst(pIst, zn_LW, time);
+							idxlwa++;
+						}while(converged==false && idxlwa<100);
+					}else{
+						znTemp = LW_SOL.solveRK(zn_LW);
+					}
 					cp.set_aktuelle_Rechenzeit(time);
 					zn_LW=znTemp;
 					znTemp=null;	
@@ -93,21 +117,35 @@ public class LWA extends InternesRestgas {
 				f_mInit=Math.abs(m_neu-m_alt)/(m_alt);
 				System.out.println("Relative Abweichung der Gesamtmasse: " + f_mInit);
 
-				m_alt=m_neu;					
+				m_alt=m_neu;
+				if(mitZwiKo) {
+					((LadungsWechselAnalyse)dglSys_LW).set_mInit(m_neu);
+				}
 				idx++;
 			}	
 
 			System.out.println("Masse bei Iteration " + idx2 + " = "+ m_neu + " kg");
-			mLuftFeucht=((LadungsWechselAnalyse)dglSys_LW).get_mLuftFeucht(zn_LW);
-			//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
-			((LadungsWechselAnalyse)dglSys_LW).set_TSaug(mLuftFeucht);				
+			if(mitZwiKo) {
+				mLuftFeucht=((LadungsWechselAnalyse)dglSys_LW).get_mLuftFeucht(zn_LW);
+				//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
+				((LadungsWechselAnalyse)dglSys_LW).set_TSaug(mLuftFeucht);				
+			}else{
+				mLuftFeucht=((LadungsWechselAnalyse_ohneQb)dglSys_LW).get_mLuftFeucht(zn_LW);
+				//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
+				((LadungsWechselAnalyse_ohneQb)dglSys_LW).set_TSaug(mLuftFeucht);
+			}
 			idx2+=1;
 		}while(Math.abs((mLuftFeucht_mess-mLuftFeucht)/mLuftFeucht_mess)>0.005&&idx2<=50);
 //		 "_" + (idx-1) +
 //		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ "_ERGEBNISSE_LW.txt");				
 		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ ".txt");		
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + (idx2) );	
-		double agrInt=((LadungsWechselAnalyse)dglSys_LW).get_mAGRintern(zn_LW);
+		double agrInt;
+		if(mitZwiKo) {
+			agrInt=((LadungsWechselAnalyse)dglSys_LW).get_mAGRintern(zn_LW);
+		}else{
+			agrInt=((LadungsWechselAnalyse_ohneQb)dglSys_LW).get_mAGRintern(zn_LW);
+		}
 		return agrInt;
 	}
 

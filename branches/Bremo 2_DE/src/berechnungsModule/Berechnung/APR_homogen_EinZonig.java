@@ -16,6 +16,7 @@ import misc.VektorBuffer;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 import bremo.parameter.CasePara;
+import bremoExceptions.MiscException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 import bremoExceptions.StopBremoException;
@@ -147,8 +148,13 @@ public class APR_homogen_EinZonig extends APR{
 		
 		//Anfangsbedingungen Setzen
 		//p Init
-		IndizierDaten indiD = new IndizierDaten(cp);
-		double p_init= indiD.get_pZyl(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC);
+		double p_init=101300; // Umgebungsdruck 1bar
+		try{
+			IndizierDaten indiD = new IndizierDaten(cp);
+			p_init= indiD.get_pZyl(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC);
+		}catch(InvalidParameterException e){
+			p_init = cp.get_p_ini();
+		}
 		
 /*	        // Versuche Anfangsdruck aus dem indizierfile zu lesen, ansonsten Umgebungsdruck als Anfangsbedingung
 		try{
@@ -325,7 +331,7 @@ public class APR_homogen_EinZonig extends APR{
 		if(dQburn>dQburnMAX)dQburnMAX=dQburn;
 
 		if (CP.is_VerbrennungAutoDetect()==false)
-		t_VerbrennungsBeginn=CP.get_verbrennungsBeginnSEC();
+			t_VerbrennungsBeginn=CP.get_verbrennungsBeginnSEC();
 		else
 			t_VerbrennungsBeginn= t_VerbrennungsBeginn ();
 		if(time>=t_VerbrennungsBeginn){
@@ -453,15 +459,16 @@ public VektorBuffer get_p_buffer() {
 public double t_VerbrennungsBeginn () {
 	double x0 =CP.SYS.RECHNUNGS_BEGINN_DVA_SEC;
 	double time=0;
+	double Qbtemp=0;
 	int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
 	boolean verbrennungsbeginnGefunden=false;
 	
 //	while(verbrennungsbeginnGefunden==false){
 	for(int i=1;i<anzSimWerte;i++){
-	time=x0+i*CP.SYS.WRITE_INTERVAL_SEC;
-	double dQburn = brennverlauf.get_dQburn(time);
-	Qb=Qb+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;
-	double xQ=Qb/Qmax;
+		time=x0+i*CP.SYS.WRITE_INTERVAL_SEC;
+		double dQburn = brennverlauf.get_dQburn(time);
+		Qbtemp=Qbtemp+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;
+		double xQ=Qb/Qmax;
 	if(xQ>0.05){
 		verbrennungsbeginnGefunden=true;
 	return time;}

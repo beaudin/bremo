@@ -123,6 +123,7 @@ public class Bremo extends Thread {
 		try {
 			casePara = new CasePara(inputFile);
 			caseParaerzeugt=true;
+			casePara.set_CalledFromGUI(calledFromGUI);
 			SwingBremo.SetDebbugingMode(casePara.SYS.DUBUGGING_MODE) ; 
 			r = new Rechnung(casePara);
 		} catch (ParameterFileWrongInputException e) {
@@ -136,6 +137,7 @@ public class Bremo extends Thread {
 			e.stopBremo();			
 		}
 		try {
+			casePara.set_CalledFromGUI(calledFromGUI);
 			r.berechnungDurchfuehren();
 			if(calledFromGUI){
 			new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
@@ -219,7 +221,9 @@ public class Bremo extends Thread {
 		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
 		//Hier einige Beisspile wie Funktionen getestet werden können
 		System.out.println(System.getProperty("home"));
-		File fileCP = new File("d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//bremo_setup_140123_00009_zyklus163.txt"); //TODO Filename
+		File fileCP = new File("d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//"+
+				"bremo_setup_140123_00009_zyklus163.txt"); //TODO Filename
+//		File fileCP = new File("d://Daten//bremo//java_ws//bremo 2_de//src//inputfiles//apr//bremo_setup.txt");
 		double startTime = System.currentTimeMillis();
 		Bremo bremo=new Bremo(fileCP,false);
 		bremo.run();
@@ -239,7 +243,13 @@ public class Bremo extends Thread {
 			inputFileNames=args;
 		else{
 			String [] ifn={	
-
+//					"apr//bremo_setup_eps.txt",
+//					"apr//bremo_setup_mL.txt",
+//					"apr//bremo_setup_mK.txt",
+//					"apr//bremo_setup_offset.txt",
+//					"apr//bremo_setup_mRG.txt",
+//					"apr//bremo_setup_dOT.txt"
+//					"d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//bremo_setup_140123_00009_zyklus163.txt"
 //					"PhH/Messpunkt_10_Schichtreferenz/Bremo_Inputfile_Messpunkt_10.txt"
 //					"Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/withMixing/mode3_Mix.txt",
 //					"Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/withDiffusion/KivaFixed/mode3_DiffusionInp.txt",

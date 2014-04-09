@@ -21,8 +21,8 @@ import bremoExceptions.ParameterFileWrongInputException;
 
 /**
  * Klasse zur Durchfuehrung einer DVA mit einer Zone. Es wird zunaechst das Frischgemisch 
- * inForm eines Spezies-Objektes aud Frischluft, AGR und allen Kraftstoffen definiert. 
- * Der Heizwert dieses Gemsichs wird herangezogen um dQ in dm umzurechnen. 
+ * inForm eines Spezies-Objektes aus Frischluft, AGR und allen Kraftstoffen definiert. 
+ * Der Heizwert dieses Gemischs wird herangezogen um dQ in dm umzurechnen. 
  * Das verbrennende Massenelement wird der Zone entzogen verbrannt, d.h. es wird die Zusammensetzung 
  * des dissoziierenden Rauchgases bestimmt, und anschlieﬂend mit der Temperatur der Zone wieder beigemischt.
  * @author eichmeier

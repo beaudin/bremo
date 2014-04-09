@@ -8,7 +8,7 @@ import matLib.MatLibBase;
 import misc.LittleHelpers;
 import misc.VektorBuffer;
 import berechnungsModule.ErgebnisBuffer;
-import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse;
+import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse_ohneQb;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
@@ -252,7 +252,7 @@ public class Verlustteilung {
 		
 		//reale gemittelte Ladungswechselverluste
 		
-		LadungsWechselAnalyse LWArealGem = new LadungsWechselAnalyse(CP,true);
+		LadungsWechselAnalyse_ohneQb LWArealGem = new LadungsWechselAnalyse_ohneQb(CP,true);
 		VektorBuffer LWArealGemBuffer = ladungswechselAnalyseDurchfuehren(LWArealGem);
 		double [] pLWArealGem = LWArealGemBuffer.getValues();
 		
@@ -266,7 +266,7 @@ public class Verlustteilung {
 		
 		
 		// reale Ladungswechselverluste
-		LadungsWechselAnalyse LWA = new LadungsWechselAnalyse(CP);
+		LadungsWechselAnalyse_ohneQb LWA = new LadungsWechselAnalyse_ohneQb(CP);
 		VektorBuffer LWAbuffer = ladungswechselAnalyseDurchfuehren(LWA);
 		double [] pLWA = LWAbuffer.getValues();
 		l+=1;
@@ -495,9 +495,9 @@ private VektorBuffer ladungswechselAnalyseDurchfuehren(BerechnungsModell dglSys_
 			}	
 
 			System.out.println("Masse bei Iteration " + idx2 + " = "+ m_neu + " kg");
-			mLuftFeucht=((LadungsWechselAnalyse)dglSys_LW).get_mLuftFeucht(zn_LW);
+			mLuftFeucht=((LadungsWechselAnalyse_ohneQb)dglSys_LW).get_mLuftFeucht(zn_LW);
 			//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
-			((LadungsWechselAnalyse)dglSys_LW).set_TSaug(mLuftFeucht);				
+			((LadungsWechselAnalyse_ohneQb)dglSys_LW).set_TSaug(mLuftFeucht);				
 			idx2+=1;
 		}while(Math.abs((mLuftFeucht_mess-mLuftFeucht)/mLuftFeucht_mess)>0.005&&idx2<=50);
 //		 "_" + (idx-1) +

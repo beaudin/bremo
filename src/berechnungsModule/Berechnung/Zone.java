@@ -137,7 +137,7 @@ public class Zone {
 				throw new NegativeMassException("Falsche Werte in Zone " + 
 						this.ID + "\n V= " + V_Zone + "\n p= " + p_Zone+ "\n T= " + T_Zone );
 			}catch(NegativeMassException nmE){
-				nmE.log_Warning();					
+				nmE.log_Warning();	
 			}
 		}		
 			if(T_Zone>T_max_Zone)
@@ -164,7 +164,7 @@ public class Zone {
 									this.ID+" hatte eine negative Masse ("
 									+mi_+"kg). Die Masse wurde auf null gesetzt!");
 						}catch(NegativeMassException nmE){						
-							nmE.log_Warning();					
+							nmE.log_Warning();	
 						}											
 					}
 					mi_=0; 

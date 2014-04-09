@@ -61,6 +61,7 @@ public class CasePara {
 	public final Solver SOLVER;
 	public final TurbulenceModelFactory TURB_FACTORY;
 	protected final boolean callsCantera;
+	private boolean calledFromGUI;
 
 	public CasePara(File inputFile) throws ParameterFileWrongInputException {			
 		InputFileReader	ifr =new InputFileReader(inputFile);
@@ -265,8 +266,12 @@ public class CasePara {
 		try {
 			column = (int)set_doublePara(INPUTFILE_PARAMETER, columnIdentifier,"",1,40);
 			return column;
-		} catch (ParameterFileWrongInputException e) {			
-			e.printStackTrace();
+		} catch (ParameterFileWrongInputException e) {
+			if(calledFromGUI){
+				e.log_Warning(e.getMessage());
+			}else{
+				e.printStackTrace();
+			}
 			e.stopBremo();
 			return 0;
 		}		
@@ -309,8 +314,12 @@ public class CasePara {
 					e.stopBremo();				
 				}
 			return file;
-		} catch (ParameterFileWrongInputException e) {			
-			e.printStackTrace();
+		} catch (ParameterFileWrongInputException e) {		
+			if(calledFromGUI){
+				e.log_Warning(e.getMessage());
+			}else{
+				e.printStackTrace();
+			}
 			e.stopBremo();
 			return null;
 		}		
@@ -381,6 +390,33 @@ public class CasePara {
 			return Double.NaN;
 		}		
 
+	}
+	
+	/**
+	 * Gibt an, ab welchem Zeitpunkt in der LWA bei einer Zwischenkompression ein Kraftstoffumsatz erfolgen soll. Ab
+	 * diesem Zeitpunkt wird die freigesetzte Wärme in einen Massenumsatz umgerechnet.
+	 */
+	private double umsatzBeginn=-5.55;
+	public double get_verbrennungsBeginnLWASEC(){
+		if(!(umsatzBeginn==-5.55)) return umsatzBeginn;
+		try{
+			if(SYS.IS_KW_BASIERT){				
+				umsatzBeginn =set_doublePara(
+						INPUTFILE_PARAMETER, "verbrennungsBeginnLWA","[KWnZOT]",SYS.RECHNUNGS_ENDE_DVA_KW,
+						SYS.RECHNUNGS_BEGINN_DVA_KW+convert_SEC2KW(SYS.DAUER_ASP_SEC));
+				umsatzBeginn=convert_KW2SEC(umsatzBeginn);
+			}else {				
+				umsatzBeginn =set_doublePara(INPUTFILE_PARAMETER, "verbrennungsBeginnLWA","[s]",SYS.RECHNUNGS_ENDE_DVA_SEC,
+						SYS.RECHNUNGS_BEGINN_DVA_SEC+SYS.DAUER_ASP_SEC);
+			}				
+			return umsatzBeginn;				
+		} catch (ParameterFileWrongInputException e) {			
+			e.log_Warning("Im Inputfile wurde \"verbrennungsBeginnLWA\" nicht angegeben!\n"+
+					"Der Wärmeeintrag in der Zwischenkompression wird sofort in einen "+
+					"Massenumsatz umgerechnet.");
+			umsatzBeginn = 0;
+			return umsatzBeginn;
+		}
 	}
 
 	/**
@@ -582,7 +618,7 @@ public class CasePara {
 		}		
 	}	
 	
-	/** 
+	/** Init-Wert des Drucks bei Rechnungsbeginn für die APR, falls kein Indizierfile vorhanden ist.
 	 * @return initial pressure [Pa]
 	 */	
 	public double get_p_ini(){
@@ -794,7 +830,17 @@ public class CasePara {
 		//Dies gilt für alle Eingabegrößen die von der LWA ueberschrieben werden muessen....
 		//Alternativ denkbar ist auch die Uebergabe aller Werte aus der LWA direkt in die Berechnungsmodule
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "mAGR_intern_ASP","[kg]",0,Double.POSITIVE_INFINITY);
+			double mAGR;
+			String[] einheiten = new String[2];
+			einheiten[0] = "[kg]";
+			einheiten[1] = "[%]";
+			double agr = set_doublePara(INPUTFILE_PARAMETER, "mAGR_intern_ASP",einheiten,0,Double.POSITIVE_INFINITY);
+			if(INPUTFILE_PARAMETER.get("mAGR_intern_ASP")[1].equalsIgnoreCase("[%]")){
+				mAGR = agr / (100-agr) * (this.get_mAGR_extern_ASP() + this.get_mLuft_feucht_ASP() + this.MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP());
+			}else{
+				mAGR = agr;
+			}
+			return mAGR;
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2686,5 +2732,9 @@ public class CasePara {
 		}//Konstruktor SysPara	
 
 	}//Klasse SysPara
+
+	public void set_CalledFromGUI(boolean calledFromGUI) {
+		this.calledFromGUI = calledFromGUI;
+	}
 
 }//Klasse CasePara

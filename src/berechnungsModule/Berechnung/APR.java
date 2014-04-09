@@ -18,5 +18,4 @@ public abstract class APR extends BerechnungsModell {
 	
 	public abstract Zone [] calc_dQburn(Zone [] zonen);
 	
-
 }

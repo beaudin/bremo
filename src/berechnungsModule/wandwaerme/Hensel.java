@@ -9,6 +9,7 @@ import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 import io.VentilhubFileReader;
 import berechnungsModule.Berechnung.Zone;
+import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse;
 import misc.HeizwertRechner;
 import misc.VektorBuffer;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
@@ -103,6 +104,17 @@ public class Hensel extends WandWaermeUebergang {
 				try{
 					ggTemp = (GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0]; //notwendig, da sonst Absturz ?! mn
 				} catch (ClassCastException c){
+					boolean isCasted = false;
+					int i = 0;
+					while(!isCasted && i<30){
+						try{
+							ggTemp = (GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0];
+							isCasted = true;
+						}catch(ClassCastException c2){
+							isCasted = false;
+							i+=1;
+						}
+					}
 					try{ //Abfangen eines Fehlers, der vermutlich vom Rechner abhängig ist. Tritt sporadisch auf. --mn
 						throw new ParameterFileWrongInputException("Fehler, der vermutlich von der Rechenleistung kommt!\n"+
 								"Rechnung bitte neustarten!");

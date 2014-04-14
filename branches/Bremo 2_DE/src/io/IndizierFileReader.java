@@ -8,7 +8,8 @@ public abstract class IndizierFileReader {
 //File gehört zum Objekt, kann privat sein.
 	protected double  pZyl [];
 	protected double  pEin [];
-	protected double  pAbg  [];
+	protected double  pAbg [];
+	protected double  pKGH [];
 	/**
 	 * die im Eingabefile angegebene Zeitachse in [s nach Rechenbeginn]
 	 */
@@ -65,7 +66,22 @@ public abstract class IndizierFileReader {
 		}		
 		 return pAbg;
 	}
-	// gibt pAbg zurück
+	
+	// gibt pKGH zurück
+	public double[] get_pKGH(){
+		try{
+			double a=pKGH[0];
+		}catch(NullPointerException e){
+			try {
+				throw new ParameterFileWrongInputException("Es wurde versucht auf den Einlassdruck zuzugreifen. \n " +
+						"Dieser wurde aber nicht eingelesen --> InputFile Checken ");
+			} catch (ParameterFileWrongInputException e1) {
+				e1.stopBremo();
+			}
+		}		
+		 return pKGH;
+	}
+	// gibt Zeitachse zurück
 	public double[] get_Zeitachse(){ 
 		 return zeitAchse;
 	}

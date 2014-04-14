@@ -24,6 +24,7 @@ public class IndizierDaten {
 	private double [] pZyl,pZylRoh;
 	private double [] pEin,pEinRoh;
 	private double [] pAus,pAusRoh;
+	private double [] pKGH,pKGHRoh;
 	double [] zeitAchse_LW;
 	private final CasePara CP;
 	private final double PZYL_MAX=0;//vorher ohne NULL
@@ -34,6 +35,7 @@ public class IndizierDaten {
 	private final boolean filternBitte;
 	private double pOffset; //Offset Zylinderdruck für PostProcessor
 	private double kappa_druckabgleich=0;
+	private boolean kghIndiziert = false;
 	
 	
 	
@@ -68,14 +70,26 @@ public class IndizierDaten {
 		int indexOf=indiFile.getName().indexOf(".");
 		String EINGABEDATEI_FORMAT=indiFile.getName().substring(indexOf+1); //Dateiendung		
 		int pZylNr=CP.get_ColumnToRead("spalte_pZyl");				
-		int pEinNr=CP.get_ColumnToRead("spalte_pEin");		
-		int pAusNr=CP.get_ColumnToRead("spalte_pAbg");	
-		if(pZylNr==pEinNr || pZylNr==pAusNr || pEinNr==pAusNr){
+		int pEinNr=pZylNr;
+		int pAusNr=pZylNr;
+		if(CP.RESTGASMODELL.involvesGasExchangeCalc()){
+			pEinNr=CP.get_ColumnToRead("spalte_pEin");
+			pAusNr=CP.get_ColumnToRead("spalte_pAbg");	
+		}
+		int pKGHNr;
+		System.out.println(CP.BLOW_BY_MODELL);
+		System.out.println(CP.is_pKGH_indiziert());
+		if(CP.BLOW_BY_MODELL.is_Berechnet() && CP.is_pKGH_indiziert()){
+			pKGHNr=CP.get_ColumnToRead("spalte_pKGH");
+			kghIndiziert=true;
+		}else{
+			pKGHNr=pZylNr;
+		}
+		if(CP.RESTGASMODELL.involvesGasExchangeCalc() && (pZylNr==pEinNr || pZylNr==pAusNr || pEinNr==pAusNr)){
 			try {
 				throw new ParameterFileWrongInputException("Die angegebenen Kanalnummern bzw Spaltennummern " +
 						"für pZyl, pEin und pAbg sind teilweise identisch");
 			} catch (ParameterFileWrongInputException e1) {
-				// TODO Auto-generated catch block
 				e1.stopBremo();
 			}
 		}		
@@ -93,19 +107,28 @@ public class IndizierDaten {
 		IndizierFileReader indiReader = null;
 
 		if (fileName.endsWith("txt") || fileName.endsWith("TXT")){
-			if(pZylNr==1|| pEinNr==1 || pAusNr==1){
+			if(pZylNr==1 || pEinNr==1 || pAusNr==1 || pKGHNr ==1){
 				String kanal=null;
 				if(pZylNr==1)kanal="spalte_pZyl";
 				if(pEinNr==1)kanal="spalte_pAbg";
 				if(pAusNr==1)kanal="spalte_pEin";
+				if(pKGHNr==1)kanal="spalte_pKGH";
 				try {
 					throw new ParameterFileWrongInputException("Der Wert für \"" + kanal+ "\" wurde auf die erste Spalte des Druckeingabefiles gesetzt. \n " +
 							"In der ersten spalte muss aber immer die Zeit bzw. der Kurbelwinkel stehen.");
 				} catch (ParameterFileWrongInputException e) {					
 					e.stopBremo();
 				}	
-			}			
-			indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr);
+			}
+			if(cp.RESTGASMODELL.involvesGasExchangeCalc() && cp.is_pKGH_indiziert()){
+				indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr,pKGHNr);
+			}else if(cp.RESTGASMODELL.involvesGasExchangeCalc()){
+				indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr);
+			}else if(cp.is_pKGH_indiziert()){
+				indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pKGHNr);
+			}else{
+				indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr);
+			}
 		}
 		if(fileName.endsWith("adv")||fileName.endsWith("ADV"))
 			indiReader=new IndizierFileReader_adv(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr);
@@ -131,63 +154,67 @@ public class IndizierDaten {
 		}		   
 		zeitAchse=misc.LittleHelpers.concat(zeitAchse, temp2);
 		
-		////////////////////////////////////
-		//Definieren des Einlassdrucks
-		///////////////////////////////////		
+		if(CP.RESTGASMODELL.involvesGasExchangeCalc()){
+			////////////////////////////////////
+			//Definieren des Einlassdrucks
+			///////////////////////////////////		
+			
+			if(gemittelt == false){ //fuer Verlustteilung Frank Haertel
+			pEinRoh=indiReader.get_pEin();
+			//Anpassendes Mittelwertes von Saugrohrdrucksensor und Piezo		
+			if(CP.shift_pInlet()){
+				double offset=CP.get_p_LadeLuft()-matLib.MatLibBase.mw_aus_1DArray(pEinRoh);
+				pEinRoh=this.shiftMe(pEinRoh, offset);
+			}
+			//Filtern
+			if(this.filternBitte)
+				pEin=sgol.filterData(pEinRoh);
+			else
+				pEin=pEinRoh;
+			
+			//Anpassen fuer die LWA (doppelte laenge fuer zweites ASP)
+			pEin=misc.LittleHelpers.concat(pEin, pEin);	
+			
+			////////////////////////////////////
+			//Definieren des Auslassdrucks
+			///////////////////////////////////	
+			pAusRoh=indiReader.get_pAbg();
+			if(CP.shift_pOutlet()){
+				double offset=CP.get_p_Abgas()-matLib.MatLibBase.mw_aus_1DArray(pAusRoh);
+				pAusRoh=this.shiftMe(pAusRoh, offset);
+			}
+			//Filtern
+			if(this.filternBitte)
+				pAus=sgol.filterData(pAusRoh);
+			else
+				pAus=pAusRoh;
+			pAus=misc.LittleHelpers.concat(pAus,pAus);		
+			
+			//fuer Verlustteilung Frank Haertel
+			} 
+		    if(gemittelt == true){ 
+		      pEinRoh=indiReader.get_pEin(); 
+		      pAusRoh=indiReader.get_pAbg(); 						//fuer Verlustteilung Frank Haertel
+		      double summePein=0; 
+		      double summePaus=0; 
+		      for (int i = 0; i < pEinRoh.length; i++) { 
+		          summePein += pEinRoh[i]; 
+		      } 
+		      for (int i = 0; i < pAusRoh.length; i++) { 			//fuer Verlustteilung Frank Haertel
+		          summePaus += pAusRoh[i]; 
+		      } 
+		      double pEinWert=summePein/pEinRoh.length; 
+		      double pAusWert=summePaus/pAusRoh.length; 
+		      pEin = new double[zeitAchse.length]; 
+		      pAus = new double[zeitAchse.length]; 
+		      for (int i = 0; i < zeitAchse.length; i++) { 			//fuer Verlustteilung Frank Haertel
+		          pEin [i]= pEinWert; 
+		          pAus [i]= pAusWert; 
+		      } 
+		    } 
+		} //end if für Ein/Auslassdruck
 		
-		if(gemittelt == false){ //fuer Verlustteilung Frank Haertel
-		pEinRoh=indiReader.get_pEin();
-		//Anpassendes Mittelwertes von Saugrohrdrucksensor und Piezo		
-		if(CP.shift_pInlet()){
-			double offset=CP.get_p_LadeLuft()-matLib.MatLibBase.mw_aus_1DArray(pEinRoh);
-			pEinRoh=this.shiftMe(pEinRoh, offset);
-		}
-		//Filtern
-		if(this.filternBitte)
-			pEin=sgol.filterData(pEinRoh);
-		else
-			pEin=pEinRoh;
 		
-		//Anpassen fuer die LWA (doppelte laenge fuer zweites ASP)
-		pEin=misc.LittleHelpers.concat(pEin, pEin);	
-		
-		////////////////////////////////////
-		//Definieren des Auslassdrucks
-		///////////////////////////////////	
-		pAusRoh=indiReader.get_pAbg();
-		if(CP.shift_pOutlet()){
-			double offset=CP.get_p_Abgas()-matLib.MatLibBase.mw_aus_1DArray(pAusRoh);
-			pAusRoh=this.shiftMe(pAusRoh, offset);
-		}
-		//Filtern
-		if(this.filternBitte)
-			pAus=sgol.filterData(pAusRoh);
-		else
-			pAus=pAusRoh;
-		pAus=misc.LittleHelpers.concat(pAus,pAus);		
-		
-		//fuer Verlustteilung Frank Haertel
-		} 
-	    if(gemittelt == true){ 
-	      pEinRoh=indiReader.get_pEin(); 
-	      pAusRoh=indiReader.get_pAbg(); 						//fuer Verlustteilung Frank Haertel
-	      double summePein=0; 
-	      double summePaus=0; 
-	      for (int i = 0; i < pEinRoh.length; i++) { 
-	          summePein += pEinRoh[i]; 
-	      } 
-	      for (int i = 0; i < pAusRoh.length; i++) { 			//fuer Verlustteilung Frank Haertel
-	          summePaus += pAusRoh[i]; 
-	      } 
-	      double pEinWert=summePein/pEinRoh.length; 
-	      double pAusWert=summePaus/pAusRoh.length; 
-	      pEin = new double[zeitAchse.length]; 
-	      pAus = new double[zeitAchse.length]; 
-	      for (int i = 0; i < zeitAchse.length; i++) { 			//fuer Verlustteilung Frank Haertel
-	          pEin [i]= pEinWert; 
-	          pAus [i]= pAusWert; 
-	      } 
-	    } 
 	    //fuer Verlustteilung Frank Haertel
 		
 		////////////////////////////////////
@@ -286,7 +313,7 @@ public class IndizierDaten {
 	 * Liefert den Einlassdruck in [Pa] zum Zeitpunkt time in [s nach Rechenbeginn].
 	 * Trifft die Zeit nicht exakt einen gemesenen Wert wird linear interpoliert.
 	 * @param time in [s nach Rechenbeginn]
-	 * @return Zylinderdruck in [Pa]
+	 * @return Einlassdruck in [Pa]
 	 */
 	public double get_pEin(double time){
 		return L_Interp.linInterPol(time, zeitAchse, pEin);
@@ -300,6 +327,16 @@ public class IndizierDaten {
 	 */
 	public double get_pAus(double time){
 		return L_Interp.linInterPol(time, zeitAchse, pAus);
+	}
+	
+	/**
+	 * Liefert den Kurbelgehäusedruck in [Pa] zum Zeitpunkt time in [s nach Rechenbeginn].
+	 * Trifft die Zeit nicht exakt einen gemesenen Wert wird linear interpoliert.
+	 * @param time in [s nach Rechenbeginn]
+	 * @return Kurbelgehäusedruck in [Pa]
+	 */
+	public double get_pKGH(double time){
+		return L_Interp.linInterPol(time, zeitAchse, pKGH);
 	}
 
 	/** 

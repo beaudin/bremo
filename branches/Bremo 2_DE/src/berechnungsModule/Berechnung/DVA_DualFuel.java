@@ -1,11 +1,13 @@
 package berechnungsModule.Berechnung;
 
 import java.util.Hashtable;
+
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 import misc.HeizwertRechner;
 import misc.LittleHelpers;
 import misc.VektorBuffer;
+import berechnungsModule.blowby.BlowBy;
 import berechnungsModule.gemischbildung.Einspritzung;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.gemischbildung.Spray;
@@ -23,9 +25,11 @@ public class DVA_DualFuel extends DVA {
 	private Motor motor;
 	private GleichGewichtsRechner gg;
 	private MasterEinspritzung masterEinspritzung;
+	private BlowBy blowbyModell;
 	private final int ANZAHL_ZONEN;
 
 	private double dQw, Qw=0, Qb=0,mb=0;
+	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
 
 	/**
@@ -67,6 +71,7 @@ public class DVA_DualFuel extends DVA {
 		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		checkEinspritzungen(masterEinspritzung); //checkt ob alle Einspritzungen in die richtigen Zonen erfolgen
 		gg=CP.OHC_SOLVER;
+		blowbyModell = CP.BLOW_BY_MODELL;
 
 		T_buffer = new VektorBuffer(cp);
 		dQb_buffer = new VektorBuffer(cp);	
@@ -173,7 +178,30 @@ public class DVA_DualFuel extends DVA {
 
 		double V2=zonen_IN[2].get_V();	
 
-		dmZoneBurn=0;	
+		dmZoneBurn=0;
+		
+		double m2 = zonen_IN[2].get_m();
+		double mges = m0 + m1 + m2;
+		dmL = blowbyModell.get_mLeckage(time, zonen_IN)*CP.SYS.WRITE_INTERVAL_SEC;
+		if(dmL>=0){
+			if((m0-dmL)<=CP.SYS.MINIMALE_ZONENMASSE){}else{
+				try {
+					zonen_IN[0].set_dm_aus((m0+m1)/mges*dmL);
+				} catch (NegativeMassException e) {
+				}
+			}
+			if((m2-dmL)<=CP.SYS.MINIMALE_ZONENMASSE){}else{
+				try {
+					zonen_IN[2].set_dm_aus(m2/mges*dmL);
+				} catch (NegativeMassException e) {
+				}
+			}
+		}else{
+			zonen_IN[0].set_dm_ein((m0 + m1)/mges*dmL,T1,zonen_IN[0].get_ggZone());
+			if(burntZonesAlreadyInitialised){
+				zonen_IN[1].set_dm_ein(m2/mges*dmL,zonen_IN[1].get_T(),zonen_IN[2].get_ggZone());
+			}
+		}
 
 		if(esBrennt&&dQburn>0){	
 			dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,spez1,T1,p);
@@ -357,6 +385,7 @@ public class DVA_DualFuel extends DVA {
 		fortschritt=zonenMasseVerbrannt/mGes;
 		Qb=Qb+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;
 		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC; 
+		mL = mL+dmL*super.CP.SYS.WRITE_INTERVAL_SEC;
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
 		double xQ=Qb/Qmax;
 		
@@ -471,7 +500,16 @@ public class DVA_DualFuel extends DVA {
 		super.buffer_EinzelErgebnis("Qb/Qmax [-]", xQ,i);
 
 		i+=1;
-		super.buffer_EinzelErgebnis("Qmax [J]", Qmax,i);		
+		super.buffer_EinzelErgebnis("Qmax [J]", Qmax,i);	
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dmL [kg/KW]", super.CP.convert_ProSEC_2_ProKW(dmL), i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("mL [kg]", mL, i);
 
 		i+=1;
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);

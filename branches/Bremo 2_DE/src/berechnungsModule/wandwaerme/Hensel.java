@@ -103,27 +103,14 @@ public class Hensel extends WandWaermeUebergang {
 				GasGemisch ggTemp = null;
 				try{
 					ggTemp = (GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0]; //notwendig, da sonst Absturz ?! mn
+					if(ggTemp.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2))
+						xCO2 = ggTemp.get_speziesMolenBruecheDetailToIntegrate().get(co2);
 				} catch (ClassCastException c){
-					boolean isCasted = false;
-					int i = 0;
-					while(!isCasted && i<30){
-						try{
-							ggTemp = (GasGemisch)gg.get_speziesMolenBruecheDetailToIntegrate().keySet().toArray()[0];
-							isCasted = true;
-						}catch(ClassCastException c2){
-							isCasted = false;
-							i+=1;
-						}
-					}
-					try{ //Abfangen eines Fehlers, der vermutlich vom Rechner abhängig ist. Tritt sporadisch auf. --mn
-						throw new ParameterFileWrongInputException("Fehler, der vermutlich von der Rechenleistung kommt!\n"+
-								"Rechnung bitte neustarten!");
-					}catch(ParameterFileWrongInputException e){
-						e.stopBremo();
-					}
+					//Abfangen eines Fehlers, der vermutlich vom Rechner abhängig ist. Tritt sporadisch auf. --mn
+					//In der LWA im HCCI-Betrieb ist es aber durchaus zulässig mit reinem Abgas zu rechnen. Ein kleiner Fehler wird dann nur während
+					//des Ansaugvorgangs gemacht.
+					xCO2 = xCO2_Ex;
 				}
-				if(ggTemp.get_speziesMolenBruecheDetailToIntegrate().containsKey(co2))
-					xCO2 = ggTemp.get_speziesMolenBruecheDetailToIntegrate().get(co2);
 			}
 			x_rg=xCO2/xCO2_Ex;
 		}
@@ -280,7 +267,7 @@ public class Hensel extends WandWaermeUebergang {
 				T=tBuffer.getValue(cp.get_time());
 			}catch(InvalidParameterException ipe){
 				System.err.println("Fehler bei Berechnung der Wärmestromdichte nach Hensel.\n" +
-						"Dieser Fehler tritt normalerweise im ersten Durchlauf der LWA auf.");
+						"Dieser Fehler tritt normalerweise nur im ersten Durchlauf der LWA auf.");
 			}catch(ArrayIndexOutOfBoundsException aiob){
 				System.err.println("Fehler bei Berechnung der Wärmestromdichte nach Hensel in der APR.");
 			}

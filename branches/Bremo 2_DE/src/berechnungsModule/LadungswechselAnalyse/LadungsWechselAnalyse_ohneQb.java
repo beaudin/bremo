@@ -11,6 +11,7 @@ import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.Zone;
 import misc.VektorBuffer;
+import berechnungsModule.blowby.BlowBy;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
@@ -23,6 +24,7 @@ public class LadungsWechselAnalyse_ohneQb extends BerechnungsModell {
 	
 	private  WandWaermeUebergang wandWaermeModell;
 	private Motor m;
+	private BlowBy blowbyModell;
 	private MasterEinspritzung masterEinspritzung;
 	protected final IndizierDaten indiD;
 	private double pInit,VInit;
@@ -39,6 +41,7 @@ public class LadungsWechselAnalyse_ohneQb extends BerechnungsModell {
 	private GasGemisch gAbgasbehaelter;
 	private GasGemisch gFrischluftbehaelter, feuchteLuft;
 	private double dmEVTemp;
+	private double dmL, mL=0;
 
 
 	private double pSaug, TSaug,TSaug_alt, pAbg, TAbg, kappa, pZyl, TZyl, Rgas,mLF_mess;
@@ -72,6 +75,7 @@ public class LadungsWechselAnalyse_ohneQb extends BerechnungsModell {
 		T_buffer = new VektorBuffer(CP);
 		p_buffer = new misc.VektorBuffer(cp); 						//fuer Verlustteilung Frank Haertel 
 		m = CP.MOTOR;
+		blowbyModell = CP.BLOW_BY_MODELL;
 		//indiD=new IndizierDaten(cp);								//fuer Verlustteilung Frank Haertel 
 		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		anzZonen=1;
@@ -166,6 +170,20 @@ public class LadungsWechselAnalyse_ohneQb extends BerechnungsModell {
 		dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen, fortschritt, T_buffer);
 		//Waermestrom abfuehren
 		zonen[0].set_dQ_ein_aus(-1*dQw);
+		
+		//Leckagestrom abführen
+		dmL = blowbyModell.get_mLeckage(time, zonen)*CP.SYS.WRITE_INTERVAL_SEC;
+		if(dmL>=0){
+			try{
+				zonen[0].set_dm_aus(dmL);
+			}catch(NegativeMassException nme){
+				nme.log_Warning("BlowBy führte zu einer Entleerung der Zone ! \n" +
+						"BlowBy-Eingaben überprüfen.");
+				nme.stopBremo();
+			}
+		}else{
+			zonen[0].set_dm_ein(-dmL, zonen[0].get_T(), zonen[0].get_ggZone());
+		}
 		
 		//Direkteinspritzung
 		//Verdampfungswaerme abfuehren
@@ -327,6 +345,13 @@ public class LadungsWechselAnalyse_ohneQb extends BerechnungsModell {
 		super.buffer_EinzelErgebnis("alpha_A_vor [-]",alpha_A_vor,i);
 		i++;
 		super.buffer_EinzelErgebnis("alpha_A_rück [-]",alpha_A_rueck,i);
+		i++;
+		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);
+		i++;
+		super.buffer_EinzelErgebnis("dmL [kg/KW]", super.CP.convert_ProSEC_2_ProKW(dmL), i);
+		i++;
+		mL=mL+dmL*super.CP.SYS.WRITE_INTERVAL_SEC;
+		super.buffer_EinzelErgebnis("mL [kg]", mL, i);
 		i++;
 		super.buffer_EinzelErgebnis("T_Saug [K]",this.TSaug,i);
 		i++;

@@ -7,6 +7,7 @@ import misc.HeizwertRechner;
 import misc.VektorBuffer;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
+import berechnungsModule.blowby.BlowBy;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
@@ -34,12 +35,14 @@ public class DVA_Homogen_EinZonig extends DVA{
 	private Motor motor;
 	private GleichGewichtsRechner gg;
 	private MasterEinspritzung masterEinspritzung;
+	private BlowBy blowbyModell;
 	private boolean krstVerbrannt=false;
 	
 	
 	private final int ANZAHL_ZONEN;
 	
 	private double dQw, Qw=0, Qb=0;
+	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
 	
 	/**
@@ -79,6 +82,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		gg=CP.OHC_SOLVER;
 		this.checkEinspritzungen(masterEinspritzung);
+		blowbyModell = CP.BLOW_BY_MODELL;
 		
 		T_buffer = new misc.VektorBuffer(cp);
 		dQb_buffer = new misc.VektorBuffer(cp);
@@ -172,7 +176,21 @@ public class DVA_Homogen_EinZonig extends DVA{
 		//Wandwaermestrom bestimmen	
 		dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen_IN, fortschritt, T_buffer);
 		//Wandwaermestrom abfuehren
-		zonen_IN[0].set_dQ_ein_aus(-1*dQw);			
+		zonen_IN[0].set_dQ_ein_aus(-1*dQw);	
+		
+		//Leckagestrom abführen
+		dmL = blowbyModell.get_mLeckage(time, zonen_IN)*CP.SYS.WRITE_INTERVAL_SEC;
+		if(dmL>=0){
+			try{
+				zonen_IN[0].set_dm_aus(dmL);
+			}catch(NegativeMassException nme){
+				nme.log_Warning("BlowBy führte zu einer Entleerung der Zone ! \n" +
+						"BlowBy-Eingaben überprüfen.");
+				nme.stopBremo();
+			}
+		}else{
+			zonen_IN[0].set_dm_ein(-dmL, T, zonen_IN[0].get_ggZone());
+		}
 	
 		//Verbrennungswaerme zufuehren
 		zonen_IN[0].set_dQ_ein_aus(dQburn);
@@ -237,7 +255,8 @@ public class DVA_Homogen_EinZonig extends DVA{
 		zonenMasseVerbrannt=zonenMasseVerbrannt+dmZoneBurn*super.CP.SYS.WRITE_INTERVAL_SEC;
 		fortschritt=zonenMasseVerbrannt/mINIT;
 		Qb=Qb+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;
-		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC; 
+		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC;
+		mL=mL+dmL*super.CP.SYS.WRITE_INTERVAL_SEC;
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
 		double xQ=Qb/Qmax;
 
@@ -307,7 +326,16 @@ public class DVA_Homogen_EinZonig extends DVA{
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("Qmax [J]", Qmax,i);	
-
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dmL [kg/KW]", super.CP.convert_ProSEC_2_ProKW(dmL), i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("mL [kg]", mL, i);
+		
 		i+=1;
 		double Hu=zn[0].get_ggZone().get_Hu_mass();
 		super.buffer_EinzelErgebnis("Hu Zone [J/kg]",Hu,i );	

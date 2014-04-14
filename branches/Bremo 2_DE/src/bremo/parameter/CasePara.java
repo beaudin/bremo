@@ -18,6 +18,8 @@ import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.BerechnungsModellFabrik;
 import berechnungsModule.Berechnung.CanteraCaller;
+import berechnungsModule.blowby.BlowBy;
+import berechnungsModule.blowby.BlowByFabrik;
 import berechnungsModule.gemischbildung.Kraftstoff_Eigenschaften;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.internesRestgas.InternesRestgas;
@@ -60,6 +62,7 @@ public class CasePara {
 	public final MasterEinspritzung MASTER_EINSPRITZUNG;
 	public final Solver SOLVER;
 	public final TurbulenceModelFactory TURB_FACTORY;
+	public final BlowBy BLOW_BY_MODELL;
 	protected final boolean callsCantera;
 	private boolean calledFromGUI;
 
@@ -112,6 +115,9 @@ public class CasePara {
 		
 		//Turbulence
 		TURB_FACTORY=new TurbulenceModelFactory(this, new MakeMeUnique());
+		BlowByFabrik bbf = new BlowByFabrik(this);
+		BLOW_BY_MODELL = bbf.BLOW_BY_MODELL;
+		
 		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG und RESTGAS_MODELL
 		BerechnungsModellFabrik bmf=new BerechnungsModellFabrik(this);
 		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;	
@@ -470,7 +476,20 @@ public class CasePara {
 	    return verlustteilung;
 		} 
 	
-	      
+	
+	public boolean is_pKGH_indiziert(){
+		boolean indiziert = false;
+		String s = null;
+		String[] s2 = {"ja", "nein"};
+		try{
+			s=this.set_StringPara(INPUTFILE_PARAMETER, "pKGHindiziert", s2);
+			if(s.equalsIgnoreCase("ja")) indiziert = true;
+		}catch (ParameterFileWrongInputException e){
+			e.stopBremo();
+		}
+		return indiziert;
+	}
+
 
 
 
@@ -1899,7 +1918,20 @@ public class CasePara {
 			e.stopBremo();
 			return Double.NaN;
 		}		
-	}	
+	}
+	
+	/**
+	 * @return liefert den Kurbelgehäusedruck aus dem Inputfile
+	 */
+	public double get_pKGH(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "p_KGH", "[Pa]", 0, Double.POSITIVE_INFINITY);
+		}catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+			return Double.NaN;
+		}
+	}
+	
 	/**
 	 * Returns the pressure at IVC 
 	 * (needed for WHT models like Woschni if simulation 
@@ -2010,6 +2042,18 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}	
+	
+	/**
+	 * @return Gibt die BlowBy-Fläche in [m^2] zurück. Überlicherweise 0.002 bis 0.004 * Bohrung [m^2] zurück.
+	 */
+	public double get_FlaecheBB() {
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "FlaecheBB","[m^2]",0,0.01*get_Bohrung()); 
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+			return Double.NaN;
+		}
+	}
 
 
 	/** 

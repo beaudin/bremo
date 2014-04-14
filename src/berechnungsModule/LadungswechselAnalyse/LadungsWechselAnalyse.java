@@ -11,6 +11,8 @@ import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.Zone;
 import misc.VektorBuffer;
+import berechnungsModule.blowby.BlowBy;
+import berechnungsModule.blowby.BlowByFabrik;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
@@ -27,7 +29,8 @@ import bremoExceptions.ParameterFileWrongInputException;
  */
 public class LadungsWechselAnalyse extends MasterLWA {
 	
-	private  WandWaermeUebergang wandWaermeModell;
+	private WandWaermeUebergang wandWaermeModell;
+	private BlowBy blowbyModell;
 	private Motor m;
 	private MasterEinspritzung masterEinspritzung;
 	private IndizierDaten indiD;
@@ -51,6 +54,7 @@ public class LadungsWechselAnalyse extends MasterLWA {
 	private GasGemisch gAbgasbehaelter;
 	private GasGemisch gFrischluftbehaelter, feuchteLuft;
 	private double dmEVTemp;
+	private double dmL, mL=0;
 
 
 	private double pSaug, TSaug,TSaug_alt, pAbg, TAbg, kappa, pZyl, TZyl, Rgas,mLF_mess;
@@ -145,6 +149,8 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
 		krstVerbrannt = false;
+		
+		blowbyModell = super.CP.BLOW_BY_MODELL;
 	}
 
 	private double dm;
@@ -211,6 +217,20 @@ public class LadungsWechselAnalyse extends MasterLWA {
 				nmE.log_Warning();
 				krstVerbrannt=true;
 			}	
+		}
+		
+		//Leckagestrom abführen
+		dmL = blowbyModell.get_mLeckage(time, zonen)*CP.SYS.WRITE_INTERVAL_SEC;
+		if(dmL>=0){
+			try{
+				zonen[0].set_dm_aus(dmL);
+			}catch(NegativeMassException nme){
+				nme.log_Warning("BlowBy führte zu einer Entleerung der Zone ! \n" +
+						"BlowBy-Eingaben überprüfen.");
+				nme.stopBremo();
+			}
+		}else{
+			zonen[0].set_dm_ein(-dmL, zonen[0].get_T(), zonen[0].get_ggZone());
 		}
 		
 		//Direkteinspritzung
@@ -395,6 +415,13 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		super.buffer_EinzelErgebnis("alpha_A_vor [-]",alpha_A_vor,i);
 		i++;
 		super.buffer_EinzelErgebnis("alpha_A_rück [-]",alpha_A_rueck,i);
+		i++;
+		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);
+		i++;
+		super.buffer_EinzelErgebnis("dmL [kg/KW]", super.CP.convert_ProSEC_2_ProKW(dmL), i);
+		i++;
+		mL=mL+dmL*super.CP.SYS.WRITE_INTERVAL_SEC;
+		super.buffer_EinzelErgebnis("mL [kg]", mL, i);
 		i++;
 		super.buffer_EinzelErgebnis("T_Saug [K]",this.TSaug,i);
 		i++;

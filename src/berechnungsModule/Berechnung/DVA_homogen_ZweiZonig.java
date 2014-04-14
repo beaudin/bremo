@@ -8,6 +8,8 @@ import matLib.MatLibBase;
 import misc.HeizwertRechner;
 import misc.LittleHelpers;
 import misc.VektorBuffer;
+import berechnungsModule.blowby.BlowBy;
+import berechnungsModule.blowby.BlowByFabrik;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
@@ -39,11 +41,13 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	private Motor motor;
 	private GleichGewichtsRechner gg;
 	private MasterEinspritzung masterEinspritzung;
+	private BlowBy blowbyModell;
 
 
 	private final int ANZAHL_ZONEN;
 
 	private double dQw, Qw=0, Qb=0,mb=0;
+	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
 
 	/**
@@ -83,6 +87,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 		checkEinspritzungen(masterEinspritzung); //checkt ob alle Einspritzungen in die unverbrennte Zone erfolgen
 		gg=CP.OHC_SOLVER;
+		blowbyModell = CP.BLOW_BY_MODELL;
 
 		T_buffer = new misc.VektorBuffer(cp);
 		dQb_buffer = new misc.VektorBuffer(cp);	
@@ -137,8 +142,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 				m1,ggZone_init, true,1);
 
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
-		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
-
+		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		
 	}
 
 
@@ -160,14 +165,39 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 
 		dmZoneBurn=0;	
+		
+		double m0 = zonen_IN[0].get_m();
+		double m1 = zonen_IN[1].get_m();
+		double mges = m0 + m1;
+		dmL = blowbyModell.get_mLeckage(time, zonen_IN)*CP.SYS.WRITE_INTERVAL_SEC;
+		if(dmL>=0){
+			if((m0-dmL)<=CP.SYS.MINIMALE_ZONENMASSE){}else{
+				try {
+					zonen_IN[0].set_dm_aus(m0/mges*dmL);
+				} catch (NegativeMassException e) {
+				}
+			}
+			if((m1-dmL)<=CP.SYS.MINIMALE_ZONENMASSE){}else{
+				try {
+					zonen_IN[1].set_dm_aus(m1/mges*dmL);
+				} catch (NegativeMassException e) {
+				}
+			}
+		}else{
+			zonen_IN[0].set_dm_ein(-m0/mges*dmL,Tu,zonen_IN[0].get_ggZone());
+			if(burntZonesAlreadyInitialised){
+				zonen_IN[1].set_dm_ein(-m1/mges*dmL,zonen_IN[1].get_T(),zonen_IN[1].get_ggZone());
+			}
+		}
+		
 
 
 		if(burntZonesAlreadyInitialised){
 			if(esBrennt&&dQburn>0) 
 				dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,this.get_frischGemisch(),Tu,p);
 
-			//Verbrennungswaerme zufuehren
-			zonen_IN[1].set_dQ_ein_aus(1*dQburn);
+				//Verbrennungswaerme zufuehren
+				zonen_IN[1].set_dQ_ein_aus(1*dQburn);
 
 			if(dmZoneBurn>0){
 				if(zonen_IN[0].get_m()-CP.SYS.MINIMALE_ZONENMASSE>dmZoneBurn*CP.SYS.WRITE_INTERVAL_SEC){
@@ -205,7 +235,9 @@ public class DVA_homogen_ZweiZonig extends DVA {
 			zonen_IN[0].set_dQ_ein_aus(-1*dQwu);		
 			//verbrannte Zone
 			double dQwb=dQw-dQwu;
-			zonen_IN[1].set_dQ_ein_aus(-1*dQwb);				
+			zonen_IN[1].set_dQ_ein_aus(-1*dQwb);
+			
+			//BlowBy Massenstrom abführen
 
 			//Verdampfungswaerme abfuehren
 			zonen_IN=masterEinspritzung.entnehme_dQ_krstDampf(time, zonen_IN);			
@@ -303,7 +335,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		zonenMasseVerbrannt=zn[1].get_m();
 		fortschritt=zonenMasseVerbrannt/mINIT;
 		Qb=Qb+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;
-		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC; 
+		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC;
+		mL=mL+dmL*CP.SYS.WRITE_INTERVAL_SEC;
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
 		double xQ=Qb/Qmax;
 
@@ -383,6 +416,15 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 		i+=1;
 		super.buffer_EinzelErgebnis("Qmax [J]", Qmax,i);	
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dmL [kg/KW]", super.CP.convert_ProSEC_2_ProKW(dmL), i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("mL [kg]", mL, i);
 
 		i+=1;
 		double Hu=zn[0].get_ggZone().get_Hu_mass();

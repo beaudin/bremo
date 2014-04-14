@@ -14,11 +14,9 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 
 	private static String ext = ".txt";
 	private String [] zeitEinheiten={"[KWnZOT]","[s]"};
-	private String zeitEinheit, einheitPZyl, einheitPEin,einheitPAbg; 
-	private double kf_pZyl,kf_pEin,kf_pAbg;//Faktoren für die Umrechnung von bar nach Pa
-	private int spalte_pZyl;
-	private int spalte_pEin;
-	private int spalte_pAbg;	
+	private String zeitEinheit, einheitPZyl, einheitPEin,einheitPAbg, einheitPKGH; 
+	private double kf_pZyl,kf_pEin,kf_pAbg, kf_pKGH;//Faktoren für die Umrechnung von bar nach Pa
+	private int spalte_pZyl,spalte_pEin,spalte_pAbg,spalte_pKGH;	
 	private File file;
 	private boolean dreiDruecke=true;
 	private boolean convertKW2SEC=false;
@@ -28,12 +26,14 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 	public IndizierFileReader_txt(CasePara cp,String pfad,
 			int kanal_pZyl,
 			int kanal_pEin,
-			int kanal_pAus){	
+			int kanal_pAus,
+			int kanal_pKGH){	
 		super(cp);
 
 		spalte_pZyl = kanal_pZyl;
 		spalte_pEin = kanal_pEin;
-		spalte_pAbg = kanal_pAus;			
+		spalte_pAbg = kanal_pAus;
+		spalte_pKGH = kanal_pKGH;
 		anzahlZyklen=1; //Bei txt-Files kann erstmal nur ein Zyklus eingelesen werden!
 
 		if( !pfad.endsWith(ext))
@@ -49,15 +49,63 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 			}
 		datei_Einlesen();		
 	}
+	
+	public IndizierFileReader_txt(CasePara cp,String pfad,
+			int kanal_pZyl,
+			int kanal_pEin,
+			int kanal_pAus){	
+		super(cp);
+
+		spalte_pZyl = kanal_pZyl;
+		spalte_pEin = kanal_pEin;
+		spalte_pAbg = kanal_pAus;
+		spalte_pKGH = spalte_pZyl;
+		anzahlZyklen=1; //Bei txt-Files kann erstmal nur ein Zyklus eingelesen werden!
+
+		if( !pfad.endsWith(ext))
+			throw new IllegalArgumentException("TXT_datei: kein gültiges Dateiformat");
+
+		file = new File(pfad);
+		if (!file.isFile())
+			try{ throw new ParameterFileWrongInputException("Der für das " +
+					"Indizierfile angegebene Pfad zeigt nicht auf eine Datei! \n"
+					+ pfad);
+			}catch(ParameterFileWrongInputException e){
+				e.stopBremo();				
+			}
+		datei_Einlesen();		
+	}
+	
+	public IndizierFileReader_txt(CasePara cp,String fileName,int kanal_pZyl){
+		super(cp);
+		dreiDruecke = false;
+		spalte_pZyl = kanal_pZyl;
+		spalte_pEin = spalte_pZyl;
+		spalte_pAbg = spalte_pZyl;
+		spalte_pKGH = spalte_pZyl;
+		
+		if( !fileName.endsWith(ext))
+			throw new IllegalArgumentException("TXT_datei: kein gültiges Dateiformat");
+
+		file = new File(fileName);
+		if (!file.isFile())
+			try{ throw new ParameterFileWrongInputException("Der für das " +
+					"Indizierfile angegebene Pfad zeigt nicht auf eine Datei!");
+			}catch(ParameterFileWrongInputException e){
+				e.stopBremo();				
+			}			
+		datei_Einlesen();
+	}
 
 
 
-	public IndizierFileReader_txt(CasePara cp,String fileName,int kanal_pZyl){		
+	public IndizierFileReader_txt(CasePara cp,String fileName,int kanal_pZyl, int kanal_pKGH){		
 		super(cp);
 		dreiDruecke=false;
 		spalte_pZyl = kanal_pZyl;
 		spalte_pEin = spalte_pZyl;
 		spalte_pAbg = spalte_pZyl;
+		spalte_pKGH = kanal_pKGH;
 		
 
 		if( !fileName.endsWith(ext))
@@ -96,7 +144,7 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 				try {
 					idx++;
 					String[] theline = line.split("\t");
-					if(theline.length==4){
+					if(theline.length==5){
 						//was ist wenn nur der ZylinderDruckeingelesen werden soll
 						//vielleicht noch eine Abfrage bezüglich der eingegebenen Spalten 
 						//						wenn eine größer ist als die gesamte Spalten zahl gibts einen Fehler!
@@ -109,6 +157,7 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 						einheitPZyl=theline[spalte_pZyl-1];
 						einheitPEin=theline[spalte_pEin-1];
 						einheitPAbg=theline[spalte_pAbg-1];
+						einheitPKGH=theline[spalte_pKGH-1];
 
 						if(zeitEinheit.equals(zeitEinheiten[0])||zeitEinheit.equals(zeitEinheiten[1])){}else{
 							throw new ParameterFileWrongInputException("Die Einheit in der ersten Spalte " +
@@ -118,6 +167,7 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 						kf_pZyl=set_kalibrierfaktor(einheitPZyl);
 						kf_pEin=set_kalibrierfaktor(einheitPEin);
 						kf_pAbg=set_kalibrierfaktor(einheitPAbg);
+						kf_pKGH=set_kalibrierfaktor(einheitPKGH);
 						kalibrierungErfolgreich=true;
 					}
 					Double.parseDouble(theline[0]); //wirft eine Exception wenn theline[0] keine zahl ist
@@ -183,6 +233,9 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 				pEin=new double[nbrOfValues];
 				pAbg=new double[nbrOfValues];
 			}
+			if(spalte_pZyl != spalte_pKGH){
+				pKGH=new double[nbrOfValues];
+			}
 			int i=0;
 			t=zeitAchseTemp[0];
 			do{
@@ -191,7 +244,10 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 				if(dreiDruecke){ 
 					super.pEin[i] = linInt.linInterPol(t, zeitAchseTemp, data[2]);
 					super.pAbg[i] = linInt.linInterPol(t, zeitAchseTemp, data[3]);
-				}	
+				}
+				if(spalte_pZyl != spalte_pKGH){
+					super.pKGH[i] = linInt.linInterPol(t, zeitAchseTemp, data[data.length-1]);
+				}
 				t=t+delta_min;
 				i=i+1;
 			}while(t<=tMax);			   
@@ -201,6 +257,9 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 			if(dreiDruecke){ 
 				super.pEin = data[2];
 				super.pAbg = data[3];
+			}
+			if(spalte_pZyl != spalte_pKGH){
+				super.pKGH = data[data.length-1];
 			}
 		}
 		//interpolate if given values are not equally distributed		   
@@ -237,6 +296,9 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 		int anzSpalten=2;		
 		if(dreiDruecke){ 
 			anzSpalten=4;			
+		}
+		if(spalte_pZyl != spalte_pKGH){
+			anzSpalten+=1;
 		}
 
 		double[][] data = new double[anzSpalten][linesInFile];
@@ -277,6 +339,9 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 					if(dreiDruecke){
 						data[2][cnt]=Double.parseDouble(theline[spalte_pEin-1])*kf_pEin;
 						data[3][cnt]=Double.parseDouble(theline[spalte_pAbg-1])*kf_pAbg;
+					}
+					if(spalte_pZyl != spalte_pKGH){
+						data[data.length-1][cnt]=Double.parseDouble(theline[spalte_pZyl-1])*kf_pKGH;
 					}
 					cnt++;
 				}

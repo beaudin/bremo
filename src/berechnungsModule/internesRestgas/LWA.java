@@ -75,6 +75,11 @@ public class LWA extends InternesRestgas {
 				//Iteration (Einlassschluss) im Zylinder war.
 				zn_LW[0]=new Zone(CP,pInit, VInit,TInit, m_alt,
 						abgas, false, 0);
+				
+				if(mitZwiKo) {
+					((LadungsWechselAnalyse)dglSys_LW).set_mInit(m_alt);
+				}
+				
 				for(int i=1;i<anzSimWerte;i++){
 					time=x0_LW+i*cp.SYS.WRITE_INTERVAL_SEC;		
 					LW_SOL.setFinalValueOfX(time);
@@ -85,6 +90,7 @@ public class LWA extends InternesRestgas {
 						do{
 							znTemp=LW_SOL.solveRK(zn_LW);
 							pIst = znTemp[0].get_p();
+//							System.out.println(pIst);
 							if(pIst<0 || Double.isNaN(pIst)){
 								dglSys_LW.bufferErgebnisse(time,zn_LW);	
 								dglSys_LW.schreibeErgebnisFile("DEBUG_ZONENFEHLER.txt");
@@ -118,9 +124,6 @@ public class LWA extends InternesRestgas {
 				System.out.println("Relative Abweichung der Gesamtmasse: " + f_mInit);
 
 				m_alt=m_neu;
-				if(mitZwiKo) {
-					((LadungsWechselAnalyse)dglSys_LW).set_mInit(m_neu);
-				}
 				idx++;
 			}	
 

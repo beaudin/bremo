@@ -249,42 +249,8 @@ public class Bremo extends Thread {
 //					"apr//bremo_setup_offset.txt",
 //					"apr//bremo_setup_mRG.txt",
 //					"apr//bremo_setup_dOT.txt"
-//					"d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//bremo_setup_140123_00009_zyklus163.txt"
-//					"PhH/Messpunkt_10_Schichtreferenz/Bremo_Inputfile_Messpunkt_10.txt"
-//					"Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/withMixing/mode3_Mix.txt",
-//					"Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/withDiffusion/KivaFixed/mode3_DiffusionInp.txt",
-//					"Mode7/Rasterfahndung/mode7InpRF.txt"
-//					"Mode7/mode7Inp_Mix1.txt"
-//					"Mode3/RasterFahndung/mode3InpMix_T_IVC_351.txt",
-//					"Mode7/mode7Inp_Mix6.txt",
-//					"Mode7/InputFromGTPower/m7_GTPowerRed_Mix1_b_OldParameters.txt"					
-//					"Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_35_Mix1_b.txt",
-//					"Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_45_Mix1_b.txt",
-//					"Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_54_Mix1_b.txt",
-//					"Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_65_Mix1_b.txt",
-//					"Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_65_Mix1_b_BestMatch.txt",
-//					"Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_75_Mix1_b.txt",
-//					"Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_40_Mix1_b.txt",
-//					"Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_50_Mix1_b.txt",
-//					"Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_60_Mix1_b.txt",
-//					"Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_70_Mix1_b.txt",
-//					"Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_90_Mix1_b.txt",
-//					"Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_40_Mix1_b.txt",
-//					"Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_50_Mix1_b.txt",
-//					"Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_60_Mix1_b.txt",
-//					"Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_70_Mix1_b.txt",
-//					"Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_80_Mix1_b.txt",
-////					"Mode6/InputFromGTPowerM6/m6_GT_30_Mix1_b.txt",
-//					"Mode6/InputFromGTPowerM6/m6_GT_40_Mix1_b.txt",
-//					"Mode6/InputFromGTPowerM6/m6_GT_51_Mix1_b.txt",
-//					"Mode6/InputFromGTPowerM6/m6_GT_60_Mix1_b.txt",
-//					"Mode6/InputFromGTPowerM6/m6_GT_70_Mix1_b.txt",
-//					"Mode3/InputFromGTPowerM3/m3_GT_T_INTAKE_30_Mix1_b_BestMatch.txt",
-//					"Mode3/VergleichMitChemkin/mode3_Compare2Chemkin.txt"
-//					"Mode3/DERCMeeting/m3_T_IVC_351_Mix1_bTest.txt"
-//					"Mode3/InputFromGT/m3_GTPowerReducedInput_Mix1_b_DERCConstants.txt",
-//					"InputFromGT/Mode3/m3_GTPowerReducedInput_Mix6.txt",
-//					"Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/VergleichMitChemkin/mode3_Compare2Chemkin.txt"
+//					"d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//bremo_setup_140123_00009_zyklus164.txt",
+//					"d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//bremo_setup_140123_00009_zyklus165.txt"
 			};
 			inputFileNames=ifn;
 		}		
@@ -359,7 +325,7 @@ public class Bremo extends Thread {
 	private static void multiFileRun(String [] inputFileNames){
 		File file;	
 		for(int i=0;i<inputFileNames.length;i++){
-			file = new File("src//InputFiles//" +
+			file = new File(//"src//InputFiles//" +
 					inputFileNames[i]);				
 			Bremo bremo=new Bremo(file,false);
 			bremo.run();

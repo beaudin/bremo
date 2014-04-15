@@ -106,6 +106,10 @@ public class CasePara {
 		InternesRestgasFabrik irgf=new InternesRestgasFabrik(this);
 		RESTGASMODELL=irgf.RESTGAS_MODELL;
 		
+		//BlowBy
+		BlowByFabrik bbf = new BlowByFabrik(this);
+		BLOW_BY_MODELL = bbf.BLOW_BY_MODELL;
+		
 		//Wandwaerme
 		WandWaermeUebergangFabrik wwf=new WandWaermeUebergangFabrik(this);
 		WAND_WAERME=wwf.WAND_WAERME_MODUL;
@@ -115,10 +119,6 @@ public class CasePara {
 		
 		//Turbulence
 		TURB_FACTORY=new TurbulenceModelFactory(this, new MakeMeUnique());
-		
-		//BlowBy
-		BlowByFabrik bbf = new BlowByFabrik(this);
-		BLOW_BY_MODELL = bbf.BLOW_BY_MODELL;
 		
 		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG und RESTGAS_MODELL
 		BerechnungsModellFabrik bmf=new BerechnungsModellFabrik(this);

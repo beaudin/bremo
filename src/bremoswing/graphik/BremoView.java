@@ -60,6 +60,15 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
     JButton favoriteButton;
     JButton y_achse_button;
     
+    JButton save_Fav_1 ;
+    JButton save_Fav_2 ;
+    JButton save_Fav_3 ;
+    JButton save_Fav_4 ;
+    JButton load_Fav_1 ;
+    JButton load_Fav_2 ;
+    JButton load_Fav_3 ;
+    JButton load_Fav_4 ;
+    
     JComboBox<String> x_achse;
     JComboBox<String> y_achse_1;
     JComboBox<String> y_achse_2;
@@ -114,6 +123,26 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         favoriteButton.setName("favoriteButon");
         y_achse_button.setName("y_achse_button");
         
+        save_Fav_1 = new JButton("Save Fav 1");
+        save_Fav_2 = new JButton("Save Fav 2");
+        save_Fav_3 = new JButton("Save Fav 3");
+        save_Fav_4 = new JButton("Save Fav 4");
+               
+        load_Fav_1 = new JButton("Load Fav 1");
+        load_Fav_2 = new JButton("Load Fav 2");
+        load_Fav_3 = new JButton("Load Fav 3");
+        load_Fav_4 = new JButton("Load Fav 4");
+        
+        save_Fav_1.setName("s_favs_1");
+        save_Fav_2.setName("s_favs_2");
+        save_Fav_3.setName("s_favs_3");
+        save_Fav_4.setName("s_favs_4");
+        
+        load_Fav_1.setName("l_favs_1");
+        load_Fav_2.setName("l_favs_2");
+        load_Fav_3.setName("l_favs_3");
+        load_Fav_4.setName("l_favs_4");
+        
         x_achse_label   = new JLabel("X-Axe :");
         y_achse_1_label = new JLabel("1. Y-Axe :") ;
         y_achse_2_label = new JLabel("2. Y-Axe :");
@@ -155,7 +184,15 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         chooseFrame = new ItemChooseFrame(this);
       
         openFileButton.addActionListener(this);
-        favoriteButton.addActionListener(this);
+        
+        save_Fav_1.addActionListener(this);
+        save_Fav_2.addActionListener(this);
+        save_Fav_3.addActionListener(this);
+        save_Fav_4.addActionListener(this);
+        load_Fav_1.addActionListener(this);
+        load_Fav_2.addActionListener(this);
+        load_Fav_3.addActionListener(this);
+        load_Fav_4.addActionListener(this);
         
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setPreferredSize(new Dimension (1280,800));
@@ -234,6 +271,34 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
       virtualPanel.add(favoriteButton);
             
       TabellePanel.add(virtualPanel);
+      
+      JPanel virtualPanel2 = new JPanel(new GridLayout(4, 2, 5, 5));
+      
+      save_Fav_1.setToolTipText("Store the Index of All Curve on the Graphic as Favorite 1");
+      save_Fav_2.setToolTipText("Store the Index of All Curve on the Graphic as Favorite 2");
+      save_Fav_3.setToolTipText("Store the Index of All Curve on the Graphic as Favorite 3");
+      save_Fav_4.setToolTipText("Store the Index of All Curve on the Graphic as Favorite 4");
+      
+      load_Fav_1.setToolTipText("load the Index on Favorite 1 to show on the Graphic");
+      load_Fav_2.setToolTipText("load the Index on Favorite 2 to show on the Graphic");
+      load_Fav_3.setToolTipText("load the Index on Favorite 3 to show on the Graphic");
+      load_Fav_4.setToolTipText("load the Index on Favorite 4 to show on the Graphic");
+      
+      virtualPanel2.add(save_Fav_1);
+      virtualPanel2.add(load_Fav_1);
+      
+      virtualPanel2.add(save_Fav_2);
+      virtualPanel2.add(load_Fav_2);
+      
+      virtualPanel2.add(save_Fav_3);
+      virtualPanel2.add(load_Fav_3);
+      
+      virtualPanel2.add(save_Fav_4);
+      virtualPanel2.add(load_Fav_4);
+      
+      virtualPanel2.setBorder(BorderFactory.createTitledBorder("Favorite"));
+      
+      TabellePanel.add(virtualPanel2);
         
         
         /********************************************************************************/
@@ -368,23 +433,45 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
     	TitelPanel.revalidate();
     }
     
-   
+    /**
+     * Update the Visibility of the Y-axe ChooseFrame
+     * @param bol
+     */
 	public void update( boolean bol) {
 		chooseFrame.setVisible(bol);
 	}
-	
+	/**
+	 * Update the Titel 
+	 * @param str
+	 */
 	public void update(String str) {
-		TitelLabel.setText(str);
+		TitelLabel.setText(str.replace(".txt", ""));
 		TitelPanel.revalidate();
 	}
+	/**
+	 * Update the chart of the GraphicPanel
+	 * @param chart
+	 */
 	public void update(ChartPanel chart) {
 		GraphikPanel.removeAll();
 		GraphikPanel.add(chart);
 		GraphikPanel.revalidate();
 	}
+	/**
+	 * Update the X_achse Combobox
+	 * @param item
+	 */
 	public void update(String [] item) {
 		addItemToComboBox(x_achse, item);
 		chooseFrame.addItemtoListBox(item);
+		GroupPanel.revalidate();
+	}
+	/**
+	 * Update the path of the Inputfile
+	 * @param stb
+	 */
+	public void update(StringBuilder stb) {
+		pathLabel.setText(stb.toString());
 		GroupPanel.revalidate();
 	}
 	
@@ -438,8 +525,6 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 		 * @param cb
 		 * @param item
 		 */
-		
-		@SuppressWarnings("unchecked")
 		public  void addItemToComboBox(JComboBox<String> cb, String[] item) {
 
 			cb.removeAllItems();
@@ -484,10 +569,37 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			OpenFileToShowOnBremoView();
 			break;
 
-		case "favoriteButon":
-			controller.favs(this);
+		case "s_favs_1":
+			controller.savefavs(1);
 			break;
-
+			
+		case "s_favs_2":
+			controller.savefavs(2);
+			break;
+			
+		case "s_favs_3":
+			controller.savefavs(3);
+			break;
+			
+		case "s_favs_4":
+			controller.savefavs(4);
+			break;
+			
+		case "l_favs_1":
+			controller.loadfavs(1);
+			break;
+			
+		case "l_favs_2":
+			controller.loadfavs(2);
+			break;
+			
+		case "l_favs_3":
+			controller.loadfavs(3);
+			break;
+		case "l_favs_4":
+			controller.loadfavs(4);
+			break;
+			
 		default:
 			System.err.println("find no component list !");
 			break;
@@ -509,6 +621,9 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         }
         if (arg instanceof String [] ) {
         	update((String[])arg);
+        }
+        if (arg instanceof StringBuilder ) {
+        	update((StringBuilder)arg);
         }
 	}
 

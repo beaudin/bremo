@@ -24,6 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
@@ -37,6 +38,7 @@ import bremo.main.Bremo;
 import bremoExceptions.ParameterFileWrongInputException;
 import bremoswing.SwingBremo;
 import bremoswing.util.ExtensionFileFilter;
+import bremoswing.util.FertigMeldungFrame;
 
 /**
  *
@@ -65,7 +67,7 @@ public  class SelectItemToPlotten extends JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
-        jPanel1 = new JPanel(){
+        jPanel = new JPanel(){
 			public void paintComponent(Graphics g) 
             {
               
@@ -91,63 +93,54 @@ public  class SelectItemToPlotten extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-        		if (fileComboBox.getSelectedItem().toString().equals("Calculation not made! Choose a file to show ?")) {
-        			
-        		}
-        		else {
-				        plott();
-        		}
+				 plott();
 			}
 		});
+        setVisible(true);
         setResizable(false);
         setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo1.png")).getImage());
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Choose to plott");
-        jPanel1.setBorder(BorderFactory.createTitledBorder("Bitte Input File zu plotten wählen"));
+        jPanel.setBorder(BorderFactory.createTitledBorder("Bitte Input File zu plotten wählen"));
 
        // fileComboBox.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         String[] tmp = SwingBremo.bremoThreadFertig;
-        addFileItemToComboBox(fileComboBox, tmp);
+		try {
+			addFileItemToComboBox(fileComboBox, tmp);
+		} catch (NullPointerException e) {
+			dispose();
+			callBremoView();
+		}
         fileComboBox.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				//plott();
+				        plott();
 			}
 		});
         fileComboBox.addKeyListener(new KeyAdapter() {
             @Override 
         	public void keyPressed (KeyEvent e){
-            	 
-            	if (e.getKeyCode() == KeyEvent.VK_ENTER){
-            		if (fileComboBox.getSelectedItem().toString().equals("Calculation not made! Choose a file to show ?")) {
-            			
-            		}
-            		else {
-    				        plott();
-            		}
-
-            	}
+            	    	plott();
              }
 		});
-        GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        
+        GroupLayout jPanelLayout = new GroupLayout(jPanel);
+        jPanel.setLayout(jPanelLayout);
+        jPanelLayout.setHorizontalGroup(
+            jPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelLayout.createSequentialGroup()
                 //.addContainerGap()
                 .addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, 297, GroupLayout.PREFERRED_SIZE)
                 .addComponent(ButtonOK,GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE))
                 //.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-            	.addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+        jPanelLayout.setVerticalGroup(
+            jPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelLayout.createSequentialGroup()
+            	.addGroup(jPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
             	        .addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addComponent(ButtonOK,GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -157,11 +150,11 @@ public  class SelectItemToPlotten extends JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -184,6 +177,7 @@ public  class SelectItemToPlotten extends JFrame {
 		    
 		    try {
 		    	File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
+		    	File output = null ;
 		        String berechnungModell = "";
 		        boolean is_RestgasVorgabe_LWA = false;
 		        BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
@@ -198,116 +192,66 @@ public  class SelectItemToPlotten extends JFrame {
 						String[] tmp =  header[1].split("_");
 						if (tmp[0].equals("DVA")){
 							berechnungModell = "DVA";
+							output = new File(input.getParent()+"/DVA_"+input.getName());
 						}
 						else if (tmp[0].equals("APR")){
 							berechnungModell = "APR";
+							output = new File(input.getParent()+"/APR_"+input.getName());
 						}
 					}
 					if (header[0].equals("RestgasVorgabeLWA")){
 						is_RestgasVorgabe_LWA = true;
 					}
 				}
-				// new bremoGraphik(input);
-				if (berechnungModell.equals("DVA")){
-					
-					new DVA_ModellGraphik(input,is_RestgasVorgabe_LWA);
-				}
-				else if  (berechnungModell.equals("APR")){
-					
-					new APR_ModellGraphik(input, is_RestgasVorgabe_LWA); 
+				try {
+				   callBremoViewWhitFile(output);
+				} catch (NullPointerException e) {
+					     callBremoView();
 				}
 				in.close();
+				dispose();
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				new FertigMeldungFrame("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParameterFileWrongInputException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				new FertigMeldungFrame("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);
 			} catch (NullPointerException e){
-				
+				new FertigMeldungFrame("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);
 			}
 	}
-	
-	void choose_and_ploot() {
+	public void callBremoView() {
 		
-//		JFileChooser fileChooser = new JFileChooser(".");
-//		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-//		fileChooser.setMultiSelectionEnabled(false);
-//		ExtensionFileFilter txtFilter = new ExtensionFileFilter(null,
-//				new String[] { "txt" });
-//
-//		fileChooser.addChoosableFileFilter(txtFilter);
-//		try {
-//			int status = fileChooser.showOpenDialog(getRootPane());
-//
-//			if (status == JFileChooser.APPROVE_OPTION) {
-//				if (fileChooser.getSelectedFile() != null) {
-//					File file = fileChooser.getSelectedFile();
-//					String fileName = file.getName();
-//					String Modell = fileName.split("_")[0];
-//					
-//					freiMode = new BremoUltimateView(file);
-//					currentPath = file.getParent();
-//					TitelLabel.setText(fileName.substring(0,fileName.indexOf(".")));
-//					BremoGraphicUpdate();
-//				}
-//			} else if (status == JFileChooser.CANCEL_OPTION) {
-//
-//				fileChooser.cancelSelection();
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-	}
-	
-	
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /*
-         * Set the Nimbus look and feel
-         */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel. For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SelectItemToPlotten.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SelectItemToPlotten.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SelectItemToPlotten.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(SelectItemToPlotten.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+	       BremoView view = new BremoView(new BremoViewModel());
+	       
+	       view.getController().getModel().addObserver(view);
+	       
+	       view.setVisible(true);
+			
+		}
+		
+	public void callBremoViewWhitFile(File file) {
+			
+		       BremoView view = new BremoView(new BremoViewModel());
+		       
+		       view.getController().getModel().addObserver(view);
+		       
+			try {
+				view.getController().SendFileModel(file);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				new FertigMeldungFrame("Error", e.getMessage(),JOptionPane.ERROR_MESSAGE);
+			}
+		       
+		       view.setVisible(true);
+				
+			}
 
-        /*
-         * Create and display the form
-         */
-        java.awt.EventQueue.invokeLater(new Runnable() {
+	
 
-            public void run() {
-                new SelectItemToPlotten().setVisible(true);
-            }
-        });
-    }
-    // Variables declaration - do not modify
+    // Variables declaration
     private JComboBox fileComboBox;
-    private JPanel jPanel1;
+    private JPanel jPanel;
     private JButton ButtonOK;
     // End of variables declaration
 }

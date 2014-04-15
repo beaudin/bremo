@@ -76,14 +76,12 @@ public class IndizierDaten {
 			pEinNr=CP.get_ColumnToRead("spalte_pEin");
 			pAusNr=CP.get_ColumnToRead("spalte_pAbg");	
 		}
-		int pKGHNr;
-		System.out.println(CP.BLOW_BY_MODELL);
-		System.out.println(CP.is_pKGH_indiziert());
-		if(CP.BLOW_BY_MODELL.is_Berechnet() && CP.is_pKGH_indiziert()){
-			pKGHNr=CP.get_ColumnToRead("spalte_pKGH");
-			kghIndiziert=true;
-		}else{
-			pKGHNr=pZylNr;
+		int pKGHNr=pZylNr;
+		if(CP.BLOW_BY_MODELL.is_Berechnet()){
+			if(CP.is_pKGH_indiziert()){
+				pKGHNr=CP.get_ColumnToRead("spalte_pKGH");
+				kghIndiziert=true;
+			}
 		}
 		if(CP.RESTGASMODELL.involvesGasExchangeCalc() && (pZylNr==pEinNr || pZylNr==pAusNr || pEinNr==pAusNr)){
 			try {

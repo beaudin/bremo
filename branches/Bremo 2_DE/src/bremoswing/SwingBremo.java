@@ -61,6 +61,8 @@ import bremoswing.util.FertigMeldungFrame;
  */
 public class SwingBremo extends JFrame {
 
+	private static final String title = "Bremo 2.0 Beta";
+	
 	private static final long serialVersionUID = 1L;
 	public static boolean ConsloseModeActive = false;
 	/************************** Variables declaration ****************************************/
@@ -232,7 +234,7 @@ public class SwingBremo extends JFrame {
 		NrBremoAlive = 0;
 
 		/****** HAUPT FRAME ****************************************************************/
-		setTitle("Bremo 2.0 Beta");
+		setTitle(this.title);
 		setBackground(new Color(255, 255, 255));
 		setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo1.png")).getImage());

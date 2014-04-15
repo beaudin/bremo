@@ -59,7 +59,7 @@ public class BremoViewController  {
 	}
 
 	public void SendFileModel(File file) throws IOException {
-		model.setInputFile(file);
+		model.readInputFile(file);
 		
 	}
 
@@ -67,10 +67,14 @@ public class BremoViewController  {
 		return model;
 	}
 
-	public void favs(BremoView view) {
-	
-		model.saveFavs();
-		
+	public void savefavs(int i) {
+		// TODO Auto-generated method stub
+		model.saveFavs(i);
+	}
+
+	public void loadfavs(int i)  {
+		// TODO Auto-generated method stub
+		model.loadFavs(i);
 	}
 	
 	

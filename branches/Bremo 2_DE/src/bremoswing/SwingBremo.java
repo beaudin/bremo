@@ -20,9 +20,12 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.ThreadGroup;
 import java.net.URL;
+
+
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -51,10 +54,12 @@ import bremoswing.graphik.SelectItemToPlotten;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.SucheBremo;
 import bremoswing.util.FertigMeldungFrame;
+
+
 /*
  * SwingBremo.java
  *
- */
+ *
 
 /**
  * @author Ngueneko Steve
@@ -91,7 +96,7 @@ public class SwingBremo extends JFrame {
 	public static int NrOfFile;
 	public static int NrBremoAlive;
 	public static JProgressBar progressBar;
-	public static JProgressBar progressBarInd;
+	public static JProgressBar progressBarInd;	
 	// public static JButton pb;
 	public static JLabel label;
 	public static Timer timerUpdate;
@@ -157,7 +162,7 @@ public class SwingBremo extends JFrame {
 	private void initComponents() {
 
 		System.setOut(outStream);
-		System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten auf Ausgabe in Eclipse statt Bremo-GUI
+		//System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
 
 		manager = new JPanel(){
 			/**
@@ -225,6 +230,7 @@ public class SwingBremo extends JFrame {
 
 		progressBar = new JProgressBar(0, 100);
 		progressBarInd = new JProgressBar(0, 100);
+		
 
 		label = new JLabel();
 		percent = 0;
@@ -340,13 +346,14 @@ public class SwingBremo extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-//				// TODO Auto-generated method stub
-//				if(plotten != null ) {
-//				  plotten.dispose();
-//				}
-//			    plotten = new SelectItemToPlotten();
-//				plotten.setVisible(true);
-				callBremoView();
+				
+				if(plotten != null ) {
+				  plotten.dispose();
+				}
+			    plotten = new SelectItemToPlotten();
+				
+				
+				//callBremoView();
 				
 				
 			}
@@ -389,7 +396,7 @@ public class SwingBremo extends JFrame {
 //		label.setBackground(new Color(255, 255, 255));
 	
 		gc.fill = GridBagConstraints.NONE;
-		gc.insets = new Insets(5, 10, 0, 155);
+		gc.insets = new Insets(5, 10, 0, 100);
 		gc.weightx = 0.5;
 		gc.gridx = 5;
 		gc.gridy = 0;
@@ -400,7 +407,7 @@ public class SwingBremo extends JFrame {
 
 		/************ PROGESSBAR ************************************/
 		
-		progressBarInd.setValue(100);
+		//progressBarInd.setValue(10);
 		progressBarInd.setIndeterminate(true);
 		progressBarInd.setVisible(false);
 		
@@ -602,6 +609,23 @@ public class SwingBremo extends JFrame {
        view.setVisible(true);
 		
 	}
+	
+	public void callBremoViewWhitFile(File file) {
+		
+	       BremoView view = new BremoView(new BremoViewModel());
+	       
+	       view.getController().getModel().addObserver(view);
+	       
+		try {
+			view.getController().SendFileModel(file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			new FertigMeldungFrame("Error", e.getMessage(),JOptionPane.ERROR_MESSAGE);
+		}
+	       
+	       view.setVisible(true);
+			
+		}
 
 	/** Warning Massage **********/
 	protected void messsage() {

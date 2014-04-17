@@ -492,6 +492,15 @@ public class IndizierDaten {
 		double t_Beginn = CP.get_DruckabgleichBeginn();
         double t_Ende = CP.get_DruckabgleichEnde();
         
+        if((t_Beginn-t_Ende)>CP.convert_KW2SEC(20))
+			try {
+				throw new ParameterFileWrongInputException(
+						"Der Bereich für den Druckabgleich mit der PolytropenMethode sollte" + 
+				"kleiner gewählt werden.");
+			} catch (ParameterFileWrongInputException e) {
+				e.log_Warning(e.getMessage());
+			}
+        
         if (t_Beginn-t_Ende<0){
         
         double deltat=zeitAchse[0]-zeitAchse[1];
@@ -519,29 +528,34 @@ public class IndizierDaten {
 			kappa = CP.get_Kappa_Druckabgleich();//(polyIdy)
 		} else {
 			
-//		//Frischgemisch als Spezies Objekt erstellen
-//		//Ersatz des Verbrennungsluftaufrufes mit AGRintern=0
-		Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuft();
-//		Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuftPolytropenmethode();	
-		MasterEinspritzung me=CP.MASTER_EINSPRITZUNG;
-		Spezies krst=me.get_spezKrstALL();	
-		Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
-		double mKrst=me.get_mKrst_Sum_ASP();
-//		//Aufruf ohne zirkuläre Referenz
-		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();
-//		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP_Polytropenmethode();	
-		double mGes= mVerbrennungsLuft+mKrst;
-		frischGemisch_MassenbruchHash.put(verbrennungsLuft, mVerbrennungsLuft/mGes);
-		frischGemisch_MassenbruchHash.put(krst, mKrst/mGes);		
-//
-		GasGemisch frischGemisch=new GasGemisch("Frischgemisch");	
-		frischGemisch.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);
-//		//double T=300; //Temperatur statisch bei 300K, gewählt von Juwe
-		double T=pZyl_temp_1*v1/(mGes*frischGemisch.get_R()); //Temperatur zu Beginn des Abgleichs aus idealer Gasgleichung
-		kappa = frischGemisch.get_kappa(T); //CP.get_Kappa_Druckabgleich();//(polyIdy)
+//			Frischgemisch als Spezies Objekt erstellen
+//			Ersatz des Verbrennungsluftaufrufes mit AGRintern=0
+			Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuft();
+//			Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuftPolytropenmethode();	
+			MasterEinspritzung me=CP.MASTER_EINSPRITZUNG;
+			Spezies krst=me.get_spezKrstALL();	
+			Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
+			double mKrst=me.get_mKrst_Sum_ASP();
+//			Aufruf ohne zirkuläre Referenz
+			double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();
+//			double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP_Polytropenmethode();	
+			double mGes= mVerbrennungsLuft+mKrst;
+			frischGemisch_MassenbruchHash.put(verbrennungsLuft, mVerbrennungsLuft/mGes);
+			frischGemisch_MassenbruchHash.put(krst, mKrst/mGes);		
+	
+			GasGemisch frischGemisch=new GasGemisch("Frischgemisch");	
+			frischGemisch.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);
+//			double T=300; //Temperatur statisch bei 300K, gewählt von Juwe
+			
+			double T=pZyl_temp_1*v1/(mGes*frischGemisch.get_R()); //Temperatur zu Beginn des Abgleichs aus idealer Gasgleichung
+			kappa = frischGemisch.get_kappa(T); //CP.get_Kappa_Druckabgleich();//(polyIdy)
+			T=pZyl_temp_1*v1/(mGes*frischGemisch.get_R()); //Temperatur zum Ende des Abgleichs
+			kappa = (kappa + frischGemisch.get_kappa(T)) / 2; //Mittelwertbildung
 
 		}
+		//Für PostFile
 		kappa_druckabgleich = kappa;
+		
 		double pZyl_temp_1_ABS = 
 		(pZyl_temp_2-pZyl_temp_1)/(Math.pow((v1/v2),kappa)-1);
 		

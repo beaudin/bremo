@@ -110,7 +110,7 @@ public  class SelectItemToPlotten extends JFrame {
 		try {
 			addFileItemToComboBox(fileComboBox, tmp);
 		} catch (NullPointerException e) {
-			dispose();
+			setVisible(false);
 			callBremoView();
 		}
         fileComboBox.addActionListener(new ActionListener() {
@@ -209,7 +209,6 @@ public  class SelectItemToPlotten extends JFrame {
 					     callBremoView();
 				}
 				in.close();
-				dispose();
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				new FertigMeldungFrame("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);

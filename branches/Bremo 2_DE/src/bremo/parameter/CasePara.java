@@ -2782,5 +2782,27 @@ public class CasePara {
 	public void set_CalledFromGUI(boolean calledFromGUI) {
 		this.calledFromGUI = calledFromGUI;
 	}
+	
+	/**
+	 * Zum Ändern eines Double-Wertes im Inputfile-Parametersatzes für iterative Rechnungen. 
+	 * @param paraName
+	 * @param paraEinheit -- Auf richtige Einheit achten!! 
+	 * @param paraWert
+	 */
+	public void set_ParaInputfile(String paraName, String paraEinheit, double paraWert){
+		String[] paraWertEinheit = {Double.toString(paraWert), paraEinheit};
+		INPUTFILE_PARAMETER.put(paraName, paraWertEinheit);
+	}
+	
+	/**
+	 * Zum Ändern eines String-Wertes im Inputfile-Parametersatzes für iterative Rechnungen. 
+	 * @param paraName
+	 * @param paraEinheit -- Auf richtige Einheit achten!! 
+	 * @param paraWert
+	 */
+	public void set_ParaInputfile(String paraName, String paraEinheit, String paraWert){
+		String[] paraWertEinheit = {paraWert, paraEinheit};
+		INPUTFILE_PARAMETER.put(paraName, paraWertEinheit);
+	}
 
 }//Klasse CasePara

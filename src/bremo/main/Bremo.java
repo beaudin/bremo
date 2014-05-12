@@ -140,8 +140,8 @@ public class Bremo extends Thread {
 			casePara.set_CalledFromGUI(calledFromGUI);
 			r.berechnungDurchfuehren();
 			if(calledFromGUI){
-			new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
-			SwingBremo.PutInBremoThreadFertig(this.getName());
+				new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
+				SwingBremo.PutInBremoThreadFertig(this.getName());
 			}
 		} catch (Exception  e) {
 			this.interrupt();

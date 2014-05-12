@@ -1,11 +1,14 @@
 package berechnungsModule;
 
 import io.FileWriter_txt;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
+
 import matLib.MatLibBase;
+import misc.LinInterp;
 import bremo.parameter.CasePara;
 import bremoExceptions.BirdBrainedProgrammerException;
 
@@ -116,5 +119,26 @@ public class ErgebnisBuffer {
 
 		txtW.writeTextLineToFile(header, false);
 		txtW.writeMatrixToFile(MatLibBase.transp_2d_array(values), true);
+	}
+	
+	/**
+	 * Gibt den gebufferten Wert zu einem bestimmten Zeitpunkt zurück. Gibt es keinen Wert, wird null zurückgegeben.
+	 * @param time [sec n. Rechenbeginn]
+	 * @param name (wie er in der Ausgabedatei steht)
+	 * @return value
+	 */
+	@SuppressWarnings("null")
+	public double get_bufferedErgebnis(double time, String name){
+		double value = 0;
+		try{
+			double[] zeit = vector2double(this.ergebnisHash.get("Zeit [s n. Rechenbeginn]"));
+			double[] values = vector2double(this.ergebnisHash.get(name));
+			LinInterp linInterp = new LinInterp(this.cp);
+			value = linInterp.linInterPol(time, zeit, values);
+			return value;
+		}catch(Exception e){
+			return (Double) null;
+		}
+		
 	}
 }

@@ -359,6 +359,8 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		int i=0;
 		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",super.CP.convert_SEC2KW(time),i);
 		i++;
+		super.buffer_EinzelErgebnis("Zeit [s n. Rechenbeginn]",time,i);
+		i++;
 		super.buffer_EinzelErgebnis("pZyl_mess [bar]",indiD.get_pZyl(time)*1e-5,i);
 		i++;
 		super.buffer_EinzelErgebnis("pZyl_berech [bar]",zonen[0].get_p()*1E-5,i);

@@ -8,6 +8,9 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -38,10 +41,10 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
     private JLabel y_achse_2_label;
     private JLabel y_achse_3_label;
     private JLabel y_achse_4_label;
-    private JList<String> y_achse_1;
-    private JList<String> y_achse_2;
-    private JList<String> y_achse_3;
-    private JList<String> y_achse_4;
+    public JList<String> y_achse_1;
+    public JList<String> y_achse_2;
+    public JList<String> y_achse_3;
+    public JList<String> y_achse_4;
     private JScrollPane jScrollPane1;
     private JScrollPane jScrollPane2;
     private JScrollPane jScrollPane3;
@@ -53,7 +56,6 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
     private BremoViewResource resource ;
     
     
-       
     public ItemChooseFrame(BremoView parent) {
     	this.parent = parent;
         initComponents();
@@ -109,25 +111,31 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
         OkButton.setName("OkButton");
         OkButton.addActionListener(this);
         
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        
+        
+        
+        //setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setResizable(false);
         setIconImage(new ImageIcon(getClass().getResource(
 				resource.getIconBremoSwing())).getImage());
 
-       
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+				setVisible(false);
+			}
+		});
         jScrollPane1.setViewportView(y_achse_1);
 
         jScrollPane2.setViewportView(y_achse_2);
 
         jScrollPane3.setViewportView(y_achse_3);
 
-        y_achse_4.setModel(new AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         jScrollPane4.setViewportView(y_achse_4);
 
+        lockAxe("1");
+        
         OkButton.setText("OK");
         OkButton.addActionListener(new ActionListener() {
 			
@@ -234,6 +242,11 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
 		y_achse_3.setModel(new JList<String>(item).getModel());
     	y_achse_4.removeAll();
 		y_achse_4.setModel(new JList<String>(item).getModel());
+    }
+    
+    void SelectIndiceOnList() {
+    	
+    	
     }
 
 	@Override

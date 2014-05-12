@@ -1,7 +1,9 @@
 package bremoswing.graphik;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Stroke;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,8 +12,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Observer;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
 
@@ -26,6 +37,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -49,6 +61,10 @@ public class BremoViewModel implements Observable {
 	 * Output file. 1.place x_index 2.place list y_index
 	 */
 	private ArrayList<int[]> IndexStore;
+	/**
+	 * Units is a Store for the Units of all possible element to represent
+	 */
+	private String [] Units ;
 	private File file;
 	private File favsFile;
 	private ChartPanel Chart;
@@ -92,8 +108,16 @@ public class BremoViewModel implements Observable {
 	/**
 	 * Notify Observer to show the Path of the Inputfile
 	 */
-	private void notifyObserver(StringBuilder stb) {
+	public void notifyObserver(StringBuilder stb) {
 		bremoViewObserver.update(null, stb);
+		
+	}
+	
+	/**
+	 * Notify Observer to show the Path of the Inputfile
+	 */
+	public void notifyObserver(List list) {
+		bremoViewObserver.update(null, list);
 		
 	}
 
@@ -237,6 +261,11 @@ public class BremoViewModel implements Observable {
 		if (checkFavsfile()) {
 			String log_param = readFavsFile();
 			Diagramm_From_Index(log_param);
+		} else {
+			indexStoreReset();
+			IndexStore.add(0, new int[] {0});
+			IndexStore.add(1,new int [] {2});
+			notifyObserver(Build_Diagramm(1, "No Log"));
 		}
 	}
 
@@ -337,8 +366,12 @@ public class BremoViewModel implements Observable {
 		int[] y_index_2 = null;
 		int[] y_index_3 = null;
 		int[] y_index_4 = null;
-
-		int x_index = IndexStore.get(0)[0];
+		int x_index;
+		try {
+			x_index = IndexStore.get(0)[0];
+		} catch (IndexOutOfBoundsException e ) {
+			x_index = 0;
+		}
 
 		if (axe > 0) {
 			y_index_1 = IndexStore.get(1);
@@ -376,8 +409,15 @@ public class BremoViewModel implements Observable {
 		if ((zeile = br.readLine()) != null) {
 
 			header = Arrays.asList(zeile.split("\t"));
-
-			x_selected = header.get(x_index);
+            
+			// get Item of X axe und take default as 0 when index no match
+			try {
+			    x_selected = header.get(x_index);
+            } catch (Exception e) {
+            	x_selected = header.get(0);
+            }
+			
+			
 
 			if (axe > 0) {
 				for (int i = 0; i < y_index_1.length; i++) {
@@ -450,13 +490,53 @@ public class BremoViewModel implements Observable {
 				}
 			}
 		}
-
+        
+		/**send Index to Bremoview and ItemChooseFrame to select Item in JList & JCombobox */
+		
+		List indexItem = new ArrayList() ;
+		// add in the 1.place the index of axe
+		indexItem.add(axe-1);
+		// add in the 2.place the Log param
+		indexItem.add(Log_param);
+		//add in the 3.place the index of X axe
+		indexItem.add(x_index);
+		//add in the 4.place the index of 1.Jlist of ItemChooseFrame
+		if (axe > 0 ) {
+			indexItem.add(y_index_1);
+		}
+		//add in the 5.place the index of 2.Jlist of ItemChooseFrame
+		if (axe > 1) {
+			indexItem.add(y_index_2);
+		}
+		//add in the 5.place the index of 2.Jlist of ItemChooseFrame
+		if (axe > 2) {
+			indexItem.add(y_index_3);
+		}		
+		//add in the 5.place the index of 2.Jlist of ItemChooseFrame
+		if (axe > 3) {
+			indexItem.add(y_index_4);
+		}
+		notifyObserver(indexItem);
+		/*************************************************************************************/
+		
 		XYDataset datasetVerlauf1 = null;
 		XYDataset datasetVerlauf2 = null;
 		XYDataset datasetVerlauf3 = null;
 		XYDataset datasetVerlauf4 = null;
 		
-        br.readLine();
+		zeile = br.readLine();
+
+		value = zeile.split("\t");
+		try {
+			Double.parseDouble(value[0]);
+			br.close();
+			br = new BufferedReader(new FileReader(file));
+			br.readLine();
+
+		} catch (Exception e) {
+			Units = value;
+			System.err.println(Units[0]);
+		}
         
 		while ((zeile = br.readLine()) != null) {
 			value = zeile.split("\t");
@@ -682,66 +762,26 @@ public class BremoViewModel implements Observable {
 			}
 		}
 
-		ChartPanel chartVerlauf = null;
+		
 
-		String[] yLabel1 = y_selected_1;
-		String[] yLabel2 = y_selected_2;
-		String[] yLabel3 = y_selected_3;
-		String[] yLabel4 = y_selected_4;
-
-		if (axe > 0) {
-			for (int i = 0; i < yLabel1.length; i++) {
-				try {
-					yLabel1[i] = yLabel1[i].split(" ")[1];
-				} catch (ArrayIndexOutOfBoundsException e) {
-					yLabel1[i] = "[]";
-				}
-			}
-			if (axe > 1) {
-				for (int i = 0; i < yLabel2.length; i++) {
-					try {
-						yLabel2[i] = yLabel2[i].split(" ")[1];
-					} catch (ArrayIndexOutOfBoundsException e) {
-						yLabel2[i] = "[]";
-					}
-				}
-				if (axe > 2) {
-					for (int i = 0; i < yLabel3.length; i++) {
-						try {
-							yLabel3[i] = yLabel3[i].split(" ")[1];
-						} catch (ArrayIndexOutOfBoundsException e) {
-							yLabel3[i] = "[]";
-						}
-					}
-					if (axe > 3) {
-						for (int i = 0; i < yLabel4.length; i++) {
-							try {
-								yLabel4[i] = yLabel4[i].split(" ")[1];
-							} catch (ArrayIndexOutOfBoundsException e) {
-								yLabel4[i] = "[]";
-							}
-						}
-					}
-				}
-			}
-		}
-
+		ChartPanel chartVerlauf = null ;
+		
 		switch (axe) {
 		case 1:
-			chartVerlauf = createChartPanel(null, x_selected, yLabel1,
+			chartVerlauf  = createChartPanel(null, x_selected, "",
 					datasetVerlauf1);
 			break;
 		case 2:
-			chartVerlauf = createChartPanel(null, x_selected, yLabel1, yLabel2,
+			chartVerlauf = createChartPanel(null, x_selected, "", "",
 					datasetVerlauf1, datasetVerlauf2);
 			break;
 		case 3:
-			chartVerlauf = createChartPanel(null, x_selected, yLabel1, yLabel2,
-					yLabel3, datasetVerlauf1, datasetVerlauf2, datasetVerlauf3);
+			chartVerlauf = createChartPanel(null, x_selected, "", "",
+					"", datasetVerlauf1, datasetVerlauf2, datasetVerlauf3);
 			break;
 		case 4:
-			chartVerlauf = createChartPanel(null, x_selected, yLabel1, yLabel2,
-					yLabel3, yLabel4, datasetVerlauf1, datasetVerlauf2,
+			chartVerlauf = createChartPanel(null, x_selected, "", "",
+					"", "", datasetVerlauf1, datasetVerlauf2,
 					datasetVerlauf3, datasetVerlauf4);
 			break;
 		default:
@@ -798,8 +838,20 @@ public class BremoViewModel implements Observable {
 		IndexStore.add(0, new int[] { x_index });
 		IndexStore.add(1, y_index);
 
-		br.readLine();
+		zeile = br.readLine();
 
+		value = zeile.split("\t");
+		try {
+			Double.parseDouble(value[0]);
+			br.close();
+			br = new BufferedReader(new FileReader(file));
+			br.readLine();
+
+		} catch (Exception e) {
+			Units = value;
+			System.err.println(Units[0]);
+		}
+		
 		while ((zeile = br.readLine()) != null) {
 			value = zeile.split("\t");
 
@@ -836,16 +888,9 @@ public class BremoViewModel implements Observable {
 		}
 		datasetVerlauf = collectionVerlauf;
 		ChartPanel chartVerlauf = null;
-		String[] yLabel = y_selected.toArray(new String[y_selected.size()]);
-		for (int i = 0; i < yLabel.length; i++) {
-			try {
-				yLabel[i] = yLabel[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel[i] = "[]";
-			}
-		}
+		
 
-		chartVerlauf = createChartPanel(null, x_selected, yLabel,
+		chartVerlauf = createChartPanel(null, x_selected, "",
 				datasetVerlauf);
 
 		br.close();
@@ -906,7 +951,19 @@ public class BremoViewModel implements Observable {
 		IndexStore.add(1, y_index1);
 		IndexStore.add(2, y_index2);
 
-		br.readLine();
+		zeile = br.readLine();
+
+		value = zeile.split("\t");
+		try {
+			Double.parseDouble(value[0]);
+			br.close();
+			br = new BufferedReader(new FileReader(file));
+			br.readLine();
+
+		} catch (Exception e) {
+			Units = value;
+			System.err.println(Units[0]);
+		}
 
 		while ((zeile = br.readLine()) != null) {
 			value = zeile.split("\t");
@@ -974,25 +1031,8 @@ public class BremoViewModel implements Observable {
 
 		ChartPanel chartVerlauf = null;
 
-		String[] yLabel1 = y_selected1.toArray(new String[y_selected1.size()]);
-		for (int i = 0; i < yLabel1.length; i++) {
-			try {
-				yLabel1[i] = yLabel1[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel1[i] = "[]";
-			}
-		}
-
-		String[] yLabel2 = y_selected2.toArray(new String[y_selected2.size()]);
-		for (int i = 0; i < yLabel2.length; i++) {
-			try {
-				yLabel2[i] = yLabel2[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel2[i] = "[]";
-			}
-		}
-
-		chartVerlauf = createChartPanel(null, x_selected, yLabel1, yLabel2,
+		
+		chartVerlauf = createChartPanel(null, x_selected, "", "",
 				datasetVerlauf1, datasetVerlauf2);
 
 		br.close();
@@ -1070,7 +1110,19 @@ public class BremoViewModel implements Observable {
 		IndexStore.add(2, y_index2);
 		IndexStore.add(3, y_index3);
 
-		br.readLine();
+		zeile = br.readLine();
+
+		value = zeile.split("\t");
+		try {
+			Double.parseDouble(value[0]);
+			br.close();
+			br = new BufferedReader(new FileReader(file));
+			br.readLine();
+
+		} catch (Exception e) {
+			Units = value;
+			System.err.println(Units[0]);
+		}
 
 		while ((zeile = br.readLine()) != null) {
 			value = zeile.split("\t");
@@ -1168,34 +1220,10 @@ public class BremoViewModel implements Observable {
 
 		ChartPanel chartVerlauf = null;
 
-		String[] yLabel1 = y_selected1.toArray(new String[y_selected1.size()]);
-		for (int i = 0; i < yLabel1.length; i++) {
-			try {
-				yLabel1[i] = yLabel1[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel1[i] = "[]";
-			}
-		}
+		
 
-		String[] yLabel2 = y_selected2.toArray(new String[y_selected2.size()]);
-		for (int i = 0; i < yLabel2.length; i++) {
-			try {
-				yLabel2[i] = yLabel2[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel2[i] = "[]";
-			}
-		}
-		String[] yLabel3 = y_selected3.toArray(new String[y_selected3.size()]);
-		for (int i = 0; i < yLabel3.length; i++) {
-			try {
-				yLabel3[i] = yLabel3[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel3[i] = "[]";
-			}
-		}
-
-		chartVerlauf = createChartPanel(null, x_selected, yLabel1, yLabel2,
-				yLabel3, datasetVerlauf1, datasetVerlauf2, datasetVerlauf3);
+		chartVerlauf = createChartPanel(null, x_selected,"", "",
+				"", datasetVerlauf1, datasetVerlauf2, datasetVerlauf3);
 
 		br.close();
 		// selected1 = selected1.substring(0, selected1.indexOf("["));
@@ -1282,7 +1310,19 @@ public class BremoViewModel implements Observable {
 		IndexStore.add(4, y_index4);
 
 		/************************** READ 2.LINE OF INPUTFILE *******************/
-		br.readLine();
+		zeile = br.readLine();
+
+		value = zeile.split("\t");
+		try {
+			Double.parseDouble(value[0]);
+			br.close();
+			br = new BufferedReader(new FileReader(file));
+			br.readLine();
+
+		} catch (Exception e) {
+			Units = value;
+			System.err.println(Units[0]);
+		}
 
 		/************************** READ THE REST OF LINE OF INPUTFILE *********/
 		while ((zeile = br.readLine()) != null) {
@@ -1410,48 +1450,11 @@ public class BremoViewModel implements Observable {
 		}
 		datasetVerlauf4 = collectionVerlauf4;
 
-		/***************** LABEL PROCESSING **************************/
-		ChartPanel chartVerlauf = null;
-
-		String[] yLabel1 = y_selected1.toArray(new String[y_selected1.size()]);
-		for (int i = 0; i < yLabel1.length; i++) {
-			try {
-				yLabel1[i] = yLabel1[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel1[i] = "[]";
-			}
-		}
-
-		String[] yLabel2 = y_selected2.toArray(new String[y_selected2.size()]);
-		for (int i = 0; i < yLabel2.length; i++) {
-			try {
-				yLabel2[i] = yLabel2[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel2[i] = "[]";
-			}
-		}
-
-		String[] yLabel3 = y_selected3.toArray(new String[y_selected3.size()]);
-		for (int i = 0; i < yLabel3.length; i++) {
-			try {
-				yLabel3[i] = yLabel3[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel3[i] = "[]";
-			}
-		}
-
-		String[] yLabel4 = y_selected4.toArray(new String[y_selected4.size()]);
-		for (int i = 0; i < yLabel4.length; i++) {
-			try {
-				yLabel4[i] = yLabel4[i].split(" ")[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				yLabel4[i] = "[]";
-			}
-		}
+		
 		/************************************************************************/
 
-		chartVerlauf = createChartPanel(null, x_selected, yLabel1, yLabel2,
-				yLabel3, yLabel4, datasetVerlauf1, datasetVerlauf2,
+		ChartPanel chartVerlauf = createChartPanel(null, x_selected, "", "",
+				"", "", datasetVerlauf1, datasetVerlauf2,
 				datasetVerlauf3, datasetVerlauf4);
 
 		br.close();
@@ -1478,7 +1481,7 @@ public class BremoViewModel implements Observable {
 	 * @return
 	 */
 	public static ChartPanel createChartPanel(String Titel, String XLabel,
-			String[] YLabel, XYDataset data) {
+			String YLabel, XYDataset data) {
 
 		return createChartPanel(Titel, XLabel, YLabel, null, null, null, data,
 				null, null, null);
@@ -1495,9 +1498,9 @@ public class BremoViewModel implements Observable {
 	 * @return
 	 */
 	public static ChartPanel createChartPanel(String Titel, String XLabel,
-			String[] YLabel1, String[] YLabel2, XYDataset data1, XYDataset data2) {
+			String yLabel1, String yLabel2, XYDataset data1, XYDataset data2) {
 
-		return createChartPanel(Titel, XLabel, YLabel1, YLabel2, null, null,
+		return createChartPanel(Titel, XLabel, yLabel1, yLabel2, null, null,
 				data1, data2, null, null);
 	}
 
@@ -1512,7 +1515,7 @@ public class BremoViewModel implements Observable {
 	 * @return
 	 */
 	public static ChartPanel createChartPanel(String Titel, String XLabel,
-			String[] YLabel1, String[] YLabel2, String[] YLabel3,
+			String YLabel1, String YLabel2, String YLabel3,
 			XYDataset data1, XYDataset data2, XYDataset data3) {
 
 		return createChartPanel(Titel, XLabel, YLabel1, YLabel2, YLabel3, null,
@@ -1531,8 +1534,8 @@ public class BremoViewModel implements Observable {
 	 */
 	@SuppressWarnings("deprecation")
 	public static ChartPanel createChartPanel(String Titel, String XLabel,
-			String[] YLabel1, String[] YLabel2, String[] YLabel3,
-			String[] YLabel4, XYDataset data1, XYDataset data2,
+			String YLabel1, String YLabel2, String YLabel3,
+			String YLabel4, XYDataset data1, XYDataset data2,
 			XYDataset data3, XYDataset data4) {
 
 		XYDataset data_1, data_2, data_3, data_4;
@@ -1558,9 +1561,10 @@ public class BremoViewModel implements Observable {
 		}
 
 		JFreeChart chart = ChartFactory
-				.createXYLineChart(Titel, XLabel, YLabel1[0], data_1,
+				.createXYLineChart(Titel, XLabel, YLabel1, data_1,
 						PlotOrientation.VERTICAL, true, true, false);
 		XYPlot xyplot = (XYPlot) chart.getPlot();
+		
 
 		/** Setting of the X Axis **/
 		NumberAxis numberaxisX = (NumberAxis) xyplot.getDomainAxis();
@@ -1569,10 +1573,10 @@ public class BremoViewModel implements Observable {
 		numberaxisX.setLabelFont(new Font("Arial", Font.BOLD, 10));
 		numberaxisX.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
 		numberaxisX.setPositiveArrowVisible(false);
-		if (XLabel != null
-				&& (XLabel.equals("KW") || XLabel.equals("Kurbelwinkel [°KW]"))) {
-			numberaxisX.setTickUnit(new NumberTickUnit(30));
-		}
+//		if (XLabel != null
+//				&& (XLabel.equals("KW") || XLabel.equals("Kurbelwinkel [°KW]"))) {
+//			numberaxisX.setTickUnit(new NumberTickUnit(30));
+//		}
 
 		/** Setting of the Y Axis **/
 		if (nbr_of_curve > 0) {
@@ -1582,6 +1586,19 @@ public class BremoViewModel implements Observable {
 			numberaxis0.setLabelFont(new Font("Arial", Font.BOLD, 10));
 			numberaxis0.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
 			numberaxis0.setPositiveArrowVisible(false);
+			XYItemRenderer xyitemrenderer = new XYLineAndShapeRenderer(true , false) {
+				
+				private static final long serialVersionUID = 1L;
+				Stroke stroke = new BasicStroke(2.5f);
+				@Override
+			    public Stroke getItemStroke(int row, int column) {
+					return stroke;
+			    }
+			};
+			xyitemrenderer.setSeriesPaint(0, Color.red);
+			XYToolTipGenerator generator = new StandardXYToolTipGenerator();
+			xyitemrenderer.setToolTipGenerator(generator);
+			xyplot.setRenderer(0, xyitemrenderer);
 
 			if (nbr_of_curve > 1) {
 				NumberAxis numberaxis1 = new NumberAxis();
@@ -1590,19 +1607,25 @@ public class BremoViewModel implements Observable {
 				numberaxis1.setLabelFont(new Font("Arial", Font.PLAIN, 10));
 				numberaxis1.setTickLabelFont(new Font("Arial", Font.PLAIN, 10));
 				numberaxis1.setPositiveArrowVisible(false);
-				numberaxis1.setLabel(YLabel2[0]);
+				numberaxis1.setLabel(YLabel2);
 
 				xyplot.setRangeAxis(1, numberaxis1);
 				xyplot.setDataset(1, data_2);
 				xyplot.setRangeAxis(1, numberaxis1);
 				xyplot.mapDatasetToRangeAxis(1, 1);
-				XYItemRenderer xyitemrenderer = new StandardXYItemRenderer();
-				// xyitemrenderer.setSeriesPaint(0, new Color(16,78,139));
-				xyitemrenderer.setSeriesPaint(0, Color.blue);
-
-				XYToolTipGenerator generator = new StandardXYToolTipGenerator();
-				xyitemrenderer.setToolTipGenerator(generator);
-				xyplot.setRenderer(1, xyitemrenderer);
+				XYItemRenderer xyitemrenderer1 = new XYLineAndShapeRenderer(true , false) {
+					
+					private static final long serialVersionUID = 1L;
+					Stroke stroke = new BasicStroke(2.5f);
+					@Override
+				    public Stroke getItemStroke(int row, int column) {
+						return stroke;
+				    }
+				};
+				xyitemrenderer1.setSeriesPaint(0, Color.blue);
+				XYToolTipGenerator generator1 = new StandardXYToolTipGenerator();
+				xyitemrenderer1.setToolTipGenerator(generator1);
+				xyplot.setRenderer(1, xyitemrenderer1);
 
 				if (nbr_of_curve > 2) {
 					NumberAxis numberaxis2 = new NumberAxis();
@@ -1612,7 +1635,7 @@ public class BremoViewModel implements Observable {
 					numberaxis2.setTickLabelFont(new Font("Arial", Font.PLAIN,
 							10));
 					numberaxis2.setPositiveArrowVisible(false);
-					numberaxis2.setLabel(YLabel3[0]);
+					numberaxis2.setLabel(YLabel3);
 
 					xyplot.setRangeAxis(2, numberaxis2);
 					xyplot.setDataset(2, data_3);
@@ -1620,10 +1643,16 @@ public class BremoViewModel implements Observable {
 					xyplot.setRangeAxisLocation(1,
 							org.jfree.chart.axis.AxisLocation.BOTTOM_OR_LEFT);
 					xyplot.mapDatasetToRangeAxis(2, 2);
-					XYItemRenderer xyitemrenderer2 = new StandardXYItemRenderer();
-					// xyitemrenderer.setSeriesPaint(0, new Color(16,78,139));
+					XYItemRenderer xyitemrenderer2 = new XYLineAndShapeRenderer(true , false) {
+						
+						private static final long serialVersionUID = 1L;
+						Stroke stroke = new BasicStroke(2.5f);
+						@Override
+					    public Stroke getItemStroke(int row, int column) {
+							return stroke;
+					    }
+					};
 					xyitemrenderer2.setSeriesPaint(0, Color.cyan);
-
 					XYToolTipGenerator generator2 = new StandardXYToolTipGenerator();
 					xyitemrenderer2.setToolTipGenerator(generator2);
 					xyplot.setRenderer(2, xyitemrenderer2);
@@ -1637,17 +1666,22 @@ public class BremoViewModel implements Observable {
 						numberaxis3.setTickLabelFont(new Font("Arial",
 								Font.PLAIN, 10));
 						numberaxis3.setPositiveArrowVisible(false);
-						numberaxis3.setLabel(YLabel4[0]);
+						numberaxis3.setLabel(YLabel4);
 
 						xyplot.setRangeAxis(3, numberaxis3);
 						xyplot.setDataset(3, data_4);
 						xyplot.setRangeAxis(3, numberaxis3);
 						xyplot.mapDatasetToRangeAxis(3, 3);
-						XYItemRenderer xyitemrenderer3 = new StandardXYItemRenderer();
-						// xyitemrenderer.setSeriesPaint(0, new
-						// Color(16,78,139));
+						XYItemRenderer xyitemrenderer3 = new XYLineAndShapeRenderer(true , false) {
+							
+							private static final long serialVersionUID = 1L;
+							Stroke stroke = new BasicStroke(2.5f);
+							@Override
+						    public Stroke getItemStroke(int row, int column) {
+								return stroke;
+						    }
+						};
 						xyitemrenderer3.setSeriesPaint(0, Color.magenta);
-
 						XYToolTipGenerator generator3 = new StandardXYToolTipGenerator();
 						xyitemrenderer3.setToolTipGenerator(generator3);
 						xyplot.setRenderer(3, xyitemrenderer3);
@@ -1658,7 +1692,7 @@ public class BremoViewModel implements Observable {
 		}
 		// writeChartToPDF(chart, 600, 400,
 		// "src/bremoGraphik/pdf/Verlauf von "+Titel+".pdf");
-
+		
 		final ChartPanel chartPanel = new ChartPanel(chart);
 		return chartPanel;
 	}
@@ -1715,7 +1749,7 @@ public class BremoViewModel implements Observable {
 	 */
 	public boolean checkFavsfile() {
 
-		File f = new File(file.getParent() + "/FAVS_4.txt");
+		File f = new File(file.getParent() + "/FAVS_6.txt");
 		if (f.exists()) {
 			favsFile = f;
 			return true;

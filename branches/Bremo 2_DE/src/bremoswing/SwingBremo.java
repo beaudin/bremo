@@ -240,7 +240,7 @@ public class SwingBremo extends JFrame {
 		NrBremoAlive = 0;
 
 		/****** HAUPT FRAME ****************************************************************/
-		setTitle(this.title);
+		setTitle(title);
 		setBackground(new Color(255, 255, 255));
 		setIconImage(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/bremo1.png")).getImage());
@@ -343,21 +343,19 @@ public class SwingBremo extends JFrame {
 				"/bremoswing/bild/see_graphik.png")));
 		sehen.setToolTipText("Schauen Sie Ergebniss als Graphik");
 		sehen.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				
-				if(plotten != null ) {
-				  plotten.dispose();
+
+				if (bremoThreadFertig != null ) {
+					if (bremoThreadFertig [0] != null) {
+					    plotten = new SelectItemToPlotten();
+					}
+				} else {
+					SelectItemToPlotten.callBremoView();
 				}
-			    plotten = new SelectItemToPlotten();
-				
-				
-				//callBremoView();
-				
-				
 			}
-	
+
 		});
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(0, 0, 0, 0);
@@ -411,8 +409,6 @@ public class SwingBremo extends JFrame {
 		progressBarInd.setIndeterminate(true);
 		progressBarInd.setVisible(false);
 		
-       
-		
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(10, 0, 5, 0);
 		gc.weightx = 0.1;
@@ -427,7 +423,6 @@ public class SwingBremo extends JFrame {
 		progressBar.setStringPainted(true);
 		progressBar.setVisible(false);
 		
-
 		manager.add(progressBar, gc);
 
 		timerCalcul = new Timer(1000, new ActionListener() {

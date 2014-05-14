@@ -38,10 +38,12 @@ public class WoschniHuber extends WandWaermeUebergang {
 		Hubvolumen = motor.get_Hubvolumen();  //[m^3]
 		Kompressionsvolumen = motor.get_Kompressionsvolumen();	//[m^3]
 		mittlereKolbengeschwindigkeit= 2*motor.get_Hub()*cp.get_DrehzahlInUproSec(); //[m/s]
-		Temperatur_1=cp.get_T_IVC_WHT(); //[K]
+		Temperatur_1=cp.get_T_IVC_WHT(); //[K] //TODO: In Abfrage für t!=IVC setzen! 
 		Druck_1=indiD.get_pZyl(cp.get_Einlassschluss()); //[bar]
 		Volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]
-		vDrall=cp.get_DrallGeschwindigkeit();
+		//Formel nach Pischinger "Thermodynamik der Verbrennungskraftmaschine" Seite 203
+		vDrall=cp.get_swirlRatio()*cp.get_DrehzahlInUproSec()*Math.PI*motor.get_Bohrung()*0.7;
+		//vDrall=cp.get_DrallGeschwindigkeit();
 		p_mi=indiD.get_pmi();
 		//Polytropenexponent für die Schleppdruckberechnung ermitteln.
 		//Dies wird in den 10°KW vorm Referenzpunkt gemacht...

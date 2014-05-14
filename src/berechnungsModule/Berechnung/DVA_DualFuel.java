@@ -31,6 +31,8 @@ public class DVA_DualFuel extends DVA {
 	private double dQw, Qw=0, Qb=0,mb=0;
 	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
+	
+	private double whtfMult=CP.get_whtfMult();
 
 	/**
 	 * <p>
@@ -290,7 +292,8 @@ public class DVA_DualFuel extends DVA {
 		}
 
 		//Wandwaermestrom bestimmen			
-		dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen_IN, fortschritt, T_buffer);			
+		dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen_IN, fortschritt, T_buffer);
+		dQw=whtfMult*dQw;
 
 		//Wandwaermestrom abfuehren
 		//OttoZone
@@ -458,6 +461,15 @@ public class DVA_DualFuel extends DVA {
 
 		i+=1;
 		super.buffer_EinzelErgebnis("p [bar]",zn[0].get_p()*1e-5,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dQh [J/s]",dQburn-dQw,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dQh [J/KW]", super.CP.convert_ProSEC_2_ProKW(dQburn-dQw),i);
+		
+		i+=1;		
+		super.buffer_EinzelErgebnis("Qh [J]", Qb-Qw,i);
 
 		i+=1;
 		super.buffer_EinzelErgebnis("dQb [J/s]",dQburn,i);

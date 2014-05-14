@@ -99,7 +99,7 @@ public class SimpleDirektEinspritzung extends Einspritzung {
 	}
 
 	public double get_Tkrst_dampf(double time, Zone zn) {
-		//Der Kraftstoff verdampft bei der Temperatur des flueissigen Krst und kommt dann als Dampf mit dieser Temp in die Zone 
+		//Der Kraftstoff verdampft bei der Temperatur des fluessigen Krst und kommt dann als Dampf mit dieser Temp in die Zone 
 		//--> ist nicht ganz  richtig passt aber zur bestimmung der Verdampfungsenthalpie
 		return this.get_T_fuel_liq(); 
 

@@ -1514,7 +1514,7 @@ public class CasePara {
 		try {
 			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_RON_95","[MJ/mol]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftatoff \"RON_95\" wurde kein Heizwert angegeben. \n" +
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"RON_95\" wurde kein Heizwert angegeben. \n" +
 					"Es wird mit dem Standardwert gerechnet: " +stdHu + "[J/mol]");
 			return stdHu;
 		}		
@@ -1529,7 +1529,7 @@ public class CasePara {
 		try {
 			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_RON_98","[MJ/mol]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftatoff \"RON_98\" wurde kein Heizwert angegeben. \n" +
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"RON_98\" wurde kein Heizwert angegeben. \n" +
 					"Es wird mit dem Standardwert gerechnet: " +stdHu +  "[J/mol]");			
 			return stdHu;
 		}		
@@ -1544,7 +1544,7 @@ public class CasePara {
 		try {
 			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_Diesel","[MJ/mol]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftatoff \"Diesel\" wurde kein Heizwert angegeben. \n" +
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"Diesel\" wurde kein Heizwert angegeben. \n" +
 					"Es wird mit dem Standardwert gerechnet: " +stdHu + "[J/mol]");
 			return stdHu;
 		}		
@@ -1589,12 +1589,14 @@ public class CasePara {
 		double whtfCorr=1;
 		try {
 			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, "whtfMult","[-]",0,Double.MAX_VALUE); 
+			return whtfCorr;
 		} catch (ParameterFileWrongInputException e) {			
-			e.stopBremo();	
+			e.log_Warning("Der Wert fuer \"whtfMult\" wurde im Inputfile nicht angegeben. \n " +
+					"Es wird ohne Multiplikator für die Anpassung des Wandwaermeverlustes gerechnet!");	
+			return whtfCorr;
 		}					
-		return whtfCorr;
 	}
-	
+		
 	/**
 	 * Returns the polytropic exponent needed for WHTF models like Woschni or Chang (this method 
 	 * is only called when the simulation does not start at IVC)

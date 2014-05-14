@@ -371,7 +371,7 @@ public class MasterEinspritzung extends ModulFabrik{
 	/**
 	 * <p>Liefert ein Objekt vom Typ Spezies zurueck, das durch die Mischung 
 	 * aller Kraftstoffe der </br>
-	 * einzelenen Eispritzungen gebildet wird. </p>
+	 * einzelnen Eispritzungen gebildet wird. </p>
 	 * @return Spezies krst 
 	 */
 	public  Spezies get_spezKrstALL(){

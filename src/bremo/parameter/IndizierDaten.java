@@ -553,7 +553,8 @@ public class IndizierDaten {
 			kappa = (kappa + frischGemisch.get_kappa(T)) / 2; //Mittelwertbildung
 
 		}
-		//Für PostFile
+
+		//kappa_druckabgleich für Post-File
 		kappa_druckabgleich = kappa;
 		
 		double pZyl_temp_1_ABS = 

@@ -102,10 +102,9 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		Spezies krst=masterEinspritzung.get_spezKrst_verdampft(CP.get_Auslassoeffnet(), 0);		
 		double mKrst=masterEinspritzung.get_mKrst_dampffoermig_Sum_Zone(CP.get_Auslassoeffnet(),0);
 		
-		
 		double mLuft_tr=CP.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
-		double mW=CP.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel			
-		double mAGRex=CP.get_mAGR_extern_ASP();	//Masse externer AGR kg/ASP			
+		double mW=CP.get_mWasser_Luft_ASP();		//Wassermasse pro Arbeitsspiel			
+		double mAGRex=CP.get_mAGR_extern_ASP();		//Masse externer AGR kg/ASP			
 
 		//Bestimmung der Verbrennungsluftzusammensetzung	
 		GasGemisch agrEX=new GasGemisch("AGR_extern_LWA");

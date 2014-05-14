@@ -78,7 +78,7 @@ public abstract class WandWaermeUebergang {
 		
 		return R_mix;	}
 
-	//Modelle die auch fuer nciht Kolbenmotoren geeignet sind muessen diese Methode ueberschreiben
+	//Modelle die auch fuer nicht Kolbenmotoren geeignet sind muessen diese Methode ueberschreiben
 	public double get_WandWaermeStrom(double time, Zone[] zonen_IN,
 			double fortschritt, VektorBuffer tBuffer) {		
 		double wht=0;
@@ -115,7 +115,7 @@ public abstract class WandWaermeUebergang {
 //		return WWSD;
 //	}	
 	
-	
+	//TODO: Wärmestromdichte wieder einpflegen!?
 	//...und hiermit die Wärmestromdichte in W/m^2
 //	public double get_WandWaermeStromDichte(double time, Zone[] zonen_IN, double fortschritt, VektorBuffer tBuffer){
 //		//wall temperature

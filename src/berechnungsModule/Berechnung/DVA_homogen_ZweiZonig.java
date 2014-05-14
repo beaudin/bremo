@@ -21,7 +21,7 @@ import bremoExceptions.ParameterFileWrongInputException;
 
 /**
  * <p>Klasse zur Durchfuehrung einer DVA mit zwei Zonen. Der Kraftstoff wird in Zone 0 eingespritzt und vermischt sich 
- * sofort homogen mit der Verbrennungsluft. Aus Zone 0 wird das Gemsich entnommen, verbrannt und dann mit der 
+ * sofort homogen mit der Verbrennungsluft. Aus Zone 0 wird das Gemisch entnommen, verbrannt und dann mit der 
  * Temperatur der unverbrannten Zone in die verbrannte Zone zugemsicht. Die Verbrennungswaerme wird vollstaendig Zone 1
  * zugefuehrt.  Alternativ koennte auch jedesmal die adiabate Verbrennungstemperatur berechnet werden und dann das 
  * Abgas mit dieser Temperatur der verbrannten Zone zugemischt werden. Ein Waermestrome wuerde dann nicht mehr auftreten.
@@ -49,6 +49,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	private double dQw, Qw=0, Qb=0,mb=0;
 	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
+	
+	private double whtfMult=CP.get_whtfMult();
 
 	/**
 	 * <p>
@@ -227,7 +229,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 			}
 
 			//Wandwaermestrom bestimmen			
-			dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen_IN, fortschritt, T_buffer);			
+			dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen_IN, fortschritt, T_buffer);
+			dQw=whtfMult*dQw;
 
 			//Wandwaermestrom abfuehren
 			double dQwu=dQw*Vu/(Vu+Vb);
@@ -249,6 +252,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 			//Wandwaermestrom bestimmen	
 			dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen_IN, fortschritt, T_buffer);
+			dQw=whtfMult*dQw;
 			//Wandwaermestrom abfuehren
 			zonen_IN[0].set_dQ_ein_aus(-1*dQw);	
 
@@ -379,7 +383,16 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 		i+=1;
 		super.buffer_EinzelErgebnis("p [bar]",zn[0].get_p()*1e-5,i);
-
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dQh [J/s]",dQburn-dQw,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("dQh [J/KW]", super.CP.convert_ProSEC_2_ProKW(dQburn-dQw),i);
+		
+		i+=1;		
+		super.buffer_EinzelErgebnis("Qh [J]", Qb-Qw,i);
+		
 		i+=1;
 		super.buffer_EinzelErgebnis("dQb [J/s]",dQburn,i);
 
@@ -487,7 +500,6 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		i+=1;		
 		super.buffer_EinzelErgebnis("m_v[kg]", zn[1].get_m(),i);
 
-
 		i+=1;
 		super.buffer_EinzelErgebnis(" cv_u[J/kg]", zn[0].get_ggZone().get_cv_mass(zn[0].get_T()),i);	
 
@@ -546,12 +558,6 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		mRT=zn[1].get_m()*zn[1].get_ggZone().get_R()*zn[1].get_T();
 		super.buffer_EinzelErgebnis("pV-mRT zn1", (pV-mRT)/pV*100,i);	
 	}
-
-
-
-
-
-
 
 
 	private void initBurnedZone(double time, Zone[] zonen_IN){
@@ -642,7 +648,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	//fuer Verlustteilung Frank Haertel
 	@Override 
 	public VektorBuffer get_p_buffer() { 
-		// TODO Auto-generated method stub 
+		// TODO: Auto-generated method stub 
 		return null; 
 	}
 }

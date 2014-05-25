@@ -83,8 +83,8 @@ public class Zone {
 	/**
 	 * Erzeugt eine Zone mit den angegebenen Werten fuer p,V,T und den Einzelmassen.
 	 * Die Position der Einzelmassen ergibt sich aus der Klasse Spezies, hier wird jeder Spezies,
-	 * die integreiert werden soll eien Position zugewiesen. 
-	 * Diese funktion sollte nur vom Solver aufgerufen werden.
+	 * die integriert werden soll eine Position zugewiesen. 
+	 * Diese Funktion sollte nur vom Solver aufgerufen werden.
 	 * @param p_V_T_mi Vektor mit p, V, T und den Einzelmassen
 	 * @param burns gibt an ob chemGlgw geloest werden soll --> aka verbrannte Zone
 	 * @param id 
@@ -385,7 +385,6 @@ public class Zone {
 	public void set_dQ_ein_aus(double dQ_zu){
 		sumdQ=sumdQ+dQ_zu;
 	}
-
 
 	private  double[] calc_dudT_dRdT(){
 		double [] du_dt_dR_dT=new double [2];

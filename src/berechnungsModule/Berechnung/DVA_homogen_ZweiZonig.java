@@ -28,7 +28,7 @@ import bremoExceptions.ParameterFileWrongInputException;
  * Diese Art der Rechnung ist gleichwertig, die Rechenzeit steigt aber wegen der Berechnung der adiabaten Flammentemperatur 
  * deutlich an. </p> 
  * 
- *<p>Bei Direkteinspritzung ist darauf zu schten, dass der Kraftstoff vollstaenmdig verdampft ist bevor die Verbrennung 
+ *<p>Bei Direkteinspritzung ist darauf zu achten, dass der Kraftstoff vollstaendig verdampft ist bevor die Verbrennung 
  *einsetzt. Um die Menge des verbrennenden Massenelementes zu bestimmen wird der Heizwert des GasGemischs aus
  *Zone 0 verwendet. Wenn noch nicht der gesamte Kraftstoff eingespritzt ist, ist der Heizwert zu gering und 
  *es besteht die Moeglichkeit, dass die Zone vollstaendig entleert wird. </p>
@@ -49,6 +49,10 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	private double dQw, Qw=0, Qb=0,mb=0;
 	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
+	
+	public double mverbrannt=0, munverbrannt=0;
+	
+	
 	
 	private double whtfMult=CP.get_whtfMult();
 
@@ -253,10 +257,10 @@ public class DVA_homogen_ZweiZonig extends DVA {
 			//Wandwaermestrom bestimmen	
 			dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen_IN, fortschritt, T_buffer);
 			dQw=whtfMult*dQw;
-			//Wandwaermestrom abfuehren
-			zonen_IN[0].set_dQ_ein_aus(-1*dQw);	
+			//Wandwaermestrom (aus Zone0) abfuehren
+			zonen_IN[0].set_dQ_ein_aus(-1*dQw); 	
 
-			//Verbrennungswaerme zufuehren
+			//Verbrennungswaerme (Zone0) zufuehren
 			zonen_IN[0].set_dQ_ein_aus(dQburn);
 
 			//Verdampfungswaerme abfuehren
@@ -267,7 +271,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 			//Verhindert das Aufsummieren des Fehlers wenn der Brennverlauf 
 			//vor der eigentlichen Verbrennung etwas schwingt				
-			if(esBrennt&&dQburn>0) 
+			//passt eigentlich nicht, da dann esBrennt=false
+			if(esBrennt&&dQburn>0)
 				dmZoneBurn=super.convert_dQburn_2_dmKrstBurn(dQburn,zonen_IN[0].get_ggZone(),Tu,p);
 
 
@@ -361,10 +366,22 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		super.buffer_EinzelErgebnis("Vb [m3]",zn[1].get_V()/motor.get_V(time),i);
 
 		i+=1;
-		super.buffer_EinzelErgebnis("T_Zone_1 [K]",zn[0].get_T(),i);
+		super.buffer_EinzelErgebnis("T_Zone_u [K]",zn[0].get_T(),i);
 
+//		double T1=0, k1=0;
+//		if(burntZonesAlreadyInitialised){
+//		//if(esBrennt){
+//			T1=zn[1].get_T();
+//			k1=zn[1].get_ggZone().get_kappa(zn[1].get_T());
+//			}
+//		else{
+//			T1=zn[0].get_T();
+//			k1=zn[0].get_ggZone().get_kappa(zn[0].get_T());
+//		}
+		
 		i+=1;
-		super.buffer_EinzelErgebnis("T_Zone_2 [K]",zn[1].get_T(),i);
+		super.buffer_EinzelErgebnis("T_Zone_b [K]",zn[1].get_T(),i);
+//		super.buffer_EinzelErgebnis("T_Zone_b [K]",T1,i);
 
 		i+=1;
 		double Tm=wandWaermeModell.get_Tmb(zn);
@@ -422,7 +439,12 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 		i+=1;		
 		super.buffer_EinzelErgebnis("Xb[-]", fortschritt,i);
-
+		
+//		i+=1;		
+//		super.buffer_EinzelErgebnis("Init", burntZonesAlreadyInitialised?1.0:0.0,i);
+//		
+//		i+=1;		
+//		super.buffer_EinzelErgebnis("brennt's", esBrennt?1.0:0.0,i);
 
 		i+=1;		
 		super.buffer_EinzelErgebnis("Qb/Qmax [-]", xQ,i);
@@ -465,9 +487,10 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		double Vol_b = 0;
 		int cnt=0;
 
-//		Abbruch ohne doppelte Umwandlung. Evtl. durch Vergleich mit Rechenschrittweite?
-//		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
-		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
+//		Schleifen-Abbruch nicht mit A<B sondern B-A>sehr kleinem Wert nahe Null!?
+		for(double kw=CP.convert_SEC2KW(refPunkt)-10; (CP.convert_SEC2KW(refPunkt)-kw) > 1E-6; kw++){
+//		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){ //ORIGINAL
+//		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
 			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
 			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
 			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
@@ -477,10 +500,19 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		double n=MatLibBase.mw_aus_1DArray(n_array); //Polytropenexponent
 		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
 		i+=1;
-		super.buffer_EinzelErgebnis("pSchlepp [bar]",Schleppdruck,i);
+		super.buffer_EinzelErgebnis("pSchleppRefPnktWH [bar]",Schleppdruck,i);
 
 		///////////////////////////		
 
+		//Schleppdruck in bar
+		i+=1;
+		//super.buffer_EinzelErgebnis("Schleppdruck [bar]",wandWaermeModell.get_Schleppdruck(time, zn)*1E-5,i);
+		super.buffer_EinzelErgebnis("pSchleppWHT [bar]",wandWaermeModell.get_Schleppdruck()*1E-5,i);
+		
+		i+=1;
+		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("Wandwärmestromdichte [MW/m^2]",HeatFlux*1E-6,i);
+		
 //		i+=1;
 //		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt, T_buffer);
 //		super.buffer_EinzelErgebnis("Wandwärmestromdichte [MW/m^2]",HeatFlux*1E-6,i);
@@ -498,7 +530,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		super.buffer_EinzelErgebnis("m_u[kg]", zn[0].get_m(),i);
 
 		i+=1;		
-		super.buffer_EinzelErgebnis("m_v[kg]", zn[1].get_m(),i);
+		super.buffer_EinzelErgebnis("m_b[kg]", zn[1].get_m(),i);
 
 		i+=1;
 		super.buffer_EinzelErgebnis(" cv_u[J/kg]", zn[0].get_ggZone().get_cv_mass(zn[0].get_T()),i);	
@@ -520,6 +552,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 		i+=1;
 		super.buffer_EinzelErgebnis(" kappa_b [-]", zn[1].get_ggZone().get_kappa(zn[1].get_T()),i);
+//		super.buffer_EinzelErgebnis(" kappa_b [-]", k1,i);
 
 		i+=1;
 		super.buffer_EinzelErgebnis(" U_b [J]", zn[1].get_ggZone().get_u_mass(zn[1].get_T())*zn[1].get_m(),i);

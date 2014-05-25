@@ -28,6 +28,9 @@ public class WoschniHuber extends WandWaermeUebergang {
 	private double Vol_a;
 	private double C_1;
 	private double C_2;
+	
+	//fuer Ausgabe get_Schleppdruck
+	private double pSchlepp = 0;
 
 	protected WoschniHuber(CasePara mp) {
 		super(mp);		
@@ -57,7 +60,11 @@ public class WoschniHuber extends WandWaermeUebergang {
 		double Vol_b = 0;
 		int cnt=0;
 
-		for(double kw=cp.convert_SEC2KW(refPunkt)-10; kw < cp.convert_SEC2KW(refPunkt); kw++){
+		
+		//Schleifen-Abbruch nicht mit A<B sondern B-A>sehr kleinem Wert nahe Null!?
+		for(double kw=cp.convert_SEC2KW(refPunkt)-10; (cp.convert_SEC2KW(refPunkt)-kw) > 1E-6; kw++){
+//		for(double kw=cp.convert_SEC2KW(refPunkt)-10; kw < cp.convert_SEC2KW(refPunkt); kw++){ //ORIGINAL
+//		for(double kw=refPunkt-cp.convert_KW2SEC(10); kw < refPunkt; kw++){
 			pZyl_b=indiD.get_pZyl(cp.convert_KW2SEC(kw));
 			Vol_b=motor.get_V(cp.convert_KW2SEC(kw));
 			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
@@ -99,6 +106,10 @@ public class WoschniHuber extends WandWaermeUebergang {
 		C_2 = 0.00324; //Dieselmotoren mit Direkteinspritzung und Ottomotoren
 
 		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n); //[Pa]
+		
+		//fuer Ausgabe get_Schleppdruck
+		pSchlepp = Schleppdruck;
+		
 		double Volumen = motor.get_V(time);	//[m^3]
 		double v_Woschni =  mittlereKolbengeschwindigkeit + C_2 / C_1 * Hubvolumen * Temperatur_1 / (Druck_1 * Volumen_1) * (p - Schleppdruck);  
 		double v_Huber = mittlereKolbengeschwindigkeit*(1 + 2 * (Kompressionsvolumen / Volumen) * (Kompressionsvolumen / Volumen) * Math.pow(p_mi,-0.2) );
@@ -113,8 +124,18 @@ public class WoschniHuber extends WandWaermeUebergang {
 	}
 	
 	@Override
-	public double get_BrennraumFlaeche(double time) {	
-		return motor.get_BrennraumFlaeche(time)+0*motor.get_FeuerstegFlaeche();
+	public double get_BrennraumFlaeche(double time) {
+//		return motor.get_BrennraumFlaeche(time)+0*motor.get_FeuerstegFlaeche();
+		return motor.get_BrennraumFlaeche(time)+super.feuerstegMult*motor.get_FeuerstegFlaeche();
+	}
+	
+	@Override
+	//public double get_Schleppdruck(double time, Zone[] zonen_IN){
+	public double get_Schleppdruck(){
+		
+		return pSchlepp;
+//		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n); //[Pa]
+//		return Schleppdruck;
 	}
 }
 

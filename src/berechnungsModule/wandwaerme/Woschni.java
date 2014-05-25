@@ -4,7 +4,6 @@ import java.util.Hashtable;
 
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
-
 import matLib.MatLibBase;
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
@@ -26,6 +25,9 @@ public class Woschni extends WandWaermeUebergang {
 	private double volumen_1;
 	private double n; //polytropic exponent
 	private boolean setRefConditions=true;
+	
+	//fuer Ausgabe get_Schleppdruck
+	private double pSchlepp = 0;
 
 	protected Woschni(CasePara mp) {
 		super(mp);
@@ -123,6 +125,10 @@ public class Woschni extends WandWaermeUebergang {
 		double C_2 = 0.00324; //Dieselmotoren mit Direkteinspritzung und Ottomotoren
 		
 		double Schleppdruck = druck_1*Math.pow((volumen_1/motor.get_V(time)),n); //[Pa]
+		
+		//fuer Ausgabe get_Schleppdruck
+		pSchlepp = Schleppdruck;
+		
 		double Volumen = motor.get_V(time);	//[m^3]
 		double v =  mittlereKolbengeschwindigkeit + C_2 / C_1 * Hubvolumen * temperatur_1 / (druck_1 * volumen_1) * (p - Schleppdruck);  
 		// Alpha in W/(m²K)
@@ -135,4 +141,29 @@ public class Woschni extends WandWaermeUebergang {
 	public double get_BrennraumFlaeche(double time) {	
 		return motor.get_BrennraumFlaeche(time);//0*motor.get_FeuerstegFlaeche();
 	}
+	
+	@Override
+	//public double get_Schleppdruck(double time,Zone[] zonen_IN){
+	public double get_Schleppdruck(){		
+		return pSchlepp;
+	}	
+	
+//	@Override
+//	public double get_Schleppdruck(double time,Zone[] zonen_IN){		
+//		temperatur_1=super.get_Tmb(zonen_IN);
+//		//getting gamma for the whole cylinder
+//		double mTot=0;
+//		for(int i=0; i<zonen_IN.length;i++)mTot+=zonen_IN[i].get_m();
+//		Hashtable <Spezies,Double> ht=new Hashtable <Spezies,Double>();
+//		for(int i=0; i<zonen_IN.length;i++)
+//			ht.put(zonen_IN[i].get_ggZone(), zonen_IN[i].get_m()/mTot);
+//		
+//		GasGemisch gg =new GasGemisch("gg");
+//		gg.set_Gasmischung_massenBruch(ht);
+//		this.n=gg.get_kappa(temperatur_1);				
+//		druck_1=zonen_IN[0].get_p();
+//		volumen_1=motor.get_V(time);
+//		double Schleppdruck = druck_1*Math.pow((volumen_1/motor.get_V(time)),n); //[Pa]
+//		return Schleppdruck;
+//	}
 }

@@ -374,9 +374,10 @@ public class DVA_Homogen_EinZonig extends DVA{
 		double Vol_b = 0;
 		int cnt=0;
 		
-//		Abbruch ohne doppelte Umwandlung. Evtl. durch Vergleich mit Rechenschrittweite?
-//		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){
-		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
+//		Schleifen-Abbruch nicht mit A<B sondern B-A>sehr kleinem Wert nahe Null!?
+		for(double kw=CP.convert_SEC2KW(refPunkt)-10; (CP.convert_SEC2KW(refPunkt)-kw) > 1E-6; kw++){
+//		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){ //ORIGINAL
+//		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
 			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
 			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
 			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
@@ -386,9 +387,18 @@ public class DVA_Homogen_EinZonig extends DVA{
 		double n=MatLibBase.mw_aus_1DArray(n_array); //Polytropenexponent
 		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
 		i+=1;
-		super.buffer_EinzelErgebnis("pSchlepp [bar]",Schleppdruck,i);
+		super.buffer_EinzelErgebnis("pSchleppRefPnktWH [bar]",Schleppdruck,i);
 		
 		///////////////////////////		
+	
+		//Schleppdruck in bar
+		i+=1;
+		//super.buffer_EinzelErgebnis("Schleppdruck [bar]",wandWaermeModell.get_Schleppdruck(time, zn)*1E-5,i);
+		super.buffer_EinzelErgebnis("pSchleppWHT [bar]",wandWaermeModell.get_Schleppdruck()*1E-5,i);		
+		
+		i+=1;
+		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("Wandwärmestromdichte [MW/m^2]",HeatFlux*1E-6,i);
 		
 //		i+=1;
 //		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt, T_buffer);

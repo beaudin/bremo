@@ -522,6 +522,11 @@ public class DVA_DualFuel extends DVA {
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("mL [kg]", mL, i);
+		
+		//Schleppdruck in bar
+		i+=1;
+		//super.buffer_EinzelErgebnis("Schleppdruck [bar]",wandWaermeModell.get_Schleppdruck(time, zn)*1E-5,i);
+		super.buffer_EinzelErgebnis("pSchleppWHT [bar]",wandWaermeModell.get_Schleppdruck()*1E-5,i);	
 
 		i+=1;
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);

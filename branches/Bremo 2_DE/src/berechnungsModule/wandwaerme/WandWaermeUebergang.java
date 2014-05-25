@@ -4,6 +4,7 @@ package berechnungsModule.wandwaerme;
 
 
 import berechnungsModule.Berechnung.Zone;
+import matLib.MatLibBase;
 import misc.VektorBuffer;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
@@ -30,7 +31,7 @@ public abstract class WandWaermeUebergang {
 	public abstract double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt);
 	
 	/**
-	 * Liefert die Flaeche die zur Berechznung des Wandwaermestroms verwendet wird. 
+	 * Liefert die Flaeche die zur Berechnung des Wandwaermestroms verwendet wird. 
 	 * @param time
 	 * @return Oberflaeche des Brennraums in [m^2]
 	 */
@@ -115,7 +116,7 @@ public abstract class WandWaermeUebergang {
 //		return WWSD;
 //	}	
 	
-	//TODO: Wärmestromdichte wieder einpflegen!?
+
 	//...und hiermit die Wärmestromdichte in W/m^2
 //	public double get_WandWaermeStromDichte(double time, Zone[] zonen_IN, double fortschritt, VektorBuffer tBuffer){
 //		//wall temperature
@@ -125,8 +126,38 @@ public abstract class WandWaermeUebergang {
 //		double T=get_Tmb(zonen_IN);
 //		//multiply with factor		
 //		return get_WaermeUebergangsKoeffizient(time,zonen_IN, fortschritt) * (T- T_wall);
-//	}
 	
+	public double get_WandWaermeStromDichte(double time, Zone[] zonen_IN, double fortschritt){	
+	double qw=0;
+	double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
+	if(motor.isHubKolbenMotor()){
+		Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		double pistonSurf=hkm.get_Kolbenflaeche()+feuerstegMult*hkm.get_FeuerstegFlaeche();
+		double headSurf=hkm.get_fireDeckArea();
+		double cylWallSurf=hkm.get_CylinderLinerArea(time);
+
+		if(Double.isNaN(T_cyl)||Double.isNaN(T_piston)||Double.isNaN(T_head))	{
+			T_cyl=cp.get_T_Cyl();	
+			T_piston=cp.get_T_Piston();	
+			T_head=cp.get_T_Head();	
+		}
+		double T=get_Tmb(zonen_IN);
+		qw=alpha*(pistonSurf*(T-T_piston)+headSurf*(T-T_head)+cylWallSurf*(T-T_cyl))/(pistonSurf+headSurf+cylWallSurf);
+
+	}else{
+		try{
+			throw new BirdBrainedProgrammerException("WHT-Models " +
+					"for non Piston engines must override this method!");					
+		}catch(BirdBrainedProgrammerException bbpe){
+			bbpe.stopBremo();
+		}
+	}
+	return qw;	
+	}
 	
+	//public double get_Schleppdruck(double time, Zone[] zonen_IN){
+	public double get_Schleppdruck(){
+		return 0;
+	}
 	
 }

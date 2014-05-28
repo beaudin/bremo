@@ -1,0 +1,133 @@
+[Bremo::Input::Start]
+14.03.2014
+
+###############################
+#######BERECHNUNGSMODELL#######
+###############################
+[berechnungsModell: APR_1Zonig]
+debuggingMode	[-]	:=	nein
+debuggingTime	[KWnZOT]	:=	16
+minimaleZonenMasse	[kg]	:=	0.000000001
+T_freeze	[K]	:=	1600
+polynomKoeffizienten	[-]	:=	Burcat
+gleichGewichtsKonstanten	[-] 	:=	Burcat
+arbeitsverfahren	[-]	:=	4T
+zeit_oder_KW_Basiert	[-]	:=	KW
+precissionPressureTraceAnalysis	[bar]	:=	0.000001
+rechnungsSchrittweite 	[KW]	:=	0.5
+rechnungsBeginn 	[KWnZOT]	:=	-139
+rechnungsEnde	[KWnZOT]	:=	122
+[OHC_Solver: Grill]
+relaxFactor	[-]	:=	0.6
+VerbrennungsBeginnAutoDetect	[-]	:=	nein
+verbrennungsBeginn	[KWnZOT]	:=	0
+###############################
+
+###############################
+##########MOTORMODELL##########
+###############################
+[Motor: HubKolbenMotor]
+Pleuellaenge	[m]	:=	0.144
+Bohrung	[m]	:=	0.083
+Kurbelradius	[m]	:=	0.0415
+Verdichtung	[-]	:=	18.14
+Schraenkung	[m]	:=	0
+Desachsierung	[m]	:=	0
+Auslassoeffnet	[KWnZOT]	:=	122
+Auslassschluss	[KWnZOT]	:=	383
+Einlassoeffnet	[KWnZOT]	:=	-395
+Einlassschluss	[KWnZOT]	:=	-139
+
+Quetschspalthoehe	[m]	:=	0.000725
+Brennraumdachflaeche	[m^2]	:=	0.007404218
+Kolbenflaeche	[m^2]	:=	0.00541061
+Feuersteghoehe	[m]	:=	0.005
+###############################
+
+###############################
+#######BETRIEBSPARAMETER#######
+###############################
+Drehzahl	[min^-1]	:=	2001.750
+
+T_Ladeluft	[K]	:=	370
+T_Abgas	[K]	:=	400
+
+p_Ladeluft	[Pa]	:=	100425
+p_Abgas	[Pa]	:=	100425
+mLuft_feucht	[kg/h]	:=	29.092
+
+T_FeuchteMessung	[K]	:=	293.93
+relative_Luftfeuchte	[%]	:=	27.1
+p_FeuchteMessung	[Pa]	:=	99835
+
+T_Cyl	[K] 	:=	400
+T_Piston	[K] 	:=	400
+T_Head	[K] 	:=	400
+T_IVC_WHT	[K]	=	500
+p_IVC	[Pa]	=	100000
+polyExp_WHT	[-]	:=	1.4
+
+mAGR_extern	[kg/h]	:=	0.0
+###############################
+
+###############################
+########EINSPRITZMODELL########
+###############################
+Hu_RON_91	[MJ/mol]	:=	4.5812312590484
+Hu_RON_95	[MJ/mol]	:=	4.211277132508449
+Hu_RON_98	[MJ/mol]	:=	4.1086206027614996
+Hu_Diesel	[MJ/mol]	:=	7.84947120749425
+
+anzahlEinspritzungen	[-]	:= 	1
+[einspritzModell_0: SRE]
+InjZone	[-]	:=	0
+mKrst	[kg/h]	:=	1.0E-32
+krst	[-]	:=	RON_95
+vergleichsKrstVerdampfung	[-]	:= tetradecan
+T_Krst_fluessig	[K]	:=	363
+BOI	[KWnZOT]	:=	-250
+EOI	[KWnZOT]	:=	-243
+###############################
+
+###############################
+#########INDIZIERDATEN#########
+###############################
+indizierFileName	[-]	:=	Indizierfile.txt
+spalte_pZyl	[-]	:=	2
+spalte_pEin	[-]	:=	3
+spalte_pAbg	[-]	:=	4
+
+filtern	[-]	:=	ja
+sgolayOrder	[-]	:=	5
+sgolayHalfWidth	[-]	:=	11
+shift_pEin	[-]	:=	nein	
+shift_pAus	[-]	:=	nein
+pressureAdjustmentMethod	[-]	:=	ohne
+###############################
+
+###############################
+#########RESTGASMODELL#########
+###############################
+[internesRestgasModell: RestgasVorgabe]
+mAGR_intern_ASP	[kg]	:=	0
+###############################
+
+
+###############################
+########WANDWAERMEMODELL#######
+###############################
+[Wandwaermemodell: Hohenberg]
+swirlRatio	[-]	:=	0.0
+drallgeschwindigkeit	[m/s]	:=	0.6
+refPunktWoschniHuber	[KWnZOT]	:=	-60
+###############################
+
+###############################
+#########VERLUSTTEILUNG########
+###############################
+Verlustteilung	[-]	:=	nein
+burnFileName [-]  :=  DAHNZ.txt
+spalte_dQburn	[]	:=	2
+###############################
+
+[Bremo::Input::Stop]

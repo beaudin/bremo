@@ -124,6 +124,7 @@ public class Woschni extends WandWaermeUebergang {
 		//TODO: Koeffizienten von anderen Motortypen einbauen...
 		double C_2 = 0.00324; //Dieselmotoren mit Direkteinspritzung und Ottomotoren
 		
+		//polytrope Schleppdruckberechnung bezüglich Einlassschluss für Woschni-Modell
 		double Schleppdruck = druck_1*Math.pow((volumen_1/motor.get_V(time)),n); //[Pa]
 		
 		//fuer Ausgabe get_Schleppdruck

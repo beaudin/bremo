@@ -1,0 +1,158 @@
+[Bremo::Input::Start]			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%MOTORPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+			07.03.2014
+[Motor: HubKolbenMotor]			
+Bohrung	[m]	:=	0.083
+Kurbelradius	[m]	:=	0.0415
+Pleuellaenge	[m]	:=	0.144
+Verdichtung 	[-]	:=	12.14
+Schraenkung 	[m]        	:=	0
+Desachsierung 	[m]	:=	0.001
+Einlassschluss 	[KWnZOT]   	:=	-152
+-134			
+Einlassoeffnet 	[KWnZOT]   	:=	-407
+-389			
+Auslassoeffnet 	[KWnZOT]   	:=	124
+123
+124			
+Auslassschluss 	[KWnZOT]   	:=	384
+385			
+EV_Hub_max 	[m]	:=	0.008083618
+EV_Hub 	[m]	:=	0.008083618
+EV_durchmesser 	[m]	:=	0.027
+AV_durchmesser	[m]	:=	0.027
+Brennraumdachflaeche 	[m^2]   	:=	0.007404218
+Kolbenflaeche   	[m^2]       	:=	0.00541061
+Feuersteghoehe	[m]	:=	0.005
+Quetschspalthoehe	[m]	:=	0.000725
+			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%BETRIEBSPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 			
+			
+Drehzahl	[min^-1]	:=	2000.337402
+mLuft_feucht	[kg/h]	:=	26.495
+			
+T_Ladeluft	[K] 	:=	327.762
+			
+T_Abgas	[K] 	:=	507.985
+relative_Luftfeuchte	[%] 	:=	27.98
+			
+T_FeuchteMessung	[K] 	:=	293.465
+p_FeuchteMessung	[Pa] 	:=	99935
+p_Ladeluft	[Pa] 	:=	95285
+p_Abgas	[Pa] 	:=	100845
+mAGR_extern	[kg/h]	:=	0
+			
+  RestgasVorgabe  LWA      			
+[internesRestgasModell: LWA]			
+mAGR_intern_ASP	[kg] 	=	0.00E+00
+			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%Modelle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+			
+anzahlEinspritzungen	[-]	:= 	2
+			
+Hu_RON_95 	[MJ/mol] 	:=	4.12815
+			
+Hu_RON_91 	[MJ/mol] 	:=	4.581231259
+Hu_RON_98 	[MJ/mol] 	:=	4.108620.6027614996
+Hu_Diesel 	[MJ/mol] 	:=	7.849471207
+			
+[einspritzModell_0 : Homogen]			
+krst_0	[-]	:=	RON_95
+InjZone_0	[-]	:=	0
+mKrst_0	[kg/h] 	:=	0.000001
+BOI _0	[KWnZOT] 	:=	-310
+EOI_0	[KWnZOT] 	:=	-309.76
+T_Krst_fluessig_0	[K] 	:=	293
+			
+[einspritzModell_1 : simpleDI]			
+krst_1	[-]	:=	RON_95
+InjZone_1	[-]	:=	0
+mKrst_1	[kg/h] 	:=	0.516
+BOI_1	[KWnZOT] 	:=	-38
+EOI_1	[KWnZOT] 	:=	-25.5
+T_Krst_fluessig_1	[K] 	:=	293
+vergleichsKrstVerdampfung_1	[-]	:=	tetradecan
+			
+[Wandwaermemodell: Hohenberg]			
+T_Cyl	[K] 	:=	424.496
+T_Piston	[K]	:=	424.496
+T_Head	[K]	:=	424.496
+whtfMult	[-]	:=	1
+			
+[Wandwaermemodell_LW: Hohenberg]			
+refPunktWoschniHuber 	[KWnZOT]	:=	-60
+drallgeschwindigkeit	[m/s] 	:=	0
+			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%SYSTEMPARAMETER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+filtern	[-] 	:= 	ja
+sgolayOrder	[-]	:=	5
+sgolayHalfWidth	[-]	:=	11
+pressureAdjustmentMethod	[-] 	:= 	polytropenMethode
+			
+KW_Beginn_Druckabgleich	[KWnZOT]	:=	-83
+KW_Ende_Druckabgleich 	[KWnZOT]	:=	-82
+kappa_Druckabgleich	[-]	:=	1.388
+[berechnungsModell:DVA_1Zonig ]			
+			
+[OHC_Solver: Grill ]			
+standardBildungsEnthalpien	[-] 	:=	ChemieStandard
+VerbrennungsBeginnAutoDetect	[-]	:=	ja
+verbrennungsBeginn 	[KWnZOT] 	=	-25
+arbeitsverfahren	[-]	:=	4T
+minimaleZonenMasse	[kg]	:=	2.00E-06
+precissionPressureTraceAnalysis	[bar]	:=	2E-6
+polynomKoeffizienten	[-] 	:=	Burcat
+zeit_oder_KW_Basiert	[-]	:=	KW
+rechnungsSchrittweite 	[KW]	:=	1.5
+rechnungsBeginn 	[KWnZOT]	:=	-130
+rechnungsEnde	[KWnZOT]	:=	115
+			
+relaxFactor 	[-]	:=	0.7
+gleichGewichtsKonstanten	[-] 	:=	Burcat
+T_freeze	[K]	:=	1600
+debuggingMode	[-]	:=	nein
+debuggingTime 	[KWnZOT]	:=	8
+			
+indizierFileName	[-] 	:= 	Druckverlauf.txt
+spalte_pZyl	[-]	:=	3
+spalte_pEin	[-]	:=	4
+spalte_pAbg	[-]	:=	6
+shift_pEin	[-]	:=	ja
+shift_pAus	[-]	:=	ja
+			
+spalte_alphaVor	[-] 	:= 	2
+spalte_alphaRueck	[-] 	:= 	3
+			
+durchflusskennzahlEinFileName 	[-] 	:= 	Durchflusskennzahl_Einlass.txt
+RefDurchmesserEV	[m]	:=	0.027
+durchflusskennzahlAusFileName 	[-] 	:=	Durchflusskennzahl_Auslass.txt
+RefDurchmesserAV	[m]	:=	0.027
+VentilhubEinFileName 	[-] 	:= 	Ventilhub_Einlass.txt
+VentilhubAusFileName	[-] 	:= 	Ventilhub_Auslass.txt
+			
+Verlustteilung	[-]	:=	ja
+burnFileName	[-]	:=	Brennverlauf.txt
+spalte_dQburn	[-]	:=	2
+pme	[bar]	:=	0.1
+HC	[ppm]	:=	0.1
+CO	[ppm]	:=	0.1
+
+###############################
+#############BLOWBY############
+###############################
+[BlowByModell: Leckage]
+Leckage ohne
+FlaecheBB	[m^2]	:=	0.000249
+p_KGH	[Pa]	:=	120000
+pKGHindiziert	[-]	:=	nein
+###############################
+			
+[Bremo::Input::Stop]			

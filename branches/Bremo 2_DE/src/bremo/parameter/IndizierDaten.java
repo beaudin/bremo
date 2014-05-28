@@ -384,8 +384,8 @@ public class IndizierDaten {
 				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
 				pEin_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
 			}
-			pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
-								MatLibBase.mw_aus_1DArray(pEin_temp);
+			//pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-MatLibBase.mw_aus_1DArray(pEin_temp);
+			pOffset=-MatLibBase.mw_aus_1DArray(pZyl_temp)+MatLibBase.mw_aus_1DArray(pEin_temp);
 
 			pZyl = this.shiftMe(pZyl, pOffset);
 			
@@ -431,9 +431,9 @@ public class IndizierDaten {
 				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
 				pEin_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
 			}
-			pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
-								MatLibBase.mw_aus_1DArray(pEin_temp);
-
+			//pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-MatLibBase.mw_aus_1DArray(pEin_temp);
+			pOffset=-MatLibBase.mw_aus_1DArray(pZyl_temp)+MatLibBase.mw_aus_1DArray(pEin_temp);
+			
 			pZyl = this.shiftMe(pZyl, pOffset);
 		}else{
 			try{
@@ -461,15 +461,15 @@ public class IndizierDaten {
 			double ao=((Motor_HubKolbenMotor) motor).get_Auslass_oeffnet();
 			double tAbgleich=(as+ao)/2;
 			double pZyl_temp []=new double [11];
-			double pEin_temp []=new double [11];
+			double pAus_temp []=new double [11];
 			for(int i=0;i<11;i++){
 				double time=tAbgleich+(i-5)*deltat;				
 				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
-				pEin_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
+				pAus_temp[i]=L_Interp.linInterPol(time, zeitAchse, pAbgleich);
 			}
-			pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-
-								MatLibBase.mw_aus_1DArray(pEin_temp);
-
+			//pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-MatLibBase.mw_aus_1DArray(pAus_temp);
+			pOffset=-MatLibBase.mw_aus_1DArray(pZyl_temp)+MatLibBase.mw_aus_1DArray(pAus_temp);
+			
 			pZyl = this.shiftMe(pZyl, pOffset);
 		}else{
 			try{
@@ -644,7 +644,8 @@ public class IndizierDaten {
 				double time=dab-(i*deltat);			
 				pZyl_temp[i]=L_Interp.linInterPol(time, zeitAchse, pZyl);
 			}
-			pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-pRef_temp;
+			//pOffset=MatLibBase.mw_aus_1DArray(pZyl_temp)-pRef_temp;
+			pOffset=-MatLibBase.mw_aus_1DArray(pZyl_temp)+pRef_temp;
 
 			pZyl = this.shiftMe(pZyl, pOffset);
 			}

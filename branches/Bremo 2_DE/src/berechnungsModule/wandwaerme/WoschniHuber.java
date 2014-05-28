@@ -1,6 +1,10 @@
 package berechnungsModule.wandwaerme;
 
 
+import java.util.Hashtable;
+
+import kalorik.spezies.GasGemisch;
+import kalorik.spezies.Spezies;
 import matLib.MatLibBase;
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
@@ -28,6 +32,7 @@ public class WoschniHuber extends WandWaermeUebergang {
 	private double Vol_a;
 	private double C_1;
 	private double C_2;
+	private boolean setRefConditions=true; //fuer Abfrage ob Simulationsstart bei IVC
 	
 	//fuer Ausgabe get_Schleppdruck
 	private double pSchlepp = 0;
@@ -41,9 +46,9 @@ public class WoschniHuber extends WandWaermeUebergang {
 		Hubvolumen = motor.get_Hubvolumen();  //[m^3]
 		Kompressionsvolumen = motor.get_Kompressionsvolumen();	//[m^3]
 		mittlereKolbengeschwindigkeit= 2*motor.get_Hub()*cp.get_DrehzahlInUproSec(); //[m/s]
-		Temperatur_1=cp.get_T_IVC_WHT(); //[K] //TODO: In Abfrage für t!=IVC setzen! 
-		Druck_1=indiD.get_pZyl(cp.get_Einlassschluss()); //[bar]
-		Volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]
+		//Temperatur_1=cp.get_T_IVC_WHT(); //[K] //TODO: In Abfrage für t!=IVC setzen! 
+		//Druck_1=indiD.get_pZyl(cp.get_Einlassschluss()); //[bar]
+		//Volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]
 		//Formel nach Pischinger "Thermodynamik der Verbrennungskraftmaschine" Seite 203
 		vDrall=cp.get_swirlRatio()*cp.get_DrehzahlInUproSec()*Math.PI*motor.get_Bohrung()*0.7;
 		//vDrall=cp.get_DrallGeschwindigkeit();
@@ -84,6 +89,43 @@ public class WoschniHuber extends WandWaermeUebergang {
 				bbpe.stopBremo();
 			}			
 		}
+		
+		if(setRefConditions){ //IVC
+			setRefConditions=false;
+			if(time!=cp.get_Einlassschluss()){//simulation start is not at IVC (e.g homogeneous multizone model
+				Temperatur_1=cp.get_T_IVC_WHT(); //[K]	
+				n=cp.get_polyExp_WHT();
+				if(cp.compareToExp()){
+					//indiD=new IndizierDaten(cp);
+					Druck_1=indiD.get_pZyl(cp.get_Einlassschluss()); 
+				}
+				else{				
+					Druck_1=cp.get_p_IVC_WHT();
+				}				
+				Volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]	
+			}else{
+//				try{
+//				throw new BirdBrainedProgrammerException("Checken " +
+//						"ob der WHT nach Woschni funktioniert!!");
+//			}catch(BirdBrainedProgrammerException bbpe){
+//				bbpe.stopBremo();
+//			}
+			Temperatur_1=super.get_Tmb(zonen_IN);
+			//getting gamma for the whole cylinder
+			double mTot=0;
+			for(int i=0; i<zonen_IN.length;i++)mTot+=zonen_IN[i].get_m();
+			Hashtable <Spezies,Double> ht=new Hashtable <Spezies,Double>();
+			for(int i=0; i<zonen_IN.length;i++)
+				ht.put(zonen_IN[i].get_ggZone(), zonen_IN[i].get_m()/mTot);
+			
+			GasGemisch gg =new GasGemisch("gg");
+			gg.set_Gasmischung_massenBruch(ht);
+			this.n=gg.get_kappa(Temperatur_1);				
+			Druck_1=zonen_IN[0].get_p();
+			Volumen_1=motor.get_V(time);
+			}
+		}//IVC
+				
 		double p=zonen_IN[0].get_p();	//Zylinderdruck
 		double T=get_Tmb(zonen_IN);		//Mittlere Brennraumtemperatur
 		// Bestimmung an Hand des Kurbelwinkels und der Steuerzeiten ob Ladungswechsel oder Hochdruckteil
@@ -105,6 +147,7 @@ public class WoschniHuber extends WandWaermeUebergang {
 		//TODO: Koeffizienten von anderen Motortypen einbauen...
 		C_2 = 0.00324; //Dieselmotoren mit Direkteinspritzung und Ottomotoren
 
+		//polytrope Schleppdruckberechnung bezüglich refPunktWoschniHuber für Woschni-Modell
 		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n); //[Pa]
 		
 		//fuer Ausgabe get_Schleppdruck

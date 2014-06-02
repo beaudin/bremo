@@ -120,7 +120,7 @@ public class CasePara {
 		//Turbulence
 		TURB_FACTORY=new TurbulenceModelFactory(this, new MakeMeUnique());
 		
-		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG und RESTGAS_MODELL
+//		//Berechnungsmodell benoetigt MASTER_EINSPRITZUNG und RESTGAS_MODELL
 		BerechnungsModellFabrik bmf=new BerechnungsModellFabrik(this);
 		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;	
 		SOLVER.set_BerechnungsModell(BERECHNUNGS_MODELL);
@@ -175,15 +175,15 @@ public class CasePara {
 	public boolean compareToExp(){		
 		boolean compareToExp = false;
 		String s = null;
-		String s2 []= {"yes","no"};
+		String s2 []= {"ja","nein"};
 		try {
 			s=this.set_StringPara(INPUTFILE_PARAMETER, "compareToExp",s2);
 		} catch (ParameterFileWrongInputException e){	
 			compareToExp=false;
-			s="no";
+			s="nein";
 		}
-		if(s.equalsIgnoreCase("yes"))
-			compareToExp=true;		
+		if(s.equalsIgnoreCase("ja"))
+			compareToExp=true;
 		return compareToExp;		
 	}
 	
@@ -1643,7 +1643,7 @@ public class CasePara {
 //					"Es wird mit dem Referenzwert" +std_rw + "[bar] gerechnet.");
 //			return std_rw;
 //		}
-		double std_rw=-7.77;	//Standardwert für pmi (muss negativ sein, siehe z.B. das Wandwärmemodell "WoschniHuber"
+		double std_rw=-7.77;	//Standardwert muss negativ
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "Referenzwert","[bar]",0,300); 
 		} catch (ParameterFileWrongInputException e) {				
@@ -1997,8 +1997,10 @@ public class CasePara {
 			}				
 			return KW_refPunkt;				
 		} catch (ParameterFileWrongInputException e) {			
-			e.stopBremo();
-			return Double.NaN;
+//			e.stopBremo();
+//			return Double.NaN;
+			e.log_Warning("Der Parameter \"refPunktWoschniHuber\" wurde nicht angegeben, es wird mit dem Parameter \"Einlassschluss\" gerechnet.");
+			return get_Einlassschluss();
 		}
 	}
 

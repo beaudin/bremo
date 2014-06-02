@@ -155,10 +155,19 @@ public class APR_homogen_EinZonig extends APR{
 		//Anfangsbedingungen Setzen
 		//p Init
 		double p_init=101300; // Umgebungsdruck 1bar
-		try{
+////ANFANG Urspruengliche Abfrage für Initialdruck
+//		try{
+//			IndizierDaten indiD = new IndizierDaten(cp);
+//			p_init= indiD.get_pZyl(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC);
+//		}catch(InvalidParameterException e){
+//			p_init = cp.get_p_ini();
+//		}
+////ENDE Urspruengliche Abfrage für Initialdruck		
+		if(cp.compareToExp()){
 			IndizierDaten indiD = new IndizierDaten(cp);
 			p_init= indiD.get_pZyl(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC);
-		}catch(InvalidParameterException e){
+		}
+		else{
 			p_init = cp.get_p_ini();
 		}
 		
@@ -429,6 +438,11 @@ public class APR_homogen_EinZonig extends APR{
 		i+=1;
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);
 		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
+		
+		//Schleppdruck in bar
+		i+=1;
+		//super.buffer_EinzelErgebnis("Schleppdruck [bar]",wandWaermeModell.get_Schleppdruck(time, zn)*1E-5,i);
+		super.buffer_EinzelErgebnis("pSchleppWHT [bar]",wandWaermeModell.get_Schleppdruck()*1E-5,i);		
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);

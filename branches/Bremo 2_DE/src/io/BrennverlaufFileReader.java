@@ -11,8 +11,9 @@ import bremo.parameter.CasePara;
 import bremoExceptions.ParameterFileWrongInputException;
 
 /*Eine Brennverlauf-Datei besteht aus zwei Spalten: 
- * 1. Kurbelwinkel
- * 2. Brennverlauf in [J/KW]
+ * 1. Kurbelwinkel [KWnZOT] oder [s]
+ * 2. Brennverlauf in [J/s]
+ * In der ersten Zeile steht der Spaltenname, in der zweiten Zeile die EINHEIT!
 */
 
 
@@ -224,7 +225,7 @@ public class BrennverlaufFileReader {
 		}catch(NumberFormatException nfe){
 			try {
 				throw new ParameterFileWrongInputException("In einer der angegebenen Spalten " +
-						"des BRennverlaufsfiles steht zwar eine richtige Einheit im Header, " +
+						"des Brennverlaufsfiles steht zwar eine richtige Einheit im Header, " +
 						"aber Daten sind darunter keine eingetragen... ");
 			} catch (ParameterFileWrongInputException e) {				
 				e.stopBremo();

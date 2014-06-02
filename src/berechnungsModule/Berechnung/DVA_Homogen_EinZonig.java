@@ -364,32 +364,32 @@ public class DVA_Homogen_EinZonig extends DVA{
 		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
 		
 		
-		//Polytropenexponent für die Schleppdruckberechnung ermitteln.
-		//Dies wird in den 10°KW vorm Referenzpunkt gemacht...
-		double refPunkt=CP.get_refPunkt_WoschniHuber();
-		double[] n_array = new double[10]; 
-		double pZyl_a = indiD.get_pZyl(refPunkt);
-		double Vol_a = motor.get_V(refPunkt);
-		double pZyl_b = 0;
-		double Vol_b = 0;
-		int cnt=0;
-		
-//		Schleifen-Abbruch nicht mit A<B sondern B-A>sehr kleinem Wert nahe Null!?
-		for(double kw=CP.convert_SEC2KW(refPunkt)-10; (CP.convert_SEC2KW(refPunkt)-kw) > 1E-6; kw++){
-//		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){ //ORIGINAL
-//		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
-			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
-			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
-			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
-			cnt++;
-		}
-		
-		double n=MatLibBase.mw_aus_1DArray(n_array); //Polytropenexponent
-		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
-		i+=1;
-		super.buffer_EinzelErgebnis("pSchleppRefPnktWH [bar]",Schleppdruck,i);
-		
-		///////////////////////////		
+//		//Polytropenexponent für die Schleppdruckberechnung ermitteln.
+//		//Dies wird in den 10°KW vorm Referenzpunkt gemacht...
+//		double refPunkt=CP.get_refPunkt_WoschniHuber();
+//		double[] n_array = new double[10]; 
+//		double pZyl_a = indiD.get_pZyl(refPunkt);
+//		double Vol_a = motor.get_V(refPunkt);
+//		double pZyl_b = 0;
+//		double Vol_b = 0;
+//		int cnt=0;
+//		
+////		Schleifen-Abbruch nicht mit A<B sondern B-A>sehr kleinem Wert nahe Null!?
+//		for(double kw=CP.convert_SEC2KW(refPunkt)-10; (CP.convert_SEC2KW(refPunkt)-kw) > 1E-6; kw++){
+////		for(double kw=CP.convert_SEC2KW(refPunkt)-10; kw < CP.convert_SEC2KW(refPunkt); kw++){ //ORIGINAL
+////		for(double kw=refPunkt-CP.convert_KW2SEC(10); kw < refPunkt; kw++){
+//			pZyl_b=indiD.get_pZyl(CP.convert_KW2SEC(kw));
+//			Vol_b=motor.get_V(CP.convert_KW2SEC(kw));
+//			n_array[cnt]=Math.log10(pZyl_a/pZyl_b)/Math.log10(Vol_b/Vol_a);
+//			cnt++;
+//		}
+//		
+//		double n=MatLibBase.mw_aus_1DArray(n_array); //Polytropenexponent
+//		double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n)*1E-5; //[bar]
+//		i+=1;
+//		super.buffer_EinzelErgebnis("pSchleppRefPnktWH [bar]",Schleppdruck,i);
+//		
+//		///////////////////////////		
 	
 		//Schleppdruck in bar
 		i+=1;

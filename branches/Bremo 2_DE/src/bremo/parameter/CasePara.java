@@ -73,10 +73,13 @@ public class CasePara {
 		MODUL_VORGABEN=ifr.get_berechnungsModule();
 
 		//		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
+		System.out.println("====================================");
 		System.out.println("Inputfile wurde eingelesen!");
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));
 		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 
+		System.out.println(WD+CASE_NAME + ".txt");
+		System.out.println("====================================");
 //		//Is doof aber geht jetzt nicht besser
 		callsCantera=BerechnungsModellFabrik.callsCantera(this);	
 		

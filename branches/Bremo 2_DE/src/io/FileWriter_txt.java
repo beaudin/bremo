@@ -196,7 +196,7 @@ public class FileWriter_txt {
 		double matrixLine1 []={11,12,13,14,15};
 		double matrixLine2 []={21,22,23,24,25};
 		double matrix [][] ={matrixLine1,matrixLine2};
-		String [] header = {"Spalte 1", "Spale 2"};		
+		String [] header = {"Spalte 1", "Spalte 2"};		
 		this.writeTextLineToFile(header, false);
 		this.writeLineToFile(vektor, true);
 		this.writeMatrixToFile(matrix, true);

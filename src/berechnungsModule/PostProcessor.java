@@ -39,23 +39,23 @@ public class PostProcessor {
 //			FileWriter_txt txtFile = new FileWriter_txt("mb.txt");
 //			txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);			
 
-			System.out.println("DVA_Post_Ergebnisse:");
-			System.out.println("====================================");
+			System.err.println("DVA_Post_Ergebnisse:");
+			System.err.println("====================================");
 		
 			IndizierDaten indi=new IndizierDaten(CP);
 			double pmi=indi.get_pmi();
 			int i=0;
 			ergB.buffer_EinzelErgebnis("pmi [bar]",pmi*1e-5,i);
-			System.out.println("pmi = " + pmi*1e-5 + "[bar]");
+			System.err.println("pmi = " + pmi*1e-5 + "[bar]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("pMax [bar]",indi.get_pZyl_MAX()*1e-5,i);
-			System.out.println("pMax = " + indi.get_pZyl_MAX()*1e-5 + "[bar]");		
+			System.err.println("pMax = " + indi.get_pZyl_MAX()*1e-5 + "[bar]");		
 			
 			double mAGR_inter=CP.RESTGASMODELL.get_mInternesRestgas_ASP();
 			i+=1;
 			ergB.buffer_EinzelErgebnis("mAGR_intern [kg]",mAGR_inter,i);
-			System.out.println("mAGR_intern = " + mAGR_inter + "[kg]");	
+			System.err.println("mAGR_intern = " + mAGR_inter + "[kg]");	
 			
 			MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
 			double mKrst=me.get_mKrst_Sum_ASP();
@@ -64,17 +64,17 @@ public class PostProcessor {
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("AGR_intern [%]",100*mAGR_inter/mGes,i);	
-			System.out.println("mAGR_intern = " + 100*mAGR_inter/mGes + "[%]");
+			System.err.println("mAGR_intern = " + 100*mAGR_inter/mGes + "[%]");
 			
 			double temp = cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst();
 			double lambda_abgas = cp.get_mLuft_feucht_ASP() / (cp.MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP() * cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() );
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Lambda_Abgas [-]", lambda_abgas,i);
-			System.out.println("Lambda_Abgas = " + lambda_abgas + "[-]");
+			System.err.println("Lambda_Abgas = " + lambda_abgas + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Lambda_Brennraum [-]",(mAGR_inter/mGes - lambda_abgas) / (mAGR_inter/mGes - 1) ,i);	
-			System.out.println("Lambda_Brennraum = " + (mAGR_inter/mGes - lambda_abgas) / (mAGR_inter/mGes - 1) + "[-]");
+			System.err.println("Lambda_Brennraum = " + (mAGR_inter/mGes - lambda_abgas) / (mAGR_inter/mGes - 1) + "[-]");
 			
 			double umsp[]=findUmsatzPunkte(dm_buffer);
 			String s;
@@ -84,76 +84,76 @@ public class PostProcessor {
 				s="[s n. RechenBeginn]";
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_1 "+ s,umsp[0],i);
-			System.out.println("X_1 = " + umsp[0] + "[-]");
+			System.err.println("X_1 = " + umsp[0] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_5 "+ s,umsp[1],i);
-			System.out.println("X_5 = " + umsp[1] + "[-]");
+			System.err.println("X_5 = " + umsp[1] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_10 "+ s,umsp[2],i);
-			System.out.println("X_10 = " + umsp[2] + "[-]");
+			System.err.println("X_10 = " + umsp[2] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_25 "+ s,umsp[3],i);
-			System.out.println("X_25 = " + umsp[3] + "[-]");
+			System.err.println("X_25 = " + umsp[3] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_50 "+ s,umsp[4],i);
-			System.out.println("X_50 = " + umsp[4] + "[-]");
+			System.err.println("X_50 = " + umsp[4] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_75 "+ s,umsp[5],i);
-			System.out.println("X_75 = " + umsp[5] + "[-]");
+			System.err.println("X_75 = " + umsp[5] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_90 "+ s,umsp[6],i);
-			System.out.println("X_90 = " + umsp[6] + "[-]");
+			System.err.println("X_90 = " + umsp[6] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_95 "+ s,umsp[7],i);
-			System.out.println("X_95 = " + umsp[7] + "[-]");
+			System.err.println("X_95 = " + umsp[7] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_99 "+ s,umsp[8],i);
-			System.out.println("X_99 = " + umsp[8] + "[-]");
+			System.err.println("X_99 = " + umsp[8] + "[-]");
 			
 			double umspQ[]=findUmsatzPunkte(dQb_buffer);			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_1 "+ s,umspQ[0],i);
-			System.out.println("Q_1 = " + umspQ[0] + "[-]");
+			System.err.println("Q_1 = " + umspQ[0] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_5 "+ s,umspQ[1],i);
-			System.out.println("Q_5 = " + umspQ[1] + "[-]");
+			System.err.println("Q_5 = " + umspQ[1] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_10 "+ s,umspQ[2],i);
-			System.out.println("Q_10 = " + umspQ[2] + "[-]");
+			System.err.println("Q_10 = " + umspQ[2] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_25 "+ s,umspQ[3],i);
-			System.out.println("Q_25 = " + umspQ[3] + "[-]");
+			System.err.println("Q_25 = " + umspQ[3] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_50 "+ s,umspQ[4],i);
-			System.out.println("Q_50 = " + umspQ[4] + "[-]");
+			System.err.println("Q_50 = " + umspQ[4] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_75 "+ s,umspQ[5],i);
-			System.out.println("Q_75 = " + umspQ[5] + "[-]");
+			System.err.println("Q_75 = " + umspQ[5] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_90 "+ s,umspQ[6],i);
-			System.out.println("Q_90 = " + umspQ[6] + "[-]");
+			System.err.println("Q_90 = " + umspQ[6] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_95 "+ s,umspQ[7],i);
-			System.out.println("Q_95 = " + umspQ[7] + "[-]");
+			System.err.println("Q_95 = " + umspQ[7] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_99 "+ s,umspQ[8],i);
-			System.out.println("Q_99 = " + umspQ[8] + "[-]");
+			System.err.println("Q_99 = " + umspQ[8] + "[-]");
 			
 		
 			double x50;;
@@ -166,47 +166,47 @@ public class PostProcessor {
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Qw [J]",Qw[Qw.length-1],i);
-			System.out.println("Qw = " + Qw[Qw.length-1] + "[J]");
+			System.err.println("Qw = " + Qw[Qw.length-1] + "[J]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("h_therm [-]",h[0],i);
-			System.out.println("h_therm = " + h[0] + "[-]");
+			System.err.println("h_therm = " + h[0] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("h_realeLadung [-]",h[1],i);
-			System.out.println("h_realeLadung = " + h[1] + "[-]");
+			System.err.println("h_realeLadung = " + h[1] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("h_realerSchwerpunkt [-]",h[2],i);
-			System.out.println("h_realerSchwerpunkt = " + h[2] + "[-]");
+			System.err.println("h_realerSchwerpunkt = " + h[2] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis( "h_HC_CO [-]",h[3],i);
-			System.out.println("h_HC_CO = " + h[3] + "[-]");
+			System.err.println("h_HC_CO = " + h[3] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("h_WandWaerme [-]",h[4],i);
-			System.out.println("h_WandWaerme = " + h[4] + "[-]");
+			System.err.println("h_WandWaerme = " + h[4] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("h_indiziert [-]",h[5],i);
-			System.out.println("h_indiziert = " + h[5] + "[-]");
+			System.err.println("h_indiziert = " + h[5] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("delta_h_Ladungswechsel [-]",h[6],i);
-			System.out.println("delta_h_Ladungswechsel = " + h[4] + "[-]");
+			System.err.println("delta_h_Ladungswechsel = " + h[4] + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Offset Zylinderdruck [Pa]", indi.get_pOffset(), i);
-			System.out.println("Offset Zylinderdruck = " + indi.get_pOffset() + "[Pa]");
+			System.err.println("Offset Zylinderdruck = " + indi.get_pOffset() + "[Pa]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Kappa Druckabgleich Polytropenmethode", indi.get_kappa_druckabgleich(), i);
-			System.out.println("Kappa Druckabgleich Polytropenmethode = " + indi.get_kappa_druckabgleich() + "[-]");
+			System.err.println("Kappa Druckabgleich Polytropenmethode = " + indi.get_kappa_druckabgleich() + "[-]");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("L_St [MJ/mol]", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);
-			System.out.println("L_St [MJ/mol] = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() + "[-]");
+			System.err.println("L_St [MJ/mol] = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() + "[-]");
 						
 	}
 	

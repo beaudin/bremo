@@ -99,7 +99,11 @@ public class ErgebnisBuffer {
 	public  void schreibeErgebnisFile(String name){
 		String pfadFinal=cp.get_workingDirectory()+this.praefix+name;
 		if(!ergebnisHash.isEmpty()&& !ergebnisSpalteHash.isEmpty()) //Verhindert einen Fehler wenn die Ergebnisse schon geschrieben wurden (siehe LWA)
-			this.schreibeErgebnisFile(this.ergebnisHash, this.ergebnisSpalteHash, pfadFinal);		
+			this.schreibeErgebnisFile(this.ergebnisHash, this.ergebnisSpalteHash, pfadFinal);
+		System.out.println("====================================");
+		System.out.println("Schreibe "+praefix+"Datei:");
+		System.out.println(pfadFinal);
+		System.out.println("====================================");
 	}
 	
 

@@ -65,7 +65,7 @@ import bremoswing.util.FertigMeldungFrame;
  */
 public class SwingBremo extends JFrame {
 
-	private static final String title = "Bremo 2.0 Beta rev202";
+	private static final String title = "Bremo 2.0 Beta rev204";
 	
 	private static final long serialVersionUID = 1L;
 	public static boolean ConsloseModeActive = false;

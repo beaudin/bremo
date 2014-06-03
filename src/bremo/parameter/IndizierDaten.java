@@ -35,7 +35,7 @@ public class IndizierDaten {
 	private SavitzkyGolayFilter sgol;
 	private final boolean filternBitte;
 	private double pOffset; //Offset Zylinderdruck für PostProcessor
-	private double kappa_druckabgleich=0;
+	private double kappa_druckabgleich=Double.NaN;
 	private boolean kghIndiziert = false;
 	
 	
@@ -234,8 +234,8 @@ public class IndizierDaten {
 			//pZylRoh=this.referenzWertMethode();	
 			pZylRoh=this.referenzWertMethode(pZylRoh);	
 		}else if(nlm.equalsIgnoreCase("offset")){
-			double offset = CP.get_pressureOffset();
-			pZylRoh = this.shiftMe(pZylRoh, offset);
+			pOffset = CP.get_pressureOffset();
+			pZylRoh = this.shiftMe(pZylRoh, pOffset);
 		}else if(nlm.equalsIgnoreCase("ohne")){
 			
 		}else{

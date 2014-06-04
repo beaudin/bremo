@@ -23,7 +23,8 @@ public class TurbulenceModelFactory extends ModulFabrik {
 		else if(modelFlagInput.equals("k"))
 			turbModel=new Turbulence_k(super.CP);
 		else if(modelFlagInput.equals("k-eps"))
-			turbModel=null;
+			turbModel=new Turbulence_k_eps(super.CP); //für Bargende
+			//turbModel=null;
 		else{
 			try {
 				throw new BirdBrainedProgrammerException(

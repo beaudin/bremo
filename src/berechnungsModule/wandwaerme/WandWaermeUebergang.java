@@ -109,6 +109,84 @@ public abstract class WandWaermeUebergang {
 		return wht;
 	}
 	
+	//Modelle die auch fuer nicht Kolbenmotoren geeignet sind muessen diese Methode ueberschreiben
+	public double get_WandWaermeStromPiston(double time, Zone[] zonen_IN,
+			double fortschritt, VektorBuffer tBuffer) {		
+		double whtp=0;
+		double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
+		if(motor.isHubKolbenMotor()){
+			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+			double pistonSurf=hkm.get_Kolbenflaeche()+feuerstegMult*hkm.get_FeuerstegFlaeche();
+
+			if(Double.isNaN(T_piston))	{
+				T_piston=cp.get_T_Piston();		
+			}
+			double T=get_Tmb(zonen_IN);
+			whtp=alpha*pistonSurf*(T-T_piston);
+
+		}else{
+			try{
+				throw new BirdBrainedProgrammerException("WHT-Models " +
+						"for non Piston engines must override this method!");					
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
+		}
+		return whtp;
+	}
+	
+	//Modelle die auch fuer nicht Kolbenmotoren geeignet sind muessen diese Methode ueberschreiben
+	public double get_WandWaermeStromHead(double time, Zone[] zonen_IN,
+			double fortschritt, VektorBuffer tBuffer) {		
+		double whth=0;
+		double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
+		if(motor.isHubKolbenMotor()){
+			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+			double headSurf=hkm.get_fireDeckArea();
+
+			if(Double.isNaN(T_head))	{
+				T_head=cp.get_T_Head();	
+			}
+			double T=get_Tmb(zonen_IN);
+			whth=alpha*headSurf*(T-T_head);
+
+		}else{
+			try{
+				throw new BirdBrainedProgrammerException("WHT-Models " +
+						"for non Piston engines must override this method!");					
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
+		}
+		return whth;
+	}
+	
+	//Modelle die auch fuer nicht Kolbenmotoren geeignet sind muessen diese Methode ueberschreiben
+	public double get_WandWaermeStromCyl(double time, Zone[] zonen_IN,
+			double fortschritt, VektorBuffer tBuffer) {		
+		double whtl=0;
+		double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
+		if(motor.isHubKolbenMotor()){
+			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+			double cylWallSurf=hkm.get_CylinderLinerArea(time);
+
+			if(Double.isNaN(T_cyl))	{
+				T_cyl=cp.get_T_Cyl();	
+			}
+			double T=get_Tmb(zonen_IN);
+			whtl=alpha*cylWallSurf*(T-T_cyl);
+
+		}else{
+			try{
+				throw new BirdBrainedProgrammerException("WHT-Models " +
+						"for non Piston engines must override this method!");					
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
+		}
+		return whtl;
+	}
+	
 	//...und hiermit den Wandwärmestrom in W
 //	public double get_WandWaermeStrom(double time, Zone[] zonen_IN, double fortschritt, VektorBuffer tBuffer){
 //		double Brennraumflaeche = this.get_BrennraumFlaeche(time);		
@@ -152,7 +230,85 @@ public abstract class WandWaermeUebergang {
 			bbpe.stopBremo();
 		}
 	}
-	return qw;	
+	return qw; // [W/m^2]	
+	}
+	
+	//Wärmestromdichte Kolben in W/m^2
+	public double get_WandWaermeStromDichtePiston(double time, Zone[] zonen_IN, double fortschritt){	
+	double qwk=0;
+	double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
+	if(motor.isHubKolbenMotor()){
+		Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		//double pistonSurf=hkm.get_Kolbenflaeche()+feuerstegMult*hkm.get_FeuerstegFlaeche();
+
+		if(Double.isNaN(T_piston))	{
+			T_piston=cp.get_T_Piston();	
+		}
+		double T=get_Tmb(zonen_IN);
+		//qwk=alpha*pistonSurf*(T-T_piston)/pistonSurf;
+		qwk=alpha*(T-T_piston);
+
+	}else{
+		try{
+			throw new BirdBrainedProgrammerException("WHT-Models " +
+					"for non Piston engines must override this method!");					
+		}catch(BirdBrainedProgrammerException bbpe){
+			bbpe.stopBremo();
+		}
+	}
+	return qwk; // [W/m^2]	
+	}
+	
+	//Wärmestromdichte Head in W/m^2
+	public double get_WandWaermeStromDichteHead(double time, Zone[] zonen_IN, double fortschritt){	
+	double qwh=0;
+	double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
+	if(motor.isHubKolbenMotor()){
+		Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		//double headSurf=hkm.get_fireDeckArea();
+
+		if(Double.isNaN(T_head))	{
+			T_head=cp.get_T_Head();	
+		}
+		double T=get_Tmb(zonen_IN);
+		//qwh=alpha*headSurf*(T-T_head)/headSurf;
+		qwh=alpha*(T-T_head);
+
+	}else{
+		try{
+			throw new BirdBrainedProgrammerException("WHT-Models " +
+					"for non Piston engines must override this method!");					
+		}catch(BirdBrainedProgrammerException bbpe){
+			bbpe.stopBremo();
+		}
+	}
+	return qwh; // [W/m^2]	
+	}
+	
+	//Wärmestromdichte Liner in W/m^2
+	public double get_WandWaermeStromDichteCyl(double time, Zone[] zonen_IN, double fortschritt){	
+	double qwc=0;
+	double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
+	if(motor.isHubKolbenMotor()){
+		Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		//double cylWallSurf=hkm.get_CylinderLinerArea(time);
+
+		if(Double.isNaN(T_cyl))	{
+			T_cyl=cp.get_T_Cyl();	
+		}
+		double T=get_Tmb(zonen_IN);
+		//qwc=alpha*cylWallSurf*(T-T_cyl)/cylWallSurf;
+		qwc=alpha*(T-T_cyl);
+
+	}else{
+		try{
+			throw new BirdBrainedProgrammerException("WHT-Models " +
+					"for non Piston engines must override this method!");					
+		}catch(BirdBrainedProgrammerException bbpe){
+			bbpe.stopBremo();
+		}
+	}
+	return qwc; // [W/m^2]	
 	}
 	
 	//public double get_Schleppdruck(double time, Zone[] zonen_IN){

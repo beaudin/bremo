@@ -38,7 +38,7 @@ import bremoswing.util.FertigMeldungFrame;
  */
 public class Bremo extends Thread {
 
-	private  CasePara casePara; //TODO Make me final
+	private CasePara casePara; //TODO Make me final
 	private Rechnung r;
 	private File inputFile;
 	private boolean caseParaerzeugt=false;

@@ -107,13 +107,14 @@ public class SimpleDirektEinspritzung extends Einspritzung {
 
 
 	@Override
-	public double get_kineticEnergyFlux(double time, double pCyl) {
-		try {
-			throw new BirdBrainedProgrammerException("This Method has not been implemented yet");
-		}catch(BirdBrainedProgrammerException bbpe){
-			bbpe.stopBremo();
-		}
-		return 0;	
+	//keine Berücksichtigung von Turbulenz durch die Einspritzung bei simpleDI...
+	public double get_kineticEnergyFlux(double time, double pCyl) {	
+//		try {
+//			throw new BirdBrainedProgrammerException("This Method has not been implemented yet");
+//		}catch(BirdBrainedProgrammerException bbpe){
+//			bbpe.stopBremo();
+//		}
+		return 0;	//dk due to injections = 0
 	}
 
 }

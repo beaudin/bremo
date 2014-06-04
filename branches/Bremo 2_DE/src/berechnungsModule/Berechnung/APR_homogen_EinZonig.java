@@ -40,6 +40,7 @@ public class APR_homogen_EinZonig extends APR{
 	private final int ANZAHL_ZONEN;
 	
 	private double dQw, Qw=0, Qb=0;
+	private double Qwp=0, Qwh=0, Qwl=0;
 	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
 	private boolean krstVerbrannt=false;
@@ -47,7 +48,6 @@ public class APR_homogen_EinZonig extends APR{
 	private boolean verbrennungHatBegonnen;
 	
 	private double whtfMult=CP.get_whtfMult();
-	
 	
 	/**
 	 * <p>
@@ -57,7 +57,6 @@ public class APR_homogen_EinZonig extends APR{
 	 * mINIT=Masse aus mVerbrennungsluft+mKrst_dampf [kg]
 	 */
 	double mINIT=-5.55; 
-	
 	
 	double dmZoneBurn=0, Qmax;
 	Zone []  initialZones;	
@@ -241,7 +240,7 @@ public class APR_homogen_EinZonig extends APR{
 		double dQburn = brennverlauf.get_dQburn(time);
 		double p=zonen_IN[0].get_p();
 		double T=zonen_IN[0].get_T();
-		
+			
 		//Leckagestrom abführen
 				dmL = blowbyModell.get_mLeckage(time, zonen_IN)*CP.SYS.WRITE_INTERVAL_SEC;
 				if(dmL>=0){
@@ -389,10 +388,9 @@ public class APR_homogen_EinZonig extends APR{
 		i+=1;
 		super.buffer_EinzelErgebnis("Brennraumvolumen [m3]",motor.get_V(time),i);
 
-		
 		i+=1;
 		super.buffer_EinzelErgebnis("p [bar]",zn[0].get_p()*1e-5,i);
-
+		
 		i+=1;
 		super.buffer_EinzelErgebnis("dQh [J/s]",dQburn-dQw,i);
 		
@@ -445,6 +443,46 @@ public class APR_homogen_EinZonig extends APR{
 		super.buffer_EinzelErgebnis("pSchleppWHT [bar]",wandWaermeModell.get_Schleppdruck()*1E-5,i);		
 		
 		i+=1;
+		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSD [MW/m^2]",HeatFlux*1E-6,i);
+		
+		i+=1;
+		double HeatFluxPiston = wandWaermeModell.get_WandWaermeStromDichtePiston(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Kolben [MW/m^2]",HeatFluxPiston*1E-6,i);
+		
+		i+=1;
+		double HeatFluxHead = wandWaermeModell.get_WandWaermeStromDichteHead(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Head [MW/m^2]",HeatFluxHead*1E-6,i);
+		
+		i+=1;
+		double HeatFluxCyl = wandWaermeModell.get_WandWaermeStromDichteCyl(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Liner [MW/m^2]",HeatFluxCyl*1E-6,i);
+		
+		i+=1;
+		double whtp = wandWaermeModell.get_WandWaermeStromPiston(time, zn, fortschritt, T_buffer);
+		super.buffer_EinzelErgebnis("dQw Kolben [J/s]",whtp,i);
+		Qwp=Qwp+whtp*super.CP.SYS.WRITE_INTERVAL_SEC; //Kommt einen Zeitschrit zu spät?
+		
+		i+=1;
+		double whth = wandWaermeModell.get_WandWaermeStromHead(time, zn, fortschritt, T_buffer);
+		super.buffer_EinzelErgebnis("dQw Head [J/s]",whth,i);	
+		Qwh=Qwh+whth*super.CP.SYS.WRITE_INTERVAL_SEC; //Kommt einen Zeitschrit zu spät?
+		
+		i+=1;
+		double whtl = wandWaermeModell.get_WandWaermeStromCyl(time, zn, fortschritt, T_buffer);
+		super.buffer_EinzelErgebnis("dQw Liner [J/s]",whtl,i);
+		Qwl=Qwl+whtl*super.CP.SYS.WRITE_INTERVAL_SEC; //Kommt einen Zeitschrit zu spät?
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("Qw Kolben [J]",Qwp,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("Qw Head [J]",Qwh,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("Qw Liner [J]",Qwl,i);
+		
+		i+=1;
 		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);
 		
 		i+=1;
@@ -454,8 +492,7 @@ public class APR_homogen_EinZonig extends APR{
 		super.buffer_EinzelErgebnis("mL [kg]", mL, i);		
 				
 	}
-
-
+	
 	@Override
 	public Zone[] get_initialZones() {
 		

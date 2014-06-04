@@ -13,6 +13,7 @@ import berechnungsModule.blowby.BlowByFabrik;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
+import berechnungsModule.turbulence.TurbulenceModel; //für Bargende
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
 import bremo.parameter.CasePara;
 import bremoExceptions.NegativeMassException;
@@ -42,11 +43,13 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	private GleichGewichtsRechner gg;
 	private MasterEinspritzung masterEinspritzung;
 	private BlowBy blowbyModell;
+	private TurbulenceModel turb; //für Bargende
 
 
 	private final int ANZAHL_ZONEN;
 
 	private double dQw, Qw=0, Qb=0,mb=0;
+	private double Qwp=0, Qwh=0, Qwl=0;
 	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
 	
@@ -94,6 +97,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		checkEinspritzungen(masterEinspritzung); //checkt ob alle Einspritzungen in die unverbrennte Zone erfolgen
 		gg=CP.OHC_SOLVER;
 		blowbyModell = CP.BLOW_BY_MODELL;
+		turb = CP.TURB_FACTORY.get_TurbulenceModel(); //für Bargende
 
 		T_buffer = new misc.VektorBuffer(cp);
 		dQb_buffer = new misc.VektorBuffer(cp);	
@@ -150,9 +154,13 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
 		
+		turb.initialize(initialZones, 0);
 	}
 
-
+	public double get_turbFaktor(Zone [] zonen_IN, double time){
+		return turb.get_k(zonen_IN, time);
+	}
+	
 	public int get_anzZonen() {		
 		return ANZAHL_ZONEN;
 	}
@@ -277,6 +285,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 
 		}
+		this.turb.update(zonen_IN, time);
 		return zonen_IN;			
 	}
 	
@@ -345,6 +354,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		fortschritt=zonenMasseVerbrannt/mINIT;
 		Qb=Qb+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;
 		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC;
+
 		mL=mL+dmL*CP.SYS.WRITE_INTERVAL_SEC;
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
 		double xQ=Qb/Qmax;
@@ -476,6 +486,9 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);
 		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
 
+		i+=1;
+		double k=turb.get_k(zn, time);
+		super.buffer_EinzelErgebnis("k_turb [m^2/s^2]", k, i);
 
 //		//Polytropenexponent für die Schleppdruckberechnung ermitteln.
 //		//Dies wird in den 10°KW vorm Referenzpunkt gemacht...
@@ -511,7 +524,43 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		
 		i+=1;
 		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt);
-		super.buffer_EinzelErgebnis("Wandwärmestromdichte [MW/m^2]",HeatFlux*1E-6,i);
+		super.buffer_EinzelErgebnis("WSD [MW/m^2]",HeatFlux*1E-6,i);
+		
+		i+=1;
+		double HeatFluxPiston = wandWaermeModell.get_WandWaermeStromDichtePiston(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Kolben [MW/m^2]",HeatFluxPiston*1E-6,i);
+		
+		i+=1;
+		double HeatFluxHead = wandWaermeModell.get_WandWaermeStromDichteHead(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Head [MW/m^2]",HeatFluxHead*1E-6,i);
+		
+		i+=1;
+		double HeatFluxCyl = wandWaermeModell.get_WandWaermeStromDichteCyl(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Liner [MW/m^2]",HeatFluxCyl*1E-6,i);
+		
+		i+=1;
+		double whtp = wandWaermeModell.get_WandWaermeStromPiston(time, zn, fortschritt, T_buffer);
+		super.buffer_EinzelErgebnis("dQw Kolben [J/s]",whtp,i);
+		Qwp=Qwp+whtp*super.CP.SYS.WRITE_INTERVAL_SEC; //Kommt einen Zeitschrit zu spät?
+		
+		i+=1;
+		double whth = wandWaermeModell.get_WandWaermeStromHead(time, zn, fortschritt, T_buffer);
+		super.buffer_EinzelErgebnis("dQw Head [J/s]",whth,i);	
+		Qwh=Qwh+whth*super.CP.SYS.WRITE_INTERVAL_SEC; //Kommt einen Zeitschrit zu spät?
+		
+		i+=1;
+		double whtl = wandWaermeModell.get_WandWaermeStromCyl(time, zn, fortschritt, T_buffer);
+		super.buffer_EinzelErgebnis("dQw Liner [J/s]",whtl,i);
+		Qwl=Qwl+whtl*super.CP.SYS.WRITE_INTERVAL_SEC; //Kommt einen Zeitschrit zu spät?
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("Qw Kolben [J]",Qwp,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("Qw Head [J]",Qwh,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("Qw Liner [J]",Qwl,i);
 		
 //		i+=1;
 //		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt, T_buffer);

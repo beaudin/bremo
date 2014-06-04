@@ -81,14 +81,30 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 					"Die Rechnung erfolgt ohne Waermeuebergangsmodell");
 				}
 			}
+//			else if(wandwaermemodellVorgabe.equals("Bargende")){	
+//				if(motor.isHubKolbenMotor()){
+//
+//					temp=null;// TODO Konstruktor des Wandwaermemodells einfuegen --> is das Modell schon implementiert
+//				}else{
+//					throw new ParameterFileWrongInputException("Das ausgewaehlte Waermeuebergangsmodell \"" +
+//							wandwaermemodellVorgabe+ "\" ist nur fuer Hubkolbenmotoren geeignet.\n" +
+//					"Die Rechnung erfolgt ohne Waermeuebergangsmodell");
+//				}
+//			}
 			else if(wandwaermemodellVorgabe.equals("Bargende")){	
+				String isDVA_2Zonig=CP.MODUL_VORGABEN.get("berechnungsModell"); //Welches BerechnungsModell?
+				if(isDVA_2Zonig.equals("DVA_2Zonig")){ //Bargende erstmal nur für DVA_2Zonig...
 				if(motor.isHubKolbenMotor()){
-
-					temp=null;// TODO Konstruktor des Wandwaermemodells einfuegen --> is das Modell schon implementiert
+					temp=new Bargende (CP);
 				}else{
 					throw new ParameterFileWrongInputException("Das ausgewaehlte Waermeuebergangsmodell \"" +
 							wandwaermemodellVorgabe+ "\" ist nur fuer Hubkolbenmotoren geeignet.\n" +
-					"Die Rechnung erfolgt ohne Waermeuebergangsmodell");
+					"Die Rechnung erfolgt ohne Waermeuebergangsmodell");	
+				
+				}
+				}
+				else{
+					temp=null; //Das wird dann unten abgefangen und dann halt ohne ohne WWÜ gerechnet...
 				}
 			}
 			else if(wandwaermemodellVorgabe.equals("FromFile")){				

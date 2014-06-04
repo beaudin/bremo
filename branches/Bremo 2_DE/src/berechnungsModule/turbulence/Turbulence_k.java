@@ -55,27 +55,32 @@ public class Turbulence_k extends TurbulenceModel{
 		for(int i=0; i<zn.length;i++)m=m+zn[i].get_m();
 		rho_IVC=m/this.mot.get_V(time);	
 		double turbKinEnergyINIT=-5;
-		if(time!=CP.get_Einlassschluss()){//simulation does not start at IVC
-			turbKinEnergyINIT=CP.get_turbKineticEnergy_Ini();
-		}else if(CP.get_turbKineticEnergy_Ini()==-5.55){
-//			Hashtable<Spezies, Double> ht=new Hashtable<Spezies, Double>();
-//			for(int i=0; i<zn.length;i++) ht.put(zn[i].get_ggZone(), zn[i].get_m()/m);
-//			GasGemisch gg=new GasGemisch("ggTurb");
-//			gg.set_Gasmischung_massenBruch(ht);
-//			double R=gg.get_R();
-//			double delta_t_Intake=mot.get_Einlass_schliesst()-mot.get_Auslass_oeffnet();
-//			double m_dot=m/delta_t_Intake;
-//			double valveSurf=1;//will be corrected by a constant;
-//			double rho_Intake=CP.get_p_LadeLuft()/R/CP.get_T_LadeLuft();
-//			double 	v_Intake=m_dot/rho_Intake/valveSurf;
-//			turbKinEnergyINIT=C3*v_Intake*v_Intake;			
-			
+//		if(time!=CP.get_Einlassschluss()){//simulation does not start at IVC
+//			turbKinEnergyINIT=CP.get_turbKineticEnergy_Ini();
+//		}else if(CP.get_turbKineticEnergy_Ini()==-5.55){
+////			Hashtable<Spezies, Double> ht=new Hashtable<Spezies, Double>();
+////			for(int i=0; i<zn.length;i++) ht.put(zn[i].get_ggZone(), zn[i].get_m()/m);
+////			GasGemisch gg=new GasGemisch("ggTurb");
+////			gg.set_Gasmischung_massenBruch(ht);
+////			double R=gg.get_R();
+////			double delta_t_Intake=mot.get_Einlass_schliesst()-mot.get_Auslass_oeffnet();
+////			double m_dot=m/delta_t_Intake;
+////			double valveSurf=1;//will be corrected by a constant;
+////			double rho_Intake=CP.get_p_LadeLuft()/R/CP.get_T_LadeLuft();
+////			double 	v_Intake=m_dot/rho_Intake/valveSurf;
+////			turbKinEnergyINIT=C3*v_Intake*v_Intake;			
+//			
+//			//Initialisation for k taken from Kiva 3V (rinputnewsplit-ck2.f)
+//			turbKinEnergyINIT=1; 
+//			double stroke=((Motor_HubKolbenMotor)CP.MOTOR).get_Hub();
+//			double rps=CP.get_DrehzahlInUproSec();
+//			turbKinEnergyINIT=turbKinEnergyINIT*2.0*(stroke*rps)*(stroke*rps);
+		if(time==CP.get_Einlassschluss()){//simulation starts at IVC
 			//Initialisation for k taken from Kiva 3V (rinputnewsplit-ck2.f)
 			turbKinEnergyINIT=1; 
 			double stroke=((Motor_HubKolbenMotor)CP.MOTOR).get_Hub();
 			double rps=CP.get_DrehzahlInUproSec();
 			turbKinEnergyINIT=turbKinEnergyINIT*2.0*(stroke*rps)*(stroke*rps);
-			
 		}else{
 			turbKinEnergyINIT=CP.get_turbKineticEnergy_Ini();
 		}

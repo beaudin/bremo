@@ -128,6 +128,17 @@ public class CasePara {
 		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;	
 		SOLVER.set_BerechnungsModell(BERECHNUNGS_MODELL);
 		
+		//ABBRUCH für Verlustteilung wenn nicht LWA UND (APR_1Zonig ODER DVA_1Zonig)
+		if( is_Verlustteilung()
+			&!((	MODUL_VORGABEN.get("berechnungsModell")=="DVA_1Zonig"|MODUL_VORGABEN.get("berechnungsModell")=="APR_1Zonig")
+			&MODUL_VORGABEN.get("internesRestgasModell")=="LWA")){
+			try{
+				throw new BirdBrainedProgrammerException("Für die Verlsutteilung muss DVA_1Zonig oder APR_1Zonig und LWA gewählt sein");
+			}catch(BirdBrainedProgrammerException bbp){
+				bbp.stopBremo();
+			}			
+		}		
+		
 	}		
 
 	/**
@@ -449,13 +460,13 @@ public class CasePara {
 
 		if(s.equalsIgnoreCase("ja")) autodetect=true;
 
-		//		if(autodetect){
-		//			try{
-		//				throw new BirdBrainedProgrammerException("Die AutodetectMethode wurde noch nicht Programmiert");
-		//			}catch(BirdBrainedProgrammerException bbp){
-		//				bbp.stopBremo();
-		//			}
-		//		}		
+//				if(autodetect){
+//					try{
+//						throw new BirdBrainedProgrammerException("Die AutodetectMethode wurde noch nicht Programmiert");
+//					}catch(BirdBrainedProgrammerException bbp){
+//						bbp.stopBremo();
+//					}
+//				}		
 
 		return autodetect;		
 
@@ -472,14 +483,14 @@ public class CasePara {
 	    boolean verlustteilung = false; 
 	    String s = null; 
 	    String s2 []= {"ja","nein"}; 
-	    try { 
-	      s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2);
-	      if(s.equalsIgnoreCase("ja")) verlustteilung=true;
-	    } catch (ParameterFileWrongInputException e) { 
-	    	e.log_Warning("Der Parameter \"Verlustteilung\" wurde nicht gesetzt, es wird keine durchgeführt."); //Die DVA muss ja nicht gleich abbrechen.
-	    } 
+    	try { 
+    		s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2);
+    		if(s.equalsIgnoreCase("ja")) verlustteilung=true;
+    	} catch (ParameterFileWrongInputException e) { 
+    		e.log_Warning("Der Parameter \"Verlustteilung\" wurde nicht gesetzt, es wird keine durchgeführt."); //Die DVA muss ja nicht gleich abbrechen.
+    	} 
 	    return verlustteilung;
-		} 
+	}
 	
 	
 	public boolean is_pKGH_indiziert(){
@@ -671,7 +682,9 @@ public class CasePara {
 			try {
 				return set_doublePara(INPUTFILE_PARAMETER, "TurbKineticEnergy_Ini","[m^2/s^2]",0,Double.POSITIVE_INFINITY);
 			} catch (ParameterFileWrongInputException e) {			
-				return -5.55;
+				e.stopBremo();
+				//return -5.55;
+				return Double.NaN;
 			}		
 	}
 	
@@ -2361,6 +2374,21 @@ public class CasePara {
 					"Es wird mit \"Bohrung\" gerechnet!");
 			return get_Bohrung();
 		}	
+	}
+	
+	/** 
+	 * @return Gibt den Einlassventildurchmesser zurück, der für das
+	 * Wandwärmemodell nach BArgende verwendet werden soll.
+	 * */
+	public double get_EV_Durchmesser() {
+		double Durchmesser_EV;
+		try {
+			Durchmesser_EV = set_doublePara(INPUTFILE_PARAMETER, "EV_Durchmesser","[m]",1e-3,0.1);
+			return Durchmesser_EV;
+		} catch (ParameterFileWrongInputException e) {		
+			e.stopBremo();
+			return Double.NaN;
+		}		
 	}
 
 	/** 

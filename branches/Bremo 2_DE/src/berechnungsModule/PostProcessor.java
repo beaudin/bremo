@@ -178,6 +178,10 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis(" Q_MAX ",Qmax,i);
 			System.err.println("Q_MAX = " + Qmax + " [J]");		
 			
+//			i+=1;
+//			ergB.buffer_EinzelErgebnis(" Q_UV ",get_Q_HCCO(),i);
+//			System.err.println("Q_UV = " + get_Q_HCCO() + " [J]");	
+			
 			if(CP.is_Verlustteilung()){
 			double x50;;
 			if(CP.SYS.IS_KW_BASIERT)
@@ -366,6 +370,10 @@ public class PostProcessor {
 		ergB.buffer_EinzelErgebnis(" Q_MAX ",Qmax,i);
 		System.err.println("Q_MAX = " + Qmax + " [J]");	
 		
+		i+=1;
+		ergB.buffer_EinzelErgebnis(" Q_UV ",get_Q_HCCO(),i);
+		System.err.println("Q_UV = " + get_Q_HCCO() + " [J]");	
+		
 		if(CP.is_Verlustteilung()){
 		double x50;;
 		if(CP.SYS.IS_KW_BASIERT)
@@ -513,6 +521,33 @@ public class PostProcessor {
 		return h;
 	}	
 	
+	
+	private double get_Q_HCCO(){
+	
+	GasGemisch frischGemisch=new GasGemisch("Frischgemisch");
+	MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
+	double mKrst=me.get_mKrst_Sum_ASP();
+	double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
+	double mGes= mVerbrennungsLuft+mKrst;
+	
+	GasGemisch abgas =new GasGemisch("abgas");
+	abgas.set_Gasmischung_molenBruch(
+	CP.OHC_SOLVER.get_GG_molenBrueche(1e5, 300, frischGemisch));
+	
+	double Qmax = me.get_mKrst_Sum_ASP()*me.get_spezKrstALL().get_Hu_mass();
+	
+	double M=abgas.get_M();
+	double hc=CP.get_HC();
+	double co=CP.get_CO();
+	if(hc!=0 && co!=0){
+		double Hu_CO=282.9*1e3; //[J/mol] aus R. Pischinger S. 93
+	double Hu_HC=600*1e3;	//[J/mol] aus R. Pischinger S. 93
+	double Qcohc=mGes*(hc*Hu_HC+co*Hu_CO)/M;
+	return Qcohc;
+	}
+	return Double.NaN;
+	}
+		
 	private double get_p_MAX(VektorBuffer p_buffer){
         
         double pMAX=p_buffer.getValues()[0];

@@ -25,6 +25,7 @@ public class Motor_HubKolbenMotor extends Motor{
 	
 	private final double SCHRAENKUNG ;			//m
 	private final double DESACHSIERUNG;			//m	
+	private final double OTVERSATZ;				//Wenn OT bei Vmin und nicht bei Kurbelwellen-OT
 	private final double AUSLASSSCHLUSS ; 		//°KWnZOT
 	private final double AUSLASSOEFFNET ; 		//°KWnZOT
 	private final double EINLASSSCHLUSS ; 		//°KWnZOT
@@ -56,6 +57,7 @@ public class Motor_HubKolbenMotor extends Motor{
 	
 
 		if(SCHRAENKUNG!=0||DESACHSIERUNG!=0){
+			double versatz=0; //für OT-Versatz
 			//Hub wird aus dem Kolbenweg berechnet
 			double sMin=0;
 			double toleranz=1E-8; //in °KW
@@ -74,6 +76,7 @@ public class Motor_HubKolbenMotor extends Motor{
 			}else{
 				sMin=get_S(CP.convert_KW2SEC(a1));
 			}
+			
 
 			a0=0;
 			a1=10;	//10° KW nOT
@@ -81,6 +84,7 @@ public class Motor_HubKolbenMotor extends Motor{
 			while(Math.abs(a0-a1)>Math.PI/180*toleranz){
 				a0=a1;
 				a1=-get_dS_dKW(CP.convert_KW2SEC(a0))/get_d2S_dKW(CP.convert_KW2SEC(a0))+a0;
+				versatz=a1; //für OT-Versatz
 			}
 			if(get_d2S_dKW(CP.convert_KW2SEC(a1))<=0){
 				//zweite Ableitung negativ --> Maximum wurde gefunden
@@ -89,9 +93,16 @@ public class Motor_HubKolbenMotor extends Motor{
 				SMAX=get_S(CP.convert_KW2SEC(a1));
 			}
 			HUB=SMAX-sMin;	
+			if(CP.get_OT_Versatz()==720){	//für OT-Versatz
+			OTVERSATZ=versatz;
+			}
+			else{
+			OTVERSATZ=0;
+			}										//für OT-Versatz
 		}else{
 			HUB=2*KURBELRADIUS;
 			SMAX=KURBELRADIUS+PLEUELLAENGE;
+			OTVERSATZ=0;//für OT-Versatz
 		}
 
 	}
@@ -99,6 +110,10 @@ public class Motor_HubKolbenMotor extends Motor{
 	///////////////////////////////////////////////////////////////////////
 	//Get-Funktionen. Diese sind public, damit jeder beliebige Funktion darauf
 	//zugreifen kann
+	public double get_OT_Versatz() {
+		return OTVERSATZ;
+	}
+	
 	public double get_Schraenkung() {
 		return SCHRAENKUNG;
 	}
@@ -225,7 +240,7 @@ public class Motor_HubKolbenMotor extends Motor{
 		double d = DESACHSIERUNG;
 		double s = SCHRAENKUNG;
 		double w = 0;	//Kolbenweg
-//		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi), 2), 0.5); Code(Juwe)	
+//		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi), 2), 0.5); //Code(Juwe)	
 		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s-r*Math.sin(phi), 2), 0.5);
 		return w;
 	}

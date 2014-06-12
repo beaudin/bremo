@@ -5,7 +5,8 @@ import java.io.*;
 import java.util.Vector;
 
 import misc.LinInterp;
-
+import berechnungsModule.motor.Motor;
+import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.main.Bremo;
 import bremo.parameter.CasePara;
 import bremoExceptions.ParameterFileWrongInputException;
@@ -250,8 +251,9 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 				}
 				t=t+delta_min;
 				i=i+1;
-			}while(t<=tMax);			   
-		}else{	
+			}while(t<=tMax);	
+		}
+		else{	
 			super.zeitAchse=data[0];
 			super.pZyl= data[1];
 			if(dreiDruecke){ 
@@ -264,6 +266,38 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 		}
 		//interpolate if given values are not equally distributed		   
 		super.punkteProArbeitsspiel = pZyl.length;  
+		
+		//Druckspur verschieben	
+		if(CP.get_OT_Versatz()!=-999){
+			Motor motor=CP.MOTOR;
+			LinInterp linInt=new LinInterp(CP); 	
+			delta_min=CP.SYS.WRITE_INTERVAL_SEC;
+			double tMax=zeitAchseTemp[zeitAchseTemp.length-1];
+			int i=0;
+			double t=0;
+			if(motor.isHubKolbenMotor()&CP.get_OT_Versatz()==720){ //Wenn ZOT der Indizierdaten bezüglich Vmin angegeben ist
+			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+			double a=hkm.get_OT_Versatz();
+			double b=Math.round(a*10)/10.0; //Math.round(x*1000)/1000.0;
+			double versatz=b/(CP.get_DrehzahlInUproSec()*360);
+			t=zeitAchseTemp[0]+versatz;
+			}
+			else{
+			t=zeitAchseTemp[0]+CP.get_OT_Versatz()/(CP.get_DrehzahlInUproSec()*360);
+			}
+			do{
+				super.pZyl[i]=linInt.linInterPol(t, zeitAchseTemp, data[1]);
+				if(dreiDruecke){ 
+					super.pEin[i] = linInt.linInterPol(t, zeitAchseTemp, data[2]);
+					super.pAbg[i] = linInt.linInterPol(t, zeitAchseTemp, data[3]);
+				}
+				if(spalte_pZyl != spalte_pKGH){
+					super.pKGH[i] = linInt.linInterPol(t, zeitAchseTemp, data[data.length-1]);
+				}
+				t=t+delta_min;
+				i=i+1;
+			}while(t<=tMax);			
+		}
 	}
 
 

@@ -188,6 +188,11 @@ public class CasePara {
 		return this.callsCantera;
 	}
 	
+	/** 
+	 * Mit dieser Methode wird ausgewählt, ob bei der APR ein Vergleich mit einem 
+	 * Experiment durchgeführt werden soll.
+	 * Dazu müssen Indizierdaten angegeben sein.
+	 */
 	public boolean compareToExp(){		
 		boolean compareToExp = false;
 		String s = null;
@@ -196,6 +201,9 @@ public class CasePara {
 			s=this.set_StringPara(INPUTFILE_PARAMETER, "compareToExp",s2);
 		} catch (ParameterFileWrongInputException e){	
 			compareToExp=false;
+			e.log_Warning("Bei der APR wird kein Vergleich mit einem Experiment durchgeführt. "
+					+ "Es müssen keine Indizierdaten vorgegeben werden. "
+					+ "Dafür sind alle Daten zur Initialisierung von Hand vorzugeben.");
 			s="nein";
 		}
 		if(s.equalsIgnoreCase("ja"))
@@ -2093,7 +2101,45 @@ public class CasePara {
 			return Double.NaN;
 		}		
 	}
+	
+//	/**
+//	 * Mit dieser Methode wird ausgewählt, ob in den Indizierdaten der ZOT bezüglich Vmin angegeben ist.
+//	 * Wird der Parameter nicht gewählt, wird davon ausgegangen, dass der ZOT der Indizierdaten 
+//	 * bei 0°KW (senkrechter Stellung des Hubzapfens) liegt. Dies spielt bei Desachsierung/Schraenkung eine Rolle. 
+//	 */
+//	public boolean ZOT_bei_0_KW(){		
+//		boolean ZOT_bei_0_KW = false;
+//		String s = null;
+//		String s2 []= {"ja","nein"};
+//		try {
+//			s=this.set_StringPara(INPUTFILE_PARAMETER, "ZOT_bei_0_KW",s2);
+//		} catch (ParameterFileWrongInputException e){	
+//			ZOT_bei_0_KW=false;
+//			e.log_Warning("Es wird davon ausgegangen, dass der ZOT der Indizierdaten "
+//					+ "bei 0°KW (senkrechter Stellung des Hubzapfens) liegt. Andernfalls \"ZOT_bei_0_KW\" = \"ja\" setzen!");
+//			s="nein";
+//		}
+//		if(s.equalsIgnoreCase("ja"))
+//			ZOT_bei_0_KW=true;
+//		return ZOT_bei_0_KW;		
+//	}
 
+	/** 
+	 * @return Gibt den OT-Versatz zurück um die Zeitachse der Indizierdaten 
+	 * relativ zum Druckverlauf zu verschieben.Wird der Parameter nicht gewählt, 
+	 * wird davon ausgegangen, dass der ZOT der Indizierdaten bei 0°KW 
+	 * (senkrechter Stellung des Hubzapfens) liegt.
+	 * Gibt -999 zurück um keinen Versatz auszulösen.
+	 * Wenn bei Desachsierung/Schraenkung der ZOT der Indizierdaten bezüglich Vmin angegeben ist,
+	 * kann 360 eingegeben werden um den VErsatz automatisch zu korrigieren.
+	 * */
+	public double get_OT_Versatz(){		
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "OT_Versatz","[KWnZOT]",-719.9,720); 
+		} catch (ParameterFileWrongInputException e) {
+			return -999;
+		}		
+	}
 
 	/** 
 	 * @return Gibt die Verdichtung zurück.

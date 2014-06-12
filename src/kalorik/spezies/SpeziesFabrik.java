@@ -1605,7 +1605,7 @@ public Spezies get_SpeciesByName(String speciesName){
 	}
 
 	/**
-	 *	Gibt ein Objekt vom Typ KoeffizeintenSpezies mit den Koeffizeinten fuer 
+	 *	Gibt ein Objekt vom Typ KoeffizientenSpezies mit den Koeffizeinten fuer 
 	 *  Diesel nach FVV-Zylindermodul zurueck.
 	 *  Diesel wird NICHT automatisch integriert
 	 *  @return KoeffizientenSpezies spezDiesel
@@ -1619,7 +1619,7 @@ public Spezies get_SpeciesByName(String speciesName){
 			double koeffs [][]=new double [3][];
 			koeffs[0] = Koeffs_KrstFVV.get_koeffs_Diesel_l();
 			koeffs[1] = Koeffs_KrstFVV.get_koeffs_Diesel_h();
-			koeffs[2]=Koeffs_KrstFVV.get_TemperaturGrenze();
+			koeffs[2] = Koeffs_KrstFVV.get_TemperaturGrenze();
 			spezDiesel=new KoeffizientenSpezies(koeffs,hf,
 					lhv,0,12.60179278,23.52813985,0,"Diesel");
 			

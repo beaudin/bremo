@@ -95,14 +95,16 @@ public class Verlustteilung {
 		IndizierDaten indi=new IndizierDaten(CP,true);
 		double [] pGesamt=new double[anz];
 				
-		for (int l = 0; l < anz; l++) {
-			time=CP.convert_KW2SEC(-360)+l*CP.SYS.WRITE_INTERVAL_SEC;
-			pGesamt [l]= indi.get_pZyl(time); //[Pa]
-			}
+//		for (int l = 0; l < anz; l++) {
+//			time=CP.convert_KW2SEC(-360)+l*CP.SYS.WRITE_INTERVAL_SEC;
+//			pGesamt [l]= indi.get_pZyl(time); //[Pa]
+//			}
 		
-		for(int k=1;k<anz;k++){
+//		for(int k=1;k<anz;k++){ //+CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)
+		for(int k=0;k<anz;k++){
 		time=CP.convert_KW2SEC(-360)+k*CP.SYS.WRITE_INTERVAL_SEC;
 		//
+		pGesamt [k]= indi.get_pZyl(time); //[Pa]
 		
 		Ergebnis.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",CP.convert_SEC2KW(time),0);
 		

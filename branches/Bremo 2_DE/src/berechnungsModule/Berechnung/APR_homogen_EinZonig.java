@@ -545,7 +545,7 @@ public VektorBuffer get_p_buffer() {
 		return p_buffer;
 	}
 
-public double t_VerbrennungsBeginn () {
+public double t_VerbrennungsBeginn () { //TODO: Schlecht programmiert! Besser machen! (Abbruchkriterium, etc.
 	double x0 =CP.SYS.RECHNUNGS_BEGINN_DVA_SEC;
 	double time=0;
 	double Qbtemp=0;
@@ -553,7 +553,7 @@ public double t_VerbrennungsBeginn () {
 	boolean verbrennungsbeginnGefunden=false;
 	
 //	while(verbrennungsbeginnGefunden==false){
-	for(int i=1;i<anzSimWerte;i++){
+	for(int i=1;i<anzSimWerte-2;i++){ //Verbrennungsbeginn im letzten Wert würde keinen Sinn machen...
 		time=x0+i*CP.SYS.WRITE_INTERVAL_SEC;
 		double dQburn = brennverlauf.get_dQburn(time);
 		Qbtemp=Qbtemp+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;

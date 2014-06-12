@@ -24,7 +24,7 @@ public class PostProcessor {
 	private double [] Qw, mb;
 	private final CasePara CP;
 	private ErgebnisBuffer ergB;
-	private double pmi = Double.NaN;
+	private double pmi = 0;
 	
 	public PostProcessor(VektorBuffer dm_buffer,VektorBuffer dQb_buffer,VektorBuffer dQw_buffer, CasePara cp){
 			this.CP=cp;
@@ -39,9 +39,9 @@ public class PostProcessor {
 //			matrix[1]=Qw;
 //			FileWriter_txt txtFile = new FileWriter_txt("mb.txt");
 //			txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);			
-
-			System.err.println("DVA_Post_Ergebnisse:");
-			System.err.println("====================================");
+			
+			String Separator  ="\n**************************************************\n";
+			System.err.println("DVA_Post_Ergebnisse:"+Separator);
 	
 			int i=0;
 					
@@ -221,8 +221,8 @@ public class PostProcessor {
 			}
 			
 			i+=1;
-			ergB.buffer_EinzelErgebnis("L_St [MJ/mol]", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);
-			System.err.println("L_St [MJ/mol] = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() + " [-]");
+			ergB.buffer_EinzelErgebnis("L_St", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);
+			System.err.println("L_St = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() + " [-]");
 						
 	}
 	
@@ -409,8 +409,8 @@ public class PostProcessor {
 		}
 		
 		i+=1;
-		ergB.buffer_EinzelErgebnis("L_St [MJ/mol]", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);
-		System.err.println("L_St [MJ/mol] = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() + " [-]");
+		ergB.buffer_EinzelErgebnis("L_St", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);
+		System.err.println("L_St = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() + " [-]");
 					
 }
 	
@@ -514,9 +514,14 @@ public class PostProcessor {
 	}	
 	
 	private double get_p_MAX(VektorBuffer p_buffer){
-		double pMAX=Double.NaN;
-		//TODO pMAX für APR Berechnen
-		return pMAX;
+        
+        double pMAX=p_buffer.getValues()[0];
+        for(int i=0; i<p_buffer.getValues().length; i++){
+            if(p_buffer.getValues()[i]>pMAX){
+                pMAX=p_buffer.getValues()[i];
+            }
+        }
+        return pMAX;
 	}
 	
 	private double get_p_mi(VektorBuffer p_buffer){

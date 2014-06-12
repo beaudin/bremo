@@ -86,7 +86,7 @@ public class Rechnung {
 				}while (isConverged==false&& idx<100);	
 				
 				if(isConverged==false){
-					System.out.println("mangelnde Knvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
+					System.out.println("mangelnde Konvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
 					((DVA) dglSys).schreibe_DUBUGGING_Ergebnisse("NO_KON_"+
 							CP.get_CaseName()+"_"+CP.convert_SEC2KW(time)+".txt");
 				}

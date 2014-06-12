@@ -23,7 +23,7 @@ public void set_lastsearchedIndex(int newval){
  * @return linear interpolierter Wert aus values
  */
 public double linInterPol(double time, double [] zeitAchse, double [] values){
-	if(time<zeitAchse[0])
+	if(time<zeitAchse[0]) //ORIGINAL
 		try{
 			throw new MiscException("Bei der Interpolation wurde versucht einen Wert zu einem Zeitpunkt abzufragen, " +
 					"der vor dem Beginn des angegebenen Bereichs liegt");
@@ -31,14 +31,15 @@ public double linInterPol(double time, double [] zeitAchse, double [] values){
 			e.log_Warning();				
 		}
 		
-		if(time>zeitAchse[zeitAchse.length-1])
+	    if(time>zeitAchse[zeitAchse.length-1]) //ORIGINAL
+		//if(time-zeitAchse[zeitAchse.length-1]>1e-12)
 			try{
 				throw new MiscException("Bei der Interpolation wurde versucht einen Wert zu einem Zeitpunkt abzufragen, " +
 						"der nach dem Beginn des angegebenen Bereichs liegt");
 			}catch(MiscException e){
 				e.log_Warning();				
-			}		
-
+		}		
+		
 	int index=searchTimeIndexFrom(zeitAchse,lastsearchedIndex,time);
 	int index1=index+1;
 	if(index == 0 && zeitAchse.length == 1){

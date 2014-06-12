@@ -3,9 +3,12 @@ package bremo.parameter;
 
 import io.BrennverlaufFileReader;
 import io.FileWriter_txt;
+
 import java.io.File;
+
 import matLib.MatLibBase;
 import misc.LinInterp;
+import misc.VektorBuffer;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -50,7 +53,7 @@ public class BrennverlaufDaten {
 	
 	public void createMe(CasePara cp, String art, double wertQ , double startQ){
 		
-		
+		//TODO: interne Verarbeitung des Brennverlaufes aus der vorangegangenen DVA-Rechnung einbauen?
 		
 		if(art=="Vorgabe"){
 		
@@ -80,7 +83,11 @@ public class BrennverlaufDaten {
 			}
 		
 		dQburn = burnReader.getdQburn();
+		dQburn[0] = 0; //ersten Wert auf NULL ziehen
+		dQburn[dQburn.length-1] = 0; //letzten Wert auf NULL ziehen
 		zeitAchse= burnReader.getZeitachse();
+		zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
+		zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
 		}
 		if(art=="Punktuell-OT")
 		{
@@ -120,6 +127,8 @@ public class BrennverlaufDaten {
 				else
 				dQburn[k]= 0;
 			}
+			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
+			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
 	/*	double[][] matrix ={zeitAchseKW,dQburn};
 		FileWriter_txt txtFile = new FileWriter_txt("F://Workspace//Bremo//src//InputFiles//Brennverlauf-punktuell.txt");
 		txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);
@@ -163,6 +172,8 @@ public class BrennverlaufDaten {
 				else
 				dQburn[k]= 0;
 			}
+			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
+			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
 	/*	double[][] matrix ={zeitAchseKW,dQburn};
 		FileWriter_txt txtFile = new FileWriter_txt("F://Workspace//Bremo//src//InputFiles//Brennverlauf-HC-CO-Verluste.txt");
 		txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);
@@ -206,6 +217,8 @@ public class BrennverlaufDaten {
 				else
 				dQburn[k]= 0;
 			}
+			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
+			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
 		double[][] matrix ={zeitAchseKW,dQburn};
 	    //FileWriter_txt txtFile = new FileWriter_txt("F://Workspace//Bremo//src//InputFiles//Brennverlauf-startQ.txt");
 		//txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);

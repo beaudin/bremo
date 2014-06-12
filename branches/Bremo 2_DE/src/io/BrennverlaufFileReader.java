@@ -28,7 +28,7 @@ public class BrennverlaufFileReader {
 	private String zeitEinheit;
 	private boolean convertKW2SEC=false;
 	private String einheitdQburn;
-	private String [] zeitEinheiten={"[KWnZOT]","[s]"};
+	private String [] zeitEinheiten={"[KWnZOT]","[s]","Kurbelwinkel[°KW]"};
 	private int punkteProArbeitsspiel;
 	private double  dQburn [];
 	private double zeitAchse [];
@@ -66,7 +66,7 @@ public class BrennverlaufFileReader {
 
 		int idx=-1;
 		int abZeile=1;
-		//boolean kalibrierungErfolgreich=false;
+		boolean EinheitEingelesen=false;
 		try {
 			//finde die erste Zeile, die als Zahlen eingelesen werden kann
 			FileReader fr = new FileReader(file);
@@ -80,35 +80,30 @@ public class BrennverlaufFileReader {
 				try {
 					idx++;
 					String[] theline = line.split("\t");
-					//if(theline.length==4){
-						//was ist wenn nur der ZylinderDruckeingelesen werden soll
-						//vielleicht noch eine Abfrage bezüglich der eingegebenen Spalten 
-//						wenn eine größer ist als die gesamte Spalten zahl gibts einen Fehler!
-					//}
-					if(theline[0].startsWith("[")){
+
+					if(theline[0].startsWith("[")|theline[0].equals("Kurbelwinkel[°KW]")){
 						zeitEinheit=theline[0];
-						if(zeitEinheit.contains("KW")) //=[KWnZOT]
-							convertKW2SEC=true;
+						if(zeitEinheit.contains("KW")|zeitEinheit.contains("CAD")) //steht irgendwo was von Kurbelwinkeln...
+							convertKW2SEC=true; //...dann Kurbelwinkel in Zeit umrechnen
 						
 						einheitdQburn=theline[spalte_dQburn-1];
 						
 						
-						if(zeitEinheit.equals(zeitEinheiten[0])||zeitEinheit.equals(zeitEinheiten[1])){}else{
+						if(zeitEinheit.equals(zeitEinheiten[0])||zeitEinheit.equals(zeitEinheiten[1])||zeitEinheit.equals(zeitEinheiten[2])){}else{
 							throw new ParameterFileWrongInputException("Die Einheit in der ersten Spalte " +
-									"des BRennverlaufstextfiles muss "+ zeitEinheiten[0]+ 
+									"des Brennverlaufstextfiles muss "+ zeitEinheiten[0]+ 
 									" oder " +zeitEinheiten[1] +" sein. Eingegeben wurde aber "+ zeitEinheit);}							
 						
 					//	kf_pZyl=set_kalibrierfaktor(einheitPZyl);
 					//	kf_pEin=set_kalibrierfaktor(einheitPEin);
 					//	kf_pAbg=set_kalibrierfaktor(einheitPAbg);
-					//	kalibrierungErfolgreich=true;
+						EinheitEingelesen=true;
 					}
-					//Double.parseDouble(theline[0]); //wirft eine Exception wenn theline[0] keine zahl ist
-					//if(!kalibrierungErfolgreich)
-					//	throw new ParameterFileWrongInputException("Im angegebenen Brennverlaufsfile wurden keine Einheiten angegeben. \n" +
-					//			"Diese muessen vor den eigentlicehn Druckdaten in eckigen Klammern angegeben werden: \n" +
-					//			"[KW] [bar] oder [KW] [Pa] oder [s] [Pa] oder ...\n" +
-					//			"Eine weiter Fehlermoeglichkeit: Die Spaltenangaben stimmen nicht!!");
+					Double.parseDouble(theline[0]); //wirft eine Exception wenn theline[0] keine Zahl ist
+					if(!EinheitEingelesen)
+						throw new ParameterFileWrongInputException("Im angegebenen Brennverlaufsfile wurden die Einheiten falsch angegeben. \n" +
+								"Diese muessen vor den eigentlichen Daten in eckigen Klammern angegeben werden: \n" +
+								"Eine weiter Fehlermoeglichkeit: Die Spaltenangaben stimmen nicht!!");
 							
 					zeilenZaehlen=true; //Wenn numerische Daten in den Zeilen stehen sollen diese gezaehlt werden
 				}catch (ParameterFileWrongInputException pfwi){
@@ -122,7 +117,8 @@ public class BrennverlaufFileReader {
 			}
 			br.close();
 			fr.close();		
-			punkteProArbeitsspiel = cnt-2;
+			//punkteProArbeitsspiel = cnt-2;
+			punkteProArbeitsspiel = cnt-abZeile+2;
 		}
 
 		catch(FileNotFoundException fN) {
@@ -169,9 +165,9 @@ public class BrennverlaufFileReader {
 	
 	private double[][] readFile(int abZeile) {
 		//Datei wird ab Zeile abZeile gelesen. 1 wäre die erste Zeile...		
-		if(abZeile<3){
-			abZeile=3;
-		}
+//		if(abZeile<3){ Wegen DVA-Datei direkt einlesen abgeschaltet...
+//			abZeile=3;
+//		}
 				
 					
 		

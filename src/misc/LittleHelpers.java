@@ -115,22 +115,43 @@ public class LittleHelpers {
 	  
 	  //fuer Verlustteilung von Frank Haertel
 	  public static double berechnePmi (CasePara CP, double [] pZyl ){ 
-	        Motor motor=CP.MOTOR; 
-	      //Schleife über Wert 0 bis n-2 
-	      int pktProAS = pZyl.length; 
-	      double kw=0.0; 
-	      double pmi=0; 
-	      double schrittweiteSEC = CP.SYS.WRITE_INTERVAL_SEC; 
-	      double schrittweiteKW = CP.convert_ProKW_2_ProSEC(schrittweiteSEC); 
-	      for(int i=0; i < pktProAS-1; i++){ 
-	        kw = CP.SYS.RECHNUNGS_BEGINN_DVA_KW+i*schrittweiteKW; 
-	     
-	  pmi+=0.5*(pZyl[i]+pZyl[i+1])*(motor.get_V(CP.convert_KW2SEC(kw+schrittweiteKW)) 
-	            -motor.get_V(CP.convert_KW2SEC(kw))); 
-	      } 
-	      double pmiAus=pmi/((Motor_HubKolbenMotor) motor).get_Hubvolumen();
-	  // Wert wird in [Pa] ausgegeben 
-	      return pmiAus; 
-	      } 
+		  
+		  Motor motor=CP.MOTOR; 
+		  
+		  if(motor.isHubKolbenMotor()){
+				int pktProAS = pZyl.length;
+				double kw=0.0;
+				double pmi=0;
+				for(int i=0; i < pktProAS-1; i++){
+					kw = i*CP.SYS.DAUER_ASP_KW/pktProAS-360;
+					pmi+=0.5*(pZyl[i]+pZyl[i+1])*(motor.get_V(CP.convert_KW2SEC(kw+CP.SYS.DAUER_ASP_KW/pktProAS))
+							-motor.get_V(CP.convert_KW2SEC(kw)));
+				}
+				return pmi=pmi/((Motor_HubKolbenMotor) motor).get_Hubvolumen();	// Wert wird in [Pa] ausgegeben	
+			}
+		  
+		  return Double.NaN;
 
+//	        Motor motor=CP.MOTOR; 
+//	      //Schleife über Wert 0 bis n-2 
+//	      int pktProAS = pZyl.length; 
+//	      double kw=0.0; 
+//	      double pmi=0; 
+//	      double schrittweiteSEC = CP.SYS.WRITE_INTERVAL_SEC; 
+//	      double schrittweiteKW = CP.convert_ProKW_2_ProSEC(schrittweiteSEC); 
+//	      for(int i=0; i < pktProAS-1; i++){ 
+//	        kw = CP.SYS.RECHNUNGS_BEGINN_DVA_KW+i*schrittweiteKW; 
+//	     
+//	  pmi+=0.5*(pZyl[i]+pZyl[i+1])*(motor.get_V(CP.convert_KW2SEC(kw+schrittweiteKW)) 
+//	            -motor.get_V(CP.convert_KW2SEC(kw)));
+////	  pmi+=0.5*(pZyl[i]+pZyl[i+1])*(motor.get_V(CP.convert_KW2SEC(kw+schrittweiteKW)) 
+////	            +motor.get_V(CP.convert_KW2SEC(kw))); 
+//	      } 
+//	      double pmiAus=pmi/((Motor_HubKolbenMotor) motor).get_Hubvolumen();
+//	  // Wert wird in [Pa] ausgegeben 
+//	      return pmiAus; 
+//	      } 
+
+	  }
+			  
 }

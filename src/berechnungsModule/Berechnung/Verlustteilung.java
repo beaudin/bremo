@@ -32,6 +32,15 @@ public class Verlustteilung {
 	
 	private Integrator inti;
 	
+	double pmiLWAideal = Double.NaN;
+	double etaLWAideal = Double.NaN;
+	double pmiLWArealGem = Double.NaN;
+	double etaLWArealGem = Double.NaN;
+	double pmiLWA = Double.NaN;
+	double etaLWA = Double.NaN;
+	double pmiHCCO = Double.NaN;
+	double etaHCCO = Double.NaN;
+	
 	
 	public Verlustteilung (CasePara cp){
 		this.CP= cp;
@@ -61,8 +70,10 @@ public class Verlustteilung {
 	
 	
 
-	//Berechnen der Verluste
+	//Berechnen der Verluste MTZ 2/2005 Jahrgang 66 S.120f
 	public void berechneVerluste(){
+		
+		masterEinspritzung = CP.MASTER_EINSPRITZUNG;
 		
 		Ergebnis = new ErgebnisBuffer(CP,"");		
 		double x0;
@@ -72,8 +83,26 @@ public class Verlustteilung {
 		double time;
 		int i;
 		// Zeitachse
-		for(int k=1;k<anzSimWerte;k++){
-		time=x0+k*CP.SYS.WRITE_INTERVAL_SEC;
+//		for(int k=1;k<anzSimWerte;k++){
+//		time=x0+k*CP.SYS.WRITE_INTERVAL_SEC;
+		//
+		//Versatz zwischen -360 und Rechnungsbeginn
+		int versatz = (int)((360+CP.SYS.RECHNUNGS_BEGINN_DVA_KW)/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC));
+		//Anzahl Werte von -360 bis 360
+		int anz = (int)(CP.SYS.DAUER_ASP_KW/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC));
+
+		//gesamte Druckspur zusammenbauen...
+		IndizierDaten indi=new IndizierDaten(CP,true);
+		double [] pGesamt=new double[anz];
+				
+		for (int l = 0; l < anz; l++) {
+			time=CP.convert_KW2SEC(-360)+l*CP.SYS.WRITE_INTERVAL_SEC;
+			pGesamt [l]= indi.get_pZyl(time); //[Pa]
+			}
+		
+		for(int k=1;k<anz;k++){
+		time=CP.convert_KW2SEC(-360)+k*CP.SYS.WRITE_INTERVAL_SEC;
+		//
 		
 		Ergebnis.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",CP.convert_SEC2KW(time),0);
 		
@@ -83,63 +112,116 @@ public class Verlustteilung {
 		
 		Ergebnis.buffer_EinzelErgebnis("Brennraumvolumen [m3]",motor.get_V(time),2);
 		}
-		//Idealer Gleichraumprozess
-		double pmiIdeal = berechnePmiIdeal();
-		double etaIdeal = berechneEtaIdeal();
 		
-		//Mit Wandwärmeverlust
+		//Realer Ladungswechsel bzw. Originaldruckverlauf FALL 1h
+		i=3;
+		
+		for(int j=0; j<pGesamt.length; j++){
+		Ergebnis.buffer_EinzelErgebnis("p_Original [bar]",pGesamt[j]/1e5,i);
+		}
+					
+		double pmiOriginal = LittleHelpers.berechnePmi (CP, pGesamt );
+		double etaOriginal = pmi2eta(pmiOriginal);
+		System.err.println("Verlustteilung FALL 1h: Originaldruckverlauf");		
+		
+		//ideale Ladungswechselverluste FALL 1g
+		i+=1;
+		
+		for (int k = 0; k < 180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC); k++) {
+			pGesamt [k]= CP.get_p_LadeLuft();
+			}
+		
+		for (int k = (int)(540/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)) ; k < pGesamt.length; k++) {
+			pGesamt [k]= CP.get_p_Abgas();
+			}
+			
+						
+		for(int j=0; j<pGesamt.length; j++){
+		Ergebnis.buffer_EinzelErgebnis("LWAideal [bar]",pGesamt[j]/1e5,i);
+			}
+		pmiLWAideal = LittleHelpers.berechnePmi (CP, pGesamt );
+		etaLWAideal = pmi2eta(pmiLWAideal);
+		System.err.println("Verlustteilung FALL 1g: Ladungswechselverluste, ideal");
+		
+		//Ladungswechselschleife löschen
+		for (int k = 0; k < 180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC); k++) {
+			pGesamt [k]= 0;
+			}
+		
+		for (int k = (int)(540/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)) ; k < pGesamt.length; k++) {
+			pGesamt [k]= 0;
+			}
+		//
+		
+		//Mit Wandwärmeverlust FALL 1f
 		APR_homogen_EinZonig wandwaermeverlust = new APR_homogen_EinZonig(CP, true,"Vorgabe");
 		VektorBuffer mitWandwaermeverlust = berechnungDurchfuehren(wandwaermeverlust);
 		double [] pMit = mitWandwaermeverlust.getValues();
-		i=3;
+//		i=3;
+		i+=1;
 		
-		for(int j=0; j<pMit.length; j++){
-		Ergebnis.buffer_EinzelErgebnis("p_mitWandwärmeverlust [Pa]",pMit[j],i);
+//		for(int j=0; j<pMit.length; j++){
+//		Ergebnis.buffer_EinzelErgebnis("p_mitWandwärmeverlust [bar]",pMit[j]/1e5,i);
+//		}
+		
+		for (int k = 0; k <pMit.length; k++) {
+			pGesamt [k+versatz]= pMit[k]; //[Pa]
+			}
+		
+		for(int j=0; j<pGesamt.length; j++){
+		Ergebnis.buffer_EinzelErgebnis("p_mitWandwärmeverlust [bar]",pGesamt[j]/1e5,i);
 		}
-		double pmiMit = LittleHelpers.berechnePmi (CP, pMit );
+		//
+					
+		double pmiMit = LittleHelpers.berechnePmi (CP, pGesamt );
+//		double pmiMit = LittleHelpers.berechnePmi (CP, pMit );
 		double etaMit = pmi2eta(pmiMit);
+		System.err.println("Verlustteilung FALL 1f: Realer Brennverlauf mit Wandwärmeverlusten ");
 		
-		//Reale Ladung (adiabat, punktuelle Wärmefreisetzung im OT)
-		APR_homogen_EinZonig APRreal = new APR_homogen_EinZonig(CP, false,"Punktuell-OT");
-		VektorBuffer real = berechnungDurchfuehren(APRreal);
-		double [] pReal = real.getValues();
+		//Realgasverhalten FALL 1e
+		//NICHT vorhanden
+		System.err.println("Verlustteilung FALL 1e: Realgasverhalten  ==NICHT IMPLEMENTIERT==");
+		//
+		
+		// Realer Brennverlauf( realer Brennverlauf, adiabat) FALL 1d
+		APR_homogen_EinZonig APRbrennverlauf = new APR_homogen_EinZonig(CP, false,"Vorgabe");
+		VektorBuffer brennverlauf = berechnungDurchfuehren(APRbrennverlauf);
+		double [] pBrennverlauf = brennverlauf.getValues();
 		i+=1;
 		
-		for(int j=0; j<pMit.length; j++){
-		Ergebnis.buffer_EinzelErgebnis("p_Reale Ladung [Pa]",pReal[j],i);
-		}
-		double pmiReal = LittleHelpers.berechnePmi (CP, pReal );
-		double etaReal = pmi2eta(pmiReal);
+		for (int k = 0; k <pBrennverlauf.length; k++) {
+			pGesamt [k+versatz]= pBrennverlauf[k]; //[Pa]
+			}
+				
+//		for(int j=0; j<pMit.length; j++){
+//		Ergebnis.buffer_EinzelErgebnis("p_realer Brennverlauf [bar]",pBrennverlauf[j]/1e5,i);
+//		}
 		
-		//Verbrennungslage (adiabat, punktuelle Wärmefreisetzung im Verbrennungsschwerpunkt)
-		VektorBuffer dQbuffer = wandwaermeverlust.get_dQb_buffer();
-		double verbrennungschwerpunkt = findeVerbrennungsschwerpunkt(dQbuffer);
-		double Qmax = masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		for(int j=0; j<pGesamt.length; j++){
+			Ergebnis.buffer_EinzelErgebnis("p_realer Brennverlauf [bar]",pGesamt[j]/1e5,i);
+			}
 		
-		APR_homogen_EinZonig APRverbrennungslage = new APR_homogen_EinZonig(CP, false,"Qneu-startNeu",Qmax,verbrennungschwerpunkt);
-		VektorBuffer verbrennungslage = berechnungDurchfuehren(APRverbrennungslage);
-		double [] pVerbrennungslage = verbrennungslage.getValues();
-		i+=1;
+//		double pmiBrennverlauf = LittleHelpers.berechnePmi (CP, pBrennverlauf );
+		double pmiBrennverlauf = LittleHelpers.berechnePmi (CP, pGesamt );
+		double etaBrennverlauf = pmi2eta(pmiBrennverlauf);
+		System.err.println("Verlustteilung FALL 1d: Realer Brennverlauf, adiabat");
 		
-		for(int j=0; j<pMit.length; j++){
-		Ergebnis.buffer_EinzelErgebnis("p_Verbrennungslage [Pa]",pVerbrennungslage[j],i);
-		}
-		double pmiVerbrennungslage = LittleHelpers.berechnePmi (CP, pVerbrennungslage );
-		double etaVerbrennungslage = pmi2eta(pmiVerbrennungslage);
 		
-		//HC/CO-Emissionen
-		double pmiHCCO;
-		double etaHCCO;
+		//HC/CO-Emissionen Fall 1c'
 		boolean HCCOeingabe=false;
 		GasGemisch frischGemisch=new GasGemisch("Frischgemisch");
-		MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
-		double mKrst=me.get_mKrst_Sum_ASP();
+		//MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
+		double mKrst=masterEinspritzung.get_mKrst_Sum_ASP();
 		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
 		double mGes= mVerbrennungsLuft+mKrst;
 		
 		GasGemisch abgas =new GasGemisch("abgas");
 		abgas.set_Gasmischung_molenBruch(
 		CP.OHC_SOLVER.get_GG_molenBrueche(1e5, 300, frischGemisch));
+		
+		VektorBuffer dQbuffer = wandwaermeverlust.get_dQb_buffer();
+		double verbrennungschwerpunkt = findeVerbrennungsschwerpunkt(dQbuffer);
+		double Qmax = masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
 		
 		double M=abgas.get_M();
 		double hc=CP.get_HC();
@@ -156,126 +238,277 @@ public class Verlustteilung {
 */		double Hu_CO=282.9*1e3; //[J/mol] aus R. Pischinger S. 93
 		double Hu_HC=600*1e3;	//[J/mol] aus R. Pischinger S. 93
 		double Qcohc=mGes*(hc*Hu_HC+co*Hu_CO)/M;
-		
-		
+				
 		APR_homogen_EinZonig APRhcCo = new APR_homogen_EinZonig(CP, false,"Qneu-startNeu",Qmax-Qcohc,verbrennungschwerpunkt);
 		VektorBuffer COHC = berechnungDurchfuehren(APRhcCo);
 		double [] pHCCO = COHC.getValues();
-		
+				
 		i+=1;
-		
-		for(int j=0; j<pMit.length; j++){
-		Ergebnis.buffer_EinzelErgebnis("p_HC_CO [Pa]",pHCCO[j],i);
-		}	
-		pmiHCCO = LittleHelpers.berechnePmi (CP, pHCCO );
+				
+		for (int k = 0; k <pHCCO.length; k++) {
+			pGesamt [k+versatz]= pHCCO[k]; //[Pa]
+			}
+				
+//		for(int j=0; j<pMit.length; j++){
+//		Ergebnis.buffer_EinzelErgebnis("p_HC_CO [bar]",pHCCO[j]/1e5,i);
+//		}	
+		for(int j=0; j<pGesamt.length; j++){
+			Ergebnis.buffer_EinzelErgebnis("p_HC_CO [bar]",pGesamt[j]/1e5,i);
+			}	
+			
+//		pmiHCCO = LittleHelpers.berechnePmi (CP, pHCCO );
+		pmiHCCO = LittleHelpers.berechnePmi (CP, pGesamt );
 		etaHCCO = pmi2eta(pmiHCCO);
 		}
 		else{
-			HCCOeingabe = false;
-			pmiHCCO = Double.NaN;
-			etaHCCO = Double.NaN;
-			
+			HCCOeingabe = false;			
 		}
-		// Realer Brennverlauf( realer Brennverlauf, adiabat)
-		APR_homogen_EinZonig APRbrennverlauf = new APR_homogen_EinZonig(CP, false,"Vorgabe");
-		VektorBuffer brennverlauf = berechnungDurchfuehren(APRbrennverlauf);
-		double [] pBrennverlauf = brennverlauf.getValues();
+		System.err.println("Verlustteilung FALL 1c': HC-/CO-Emissionen");		
+				
+		//Verbrennungslage (adiabat, punktuelle Wärmefreisetzung im Verbrennungsschwerpunkt) FALL 1c
+		APR_homogen_EinZonig APRverbrennungslage = new APR_homogen_EinZonig(CP, false,"Qneu-startNeu",Qmax,verbrennungschwerpunkt);
+		VektorBuffer verbrennungslage = berechnungDurchfuehren(APRverbrennungslage);
+		double [] pVerbrennungslage = verbrennungslage.getValues();
 		i+=1;
 		
-		for(int j=0; j<pMit.length; j++){
-		Ergebnis.buffer_EinzelErgebnis("p_realer Brennverlauf [Pa]",pBrennverlauf[j],i);
-		}
-		double pmiBrennverlauf = LittleHelpers.berechnePmi (CP, pBrennverlauf );
-		double etaBrennverlauf = pmi2eta(pmiBrennverlauf);
-				
+		for (int k = 0; k <pVerbrennungslage.length; k++) {
+			pGesamt [k+versatz]= pVerbrennungslage[k]; //[Pa]
+			}
 		
-		//LWA-Zeitachse
-		ErgebnisLWA = new ErgebnisBuffer(CP,"");
-		double x0_LW=CP.get_Auslassoeffnet(); //initial value of x in [s]
-		double xn_LW = CP.get_Einlassschluss()+CP.SYS.DAUER_ASP_SEC; //final value of x in [s]
-		double schrittweite_LW = CP.SYS.WRITE_INTERVAL_SEC; //in [s]
-		int anzSimWerteLW=(int) ((xn_LW-x0_LW)/schrittweite_LW+1);
-		double timeLW;
-		int l;
-		for(int k=1;k<anzSimWerteLW;k++){
-			timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;	
+//		for(int j=0; j<pMit.length; j++){
+//		Ergebnis.buffer_EinzelErgebnis("p_Verbrennungslage [bar]",pVerbrennungslage[j]/1e5,i);
+//		}
+		for(int j=0; j<pGesamt.length; j++){
+		Ergebnis.buffer_EinzelErgebnis("p_Verbrennungslage [bar]",pGesamt[j]/1e5,i);
+		}
+		
+//		double pmiVerbrennungslage = LittleHelpers.berechnePmi (CP, pVerbrennungslage );
+		double pmiVerbrennungslage = LittleHelpers.berechnePmi (CP, pGesamt );
+		double etaVerbrennungslage = pmi2eta(pmiVerbrennungslage);
+		System.err.println("Verlustteilung FALL 1c: Punktuelle Wärmefreisetzung im Verbrennungsschwerpunkt, adiabat");
 			
-		ErgebnisLWA.buffer_EinzelErgebnis("Kurbelwinkel-LW [°KW]",CP.convert_SEC2KW(timeLW),0);
+		//Reale Ladung (adiabat, punktuelle Wärmefreisetzung im OT) FALL 1b
+		APR_homogen_EinZonig APRreal = new APR_homogen_EinZonig(CP, false,"Punktuell-OT");
+		VektorBuffer real = berechnungDurchfuehren(APRreal);
+		double [] pReal = real.getValues();
+		i+=1;
 		
-		ErgebnisLWA.buffer_EinzelErgebnis("Brennraumvolumen-LW [m3]",motor.get_V(timeLW),1);
+		for (int k = 0; k <pReal.length; k++) {
+			pGesamt [k+versatz]= pReal[k]; //[Pa]
+			}
 		
+//		for(int j=0; j<pMit.length; j++){
+//		Ergebnis.buffer_EinzelErgebnis("p_Reale Ladung [bar]",pReal[j]/1e5,i);
+//		}
 		
-		
+		for(int j=0; j<pGesamt.length; j++){
+		Ergebnis.buffer_EinzelErgebnis("p_Reale Ladung [bar]",pGesamt[j]/1e5,i);
 		}
 		
-	//der OT (kleinstes Volumen) wird berechnet
-		double Vmin=999999999;
-		double [] V= new double[anzSimWerteLW];
-		for(int k=1;k<anzSimWerteLW;k++){
-			timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;		
-		double VminTemp=motor.get_V(timeLW);
-			V[k-1]=VminTemp;
-		Vmin= Math.min(Vmin,VminTemp);
+//		double pmiReal = LittleHelpers.berechnePmi (CP, pReal );
+		double pmiReal = LittleHelpers.berechnePmi (CP, pGesamt );
+		double etaReal = pmi2eta(pmiReal);
+		System.err.println("Verlustteilung FALL 1b: Punktuelle Wärmefreisetzung in OT, adiabat");
 		
-			}
+		//Idealer Gleichraumprozess FALL 1a
 		
+		//TODO: hier noch Verlauf berechnen mit kappa = 1.4 = const.
+		double pmiIdeal = berechnePmiIdeal();
+		double etaIdeal = berechneEtaIdeal();
+		System.err.println("Verlustteilung FALL 1a: Idealer Gleichraumprozess");
 		
-		//umrechnen in k-ten Wert
+//		if(CP.MODUL_VORGABEN.get("internesRestgasModell").equals("LWA")){ //START: LWA
+//		
+//		//LWA-Zeitachse
+//		ErgebnisLWA = new ErgebnisBuffer(CP,"");
+//		double x0_LW=CP.get_Auslassoeffnet(); //initial value of x in [s]
+//		double xn_LW = CP.get_Einlassschluss()+CP.SYS.DAUER_ASP_SEC; //final value of x in [s]
+//		double schrittweite_LW = CP.SYS.WRITE_INTERVAL_SEC; //in [s]
+//		int anzSimWerteLW=(int) ((xn_LW-x0_LW)/schrittweite_LW+1);
+//		double timeLW;
+//		int l;
+//		for(int k=1;k<anzSimWerteLW;k++){
+//			timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;	
+//			
+//		ErgebnisLWA.buffer_EinzelErgebnis("Kurbelwinkel-LW [°KW]",CP.convert_SEC2KW(timeLW),0);
+//		
+//		ErgebnisLWA.buffer_EinzelErgebnis("Brennraumvolumen-LW [m3]",motor.get_V(timeLW),1);
+//		
+//		
+//		
+//		}
+//		
+//	//der OT (kleinstes Volumen) wird berechnet
+//		double Vmin=999999999;
+//		double [] V= new double[anzSimWerteLW];
+//		for(int k=1;k<anzSimWerteLW;k++){
+//			timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;		
+//		double VminTemp=motor.get_V(timeLW);
+//			V[k-1]=VminTemp;
+//		Vmin= Math.min(Vmin,VminTemp);
+//		
+//			}
+//		
+//		
+//		//umrechnen in k-ten Wert
+//		
+//
+//		int cnt = sucheOT(Vmin);
+//		
+//		
+//		l=2;
+//		
+//		
+//		//ideale Ladungswechselverluste
+//		IndizierDaten indiDgemittelt=new IndizierDaten(CP,true);
+//		double [] pLWAideal=new double[anzSimWerteLW];
+//		
+//		
+//		for (int k = 0; k < cnt; k++) {
+//			timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;
+//			pLWAideal [k]= indiDgemittelt.get_pAus(timeLW);
+//			}
+//		
+//		for (int k = cnt ; k < anzSimWerteLW; k++) {
+//			timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;
+//			pLWAideal [k]= indiDgemittelt.get_pEin(timeLW);
+//			}
+//			
+//						
+//		for(int j=0; j<pLWAideal.length; j++){
+//		ErgebnisLWA.buffer_EinzelErgebnis("LWAideal [bar]",pLWAideal[j]/1e5,l);
+//			}
+//		pmiLWAideal = LittleHelpers.berechnePmi (CP, pLWAideal );
+//		etaLWAideal = pmi2etaLW(pmiMit,pmiLWAideal);
+//		System.err.println("Verlustteilung: Ladungswechselverluste, ideal");
+//		
+////		//reale gemittelte Ladungswechselverluste
+////		
+////		LadungsWechselAnalyse_ohneQb LWArealGem = new LadungsWechselAnalyse_ohneQb(CP,true);
+////		VektorBuffer LWArealGemBuffer = ladungswechselAnalyseDurchfuehren(LWArealGem);
+////		double [] pLWArealGem = LWArealGemBuffer.getValues();
+////		
+////		l+=1;		
+////		for(int j=0; j<pLWArealGem.length; j++){
+////		ErgebnisLWA.buffer_EinzelErgebnis("LWArealGemittelt [bar]",pLWArealGem[j]/1e5,l);
+////		}
+////		pmiLWArealGem = LittleHelpers.berechnePmi (CP, pLWArealGem );
+////		etaLWArealGem = pmi2etaLW(pmiMit,pmiLWArealGem);
+////		System.err.println("Verlustteilung: Ladungswechselverluste, gemittelter Realverlauf");
+//		
+//		
+//		
+//		// reale Ladungswechselverluste
+//		LadungsWechselAnalyse_ohneQb LWA = new LadungsWechselAnalyse_ohneQb(CP);
+//		VektorBuffer LWAbuffer = ladungswechselAnalyseDurchfuehren(LWA);
+//		double [] pLWA = LWAbuffer.getValues();
+//		l+=1;
+//				
+//		for(int j=0; j<pLWA.length; j++){
+//		ErgebnisLWA.buffer_EinzelErgebnis("LWA [bar]",pLWA[j]*1e-5,l);
+//		}
+//		pmiLWA = LittleHelpers.berechnePmi (CP, pLWA );
+//		etaLWA = pmi2etaLW(pmiMit,pmiLWA);
+//		System.err.println("Verlustteilung: Ladungswechselverluste, LWA");
+//		
+//		} //ENDE: LWA
+//		
+//		else{ //OHNE LWA ei...fach aus dem Druckverlauf gelesen
+//			//TODO: Hier pmi Ladungswechsel berechnen
+//			
+//			
+//			//LWA-Zeitachse
+//			ErgebnisLWA = new ErgebnisBuffer(CP,"");
+//			double x0_LW=CP.get_Auslassoeffnet(); //initial value of x in [s]
+//			double xn_LW = CP.get_Einlassschluss()+CP.SYS.DAUER_ASP_SEC; //final value of x in [s]
+//			double schrittweite_LW = CP.SYS.WRITE_INTERVAL_SEC; //in [s]
+//			int anzSimWerteLW=(int) ((xn_LW-x0_LW)/schrittweite_LW+1);
+//			double timeLW;
+//			int l;
+//			for(int k=1;k<anzSimWerteLW;k++){
+//				timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;	
+//				
+//			ErgebnisLWA.buffer_EinzelErgebnis("Kurbelwinkel-LW [°KW]",CP.convert_SEC2KW(timeLW),0);
+//			
+//			ErgebnisLWA.buffer_EinzelErgebnis("Brennraumvolumen-LW [m3]",motor.get_V(timeLW),1);			
+//			}
+//
+//
+//			
+//		//der OT (kleinstes Volumen) wird berechnet
+//			double Vmin=999999999;
+//			double [] V= new double[anzSimWerteLW];
+//			for(int k=1;k<anzSimWerteLW;k++){
+//				timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;		
+//			double VminTemp=motor.get_V(timeLW);
+//				V[k-1]=VminTemp;
+//			Vmin= Math.min(Vmin,VminTemp);
+//			
+//				}
+//			
+//			
+//			//umrechnen in k-ten Wert
+//			
+//
+//			int cnt = sucheOT(Vmin);
+//			
+//			
+//			l=2;
+//			
+//			
+//			//ideale Ladungswechselverluste
+//			IndizierDaten indiDgemittelt=new IndizierDaten(CP,true);
+//			double [] pLWAideal=new double[anzSimWerteLW];
+//			
+//			
+//			for (int k = 0; k < cnt; k++) {
+//				timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;
+//				pLWAideal [k]= CP.get_p_Abgas();
+//				}
+//			
+//			for (int k = cnt ; k < anzSimWerteLW; k++) {
+//				timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;
+//				pLWAideal [k]= CP.get_p_LadeLuft();
+//				}
+//				
+//							
+//			for(int j=0; j<pLWAideal.length; j++){
+//			ErgebnisLWA.buffer_EinzelErgebnis("LWAideal [bar]",pLWAideal[j]*1e-5,l);
+//				}
+//			pmiLWAideal = LittleHelpers.berechnePmi (CP, pLWAideal );
+//			etaLWAideal = pmi2etaLW(pmiMit,pmiLWAideal);
+//			System.err.println("Verlustteilung: Ladungswechselverluste, ideal");
+//			
+////			//reale gemittelte Ladungswechselverluste
+////			l+=1;
+////			for(int j=0; j<pLWAideal.length; j++){
+////			//FAKE-Kanal für gemittelte LWA-Verluste
+////			ErgebnisLWA.buffer_EinzelErgebnis("LWArealGemittelt [bar]",Double.NaN,l);
+////			}
+////			pmiLWArealGem = LittleHelpers.berechnePmi (CP, pLWAideal );
+////			etaLWArealGem = pmi2etaLW(pmiMit,pmiLWAideal);	
+////			System.err.println("Verlustteilung: Ladungswechselverluste, gemittelter Realverlauf");
+//			
+//			// reale Ladungswechselverluste
+//			IndizierDaten indiD=new IndizierDaten(CP,true);
+//			double [] pLWA=new double[anzSimWerteLW];
+//			l+=1;
+//					
+//			for (int k = 0; k < anzSimWerteLW; k++) {
+//				timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;
+//				pLWA [k]= indiD.get_pZyl(timeLW);
+//				}
+//			
+//			
+//			for(int j=0; j<pLWA.length; j++){
+//			ErgebnisLWA.buffer_EinzelErgebnis("LWA [bar]",pLWA[j]*1e-5,l);
+//			}
+//			pmiLWA = LittleHelpers.berechnePmi (CP, pLWA );
+//			etaLWA = pmi2etaLW(pmiMit,pmiLWA);	
+//			System.err.println("Verlustteilung: Ladungswechselverluste, Realverlauf");
+//			
+//		} //OHNE LWA 
 		
-
-		int cnt = sucheOT(Vmin);
-		
-		
-		l=2;
-		
-		//ideale Ladungswechselverluste
-		IndizierDaten indiDgemittelt=new IndizierDaten(CP,true);
-		double [] pLWAideal=new double[anzSimWerteLW];
-		
-		
-		for (int k = 0; k < cnt; k++) {
-			timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;
-			pLWAideal [k]= indiDgemittelt.get_pAus(timeLW);
-			}
-		
-		for (int k = cnt ; k < anzSimWerteLW; k++) {
-			timeLW=x0_LW+k*CP.SYS.WRITE_INTERVAL_SEC;
-			pLWAideal [k]= indiDgemittelt.get_pEin(timeLW);
-			}
-			
-						
-		for(int j=0; j<pLWAideal.length; j++){
-		ErgebnisLWA.buffer_EinzelErgebnis("LWAideal [Pa]",pLWAideal[j],l);
-			}
-		double pmiLWAideal = LittleHelpers.berechnePmi (CP, pLWAideal );
-		double etaLWAideal = pmi2etaLW(pmiMit,pmiLWAideal);
-		
-		//reale gemittelte Ladungswechselverluste
-		
-		LadungsWechselAnalyse_ohneQb LWArealGem = new LadungsWechselAnalyse_ohneQb(CP,true);
-		VektorBuffer LWArealGemBuffer = ladungswechselAnalyseDurchfuehren(LWArealGem);
-		double [] pLWArealGem = LWArealGemBuffer.getValues();
-		
-		l+=1;		
-		for(int j=0; j<pLWArealGem.length; j++){
-		ErgebnisLWA.buffer_EinzelErgebnis("LWArealGemittelt [Pa]",pLWArealGem[j],l);
-		}
-		double pmiLWArealGem = LittleHelpers.berechnePmi (CP, pLWArealGem );
-		double etaLWArealGem = pmi2etaLW(pmiMit,pmiLWArealGem);
-		
-		
-		
-		// reale Ladungswechselverluste
-		LadungsWechselAnalyse_ohneQb LWA = new LadungsWechselAnalyse_ohneQb(CP);
-		VektorBuffer LWAbuffer = ladungswechselAnalyseDurchfuehren(LWA);
-		double [] pLWA = LWAbuffer.getValues();
-		l+=1;
-				
-		for(int j=0; j<pLWA.length; j++){
-		ErgebnisLWA.buffer_EinzelErgebnis("LWA [Pa]",pLWA[j],l);
-		}
-		double pmiLWA = LittleHelpers.berechnePmi (CP, pLWA );
-		double etaLWA = pmi2etaLW(pmiMit,pmiLWA);
 		
 		//Reibverluste (nur wenn pme im Inputfile angegeben wurde)
 		double pmeBar = CP.get_pme();
@@ -284,7 +517,8 @@ public class Verlustteilung {
 		double etaMech=Double.NaN;
 		if(pme>0){
 		pmr = pmiMit - pme;
-		etaMech = pme/pmiMit;
+//		etaMech = pme/pmiMit;
+		etaMech = pmi2eta(pme);
 		}
 		//HC-CO-Eingabe getätigt?
 		if(HCCOeingabe == false){
@@ -298,15 +532,23 @@ public class Verlustteilung {
 		//////////////////
 		//Ausgabebereich//
 		//////////////////
-		double[] pmi = {Double.NaN,Double.NaN,pmiIdeal,pmiReal,pmiVerbrennungslage, pmiHCCO,pmiBrennverlauf,pmiMit,pmiLWAideal,pmiLWArealGem,pmiLWA,pmr};
-		String [] headerPmi = {"pmi-Werte [Pa]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Reibmitteldruck"};
-		
-		double[] eta = {Double.NaN,Double.NaN,etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaLWAideal,etaLWArealGem,etaLWA,etaMech};
-		String [] headerEta = {"Wirkungsgrade","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Mechanischer Wirkungsgrad"};
+//		double[] pmi = {Double.NaN,Double.NaN,pmiIdeal*1e-5,pmiReal*1e-5,pmiVerbrennungslage*1e-5, pmiHCCO*1e-5,pmiBrennverlauf*1e-5,pmiMit*1e-5,pmiLWAideal*1e-5,pmiOriginal*1e-5,pmiLWArealGem*1e-5,pmiLWA*1e-5,pmr*1e-5};
+//		String [] headerPmi = {"pmi-Werte [bar]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","LWArealGemittelt","LWA real","Reibmitteldruck"};
+		double[] pmi = {Double.NaN,Double.NaN,pmiIdeal*1e-5,pmiReal*1e-5,pmiVerbrennungslage*1e-5, pmiHCCO*1e-5,pmiBrennverlauf*1e-5,pmiMit*1e-5,pmiLWAideal*1e-5,pmiOriginal*1e-5,pme*1e-5};
+		String [] headerPmi = {"pmi-Werte [bar]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","Reibung"};
+	
+//		double[] eta = {Double.NaN,Double.NaN,etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaLWAideal,etaLWArealGem,etaLWA,etaMech};
+//		String [] headerEta = {"Wirkungsgrade [%]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Mechanischer Wirkungsgrad"};
+		double[] eta = {Double.NaN,Double.NaN,etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaOriginal,etaLWAideal,etaMech};
+		String [] headerEta = {"Wirkungsgrade [%]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","Reibung"};
 		
 		//String name="Verlustteilung-Verläufe_"+CP.get_CaseName()+".txt";
 		Ergebnis.schreibeErgebnisFile("Verlustteilung-APR-Verlauf_"+CP.get_CaseName()+".txt");
-		ErgebnisLWA.schreibeErgebnisFile("Verlustteilung-LWA-Verlauf_"+CP.get_CaseName()+".txt");
+		
+		//if(CP.MODUL_VORGABEN.get("internesRestgasModell").equals("LWA")){ //START: LWA
+		//ErgebnisLWA.schreibeErgebnisFile("Verlustteilung-LWA-Verlauf_"+CP.get_CaseName()+".txt");
+		//}// ENDE: LWA
+		
 		FileWriter_txt txtFile = new FileWriter_txt(CP.get_workingDirectory()+"Verlustteilung-Wirkungsgrade_"+CP.get_CaseName()+".txt");		
 		txtFile.writeTextLineToFile(headerPmi, false);
 		txtFile.writeLineToFile (pmi, true);
@@ -353,20 +595,23 @@ public class Verlustteilung {
 		sol.setInitialValueOfX(x0);
 
 		// final value of x
-		xn = CP.SYS.RECHNUNGS_ENDE_DVA_SEC; //in [s]  
+		//xn = CP.SYS.RECHNUNGS_ENDE_DVA_SEC; //in [s]  //ORIGINAL
+		xn = CP.convert_KW2SEC(180); //in [s]
 		sol.setFinalValueOfX(xn);
 
 		schrittweite = CP.SYS.WRITE_INTERVAL_SEC; //in [s]
 		sol.setStepSize(schrittweite);
 		
-		int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
+		//int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE; //ORIGINAL
+		int anzSimWerte = (int)((xn-x0)/CP.SYS.WRITE_INTERVAL_SEC);
 		double time;
 		Zone[] zn=dglSys.get_initialZones();
 		dglSys.bufferErgebnisse(x0, zn);
 		
 		Zone [] znTemp = null;
-		//Auch hier (wie bei APR) angepasster simWert, um einen Interpolationsfehler zu vermeiden
-		for(int i=1;i<anzSimWerte-1;i++){
+		
+//		for(int i=1;i<anzSimWerte-1;i++){ //Auch hier (wie bei APR) angepasster simWert, um einen Interpolationsfehler zu vermeiden
+		for(int i=1;i<anzSimWerte+1;i++){ //geänderte Simulationslänge bis 180°KWnZOT
 
 			time=x0+i*CP.SYS.WRITE_INTERVAL_SEC;	
 			
@@ -443,7 +688,7 @@ private VektorBuffer ladungswechselAnalyseDurchfuehren(BerechnungsModell dglSys_
 		LW_SOL.setStepSize(schrittweite_LW);
 
 		//While --> LW-Analyse wird wiederholt, bis die Masse im Zylinder konvergiert hat
-		//Schliefe über °KW (Auslassöffnet bis Einlassschluss)
+		//Schleife über °KW (Auslassöffnet bis Einlassschluss)
 		int anzSimWerte=(int) ((xn_LW-x0_LW)/schrittweite_LW+1);
 		Zone [] znTemp = null;
 		zn_LW=dglSys_LW.get_initialZones();

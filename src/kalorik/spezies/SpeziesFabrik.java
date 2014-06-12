@@ -21,7 +21,7 @@ import misc.PhysKonst;
  */
 public class SpeziesFabrik {		
 	//damit der Vektor mit den zu integrierenden Spezies nicht ueberfluessiferweise mit 
-	//doppelten Grundspezies gefuellt ist wird jede Spezies nur einmal erzeugt!	
+	//doppelten Grundspezies gefuellt ist wird jede Spezies nur einmal erzeugt!
 	private Spezies spezH;
 	private Spezies spezO;
 	private Spezies spezN;

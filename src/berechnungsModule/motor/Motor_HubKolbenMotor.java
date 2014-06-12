@@ -62,7 +62,7 @@ public class Motor_HubKolbenMotor extends Motor{
 			double a0=0;
 			double a1=190;	//10° KW nUT
 			int idx=0;
-			//Minimum des Abstandes Kolbenbolzne zu KW-Mitte suchen
+			//Minimum des Abstandes Kolbenbolzen zu KW-Mitte suchen
 			while(Math.abs(a0-a1)>Math.PI/180*toleranz){ 
 				a0=a1;
 				a1=-get_dS_dKW(CP.convert_KW2SEC(a0))/get_d2S_dKW(CP.convert_KW2SEC(a0))+a0;
@@ -77,7 +77,7 @@ public class Motor_HubKolbenMotor extends Motor{
 
 			a0=0;
 			a1=10;	//10° KW nOT
-			//Maximum des Abstandes Kolbenbolzne zu KW-Mitte suchen
+			//Maximum des Abstandes Kolbenbolzen zu KW-Mitte suchen
 			while(Math.abs(a0-a1)>Math.PI/180*toleranz){
 				a0=a1;
 				a1=-get_dS_dKW(CP.convert_KW2SEC(a0))/get_d2S_dKW(CP.convert_KW2SEC(a0))+a0;
@@ -216,7 +216,8 @@ public class Motor_HubKolbenMotor extends Motor{
 	 */
 	public double get_S(double time) {
 		//Kolbenweg
-		//S = r(cos(phi)) + sqrt(L^2-(d+s-r*sin(phi))^2) 
+		//S = r(cos(phi)) + sqrt(L^2-(d+s-r*sin(phi))^2) Kommentar(JUWE)
+		//S = r(cos(phi)) + sqrt(L^2-(d+s+r*sin(phi))^2) Anleitung(JUWE)
 		//[m]
 		double phi=convertTime_TO_KW(time)* Math.PI / 180.0;
 		double l = PLEUELLAENGE;
@@ -224,7 +225,8 @@ public class Motor_HubKolbenMotor extends Motor{
 		double d = DESACHSIERUNG;
 		double s = SCHRAENKUNG;
 		double w = 0;	//Kolbenweg
-		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi), 2), 0.5);	
+//		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi), 2), 0.5); Code(Juwe)	
+		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s-r*Math.sin(phi), 2), 0.5);
 		return w;
 	}
 
@@ -303,7 +305,8 @@ public class Motor_HubKolbenMotor extends Motor{
 		double B = BOHRUNG;
 
 		double zylindervolumen = 0;
-		// V=Vc + pi*B^2/4 * (L+r-r*cos(phi)-sqrt(L^2-(d+s-r*sin(phi))^2);
+		// V=Vc + pi*B^2/4 * (L+r-r*cos(phi)-sqrt(L^2-(d+s-r*sin(phi))^2); //Kommentar(JUWE)
+		// V=Vc + pi*B^2/4 * (L+r-r*cos(phi)-sqrt(L^2-(d+s+r*sin(phi))^2); //Anleitung (JUWE)
 		//[m^3]
 		zylindervolumen = Vc + Math.PI*Math.pow(B, 2)/4*get_Kolbenweg(time);
 		return zylindervolumen;

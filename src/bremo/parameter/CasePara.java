@@ -73,13 +73,12 @@ public class CasePara {
 		MODUL_VORGABEN=ifr.get_berechnungsModule();
 
 		//		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
-		System.err.println("====================================");
-		System.err.println("Inputfile wurde eingelesen!");
+		String Separator  ="\n**************************************************\n";
+		System.err.println(Separator+"Inputfile wurde eingelesen!");
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));
 		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 
-		System.err.println(WD+CASE_NAME + ".txt");
-		System.err.println("====================================");
+		System.err.println(WD+CASE_NAME + ".txt"+Separator);
 //		//Is doof aber geht jetzt nicht besser
 		callsCantera=BerechnungsModellFabrik.callsCantera(this);	
 		
@@ -130,8 +129,11 @@ public class CasePara {
 		
 		//ABBRUCH für Verlustteilung wenn nicht LWA UND (APR_1Zonig ODER DVA_1Zonig)
 		if( is_Verlustteilung()
-			&!((	MODUL_VORGABEN.get("berechnungsModell")=="DVA_1Zonig"|MODUL_VORGABEN.get("berechnungsModell")=="APR_1Zonig")
-			&MODUL_VORGABEN.get("internesRestgasModell")=="LWA")){
+			&!(
+					MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|(MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")&compareToExp()))
+//					(MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig"))
+//					&MODUL_VORGABEN.get("internesRestgasModell").equals("LWA"))
+				){
 			try{
 				throw new BirdBrainedProgrammerException("Für die Verlsutteilung muss DVA_1Zonig oder APR_1Zonig und LWA gewählt sein");
 			}catch(BirdBrainedProgrammerException bbp){
@@ -681,7 +683,8 @@ public class CasePara {
 	public double get_turbKineticEnergy_Ini(){	
 			try {
 				return set_doublePara(INPUTFILE_PARAMETER, "TurbKineticEnergy_Ini","[m^2/s^2]",0,Double.POSITIVE_INFINITY);
-			} catch (ParameterFileWrongInputException e) {			
+			} catch (ParameterFileWrongInputException e) {
+				e.log_Warning("Für die turbulente kinetische Energie wurde kein Vorgabewert angegeben. Dies ist z.B. nötig, wenn nicht bei Einlassschluss initialisiert werden kann."); 
 				e.stopBremo();
 				//return -5.55;
 				return Double.NaN;
@@ -2552,7 +2555,7 @@ public class CasePara {
 	 * @param zeitpunktKW Zeitpunkt in [KWnZOT]
 	 * @return deltaSEC Zeitspanne in [s] --> Der Rechenbeginn liegt bei 0s
 	 */
-	public double convert_KW2SEC(double zeitpunktKW){		
+	public double convert_KW2SEC(double zeitpunktKW){	
 		return(zeitpunktKW-SYS.RECHNUNGS_BEGINN_DVA_KW)/(360*get_DrehzahlInUproSec());		 	
 	}
 

@@ -92,7 +92,8 @@ public class Verlustteilung {
 		int anz = (int)(CP.SYS.DAUER_ASP_KW/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC));
 
 		//gesamte Druckspur zusammenbauen...
-		IndizierDaten indi=new IndizierDaten(CP,true);
+//		IndizierDaten indi=new IndizierDaten(CP,true);
+		IndizierDaten indi=new IndizierDaten(CP);
 		double [] pGesamt=new double[anz];
 				
 //		for (int l = 0; l < anz; l++) {

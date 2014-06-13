@@ -2102,27 +2102,27 @@ public class CasePara {
 		}		
 	}
 	
-//	/**
-//	 * Mit dieser Methode wird ausgewählt, ob in den Indizierdaten der ZOT bezüglich Vmin angegeben ist.
-//	 * Wird der Parameter nicht gewählt, wird davon ausgegangen, dass der ZOT der Indizierdaten 
-//	 * bei 0°KW (senkrechter Stellung des Hubzapfens) liegt. Dies spielt bei Desachsierung/Schraenkung eine Rolle. 
-//	 */
-//	public boolean ZOT_bei_0_KW(){		
-//		boolean ZOT_bei_0_KW = false;
-//		String s = null;
-//		String s2 []= {"ja","nein"};
-//		try {
-//			s=this.set_StringPara(INPUTFILE_PARAMETER, "ZOT_bei_0_KW",s2);
-//		} catch (ParameterFileWrongInputException e){	
-//			ZOT_bei_0_KW=false;
-//			e.log_Warning("Es wird davon ausgegangen, dass der ZOT der Indizierdaten "
-//					+ "bei 0°KW (senkrechter Stellung des Hubzapfens) liegt. Andernfalls \"ZOT_bei_0_KW\" = \"ja\" setzen!");
-//			s="nein";
-//		}
-//		if(s.equalsIgnoreCase("ja"))
-//			ZOT_bei_0_KW=true;
-//		return ZOT_bei_0_KW;		
-//	}
+	/**
+	 * Mit dieser Methode wird ausgewählt, ob in den Indizierdaten der ZOT bei 0°Kurbelwellenwinkel angegeben ist.
+	 * Wird der Parameter nicht gewählt, wird davon ausgegangen, dass der ZOT der Indizierdaten 
+	 * bei 0°KW (senkrechter Stellung des Hubzapfens) liegt. Dies spielt bei Desachsierung/Schraenkung eine Rolle. 
+	 */
+	public boolean get_ZOTbeiKolbenOT(){		
+		boolean ZOTbeiKolbenOT = false;
+		String s = null;
+		String s2 []= {"ja","nein"};
+		try {
+			s=this.set_StringPara(INPUTFILE_PARAMETER, "ZOTbeiKolbenOT",s2);
+		} catch (ParameterFileWrongInputException e){	
+			ZOTbeiKolbenOT=false;
+			e.log_Warning("Es wird davon ausgegangen, dass der ZOT der Indizierdaten "
+					+ "bei 0°KW (senkrechter Stellung des Hubzapfens) liegt. Andernfalls \"ZOTbeiKolbenOT [KWnZOT] := ja\" setzen!");
+			s="nein";
+		}
+		if(s.equalsIgnoreCase("ja"))
+			ZOTbeiKolbenOT=true;
+		return ZOTbeiKolbenOT;		
+	}
 
 	/** 
 	 * @return Gibt den OT-Versatz zurück um die Zeitachse der Indizierdaten 
@@ -2135,9 +2135,9 @@ public class CasePara {
 	 * */
 	public double get_OT_Versatz(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "OT_Versatz","[KWnZOT]",-719.9,720); 
+			return set_doublePara(INPUTFILE_PARAMETER, "OT_Versatz","[KWnZOT]",-359.9,359); 
 		} catch (ParameterFileWrongInputException e) {
-			return -999;
+			return 0;
 		}		
 	}
 

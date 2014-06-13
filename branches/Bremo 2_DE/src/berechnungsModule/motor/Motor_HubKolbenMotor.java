@@ -25,7 +25,8 @@ public class Motor_HubKolbenMotor extends Motor{
 	
 	private final double SCHRAENKUNG ;			//m
 	private final double DESACHSIERUNG;			//m	
-	private final double OTVERSATZ;				//Wenn OT bei Vmin und nicht bei Kurbelwellen-OT
+	private final boolean ZOTBEIKOLBENOT;		//Wenn ZOT bei Kolben-OT und nicht bei Kurbelwellen-OT
+	private final double OTVERSATZ;				//OT-Vesatz durch Desachsierung/Schraenkung
 	private final double AUSLASSSCHLUSS ; 		//°KWnZOT
 	private final double AUSLASSOEFFNET ; 		//°KWnZOT
 	private final double EINLASSSCHLUSS ; 		//°KWnZOT
@@ -53,6 +54,7 @@ public class Motor_HubKolbenMotor extends Motor{
 		AUSLASSOEFFNET =CP.get_Auslassschluss(); 		//°KWnZOT
 		EINLASSSCHLUSS =CP.get_Einlassschluss(); 		//°KWnZOT
 		EINLASSOEFFNET =CP.get_Einlassoeffnet(); 		//°KWnZOT	
+		ZOTBEIKOLBENOT =CP.get_ZOTbeiKolbenOT();
 	
 	
 
@@ -93,7 +95,7 @@ public class Motor_HubKolbenMotor extends Motor{
 				SMAX=get_S(CP.convert_KW2SEC(a1));
 			}
 			HUB=SMAX-sMin;	
-			if(CP.get_OT_Versatz()==720){	//für OT-Versatz
+			if(ZOTBEIKOLBENOT){	//für OT-Versatz
 			OTVERSATZ=versatz;
 			}
 			else{
@@ -110,6 +112,10 @@ public class Motor_HubKolbenMotor extends Motor{
 	///////////////////////////////////////////////////////////////////////
 	//Get-Funktionen. Diese sind public, damit jeder beliebige Funktion darauf
 	//zugreifen kann
+	public boolean get_ZOTbeiKolbenOT() {
+		return ZOTBEIKOLBENOT;
+	}
+	
 	public double get_OT_Versatz() {
 		return OTVERSATZ;
 	}

@@ -126,11 +126,21 @@ public class Verlustteilung {
 		double etaOriginal = pmi2eta(pmiOriginal);
 		System.err.println("Verlustteilung FALL 1h: Originaldruckverlauf");		
 		
+		//Zuerst mit Wandwärmeverlust FALL 1f rechnen, damit für idealen Ladungswechsel vollständig expandiert
+		APR_homogen_EinZonig wandwaermeverlust = new APR_homogen_EinZonig(CP, true,"Vorgabe");
+		VektorBuffer mitWandwaermeverlust = berechnungDurchfuehren(wandwaermeverlust);
+		double [] pMit = mitWandwaermeverlust.getValues();
+		
+		for (int k = 0; k <pMit.length; k++) {
+			pGesamt [k+versatz]= pMit[k]; //[Pa]
+			}		
+		
 		//ideale Ladungswechselverluste FALL 1g
 		i+=1;
 		
 		for (int k = 0; k < 180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC); k++) {
-			pGesamt [k]= CP.get_p_LadeLuft();
+//			pGesamt [k]= CP.get_p_LadeLuft();
+			pGesamt [k]= pGesamt [(int)(180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC))];
 			}
 		
 		for (int k = (int)(540/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)) ; k < pGesamt.length; k++) {
@@ -156,20 +166,7 @@ public class Verlustteilung {
 		//
 		
 		//Mit Wandwärmeverlust FALL 1f
-		APR_homogen_EinZonig wandwaermeverlust = new APR_homogen_EinZonig(CP, true,"Vorgabe");
-		VektorBuffer mitWandwaermeverlust = berechnungDurchfuehren(wandwaermeverlust);
-		double [] pMit = mitWandwaermeverlust.getValues();
-//		i=3;
-		i+=1;
-		
-//		for(int j=0; j<pMit.length; j++){
-//		Ergebnis.buffer_EinzelErgebnis("p_mitWandwärmeverlust [bar]",pMit[j]/1e5,i);
-//		}
-		
-		for (int k = 0; k <pMit.length; k++) {
-			pGesamt [k+versatz]= pMit[k]; //[Pa]
-			}
-		
+		i+=1;		
 		for(int j=0; j<pGesamt.length; j++){
 		Ergebnis.buffer_EinzelErgebnis("p_mitWandwärmeverlust [bar]",pGesamt[j]/1e5,i);
 		}

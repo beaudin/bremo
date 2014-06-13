@@ -233,14 +233,23 @@ public class VentilhubFileReader {
 	public double get_Hub(double time) {
 		double letzterWert=0, ersterWert=0;
 		double dauerASP_SEC=cp.SYS.DAUER_ASP_SEC;
-		letzterWert=zeitAchse[zeitAchse.length-1];
+//		letzterWert=zeitAchse[zeitAchse.length-1]; //ORIGINAL
+		letzterWert=zeitAchse[zeitAchse.length-2];
 		ersterWert=zeitAchse[0];
 		
-		//Schleifen-Abbruch: reicht ><= oder delta<>= sehr kleinem Wert??
-		if(time>=(ersterWert+dauerASP_SEC) && time<=(letzterWert+dauerASP_SEC)){
-//		if((ersterWert+dauerASP_SEC)-time<=1E-6 && (letzterWert+dauerASP_SEC)-time>=1E-6){
+		double a=time-dauerASP_SEC;
+		boolean b=(time>=ersterWert);
+		boolean c=(time<=letzterWert);
+		double d=(ersterWert+dauerASP_SEC);
+		double e=(letzterWert+dauerASP_SEC);
+		
+		
+//		Schleifen-Abbruch: reicht ><= oder delta<>= sehr kleinem Wert??
+		if(time>=(ersterWert+dauerASP_SEC) && time<=(letzterWert+dauerASP_SEC)){ //ORIGINAL
+//		if((ersterWert+dauerASP_SEC)-time<=1E-12 && (letzterWert+dauerASP_SEC)-time>=1E-12){
 			return L_Interp.linInterPol(time-dauerASP_SEC, zeitAchse, hub);
-		}else if(time>=ersterWert && time<=letzterWert){
+		}else if(time>=ersterWert && time<=letzterWert){ //ORIGINAL
+//		}else if(1E-12>=ersterWert-time && 1E-12<=letzterWert-time){
 			return L_Interp.linInterPol(time, zeitAchse, hub);
 		}else{
 			return 0;

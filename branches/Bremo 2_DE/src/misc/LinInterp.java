@@ -24,6 +24,7 @@ public void set_lastsearchedIndex(int newval){
  */
 public double linInterPol(double time, double [] zeitAchse, double [] values){
 	if(time<zeitAchse[0]) //ORIGINAL
+//	if(time-zeitAchse[0]<1e-8)
 		try{
 			throw new MiscException("Bei der Interpolation wurde versucht einen Wert zu einem Zeitpunkt abzufragen, " +
 					"der vor dem Beginn des angegebenen Bereichs liegt");
@@ -32,7 +33,7 @@ public double linInterPol(double time, double [] zeitAchse, double [] values){
 		}
 		
 	    if(time>zeitAchse[zeitAchse.length-1]) //ORIGINAL
-		//if(time-zeitAchse[zeitAchse.length-1]>1e-12)
+//		if(time-zeitAchse[zeitAchse.length-1]>1e-8)
 			try{
 				throw new MiscException("Bei der Interpolation wurde versucht einen Wert zu einem Zeitpunkt abzufragen, " +
 						"der nach dem Beginn des angegebenen Bereichs liegt");
@@ -52,7 +53,8 @@ public double linInterPol(double time, double [] zeitAchse, double [] values){
 }
 
 public double linInterPol(double time, Double [] zeitAchse, Double [] values){
-	if(time<zeitAchse[0])
+	if(time<zeitAchse[0]) //ORIGINAL
+//	if(time-zeitAchse[0]<1e-8)
 		try{
 			throw new MiscException("Bei der Interpolation wurde versucht einen Wert zu einem Zeitpunkt abzufragen, " +
 					"der vor dem Beginn des angegebenen Bereichs liegt");
@@ -60,7 +62,8 @@ public double linInterPol(double time, Double [] zeitAchse, Double [] values){
 			e.log_Warning();				
 		}
 		
-		if(time>zeitAchse[zeitAchse.length-1])
+    	if(time>zeitAchse[zeitAchse.length-1]) //ORIGINAL
+//		if(time-zeitAchse[zeitAchse.length-1]>1e-8)		
 			try{
 				throw new MiscException("Bei der Interpolation wurde versucht einen Wert zu einem Zeitpunkt abzufragen, " +
 						"der nach dem Beginn des angegebenen Bereichs liegt");

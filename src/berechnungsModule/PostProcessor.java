@@ -60,6 +60,16 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("Offset Zylinderdruck [Pa]", indi.get_pOffset(), i);
 			System.err.println("Offset Zylinderdruck = " + indi.get_pOffset() + " [Pa]");
 			
+			Motor motor=CP.MOTOR;
+			if(motor.isHubKolbenMotor()){
+				Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+				double versatz=Math.round(10*(hkm.get_OT_Versatz()))/10.0+CP.get_OT_Versatz();
+				
+			i+=1;
+			ergB.buffer_EinzelErgebnis("OT-Versatz [KWnZOT]", versatz, i);
+			System.err.println("OT-Versatz= " + versatz + " [KWnZOT]");	
+			}
+			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Kappa Druckabgleich Polytropenmethode", indi.get_kappa_druckabgleich(), i);
 			System.err.println("Kappa Druckabgleich Polytropenmethode = " + indi.get_kappa_druckabgleich() + " [-]");
@@ -70,8 +80,6 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("mAGR_intern [kg]",mAGR_inter,i);
 			System.err.println("mAGR_intern = " + mAGR_inter + " [kg]");
 
-
-			
 			MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
 			double mKrst=me.get_mKrst_Sum_ASP();
 			double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
@@ -175,12 +183,12 @@ public class PostProcessor {
 			//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 			double Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
 			i+=1;
-			ergB.buffer_EinzelErgebnis(" Q_MAX ",Qmax,i);
+			ergB.buffer_EinzelErgebnis("Q_MAX [J]",Qmax,i);
 			System.err.println("Q_MAX = " + Qmax + " [J]");		
 			
-//			i+=1;
-//			ergB.buffer_EinzelErgebnis(" Q_UV ",get_Q_HCCO(),i);
-//			System.err.println("Q_UV = " + get_Q_HCCO() + " [J]");	
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Q_UV [J]",get_Q_HCCO(),i);
+			System.err.println("Q_UV = " + get_Q_HCCO() + " [J]");	
 			
 			if(CP.is_Verlustteilung()){
 			double x50;;
@@ -367,11 +375,11 @@ public class PostProcessor {
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 		double Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
 		i+=1;
-		ergB.buffer_EinzelErgebnis(" Q_MAX ",Qmax,i);
+		ergB.buffer_EinzelErgebnis("Q_MAX [J]",Qmax,i);
 		System.err.println("Q_MAX = " + Qmax + " [J]");	
 		
 		i+=1;
-		ergB.buffer_EinzelErgebnis(" Q_UV ",get_Q_HCCO(),i);
+		ergB.buffer_EinzelErgebnis("Q_UV [J]",get_Q_HCCO(),i);
 		System.err.println("Q_UV = " + get_Q_HCCO() + " [J]");	
 		
 		if(CP.is_Verlustteilung()){

@@ -97,6 +97,10 @@ public class Motor_HubKolbenMotor extends Motor{
 			HUB=SMAX-sMin;	
 			if(ZOTBEIKOLBENOT){	//für OT-Versatz
 			OTVERSATZ=versatz;
+			System.err.println("Der Motor hat einen geschraenkten oder desachsierten Kurbeltrieb."
+					+ "Laut Angabe im Input-File liegt der Zeitpunkt \"0 [KWnZOT]\" der Indizierdaten "
+					+ "bei Kolben-OT (minimalem Volumen), das minimale Volumen liegt aber bei "+OTVERSATZ
+					+ " [KWnZOT]. Die Druckdaten werden um "+Math.round(10*OTVERSATZ)/10.0+" [KWnZOT] verschoben.");
 			}
 			else{
 			OTVERSATZ=0;
@@ -237,8 +241,8 @@ public class Motor_HubKolbenMotor extends Motor{
 	 */
 	public double get_S(double time) {
 		//Kolbenweg
-		//S = r(cos(phi)) + sqrt(L^2-(d+s-r*sin(phi))^2) Kommentar(JUWE)
-		//S = r(cos(phi)) + sqrt(L^2-(d+s+r*sin(phi))^2) Anleitung(JUWE)
+		//S = r(cos(phi)) + sqrt(L^2-(d+s-r*sin(phi))^2) ORIGINAL-Kommentar(JUWE)
+		//S = r(cos(phi)) + sqrt(L^2-(d+s+r*sin(phi))^2) Anleitung und Code (JUWE)
 		//[m]
 		double phi=convertTime_TO_KW(time)* Math.PI / 180.0;
 		double l = PLEUELLAENGE;
@@ -246,8 +250,7 @@ public class Motor_HubKolbenMotor extends Motor{
 		double d = DESACHSIERUNG;
 		double s = SCHRAENKUNG;
 		double w = 0;	//Kolbenweg
-//		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi), 2), 0.5); //Code(Juwe)	
-		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s-r*Math.sin(phi), 2), 0.5);
+		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi), 2), 0.5); //Code(Juwe)	
 		return w;
 	}
 
@@ -326,8 +329,8 @@ public class Motor_HubKolbenMotor extends Motor{
 		double B = BOHRUNG;
 
 		double zylindervolumen = 0;
-		// V=Vc + pi*B^2/4 * (L+r-r*cos(phi)-sqrt(L^2-(d+s-r*sin(phi))^2); //Kommentar(JUWE)
-		// V=Vc + pi*B^2/4 * (L+r-r*cos(phi)-sqrt(L^2-(d+s+r*sin(phi))^2); //Anleitung (JUWE)
+		// V=Vc + pi*B^2/4 * (L+r-r*cos(phi)-sqrt(L^2-(d+s-r*sin(phi))^2); //Original-Kommentar(JUWE)
+		// V=Vc + pi*B^2/4 * (L+r-r*cos(phi)-sqrt(L^2-(d+s+r*sin(phi))^2); //Anleitung und Code (JUWE)
 		//[m^3]
 		zylindervolumen = Vc + Math.PI*Math.pow(B, 2)/4*get_Kolbenweg(time);
 		return zylindervolumen;

@@ -67,7 +67,8 @@ public class Rechnung {
 			time=x0+i*CP.SYS.WRITE_INTERVAL_SEC;	
 			
 			if(CP.SYS.IS_KW_BASIERT)
-				System.out.println("berechne Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");	
+//				System.out.println("berechne Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");	//ORIGINAL
+				System.out.println("berechne Zeitschritt: " +Math.round(10*CP.convert_SEC2KW(time))/10.0+ "[KW]");	
 			else
 				System.out.println("berechne Zeitschritt: " +time+ "[sec]");
 			sol.setFinalValueOfX(time);		

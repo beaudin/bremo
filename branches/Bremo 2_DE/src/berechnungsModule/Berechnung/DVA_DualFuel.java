@@ -395,7 +395,8 @@ public class DVA_DualFuel extends DVA {
 		
 		int i=-1;
 		i+=1;
-		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",super.CP.convert_SEC2KW(time),i);
+//		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",super.CP.convert_SEC2KW(time),i); //ORIGINAL
+		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",Math.round(10*super.CP.convert_SEC2KW(time))/10.0,i);
 
 		i+=1;
 		super.buffer_EinzelErgebnis("Zeit [s n. Rechenbeginn]",time,i);		

@@ -107,7 +107,7 @@ public class Verlustteilung {
 		//
 		pGesamt [k]= indi.get_pZyl(time); //[Pa]
 		
-		Ergebnis.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",CP.convert_SEC2KW(time),0);
+		Ergebnis.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",Math.round(10*CP.convert_SEC2KW(time))/10.0,0);
 		
 		Ergebnis.buffer_EinzelErgebnis("Zeit [s n. Rechenbeginn]",time,1);	
 	
@@ -615,7 +615,7 @@ public class Verlustteilung {
 
 			time=x0+i*CP.SYS.WRITE_INTERVAL_SEC;	
 			
-			System.out.println("berechne Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");			
+			System.out.println("berechne Zeitschritt: " +Math.round(10*CP.convert_SEC2KW(time))/10.0+ "[KW]");			
 
 			sol.setFinalValueOfX(time);		
 

@@ -267,33 +267,51 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 		//interpolate if given values are not equally distributed		   
 		super.punkteProArbeitsspiel = pZyl.length;  
 		
-		//Druckspur verschieben	
+		//Druckspur relativ zu Zeit-/Kurbelwinkelachse verschieben	
 		Motor motor=CP.MOTOR;
-		if(motor.isHubKolbenMotor()){
+		if(motor.isHubKolbenMotor()){ //Nur für Hubkolbenmotor
 			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
-			if(((hkm.get_Schraenkung()!=0||hkm.get_Desachsierung()!=0)&hkm.get_ZOTbeiKolbenOT())|CP.get_OT_Versatz()!=0){
+			if(((hkm.get_Schraenkung()!=0||hkm.get_Desachsierung()!=0)&hkm.get_ZOTbeiKolbenOT())|CP.get_OT_Versatz()!=0){ //Nur bei Schraenkung oder Desachsierung
 				LinInterp linInt=new LinInterp(CP); 	
-				delta_min=CP.SYS.WRITE_INTERVAL_SEC;
-				double tMax=zeitAchseTemp[zeitAchseTemp.length-1];
+				double delta_zeit = zeitAchse[1]-zeitAchse[0]; //Schrittweite der oben angelegten Zeitachse bzw. Aufloesung
+				
+				//Zeitachse vor und nach der eigentlichen Zeitachse anstueckeln
+				double dauer=zeitAchse[zeitAchse.length-1]-zeitAchse[0]+zeitAchse[1]-zeitAchse[0]; //max-min+Aufloesung -->Werte für den naechsten Zyklus
+				double [] temp=new double[zeitAchse.length];
+				for(int j=0; j<temp.length; j++){
+					temp[j]=zeitAchse[j]-dauer;
+				}		   
+				double [] zeitAchse2=misc.LittleHelpers.concat(temp, zeitAchse);
+				for(int j=0; j<temp.length; j++){
+					temp[j]=zeitAchse[j]+dauer;
+				}	
+				double [] zeitAchse3=misc.LittleHelpers.concat(zeitAchse2, temp); //Zeitachse, ins negative und positive verlängert, also dreimal so lang...
+				double [] data3_1=misc.LittleHelpers.concat(data[1],misc.LittleHelpers.concat(data[1],data[1])); //Druckverläufe, je dreimal hintereinander
+				double [] data3_2=misc.LittleHelpers.concat(data[2],misc.LittleHelpers.concat(data[2],data[2]));
+				double [] data3_3=misc.LittleHelpers.concat(data[3],misc.LittleHelpers.concat(data[3],data[3]));
+				double [] data3_4=misc.LittleHelpers.concat(data[data.length-1],misc.LittleHelpers.concat(data[data.length-1],data[data.length-1]));
+				
+				double zotbeikolbenot=hkm.get_OT_Versatz(); //Versatz wenn Indizierdaten ZOT bei KolbenOT und aktiver Desachsierung/Schraenkung
+				zotbeikolbenot=Math.round(zotbeikolbenot*10)/10.0; //Math.round(x*1000)/1000.0;
+				double otversatz=CP.get_OT_Versatz(); //Beliebiger bekannter OT-Versatz der Indizierdaten
+				otversatz=otversatz/(CP.get_DrehzahlInUproSec()*360);	
+				double versatz = (zotbeikolbenot+otversatz)/(CP.get_DrehzahlInUproSec()*360); //(Gesamtversatz umgerechnet in Zeit)
+				
 				int i=0;
-				double t=0;
-				double a=hkm.get_OT_Versatz();
-				a=Math.round(a*10)/10.0; //Math.round(x*1000)/1000.0;
-				double versatz=a/(CP.get_DrehzahlInUproSec()*360); 						//Versatz wenn Indizierdaten ZOT bei KolbenOT und aktiver Desachsierung/Schraenkung
-				versatz=versatz+CP.get_OT_Versatz()/(CP.get_DrehzahlInUproSec()*360);	//Beliebiger bekannter OT-Versatz der Indizierdaten
-				t=zeitAchseTemp[0]+versatz;
+				double t = zeitAchse[0] + versatz; //ursprünglicher Zeitachsenbeginn + Gesamtversatz
+							
 				do{
-					super.pZyl[i]=linInt.linInterPol(t, zeitAchseTemp, data[1]);
+					super.pZyl[i]=linInt.linInterPol(t, zeitAchse3, data3_1); //verschobener Druck durch Interpolation
 					if(dreiDruecke){ 
-						super.pEin[i] = linInt.linInterPol(t, zeitAchseTemp, data[2]);
-						super.pAbg[i] = linInt.linInterPol(t, zeitAchseTemp, data[3]);
+						super.pEin[i] = linInt.linInterPol(t, zeitAchse3, data3_2);
+						super.pAbg[i] = linInt.linInterPol(t, zeitAchse3, data3_3);
 					}
 					if(spalte_pZyl != spalte_pKGH){
-						super.pKGH[i] = linInt.linInterPol(t, zeitAchseTemp, data[data.length-1]);
+						super.pKGH[i] = linInt.linInterPol(t, zeitAchse3, data3_4);
 					}
-					t=t+delta_min;
+					t=t+delta_zeit;
 					i=i+1;
-				}while(t<=tMax);			
+				}while(i<zeitAchse.length-1);
 			}
 		}
 	}

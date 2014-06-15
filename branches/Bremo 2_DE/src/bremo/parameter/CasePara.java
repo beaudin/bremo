@@ -2112,11 +2112,15 @@ public class CasePara {
 		String s = null;
 		String s2 []= {"ja","nein"};
 		try {
-			s=this.set_StringPara(INPUTFILE_PARAMETER, "ZOTbeiKolbenOT",s2);
+			s=this.set_StringPara(INPUTFILE_PARAMETER, "0KWbeiKolbenOT",s2);
 		} catch (ParameterFileWrongInputException e){	
 			ZOTbeiKolbenOT=false;
-			e.log_Warning("Es wird davon ausgegangen, dass der ZOT der Indizierdaten "
-					+ "bei 0°KW (senkrechter Stellung des Hubzapfens) liegt. Andernfalls \"ZOTbeiKolbenOT [KWnZOT] := ja\" setzen!");
+			if(this.get_Desachsierung()!=0|this.get_Schraenkung()!=0){
+			e.log_Warning("Der Motor hat einen geschraenkten oder desachsierten Kurbeltrieb. "
+					+ "Es wird davon ausgegangen, dass der Zeitpunkt \"0 [KWnZOT]\" der Indizierdaten "
+					+ "bei 0° Kurbelwellenwinkel (Hubzapfen in Zylinderachse) liegt. "
+					+ "Andernfalls \"0KWbeiKolbenOT [KWnZOT] := ja\" für automatische Korrektur setzen!");
+			}
 			s="nein";
 		}
 		if(s.equalsIgnoreCase("ja"))
@@ -2126,16 +2130,13 @@ public class CasePara {
 
 	/** 
 	 * @return Gibt den OT-Versatz zurück um die Zeitachse der Indizierdaten 
-	 * relativ zum Druckverlauf zu verschieben.Wird der Parameter nicht gewählt, 
-	 * wird davon ausgegangen, dass der ZOT der Indizierdaten bei 0°KW 
-	 * (senkrechter Stellung des Hubzapfens) liegt.
-	 * Gibt -999 zurück um keinen Versatz auszulösen.
-	 * Wenn bei Desachsierung/Schraenkung der ZOT der Indizierdaten bezüglich Vmin angegeben ist,
-	 * kann 360 eingegeben werden um den VErsatz automatisch zu korrigieren.
+	 * relativ zum Druckverlauf zu verschieben. Wird der Parameter nicht gewählt, 
+	 * wird davon ausgegangen, dass der Zeitpunkt 0 [KWnZOT] der Indizierdaten bei 
+	 * 0° Kurbelwellenwinkel (Hubzapfen in Zylinderachse) liegt.
 	 * */
 	public double get_OT_Versatz(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "OT_Versatz","[KWnZOT]",-359.9,359); 
+			return set_doublePara(INPUTFILE_PARAMETER, "OT_Versatz","[KWnZOT]",-360,360); 
 		} catch (ParameterFileWrongInputException e) {
 			return 0;
 		}		
@@ -2231,7 +2232,7 @@ public class CasePara {
 	 * */
 	public double get_Schraenkung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Schraenkung","[m]",-0.005,0.005); 
+			return set_doublePara(INPUTFILE_PARAMETER, "Schraenkung","[m]",-0.02,0.02); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2241,11 +2242,11 @@ public class CasePara {
 
 
 	/** 
-	 * @return Gibt die Feuersteghoehe in [m]zurück.
+	 * @return Gibt die Desachsierung in [m]zurück.
 	 * */
 	public double get_Desachsierung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Desachsierung","[m]",-0.005,0.005); 
+			return set_doublePara(INPUTFILE_PARAMETER, "Desachsierung","[m]",-0.02,0.02); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;

@@ -92,8 +92,14 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 //				}
 //			}
 			else if(wandwaermemodellVorgabe.equals("Bargende")){	
-				String isDVA_2Zonig=CP.MODUL_VORGABEN.get("berechnungsModell"); //Welches BerechnungsModell?
-				if(isDVA_2Zonig.equals("DVA_2Zonig")){ //Bargende erstmal nur für DVA_2Zonig...
+//				String isDVA_2Zonig=CP.MODUL_VORGABEN.get("berechnungsModell"); //Welches BerechnungsModell?
+//				if(isDVA_2Zonig.equals("DVA_2Zonig")){ //Bargende erstmal nur für DVA_2Zonig...
+				if(
+						CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|
+						CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_2Zonig")|
+						CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_DualFuel")|
+						CP.MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")
+						){
 				if(motor.isHubKolbenMotor()){
 					temp=new Bargende (CP);
 				}else{

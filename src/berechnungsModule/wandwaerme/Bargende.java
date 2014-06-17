@@ -1,6 +1,9 @@
 package berechnungsModule.wandwaerme;
 
+import berechnungsModule.Berechnung.DVA_Homogen_EinZonig;
 import berechnungsModule.Berechnung.DVA_homogen_ZweiZonig;
+import berechnungsModule.Berechnung.DVA_DualFuel;
+import berechnungsModule.Berechnung.APR_homogen_EinZonig;
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
@@ -19,6 +22,7 @@ public class Bargende extends WandWaermeUebergang {
 	private double Hubvolumen;
 	private double T_m;
 	private double T_w;
+	private double k;
 	private double w;
 	private double mittlereKolbengeschwindigkeit;
 	private double T_zzp;															//Temp. zum Zündzeitpunkt (ZZP)
@@ -47,8 +51,19 @@ public class Bargende extends WandWaermeUebergang {
 		
 		double p = zonen_IN[0].get_p(); 											//Zylinderdruck
 		
-		double k = ((DVA_homogen_ZweiZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);	
-																					//Typecasten von Turbulenz k aus DVA_2Zonig 
+		if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")){		//Typecasten von Turbulenz k aus jeweiligem Berechnungsmodell
+			k = ((DVA_Homogen_EinZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
+			}
+		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_2Zonig")){
+				k = ((DVA_homogen_ZweiZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
+			}
+		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_DualFuel")){
+				k = ((DVA_DualFuel)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN,time);
+			}
+		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")){
+				k = ((APR_homogen_EinZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
+			}
+ 
 		double lambda = zonen_IN[0].get_ggZone().get_lambda();						//Luftverhältnis
 		double Lst = cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst();			//Mindestluftbedarf
 		double R = get_R_brennraum(time, zonen_IN);									//Gaskonstante

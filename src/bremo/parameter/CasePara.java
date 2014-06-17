@@ -127,7 +127,7 @@ public class CasePara {
 		BERECHNUNGS_MODELL=bmf.BERECHNUNGS_MODELL;	
 		SOLVER.set_BerechnungsModell(BERECHNUNGS_MODELL);
 		
-		//ABBRUCH für Verlustteilung wenn nicht LWA UND (APR_1Zonig ODER DVA_1Zonig)
+		//ABBRUCH für Verlustteilung wenn nicht APR_1Zonig ODER DVA_1Zonig
 		if( is_Verlustteilung()
 			&!(
 					MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|(MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")&compareToExp()))

@@ -286,10 +286,6 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 					temp[j]=zeitAchse[j]+dauer;
 				}	
 				double [] zeitAchse3=misc.LittleHelpers.concat(zeitAchse2, temp); //Zeitachse, ins negative und positive verlängert, also dreimal so lang...
-				double [] data3_1=misc.LittleHelpers.concat(data[1],misc.LittleHelpers.concat(data[1],data[1])); //Druckverläufe, je dreimal hintereinander
-				double [] data3_2=misc.LittleHelpers.concat(data[2],misc.LittleHelpers.concat(data[2],data[2]));
-				double [] data3_3=misc.LittleHelpers.concat(data[3],misc.LittleHelpers.concat(data[3],data[3]));
-				double [] data3_4=misc.LittleHelpers.concat(data[data.length-1],misc.LittleHelpers.concat(data[data.length-1],data[data.length-1]));
 				
 				double zotbeikolbenot=hkm.get_OT_Versatz(); //Versatz wenn Indizierdaten ZOT bei KolbenOT und aktiver Desachsierung/Schraenkung
 				zotbeikolbenot=Math.round(zotbeikolbenot*10)/10.0; //Math.round(x*1000)/1000.0;
@@ -300,14 +296,14 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 				int i=0;
 				double t = zeitAchse[0] + versatz; //ursprünglicher Zeitachsenbeginn + Gesamtversatz
 							
-				do{
-					super.pZyl[i]=linInt.linInterPol(t, zeitAchse3, data3_1); //verschobener Druck durch Interpolation
+				do{ //Interpolation mit Druckverläufen, je dreimal hintereinander
+					super.pZyl[i]=linInt.linInterPol(t, zeitAchse3, misc.LittleHelpers.concat(data[1],misc.LittleHelpers.concat(data[1],data[1]))); //verschobener Druck durch Interpolation
 					if(dreiDruecke){ 
-						super.pEin[i] = linInt.linInterPol(t, zeitAchse3, data3_2);
-						super.pAbg[i] = linInt.linInterPol(t, zeitAchse3, data3_3);
+						super.pEin[i] = linInt.linInterPol(t, zeitAchse3, misc.LittleHelpers.concat(data[2],misc.LittleHelpers.concat(data[2],data[2])));
+						super.pAbg[i] = linInt.linInterPol(t, zeitAchse3, misc.LittleHelpers.concat(data[3],misc.LittleHelpers.concat(data[3],data[3])));
 					}
 					if(spalte_pZyl != spalte_pKGH){
-						super.pKGH[i] = linInt.linInterPol(t, zeitAchse3, data3_4);
+						super.pKGH[i] = linInt.linInterPol(t, zeitAchse3, misc.LittleHelpers.concat(data[data.length-1],misc.LittleHelpers.concat(data[data.length-1],data[data.length-1])));
 					}
 					t=t+delta_zeit;
 					i=i+1;

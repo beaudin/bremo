@@ -117,8 +117,8 @@ public class BrennverlaufFileReader {
 			}
 			br.close();
 			fr.close();		
-			//punkteProArbeitsspiel = cnt-2;
-			punkteProArbeitsspiel = cnt-abZeile+2;
+			punkteProArbeitsspiel = cnt; //Alles was unter den Ueberschrift und Einheit als double eingelesen werden konnte
+			//punkteProArbeitsspiel = cnt-2; //ORIGINAL
 		}
 
 		catch(FileNotFoundException fN) {

@@ -10,6 +10,7 @@ import berechnungsModule.blowby.BlowBy;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
+import berechnungsModule.turbulence.TurbulenceModel;
 import berechnungsModule.wandwaerme.PerfektIsoliert;
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
 import bremo.parameter.BrennverlaufDaten;
@@ -36,6 +37,7 @@ public class APR_homogen_EinZonig extends APR{
 	private GleichGewichtsRechner gg;
 	private MasterEinspritzung masterEinspritzung;
 	private BlowBy blowbyModell;
+	private TurbulenceModel turb; //für Bargende
 	
 	private final int ANZAHL_ZONEN;
 	
@@ -85,6 +87,7 @@ public class APR_homogen_EinZonig extends APR{
 		ANZAHL_ZONEN=1;
 		this.createMe(cp, waermeVerluste);
 	}
+	
 	protected APR_homogen_EinZonig (CasePara cp, boolean waermeVerluste, String brennverlaufsart, double wertQ) {
 		//super(cp, new ErgebnisBuffer(cp,"APR_")); //alt, ohne Klasse "APR"
 		super(cp);
@@ -104,7 +107,6 @@ public class APR_homogen_EinZonig extends APR{
 		this.createMe(cp, waermeVerluste);
 		
 	}
-	
 	
 	protected APR_homogen_EinZonig (CasePara cp) {
 		//super(cp, new ErgebnisBuffer(cp,"APR_")); //alt, ohne Klasse "APR"
@@ -126,7 +128,9 @@ public class APR_homogen_EinZonig extends APR{
 		gg=CP.OHC_SOLVER;
 		this.checkEinspritzungen(masterEinspritzung);		
 		blowbyModell = CP.BLOW_BY_MODELL;
-		
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+			turb = CP.TURB_FACTORY.get_TurbulenceModel(); //für Bargende
+		}
 		T_buffer = new misc.VektorBuffer(cp);
 		dQb_buffer = new misc.VektorBuffer(cp);
 		dQw_buffer= new misc.VektorBuffer(cp);
@@ -196,8 +200,14 @@ public class APR_homogen_EinZonig extends APR{
 		
 		
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
-		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
-		
+		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+			turb.initialize(initialZones, 0);
+		}
+	}
+	
+	public double get_turbFaktor(Zone [] zonen_IN, double time){
+		return turb.get_k(zonen_IN, time);
 	}
 	
 	public Zone [] calc_dQburn(Zone [] zonen){
@@ -294,8 +304,9 @@ public class APR_homogen_EinZonig extends APR{
 
 		}		
 		
-		
-		
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+			this.turb.update(zonen_IN, time);
+		}
 		return zonen_IN;
 		
 	}
@@ -482,6 +493,11 @@ public class APR_homogen_EinZonig extends APR{
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("Qw Liner [J]",Qwl,i);
+		
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+			i+=1;
+			super.buffer_EinzelErgebnis("TKE_M [m^2/s^2]", this.turb.get_k(zn,time),i);
+		}
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);

@@ -104,7 +104,7 @@ public class Motor_HubKolbenMotor extends Motor{
 			}
 			else{
 			OTVERSATZ=0;
-			}										//für OT-Versatz
+			} //für OT-Versatz
 		}else{
 			HUB=2*KURBELRADIUS;
 			SMAX=KURBELRADIUS+PLEUELLAENGE;

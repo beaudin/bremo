@@ -97,7 +97,7 @@ public class Motor_HubKolbenMotor extends Motor{
 			HUB=SMAX-sMin;	
 			if(ZOTBEIKOLBENOT){	//für OT-Versatz
 			OTVERSATZ=versatz;
-			System.err.println("Der Motor hat einen geschraenkten oder desachsierten Kurbeltrieb."
+			System.err.println("Der Motor hat einen geschraenkten oder desachsierten Kurbeltrieb. "
 					+ "Laut Angabe im Input-File liegt der Zeitpunkt \"0 [KWnZOT]\" der Indizierdaten "
 					+ "bei Kolben-OT (minimalem Volumen), das minimale Volumen liegt aber bei "+OTVERSATZ
 					+ " [KWnZOT]. Die Druckdaten werden um "+Math.round(10*OTVERSATZ)/10.0+" [KWnZOT] verschoben.");

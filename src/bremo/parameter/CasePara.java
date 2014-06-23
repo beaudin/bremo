@@ -141,6 +141,28 @@ public class CasePara {
 			}			
 		}		
 		
+		/////////////// Kerrom, 06.06.14 //////// Plausibilitätsüberprüfung mit Lambda ////////////
+				
+		if (get_Lambda_Input() >= 0) { //nur, wenn lambda korrekt eingelesen wurde
+			//lambda berechnen
+			double lambda_berechnet = get_mLuft_feucht_ASP() / (MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP() * MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst());
+			//Differenz (Betrag) zwischen berechnetem und eingelesenem lambda
+			double diff = Math.abs(get_Lambda_Input() - lambda_berechnet);
+
+			// Warnung, wenn die Differenz größer als 0.01 ist
+			if (diff > 0.01) {
+				System.err.println( Separator 
+						+ "ACHTUNG: Die Differenz zwischen eingelesenem Lambda und berechnetem Lambda beträgt " + diff
+						+ ". \nEs wurden folgende Werte verwendet:\nmLuft_feucht = " + get_mLuft_feucht_ASP()
+						+ "\nmKrst (Summe aller Einspritzungen) = "	+ MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP()
+						+ "\nLst = " + MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst()
+						+ "\nLambda (eingelesenes) = " + get_Lambda_Input()
+						+ "\nberechnetes lambda = " + lambda_berechnet + Separator);
+			}
+		}
+		
+		/////////////////////////////////////////////////////////////////		
+		
 	}		
 
 	/**
@@ -2456,7 +2478,22 @@ public class CasePara {
 		}	
 	}	
 
-
+	/////////////////////Kerrom, 06.06.14 /////////////////////
+	/**
+	 * @return Gibt den im Input File angegebenen lambda Wert zurück. 
+	 * Warnung, wenn kein lambda im Input File angegeben ist.
+	 */
+	public double get_Lambda_Input() {
+	
+		try {
+		return set_doublePara(INPUTFILE_PARAMETER, "Lambda", "[-]", 0,
+					Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {
+			e.log_Warning("Lambda ist nicht im Input File angegeben oder besitzt einen ungültigen Wert. Es findet keine Plausibilitätsüberprüfung statt!");
+			return -1;
+		}
+	}
+	//////////////////////////////////////////////////////////
 
 	private double set_doublePara(Hashtable<String,String []> parameterInHash, 
 			String paraNameToSet, 

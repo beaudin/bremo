@@ -364,7 +364,8 @@ public class GasGemisch extends Spezies {
 			
 			while(e.hasMoreElements()){				
 				spez=e.nextElement();
-				if(speziesMolenMassenBruchHash.get(spez)<0)
+//				if(speziesMolenMassenBruchHash.get(spez)<0) //ORIGINAL
+				if(speziesMolenMassenBruchHash.get(spez)<-1e-12)
 					try {
 						throw new MiscException("Gasmischer: " +
 						"Molen-/ bzw. Massenbrueche kleiner 0 \n --> Das geht nun wirklich nicht" +

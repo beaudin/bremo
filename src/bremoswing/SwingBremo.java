@@ -65,7 +65,7 @@ import bremoswing.util.FertigMeldungFrame;
  */
 public class SwingBremo extends JFrame {
 
-	private static final String title = "Bremo 2.0 Beta rev213";
+	private static final String title = "Bremo 2.0 Beta rev214";
 	
 	private static final long serialVersionUID = 1L;
 	public static boolean ConsloseModeActive = false;
@@ -340,7 +340,7 @@ public class SwingBremo extends JFrame {
 		/************ BUTTON Graphic ************************************/
 		sehen.setIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/see_graphik.png")));
-		sehen.setToolTipText("Schauen Sie Ergebniss als Graphik");
+		sehen.setToolTipText("Ergebnisse betrachten");
 		sehen.addActionListener(new ActionListener() {
 
 			@Override
@@ -370,7 +370,7 @@ public class SwingBremo extends JFrame {
 				"/bremoswing/bild/doc-icon.png")));
 		docfile.setRolloverIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/doc-icon2.png")));
-		docfile.setToolTipText("Erzeugen/Editieren InputFile");
+		docfile.setToolTipText("InputFile erzeugen/editieren");
 		docfile.addActionListener(new ActionListener() {
 			
 			@Override
@@ -483,7 +483,7 @@ public class SwingBremo extends JFrame {
 		grosArea.setEditable(false);
 		// grosArea.setFont(new Font("comic sans ms", 3, 16)); // NOI18N
 		grosArea.setRows(5);
-		grosArea.setText("Programm läuft... \nWählen Sie die Input Datei Und Dann Einfach die Berechnung Ausführen .");
+		grosArea.setText("Programm läuft... \nWählen Sie ein InputFile und dann einfach die Berechnung ausführen .");
 		grosArea.setMinimumSize(new Dimension(76, 22));
 		grosArea.addKeyListener(new KeyAdapter() {
 			@Override
@@ -623,7 +623,7 @@ public class SwingBremo extends JFrame {
 
 	/** Warning Massage **********/
 	protected void messsage() {
-		new FertigMeldungFrame("Achtung","Berechnung läuf gerade... Warten Sie bis Ende ",JOptionPane.WARNING_MESSAGE);
+		new FertigMeldungFrame("Achtung","Berechnung läuf gerade... Warten Sie bis zum Berechnungsende ",JOptionPane.WARNING_MESSAGE);
 //		JOptionPane.showMessageDialog(this,
 //				"Berechnung läuf gerade... Warten Sie bis Ende ", "Achtung",
 //				JOptionPane.WARNING_MESSAGE);
@@ -634,7 +634,7 @@ public class SwingBremo extends JFrame {
 		grosArea.setText("");
 		kleinArea.setText("");
 		if (textFile.getText().equals("")) {
-			new FertigMeldungFrame("Achtung","Überprüfen Sie Bitte die InputDatei !!!",JOptionPane.WARNING_MESSAGE);
+			new FertigMeldungFrame("Achtung","Bitte das InputFile überprüfen!!!",JOptionPane.WARNING_MESSAGE);
 //			JOptionPane.showMessageDialog(this,
 //					"Überprüfen Sie Bitte die InputDatei !!!", "Achtung",
 //					JOptionPane.WARNING_MESSAGE);
@@ -665,7 +665,7 @@ public class SwingBremo extends JFrame {
 				e1.printStackTrace();
 				ActiveIcon();
 
-				label.setText(" Bitte InputFile Neu Auswählen ! ");
+				label.setText(" Bitte InputFile neu auswählen ! ");
 			} 
 				
 			
@@ -691,7 +691,7 @@ public class SwingBremo extends JFrame {
 
 		fileChooser.addChoosableFileFilter(txtFilter);
 		try {
-			label.setText(" Datei Werden geladen ... ");
+			label.setText(" lädt Datei(en) ... ");
 		
 			int status = fileChooser.showOpenDialog(getRootPane());
 
@@ -710,18 +710,18 @@ public class SwingBremo extends JFrame {
 					NrBremoAlive = files.length;
 					if (NrOfFile == 1)
 						SetDebbugingMode(true);
-					label.setText(" Datei mit Erfolg Importiert ! ");
+					label.setText("InputFile erfolgreich eingelesen.");
 
 					ActiveConsole();
 				}
 			} else if (status == JFileChooser.CANCEL_OPTION) {
 				
-				label.setText(" Import von Datei Unterbrechen ! ");
+				label.setText("InputFile-Aufruf abgebrochen!");
 
 				fileChooser.cancelSelection();
 			}
 		} catch (Exception e) {
-			label.setText(" Fehler aufgetreten ! ");
+			label.setText("Es ist ein Fehler aufgetreten!");
 			e.printStackTrace();
 		}
 		berechnen.setEnabled(true);
@@ -731,7 +731,7 @@ public class SwingBremo extends JFrame {
 	private void stopPush(ActionEvent e) {
 		if (!control) {
 			JOptionPane.showMessageDialog(this,
-					"Starten Sie Zu erst die Berechnung.", "Achtung",
+					"Zuerst die Berechnung starten.", "Achtung",
 					JOptionPane.WARNING_MESSAGE);
 		} else {
 			errStream.flush();
@@ -750,7 +750,7 @@ public class SwingBremo extends JFrame {
 		wahlFile.setEnabled(true);
 		berechnen.setEnabled(true);
 		stop.setEnabled(false);
-		label.setText(" Operation beendet. ");
+		label.setText("Operation beendet.");
 		progressBar.setValue(0);
 		progressBar.setVisible(false);
 		progressBarInd.setVisible(false);
@@ -804,8 +804,8 @@ public class SwingBremo extends JFrame {
 			
 			if (bremoThreadFertig[0] != null) {
 				
-				label.setText(" Berechnung Fertig ! ");
-				new FertigMeldungFrame("Zustand Berechnung","Die Berechnung ist Fertig !!!",JOptionPane.INFORMATION_MESSAGE);
+				label.setText("Die Berechnung ist fertig!");
+				new FertigMeldungFrame("Zustand Berechnung","Die Berechnung ist fertig!!!",JOptionPane.INFORMATION_MESSAGE);
 //				JOptionPane.showMessageDialog(popup,
 //						"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
 //						JOptionPane.INFORMATION_MESSAGE);
@@ -853,7 +853,7 @@ public class SwingBremo extends JFrame {
 		NrBremoAlive = files.length;
 		if (NrOfFile == 1)
 			SetDebbugingMode(true);
-		label.setText(" Externe Datei mit Erfolg Importiert ! ");
+		label.setText("Externe Datei mit Erfolg Importiert!");
 		
 	}
 	/************************ place Frame to the center ************************/

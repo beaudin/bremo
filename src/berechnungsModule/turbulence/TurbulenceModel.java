@@ -48,5 +48,8 @@ public abstract class TurbulenceModel {
 	public abstract void update(Zone zn[], double time);
 	
 	public abstract void initialize(Zone zn[], double time);
-
+	
+	//Methode wird benötigt, um bei einer DVA mit WWM Bargende die Turbulenz richtig berechnen zu können
+	public abstract void set_k(double turbulence,int i); 
+	
 }

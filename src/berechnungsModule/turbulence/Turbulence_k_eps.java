@@ -136,4 +136,10 @@ public class Turbulence_k_eps extends TurbulenceModel{
 		return solCon.get_modelParameter2Integrate(0);
 	}
 	
+	//Methode wird benötigt, um bei einer DVA mit WWM Bargende die Turbulenz richtig berechnen zu können
+	@Override
+	public void set_k(double turbulence,int i){
+		solCon.set_modelParameter2Integrate(turbulence, 0);
+	}
+	
 }

@@ -222,8 +222,9 @@ public class Bremo extends Thread {
 		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
 		//Hier einige Beisspile wie Funktionen getestet werden können
 		System.out.println(System.getProperty("home"));
-//		File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//Gerald//Inputfile_002.txt"); //TODO Filename
-		File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//PhH//20140225//49//NEU//Inputfile_P_202_Huegel_20140225_0049-p_m.txt"); //TODO Filename
+		File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//STEVE//Inputfile.txt"); //TODO Filename
+//		File fileCP = new File("D://Daten//Studenten//Carolin Sturm//Studentenordner//von_philipp//BREMO//20140205//05_neu//PhH//Inputfile_P_202_Huegel_20140205_0005-p_m.txt");
+//		File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//PhH//20140225//19//Inputfile_P_202_Huegel_20140225_0019-p_m.txt"); //TODO Filename
 		//File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//PhH//Messpunkt_10_Schichtreferenz//Bremo_Inputfile_Messpunkt_99.txt");
 //		File fileCP = new File("d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//"+
 //				"bremo_setup_140123_00009_zyklus163.txt"); //TODO Filename

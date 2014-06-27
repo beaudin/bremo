@@ -100,4 +100,9 @@ public  class SolverConnector {
 	public  double [] get_diff_modelParameters2Integrate(){
 		return diff_modelParameters2Integrate;		
 	}
+
+	//Methode wird benötigt, um bei einer DVA mit WWM Bargende die Turbulenz richtig berechnen zu können
+	public void set_k(double turbulence, int idx) {
+		// TODO Auto-generated method stub
+	}
 }

@@ -47,4 +47,10 @@ public class Turbulence_FromFile extends TurbulenceModel {
 		return 2d/3d*get_k(zn,time)/get_eps(zn, time)*get_intensity(zn,time);
 	}
 
+	//Methode wird benötigt, um bei einer DVA mit WWM Bargende die Turbulenz richtig berechnen zu können
+	@Override
+	public void set_k(double turbulence,int i){
+		// TODO Auto-generated method stub	
+	}
+
 }

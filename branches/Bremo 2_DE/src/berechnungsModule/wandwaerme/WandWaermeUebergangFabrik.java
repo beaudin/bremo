@@ -11,7 +11,7 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 	public static final String WANDWAERME_FLAG="Wandwaermemodell";
 	private static final String WANDWAERME_FLAG_LW="Wandwaermemodell_LW";
 	public  static final String[] WANDWAERMEMODELLE
-	={"WoschniHuber", "Woschni", "Hohenberg", "Hans", "Hensel", "Bargende", "Chang","ohne","FromFile"};
+	={"WoschniHuber", "Woschni", "Hohenberg", "Hensel", "Hans", "Bargende", "Chang", "ohne","FromFile"};
 	public final  WandWaermeUebergang WAND_WAERME_MODUL;
 	public final  WandWaermeUebergang WAND_WAERME_MODUL_LW;
 	

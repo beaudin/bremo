@@ -183,5 +183,11 @@ public class Turbulence_k extends TurbulenceModel{
 		solCon.set_diff_modelParameter2Integrate(this.calc_dk(zn, time), 0);
 		
 	}
+
+	//Methode wird benötigt, um bei einer DVA mit WWM Bargende die Turbulenz richtig berechnen zu können
+	@Override
+	public void set_k(double turbulence,int i){
+		solCon.set_modelParameter2Integrate(turbulence, 0);
+	}
 	
 }

@@ -18,7 +18,7 @@ import bremo.parameter.CasePara;
 public class Rechnung {		
 				
 	private final CasePara CP;
-
+	private double turbulence = -1; //Turbulenzfaktor negativ initialisiert, muss aber immer positiv sein. Falls nicht verändert wird Fehler abgefangen 
 
 
 	public Rechnung(CasePara cp) {		
@@ -27,7 +27,7 @@ public class Rechnung {
 
 
 	public void berechnungDurchfuehren(){	
-		double x0, xn,schrittweite;
+		double x0, xn, schrittweite;
 //		BerechnungsModell dglSys=CP.BERECHNUNGS_MODELL;		
 //		Solver sol=new Solver(CP, dglSys);
 		BerechnungsModell dglSys=CP.BERECHNUNGS_MODELL;
@@ -51,14 +51,12 @@ public class Rechnung {
 		
 			anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
 		//int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE; 
-		}
-		else 											 //fuer Verlustteilung Frank Haertel
+		}else 											 //fuer Verlustteilung Frank Haertel
 		    anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE-1;  //fuer Verlustteilung Frank Haertel
 		
 		double time;
 		Zone[] zn=dglSys.get_initialZones();
 		dglSys.bufferErgebnisse(x0, zn);
-		
 		Zone [] znTemp = null;
 	
 
@@ -73,18 +71,40 @@ public class Rechnung {
 				System.out.println("berechne Zeitschritt: " +time+ "[sec]");
 			sol.setFinalValueOfX(time);		
 
+			
 			if(dglSys.isDVA()==true){				
+				
 				double pIst=Double.NaN;
 				boolean isConverged=false;			 
 				int idx=0;
+				//Erste Rechnung vor der do-while Schleife
+				znTemp=sol.solveRK(zn);					
+				pIst = znTemp[0].get_p();	
+				idx++;
+				//Nach der ersten Rechnung wird der Turbulenzfaktor mit turbulence festgehalten, sonst wird er mit jedem weiteren Rechenschritt hoch gerechnet 
+				//Später soll turbulence den entsprechenden Wert überschreiben (bisher nur für WWÜ Bargende nötig)
+				if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
+					turbulence = CP.TURB_FACTORY.get_TurbulenceModel().get_k(zn, time);
+				}
+				
+				//Vergleich ob der Berechnete Druck mit dem gemessenen übereinstimmt 
+				// wenn nicht muss set_dQ aufgerufen werden und die Rechnung erneut durchgeführt werden
+				isConverged = ((DVA) dglSys).is_pSoll_Gleich_pIst(pIst,zn,time);
+			
 				do{	
-					znTemp=sol.solveRK(zn);					
-					pIst=  znTemp[0].get_p();
-					//Vergleich ob der Berechnete Druck mit dem gemessenen übereinstimmt 
-					// wenn nicht muss set_dQ aufgerufen werden und die Rechnung erneut durchgeführt werden				  
-					isConverged=((DVA) dglSys).is_pSoll_Gleich_pIst(pIst,zn,time);	
-					idx++;						
-				}while (isConverged==false&& idx<100);	
+					znTemp = sol.solveRK(zn);					
+					pIst = znTemp[0].get_p();				  
+					isConverged = ((DVA) dglSys).is_pSoll_Gleich_pIst(pIst,zn,time);	
+					idx++;	
+					
+				//Überschreiben von Turbulenzfaktor k (siehe oben) turbulence ist mit -1 initialisiert
+				if (turbulence >= 0) {
+					CP.TURB_FACTORY.get_TurbulenceModel().set_k(turbulence, 0);
+				//Falls set_k nicht funktioniert oder Schmarrn zurück gegeben wird
+				}else{
+					System.out.println("Vorsicht, negative Turbulenz aufgetreten - sollte nicht passieren!");
+					}
+				}while (isConverged == false && idx<100);
 				
 				if(isConverged==false){
 					System.out.println("mangelnde Konvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");

@@ -11,11 +11,13 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -24,6 +26,10 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import javafx.scene.control.Tab;
+
+import javax.annotation.Resource;
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -34,12 +40,15 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.jfree.chart.ChartPanel;
 
+import bremoswing.SwingBremo;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.FertigMeldungFrame;
+import bremoswing.util.ImageBackgroundJPanel;
 
 public  class BremoView extends JFrame implements ActionListener, Observer {
 
@@ -62,7 +71,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
     
     JButton saveButton;
     JButton openFileButton;
-    //JButton favoriteButton;
+    JButton refreshButton;
     JButton y_achse_button;
     
     JButton save_Fav_1 ;
@@ -90,17 +99,17 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
     JComboBox<String> achse_to_log;
     JComboBox<Integer> nbr_of_Achse;
     
-    JPanel TitelPanel;
-    JPanel GraphikPanel;
-    JPanel GroupPanel;
-    JPanel TabellePanel;
+    ImageBackgroundJPanel TitelPanel;
+    ImageBackgroundJPanel GraphikPanel;
+    ImageBackgroundJPanel GroupPanel;
+    ImageBackgroundJPanel TabellePanel;
     
     Font font ;
     BremoViewResource resource ;
     BremoViewController controller ;
     ItemChooseFrame chooseFrame  ;
     
-    String path;
+    
     
     public BremoView (BremoViewModel Model) {
     	   initComponents (Model);
@@ -109,15 +118,15 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	private void initComponents(BremoViewModel Model) {
      
 		/**  initialization of Variable ***********************************************/
-    	
+		resource = new BremoViewResource();
 		controller = new BremoViewController(Model);
 		
-		path = ".";
 		
-		TitelPanel   = new JPanel();
-    	GraphikPanel = new JPanel();
-    	TabellePanel = new JPanel();
-    	GroupPanel   = new JPanel();
+		
+		TitelPanel   = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,20,50);
+    	GraphikPanel = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,100,100);
+    	TabellePanel = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,300,50);
+    	GroupPanel   = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,20,70);
     	
     	font = new Font("Tahoma", 0, 14);
     	
@@ -128,32 +137,32 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         datumLabel = new JLabel();
                       
         saveButton = new JButton("Save");
-        openFileButton = new JButton(" Open ");
-        //favoriteButton = new JButton("Favs");
+        openFileButton = new JButton();
+        refreshButton = new JButton();
         y_achse_button = new JButton("Y-Axe");
         
         openFileButton.setName("openFileButton");
-        //favoriteButton.setName("favoriteButon");
+        refreshButton.setName("refreshButton");
         y_achse_button.setName("y_achse_button");
         
         
-        save_Fav_1 = new JButton("Save Fav 1");
-        save_Fav_2 = new JButton("Save Fav 2");
-        save_Fav_3 = new JButton("Save Fav 3");
-        save_Fav_4 = new JButton("Save Fav 4");
-        save_Fav_5 = new JButton("Save Fav 5");
-        save_Fav_6 = new JButton("Save Fav 6");
-        save_Fav_7 = new JButton("Save Fav 7");
-        save_Fav_8 = new JButton("Save Fav 8");
+        save_Fav_1 = new JButton("1");
+        save_Fav_2 = new JButton("2");
+        save_Fav_3 = new JButton("3");
+        save_Fav_4 = new JButton("4");
+        save_Fav_5 = new JButton("5");
+        save_Fav_6 = new JButton("6");
+        save_Fav_7 = new JButton("7");
+        save_Fav_8 = new JButton("8");
                
-        load_Fav_1 = new JButton("Load Fav 1");
-        load_Fav_2 = new JButton("Load Fav 2");
-        load_Fav_3 = new JButton("Load Fav 3");
-        load_Fav_4 = new JButton("Load Fav 4");
-        load_Fav_5 = new JButton("Load Fav 5");
-        load_Fav_6 = new JButton("Load Fav 6");
-        load_Fav_7 = new JButton("Load Fav 7");
-        load_Fav_8 = new JButton("Load Fav 8");
+        load_Fav_1 = new JButton("1");
+        load_Fav_2 = new JButton("2");
+        load_Fav_3 = new JButton("3");
+        load_Fav_4 = new JButton("4");
+        load_Fav_5 = new JButton("5");
+        load_Fav_6 = new JButton("6");
+        load_Fav_7 = new JButton("7");
+        load_Fav_8 = new JButton("8");
         
         save_Fav_1.setName("s_favs_1");
         save_Fav_2.setName("s_favs_2");
@@ -207,10 +216,9 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         x_achse.setPreferredSize(new Dimension(180, 22));
         y_achse_button.setPreferredSize(new Dimension(80, 25));
 
-        pathLabel.setText("Path");
+        pathLabel.setText(SwingBremo.loadPathFromFile());
         
         controller = new BremoViewController(new BremoViewModel());
-        resource = new BremoViewResource();
         chooseFrame = new ItemChooseFrame(this);
         
         nbr_of_Achse.addItemListener( new ItemListener() {
@@ -221,9 +229,11 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 				chooseFrame.lockAxe(nbr_of_Achse.getSelectedItem().toString());
 			}
 		});
-        
+        nbr_of_Achse.addActionListener(this);
+        achse_to_log.addActionListener(this);
+        x_achse.addActionListener(this);
         openFileButton.addActionListener(this);
-        
+        refreshButton.addActionListener(this);
         save_Fav_1.addActionListener(this);
         save_Fav_2.addActionListener(this);
         save_Fav_3.addActionListener(this);
@@ -269,14 +279,14 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         iconKIT = new ImageIcon(imageKit);
         KITLabel.setIcon(iconKIT);
        
-        TitelLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); 
+        TitelLabel.setFont(new Font("Tahoma", 1, 18)); 
         //TitelLabel.setText(Name);
         URL url = getClass().getResource(resource.getIconBremoSwing());
         ImageIcon icon = new ImageIcon(url);
         Image image = icon.getImage();
         image  = image.getScaledInstance(40, 40,java.awt.Image.SCALE_SMOOTH);
         icon = new ImageIcon(image);
-        TitelLabel.setIcon(icon);
+        //TitelLabel.setIcon(icon);
        
         
         URL urlIFKM = getClass().getResource(resource.getIconIFKM());
@@ -298,10 +308,10 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         GraphikPanel.setLayout(GraphikPanelLayout);
         
         JLabel TestLabel = new JLabel();
-        URL urlTest = getClass().getResource(resource.getIconBackgroungWater());
+        URL urlTest = getClass().getResource(resource.getIconBackgroungChart());
         ImageIcon iconTest = new ImageIcon(urlTest);
         Image imageTest = iconTest.getImage();
-        //imageTest  = imageTest.getScaledInstance(40, 40,java.awt.Image.SCALE_SMOOTH);
+        imageTest  = imageTest.getScaledInstance(600, 600,java.awt.Image.SCALE_SMOOTH);
         iconTest = new ImageIcon(imageTest);
         TestLabel.setIcon(iconTest);
         GraphikPanel.add(TestLabel);
@@ -309,17 +319,46 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         /********************************************************************************/
         /** Layout of TabellePanel  and TabellePanel Processing *************************/ 
       
-      JPanel virtualPanel = new JPanel(new GridLayout(1, 1));
+      ImageBackgroundJPanel virtualPanel = new ImageBackgroundJPanel(resource.getIconBackgroungColored_1(),100,140);
+      virtualPanel.setLayout(new GridLayout(1, 2, 5, 5));
       
-      openFileButton.setToolTipText("Open other file to show on the Graphic.");
-      //favoriteButton.setToolTipText("Save this Graphic Setting as Favorite.");
+      openFileButton.setToolTipText("Open a file to plot the Graphic.");
+      refreshButton.setToolTipText("Refresh the Chart.");
+      
+      openFileButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconChoose()))); 
+	  openFileButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconChooseRollover())));
+      
+      refreshButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconRefresh()))); 
+	  refreshButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconLoader())));
+		
       
       virtualPanel.add(openFileButton);
-      //virtualPanel.add(favoriteButton);
-            
+      virtualPanel.add(refreshButton);
+      virtualPanel.setBorder(BorderFactory.createTitledBorder("Manager"));      
       TabellePanel.add(virtualPanel);
       
-      JPanel virtualPanel2 = new JPanel(new GridLayout(8, 2, 5, 5));
+      ImageBackgroundJPanel virtualPanel2 = new ImageBackgroundJPanel(resource.getIconBackgroungColored_1(),100,140);
+      virtualPanel2.setLayout(new GridLayout(8, 2, 5, 5));
+      ImageIcon favAddIcon = new ImageIcon(getClass().getResource(resource.getIconFavAdd()));
+      ImageIcon favLoadIcon = new ImageIcon(getClass().getResource(resource.getIconFavLoad()));
+      
+      save_Fav_1.setIcon(favAddIcon);
+      save_Fav_2.setIcon(favAddIcon);
+      save_Fav_3.setIcon(favAddIcon);
+      save_Fav_4.setIcon(favAddIcon);
+      save_Fav_5.setIcon(favAddIcon);
+      save_Fav_6.setIcon(favAddIcon);
+      save_Fav_7.setIcon(favAddIcon);
+      save_Fav_8.setIcon(favAddIcon);
+      
+      load_Fav_1.setIcon(favLoadIcon);
+      load_Fav_2.setIcon(favLoadIcon);
+      load_Fav_3.setIcon(favLoadIcon);
+      load_Fav_4.setIcon(favLoadIcon);
+      load_Fav_5.setIcon(favLoadIcon);
+      load_Fav_6.setIcon(favLoadIcon);
+      load_Fav_7.setIcon(favLoadIcon);
+      load_Fav_8.setIcon(favLoadIcon);
       
       save_Fav_1.setToolTipText("Store the Index of All Curve on the Graphic as Favorite 1");
       save_Fav_2.setToolTipText("Store the Index of All Curve on the Graphic as Favorite 2");
@@ -369,10 +408,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         
         
         /********************************************************************************/
-        datumLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-		Date dt = new Date();
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		datumLabel.setText(df.format(dt));
+        refreshDate();
 		
 		y_achse_button.addActionListener(this);
 			
@@ -385,9 +421,8 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         pane.add(GraphikPanel,BorderLayout.CENTER);
         pane.add(GroupPanel,BorderLayout.PAGE_END);
         pane.add(TabellePanel,BorderLayout.LINE_END);
-		
-        setVisible(true);
         pack();
+        setVisible(true);
 	}
 	
 	 private void TitelPanelInitialisation() {
@@ -416,7 +451,12 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	}
 
 	private void GrouPanelInitialisation() {
-		 
+		Font font = new Font("Tahoma", Font.BOLD, 16);
+		
+		nbr_of_Achse_label.setFont(font);
+		achse_to_log_label.setFont(font);
+		x_achse_label.setFont(font);
+		
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(GroupPanel);
         GroupPanel.setLayout(layout);
         layout.setHorizontalGroup(
@@ -465,40 +505,6 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         );
 		
 	}
-
-	/**
-     * Update the TitelPanel
-     */
-    void TitelPanelUpdate () {
-    	
-    	TitelPanel.removeAll();
-    	TitelPanel.setLayout(new GridBagLayout());
-		GridBagConstraints gc = new GridBagConstraints();
-		gc.fill = GridBagConstraints.NONE;
-		gc.insets = new Insets(0, 0, 0, 0);
-		gc.ipadx = 0;
-		gc.ipady = 0;
-		gc.weightx = 0;
-		
-        int links = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-KITLabel.getPreferredSize().width-5;
-        int right = (TitelPanel.getPreferredSize().width / 2)-(TitelLabel.getPreferredSize().width/2)-IFKMLabel.getPreferredSize().width-5;
-      
-        gc.insets = new Insets(0, 0, 0, links);
-        gc.gridx = 0;
-		gc.gridy = 0;
-        TitelPanel.add(KITLabel,gc);
-        
-        gc.insets = new Insets(0, 0, 0, 0);
-        gc.gridx = 1;
-		gc.gridy = 0;
-        TitelPanel.add(TitelLabel,gc);
-        
-        gc.insets = new Insets(0,right , 0, 0);
-        gc.gridx = 2;
-		gc.gridy = 0;
-        TitelPanel.add(IFKMLabel,gc);
-    	TitelPanel.revalidate();
-    }
     
     /**
      * Update the Visibility of the Y-axe ChooseFrame
@@ -512,8 +518,9 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	 * @param str
 	 */
 	public void update(String str) {
-		TitelLabel.setText(str.replace(".txt", ""));
-		TitelPanel.revalidate();
+		setTitle(str);
+		//TitelLabel.setText(str.replace(".txt", ""));
+		//TitelPanel.revalidate();
 	}
 	/**
 	 * Update the chart of the GraphicPanel
@@ -570,7 +577,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			int [] y_index_3 = (int[]) list.get(5);
 			chooseFrame.y_achse_3.setSelectedIndices(y_index_3);
 		}
-		if (axe > 4) {
+		if (axe > 3) {
 			int [] y_index_4 = (int[]) list.get(6);
 			chooseFrame.y_achse_4.setSelectedIndices(y_index_4);
 		}
@@ -596,7 +603,8 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	    */
 	   void OpenFileToShowOnBremoView() {
 		   
-		    JFileChooser fileChooser = new JFileChooser(path);
+		    JFileChooser fileChooser;
+			fileChooser = new JFileChooser(SwingBremo.loadPathFromFile());
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			fileChooser.setMultiSelectionEnabled(false);
 			ExtensionFileFilter txtFilter = new ExtensionFileFilter(null,
@@ -610,7 +618,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 					if (fileChooser.getSelectedFile() != null) {
 						File file = fileChooser.getSelectedFile();
 						controller.SendFileModel(file);
-						path = file.getParent();
+						SwingBremo.savePathToFile(file.getParent());
 											}
 				} else if (status == JFileChooser.CANCEL_OPTION) {
 
@@ -645,19 +653,22 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			cb.setModel(new JComboBox<Integer>(item).getModel());
 				
 	    }
+		
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		switch (((Component) e.getSource()).getName()) {
 
 		case "nbr_of_Achse":
-			 
+			 refreshChart();
 			break;
 
 		case "achse_to_log":
+			refreshChart();
 			break;
 
 		case "x_achse":
+			refreshChart();
 			break;
 
 		case "y_achse_button":
@@ -672,6 +683,10 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 
 		case "openFileButton":
 			OpenFileToShowOnBremoView();
+			break;
+			
+		case "refreshButton":
+			refreshChart();
 			break;
 
 		case "s_favs_1":
@@ -770,5 +785,27 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 
 	public BremoViewController getController() {
 		return controller;
+	}
+	
+	/**
+	 * refresh the Chart
+	 */
+	public void refreshChart() {
+		try {
+			controller.bremoViewData(getAllselectedItem());
+			chooseFrame.getChartForBremoView();
+			refreshDate();
+		} catch (NullPointerException e) {
+
+		}
+	}
+	/**
+	 * refresh the Date
+	 */
+	public void refreshDate() {
+		datumLabel.setFont(new Font("Tahoma",Font.PLAIN, 14)); // NOI18N
+		Date dt = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		datumLabel.setText(df.format(dt));
 	}
 }

@@ -4,9 +4,11 @@
 package bremo.main;
 
 import java.awt.Color;
+import java.io.IOException;
 
 import javax.swing.JApplet;
 import javax.swing.UIManager;
+
 
 
 import bremoswing.SwingBremo;
@@ -51,7 +53,8 @@ public class BremoApplet extends JApplet {
 			}
 		});
 	}
+}
 
 	
 
-}
+

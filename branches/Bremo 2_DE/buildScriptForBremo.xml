@@ -94,13 +94,5 @@
 		</signjar>
 
 		<copy file="dist/BremoApplet.html" todir="Applet" />
-        
-		<property name="firefox" value="C:/Program Files/Mozilla Firefox/firefox.exe" />
-		<property name="file" value="Applet/BremoApplet.html"/>
-
-		<exec executable="${firefox}" spawn="yes">
-			<arg line="${file}" />
-		</exec>
-
-	</target>
+   	</target>
 </project>

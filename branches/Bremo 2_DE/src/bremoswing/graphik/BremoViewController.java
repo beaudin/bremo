@@ -53,7 +53,7 @@ public class BremoViewController  {
      * Controller tell to Model to create Chart 
      * @throws IOException 
      */
-	public void Chart() throws IOException {
+	public void Chart() {
 		model.createChart();
 		
 	}

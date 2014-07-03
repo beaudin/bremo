@@ -3,6 +3,7 @@ package bremoswing;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Insets;
@@ -19,13 +20,19 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.ThreadGroup;
 import java.net.URL;
-
-
+import java.sql.Savepoint;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -41,12 +48,27 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.FontUIResource;
 
+import com.sun.xml.internal.ws.api.Component;
+
+import org.tmatesoft.svn.*;
+import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.io.SVNRepository;
+import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNStatus;
+
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 import bremo.main.Bremo;
 import bremoswing.graphik.BremoView;
+import bremoswing.graphik.BremoViewController;
 import bremoswing.graphik.BremoViewModel;
 import bremoswing.graphik.ItemChooseFrame;
 import bremoswing.graphik.SelectItemToPlotten;
@@ -64,8 +86,9 @@ import bremoswing.util.FertigMeldungFrame;
  * @author Ngueneko Steve
  */
 public class SwingBremo extends JFrame {
-
-	private static final String title = "Bremo 2.0 Beta rev215";
+	
+    public static String  RevisionNumber = getRevisionNumber();
+	private static final String title = "Bremo 2.0 rev "+ RevisionNumber + " Beta" ;
 	
 	private static final long serialVersionUID = 1L;
 	public static boolean ConsloseModeActive = false;
@@ -149,7 +172,7 @@ public class SwingBremo extends JFrame {
 
 	/************************** End of variables declaration ****************************************/
 
-	/***** Creates new form SwingBremo *************************************************************/
+	/***** Creates new form SwingBremo  *************************************************************/
 	public SwingBremo() {
 		initComponents();
 		placeFrame(this);
@@ -157,11 +180,12 @@ public class SwingBremo extends JFrame {
 
 	/***
 	 * This method is called from within the constructor to initialize the form.
+	 * @throws IOException 
 	 ***********************/
 	private void initComponents() {
 
 		System.setOut(outStream);
-		System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
+		//System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
 
 		manager = new JPanel(){
 			/**
@@ -233,7 +257,7 @@ public class SwingBremo extends JFrame {
 
 		label = new JLabel();
 		percent = 0;
-		path = ".";
+		path = loadPathFromFile();
 		DebuggingMode = false;
 		NrOfFile = 0;
 		NrBremoAlive = 0;
@@ -340,7 +364,7 @@ public class SwingBremo extends JFrame {
 		/************ BUTTON Graphic ************************************/
 		sehen.setIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/see_graphik.png")));
-		sehen.setToolTipText("Ergebnisse betrachten");
+		sehen.setToolTipText("Schauen Sie Ergebniss als Graphik");
 		sehen.addActionListener(new ActionListener() {
 
 			@Override
@@ -349,6 +373,9 @@ public class SwingBremo extends JFrame {
 				if (bremoThreadFertig != null ) {
 					if (bremoThreadFertig [0] != null) {
 					    plotten = new SelectItemToPlotten();
+					}
+					else {
+						SelectItemToPlotten.callBremoView();
 					}
 				} else {
 					SelectItemToPlotten.callBremoView();
@@ -370,7 +397,7 @@ public class SwingBremo extends JFrame {
 				"/bremoswing/bild/doc-icon.png")));
 		docfile.setRolloverIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/doc-icon2.png")));
-		docfile.setToolTipText("InputFile erzeugen/editieren");
+		docfile.setToolTipText("Erzeugen/Editieren InputFile");
 		docfile.addActionListener(new ActionListener() {
 			
 			@Override
@@ -393,7 +420,7 @@ public class SwingBremo extends JFrame {
 //		label.setBackground(new Color(255, 255, 255));
 	
 		gc.fill = GridBagConstraints.NONE;
-		gc.insets = new Insets(5, 10, 0, 100);
+		gc.insets = new Insets(5, 10, 0, 10);
 		gc.weightx = 0.5;
 		gc.gridx = 5;
 		gc.gridy = 0;
@@ -483,7 +510,7 @@ public class SwingBremo extends JFrame {
 		grosArea.setEditable(false);
 		// grosArea.setFont(new Font("comic sans ms", 3, 16)); // NOI18N
 		grosArea.setRows(5);
-		grosArea.setText("Programm läuft... \nWählen Sie ein InputFile und dann einfach die Berechnung ausführen .");
+		grosArea.setText("Programm läuft... \nWählen Sie die Input Datei Und Dann Einfach die Berechnung Ausführen .");
 		grosArea.setMinimumSize(new Dimension(76, 22));
 		grosArea.addKeyListener(new KeyAdapter() {
 			@Override
@@ -623,7 +650,7 @@ public class SwingBremo extends JFrame {
 
 	/** Warning Massage **********/
 	protected void messsage() {
-		new FertigMeldungFrame("Achtung","Berechnung läuf gerade... Warten Sie bis zum Berechnungsende ",JOptionPane.WARNING_MESSAGE);
+		new FertigMeldungFrame("Achtung","Berechnung läuf gerade... Warten Sie bis Ende ",JOptionPane.WARNING_MESSAGE);
 //		JOptionPane.showMessageDialog(this,
 //				"Berechnung läuf gerade... Warten Sie bis Ende ", "Achtung",
 //				JOptionPane.WARNING_MESSAGE);
@@ -634,7 +661,7 @@ public class SwingBremo extends JFrame {
 		grosArea.setText("");
 		kleinArea.setText("");
 		if (textFile.getText().equals("")) {
-			new FertigMeldungFrame("Achtung","Bitte das InputFile überprüfen!!!",JOptionPane.WARNING_MESSAGE);
+			new FertigMeldungFrame("Achtung","Überprüfen Sie Bitte die InputDatei !!!",JOptionPane.WARNING_MESSAGE);
 //			JOptionPane.showMessageDialog(this,
 //					"Überprüfen Sie Bitte die InputDatei !!!", "Achtung",
 //					JOptionPane.WARNING_MESSAGE);
@@ -665,7 +692,7 @@ public class SwingBremo extends JFrame {
 				e1.printStackTrace();
 				ActiveIcon();
 
-				label.setText(" Bitte InputFile neu auswählen ! ");
+				label.setText(" Bitte InputFile Neu Auswählen ! ");
 			} 
 				
 			
@@ -691,7 +718,7 @@ public class SwingBremo extends JFrame {
 
 		fileChooser.addChoosableFileFilter(txtFilter);
 		try {
-			label.setText(" lädt Datei(en) ... ");
+			label.setText(" Datei Werden geladen ... ");
 		
 			int status = fileChooser.showOpenDialog(getRootPane());
 
@@ -699,7 +726,7 @@ public class SwingBremo extends JFrame {
 				if (fileChooser.getSelectedFile() != null) {
 					files = fileChooser.getSelectedFiles();
 					textFile.setText(files[0].getPath());
-					path = files[0].getParent();
+					updatePath(files[0].getParent());
 					bremoThread = new Bremo[files.length];
 					group = new ThreadGroup("BremoFamily");
 					for (int i = 0; i < bremoThread.length; i++) {
@@ -710,18 +737,18 @@ public class SwingBremo extends JFrame {
 					NrBremoAlive = files.length;
 					if (NrOfFile == 1)
 						SetDebbugingMode(true);
-					label.setText("InputFile erfolgreich eingelesen.");
+					label.setText(" Datei mit Erfolg Importiert ! ");
 
 					ActiveConsole();
 				}
 			} else if (status == JFileChooser.CANCEL_OPTION) {
 				
-				label.setText("InputFile-Aufruf abgebrochen!");
+				label.setText(" Import von Datei Unterbrechen ! ");
 
 				fileChooser.cancelSelection();
 			}
 		} catch (Exception e) {
-			label.setText("Es ist ein Fehler aufgetreten!");
+			label.setText(" Fehler aufgetreten ! ");
 			e.printStackTrace();
 		}
 		berechnen.setEnabled(true);
@@ -731,7 +758,7 @@ public class SwingBremo extends JFrame {
 	private void stopPush(ActionEvent e) {
 		if (!control) {
 			JOptionPane.showMessageDialog(this,
-					"Zuerst die Berechnung starten.", "Achtung",
+					"Starten Sie Zu erst die Berechnung.", "Achtung",
 					JOptionPane.WARNING_MESSAGE);
 		} else {
 			errStream.flush();
@@ -750,7 +777,7 @@ public class SwingBremo extends JFrame {
 		wahlFile.setEnabled(true);
 		berechnen.setEnabled(true);
 		stop.setEnabled(false);
-		label.setText("Operation beendet.");
+		label.setText(" Operation beendet. ");
 		progressBar.setValue(0);
 		progressBar.setVisible(false);
 		progressBarInd.setVisible(false);
@@ -804,8 +831,8 @@ public class SwingBremo extends JFrame {
 			
 			if (bremoThreadFertig[0] != null) {
 				
-				label.setText("Die Berechnung ist fertig!");
-				new FertigMeldungFrame("Zustand Berechnung","Die Berechnung ist fertig!!!",JOptionPane.INFORMATION_MESSAGE);
+				label.setText(" Berechnung Fertig ! ");
+				new FertigMeldungFrame("Zustand Berechnung","Die Berechnung ist Fertig !!!",JOptionPane.INFORMATION_MESSAGE);
 //				JOptionPane.showMessageDialog(popup,
 //						"Die Berechnung ist Fertig !!!", "Zustand Berechnung",
 //						JOptionPane.INFORMATION_MESSAGE);
@@ -831,8 +858,9 @@ public class SwingBremo extends JFrame {
 		label.setText("Verlustteilung wird berechnet...");
 	}
 	
-	/**  Schnittstelle für Externe Auswahl der InputFile */
-	public static void ExtAuswahlFile(File [] fileSaver) {
+	/**  Schnittstelle für Externe Auswahl der InputFile 
+	 * @throws IOException */
+	public static void ExtAuswahlFile(File [] fileSaver) throws IOException {
 		grosArea.setText("");
 		kleinArea.setText("");
 		berechnen.setEnabled(false);
@@ -842,7 +870,7 @@ public class SwingBremo extends JFrame {
 		
 		files = fileSaver;
 		textFile.setText(files[0].getPath());
-		path = files[0].getParent();
+		updatePath(files[0].getParent());
 		bremoThread = new Bremo[files.length];
 		group = new ThreadGroup("BremoFamily");
 		for (int i = 0; i < bremoThread.length; i++) {
@@ -853,7 +881,7 @@ public class SwingBremo extends JFrame {
 		NrBremoAlive = files.length;
 		if (NrOfFile == 1)
 			SetDebbugingMode(true);
-		label.setText("Externe Datei mit Erfolg Importiert!");
+		label.setText(" Externe Datei mit Erfolg Importiert ! ");
 		
 	}
 	/************************ place Frame to the center ************************/
@@ -899,6 +927,60 @@ public class SwingBremo extends JFrame {
         	
         }
 	}
+	public static void updatePath(String path) {
+		
+		SwingBremo.path = path;
+		savePathToFile(path);
+	}
+	/**
+	 *  Save the path Variable
+	 * @param path
+	 * @throws IOException 
+	 */
+	public static void savePathToFile(String path)  {
+		File f = new File(".path");
+		BufferedWriter wr;
+		try {
+			wr = new BufferedWriter(new FileWriter(f,false));
+			wr.write(path);
+			wr.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * load the Path Variable
+	 * @return
+	 * @throws IOException
+	 */
+	public static String loadPathFromFile() {
+		File f = new File(".path");
+		BufferedReader br;
+		BufferedWriter wr;
+		String zeile = null;
+		try {
+		if (f.exists()) {
+			br = new BufferedReader(new FileReader(f));
+			if ((zeile = br.readLine()) != null) {
+				br.close();
+			
+			}else {
+				br.close();
+				zeile = ".";
+			}
+		} else {
+			wr = new BufferedWriter(new FileWriter(f,false));
+			wr.write(".");
+			wr.close();
+			zeile = ".";
+		}
+		} catch (IOException e){
+			zeile = ".";
+		}
+		return zeile;
+	}
 
 	/**
 	 * @param args
@@ -912,7 +994,10 @@ public class SwingBremo extends JFrame {
 		 * http://download.oracle.com/javase
 		 * /tutorial/uiswing/lookandfeel/plaf.html
 		 */
-		UIManager.put("nimbusOrange", new Color(28, 138, 224)); // (25,49,187));//Color(110,170,0));
+		UIManager.put("ToolTip.font", new FontUIResource("Tahoma",Font.PLAIN,20));
+		UIManager.put("TitledBorder.font", new FontUIResource("Tahoma",Font.PLAIN,16));
+		UIManager.put("Label.font", new FontUIResource("Tahoma",Font.BOLD,14));
+		UIManager.put("nimbusOrange", new ColorUIResource(28, 138, 224)); // (25,49,187));//Color(110,170,0));
 		try {
 			for (UIManager.LookAndFeelInfo info : UIManager
 					.getInstalledLookAndFeels()) {
@@ -939,11 +1024,47 @@ public class SwingBremo extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 
 			public void run() {
-				new SwingBremo().setVisible(true);
-
+				SwingBremo swingBremo;
+				swingBremo = new SwingBremo();
+				SwingUtilities.updateComponentTreeUI(swingBremo);
+				swingBremo.setVisible(true); 
 			}
 		});
 	}
-	
 
+	/**
+	 * get The revision number of the Project from SVN
+	 * 
+	 * @return
+	 */
+	public static String getRevisionNumber() {
+//		File f = new File("RevisionNumber.xml");
+//		String path_f = "";
+//		if (f.exists()) {
+//			path_f = f.getAbsolutePath();
+//			System.err.println(path_f);
+//		}
+//		Process process;
+//        try {
+//                process = new ProcessBuilder("cmd.exe","/c","ant","-f" ,path_f).start();
+//                process.waitFor();
+//        } catch (Exception e) {
+//                e.printStackTrace();
+//        }
+		File f = new File("svnversion.properties");
+		BufferedReader br;
+		String zeile = "????";
+		try {
+			if (f.exists()) {
+				br = new BufferedReader(new FileReader(f));
+				if ((zeile = br.readLine()) != null) {
+					br.close();
+					zeile = zeile.split(":=")[1];
+				} 
+			}
+		} catch (IOException e) {
+
+		}
+		return zeile;
+	}
 }

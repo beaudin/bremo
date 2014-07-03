@@ -4,6 +4,7 @@
 	<classpathentry kind="lib" path="bibliothek/itext-5.3.2/itextpdf-5.3.2.jar" sourcepath="bibliothek/itext-5.3.2/itextpdf-5.3.2-sources.jar"/>
 	<classpathentry kind="lib" path="bibliothek/jcommon-1.0.18/jcommon-1.0.18.jar" sourcepath="bibliothek/jcommon-1.0.18/source"/>
 	<classpathentry kind="lib" path="bibliothek/jfreechart-1.0.15/jfreechart-1.0.15.jar" sourcepath="bibliothek/jfreechart-1.0.15/source"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="bibliothek/svnkit-1.7.8/svnkit-1.7.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -3,6 +3,7 @@ package bremoswing.graphik;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Observer;
+
 import javax.swing.JOptionPane;
 
 import org.jfree.chart.ChartFactory;
@@ -26,9 +28,12 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.XYShapeRenderer;
+import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.util.ShapeUtilities;
 
 import bremoswing.util.FertigMeldungFrame;
 
@@ -173,7 +178,7 @@ public class BremoViewModel implements Observable {
 
 	}
 
-	public void createChart() throws IOException {
+	public void createChart() {
 		if (ItemStore.get(0) == null && ItemStore.get(1) == null)
 			throw new NullPointerException();
 
@@ -183,26 +188,29 @@ public class BremoViewModel implements Observable {
 		String nbr = dataBremoview[0];
 		String log = dataBremoview[1];
 		String x = dataBremoview[2];
-
-		switch (nbr) {
-		case "1":
-			Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0), log);
-			break;
-		case "2":
-			Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0),
-					dataListFromchooseFrame.get(1), log);
-			break;
-		case "3":
-			Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0),
-					dataListFromchooseFrame.get(1),
-					dataListFromchooseFrame.get(2), log);
-			break;
-		default:
-			Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0),
-					dataListFromchooseFrame.get(1),
-					dataListFromchooseFrame.get(2),
-					dataListFromchooseFrame.get(3), log);
-			break;
+		try {
+			switch (nbr) {
+			case "1":
+				Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0), log);
+				break;
+			case "2":
+				Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0),
+						dataListFromchooseFrame.get(1), log);
+				break;
+			case "3":
+				Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0),
+						dataListFromchooseFrame.get(1),
+						dataListFromchooseFrame.get(2), log);
+				break;
+			default:
+				Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0),
+						dataListFromchooseFrame.get(1),
+						dataListFromchooseFrame.get(2),
+						dataListFromchooseFrame.get(3), log);
+				break;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		notifyObserver(Chart);
@@ -496,11 +504,11 @@ public class BremoViewModel implements Observable {
 		if (axe > 1) {
 			indexItem.add(y_index_2);
 		}
-		//add in the 5.place the index of 2.Jlist of ItemChooseFrame
+		//add in the 5.place the index of 3.Jlist of ItemChooseFrame
 		if (axe > 2) {
 			indexItem.add(y_index_3);
 		}		
-		//add in the 5.place the index of 2.Jlist of ItemChooseFrame
+		//add in the 5.place the index of 4.Jlist of ItemChooseFrame
 		if (axe > 3) {
 			indexItem.add(y_index_4);
 		}
@@ -1574,7 +1582,7 @@ public class BremoViewModel implements Observable {
 			numberaxis0.setLabelFont(new Font("Arial", Font.BOLD, 10));
 			numberaxis0.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
 			numberaxis0.setPositiveArrowVisible(false);
-			XYItemRenderer xyitemrenderer = new XYLineAndShapeRenderer(true , false) {
+			XYLineAndShapeRenderer xyitemrenderer = new XYLineAndShapeRenderer(true , false) {
 				
 				private static final long serialVersionUID = 1L;
 				Stroke stroke = new BasicStroke(2.5f);
@@ -1585,7 +1593,7 @@ public class BremoViewModel implements Observable {
 			};
 			xyitemrenderer.setSeriesPaint(0, Color.red);
 			XYToolTipGenerator generator = new StandardXYToolTipGenerator();
-			xyitemrenderer.setToolTipGenerator(generator);
+			xyitemrenderer.setBaseToolTipGenerator(generator);
 			xyplot.setRenderer(0, xyitemrenderer);
 
 			if (nbr_of_curve > 1) {
@@ -1601,7 +1609,7 @@ public class BremoViewModel implements Observable {
 				xyplot.setDataset(1, data_2);
 				xyplot.setRangeAxis(1, numberaxis1);
 				xyplot.mapDatasetToRangeAxis(1, 1);
-				XYItemRenderer xyitemrenderer1 = new XYLineAndShapeRenderer(true , false) {
+				XYLineAndShapeRenderer xyitemrenderer1 = new XYLineAndShapeRenderer(true , false) {
 					
 					private static final long serialVersionUID = 1L;
 					Stroke stroke = new BasicStroke(2.5f);
@@ -1612,13 +1620,13 @@ public class BremoViewModel implements Observable {
 				};
 				xyitemrenderer1.setSeriesPaint(0, Color.blue);
 				XYToolTipGenerator generator1 = new StandardXYToolTipGenerator();
-				xyitemrenderer1.setToolTipGenerator(generator1);
+				xyitemrenderer1.setBaseToolTipGenerator(generator1);
 				xyplot.setRenderer(1, xyitemrenderer1);
 
 				if (nbr_of_curve > 2) {
 					NumberAxis numberaxis2 = new NumberAxis();
-					numberaxis2.setLabelPaint(Color.cyan);
-					numberaxis2.setTickLabelPaint(Color.cyan);
+					numberaxis2.setLabelPaint(new Color(0,102,0));
+					numberaxis2.setTickLabelPaint(new Color(0,102,0));
 					numberaxis2.setLabelFont(new Font("Arial", Font.PLAIN, 10));
 					numberaxis2.setTickLabelFont(new Font("Arial", Font.PLAIN,
 							10));
@@ -1631,7 +1639,7 @@ public class BremoViewModel implements Observable {
 					xyplot.setRangeAxisLocation(1,
 							org.jfree.chart.axis.AxisLocation.BOTTOM_OR_LEFT);
 					xyplot.mapDatasetToRangeAxis(2, 2);
-					XYItemRenderer xyitemrenderer2 = new XYLineAndShapeRenderer(true , false) {
+					XYLineAndShapeRenderer xyitemrenderer2 = new XYLineAndShapeRenderer(true , false) {
 						
 						private static final long serialVersionUID = 1L;
 						Stroke stroke = new BasicStroke(2.5f);
@@ -1642,7 +1650,7 @@ public class BremoViewModel implements Observable {
 					};
 					xyitemrenderer2.setSeriesPaint(0, Color.cyan);
 					XYToolTipGenerator generator2 = new StandardXYToolTipGenerator();
-					xyitemrenderer2.setToolTipGenerator(generator2);
+					xyitemrenderer2.setBaseToolTipGenerator(generator2);
 					xyplot.setRenderer(2, xyitemrenderer2);
 
 					if (nbr_of_curve > 3) {
@@ -1660,7 +1668,7 @@ public class BremoViewModel implements Observable {
 						xyplot.setDataset(3, data_4);
 						xyplot.setRangeAxis(3, numberaxis3);
 						xyplot.mapDatasetToRangeAxis(3, 3);
-						XYItemRenderer xyitemrenderer3 = new XYLineAndShapeRenderer(true , false) {
+						XYLineAndShapeRenderer xyitemrenderer3 = new XYLineAndShapeRenderer(true , false) {
 							
 							private static final long serialVersionUID = 1L;
 							Stroke stroke = new BasicStroke(2.5f);
@@ -1671,9 +1679,9 @@ public class BremoViewModel implements Observable {
 						};
 						xyitemrenderer3.setSeriesPaint(0, Color.magenta);
 						XYToolTipGenerator generator3 = new StandardXYToolTipGenerator();
-						xyitemrenderer3.setToolTipGenerator(generator3);
+						xyitemrenderer3.setBaseToolTipGenerator(generator3);
 						xyplot.setRenderer(3, xyitemrenderer3);
-
+ 
 					}
 				}
 			}

@@ -4,6 +4,7 @@ public class BremoViewResource {
 
 	String iconKIT ;
 	String iconIFKM;
+	String iconKITBackground;
 	String iconBremoSwing;
 	String iconPaintBremoSwing;
 	String iconPlay;
@@ -18,13 +19,20 @@ public class BremoViewResource {
     String iconQuestion;
     String iconStartChart;
     String iconBackgroungWater;
-    String iconBackgroungWave;
-    
+    String iconBackgroungChart;
+    String iconBackgroungColored;
+    String iconBackgroungColored_1;
+    String iconRefresh;
+    String iconLoader;
+    String iconFavAdd;
+    String iconFavLoad;
     BremoViewResource () {
     	
     	String path = "/bremoswing/bild/";
     	
     	iconKIT = path + "KIT.png";
+    	
+    	iconKITBackground = path + "KIT_Background.jpg";
     	
     	iconIFKM = path + "IFKM.png";
     	
@@ -54,7 +62,19 @@ public class BremoViewResource {
     	
     	iconBackgroungWater = path + "water6.jpg";
     	
-    	iconBackgroungWave = path + "wave2.png";
+    	iconBackgroungChart = path + "chart.png";
+    	
+    	iconBackgroungColored = path + "Spiralling_Light.jpg";
+    	
+    	iconBackgroungColored_1 = path + "bg_body_V2.jpg";
+    	
+    	iconRefresh =path + "refresh.png";
+    	
+    	iconLoader = path + "loader.gif";
+    	
+    	iconFavAdd = path + "fav_add.png";
+    	
+        iconFavLoad = path + "fav_load.png";
     }
 
 	public String getIconKIT() {
@@ -63,6 +83,14 @@ public class BremoViewResource {
 
 	public void setIconKIT(String iconKIT) {
 		this.iconKIT = iconKIT;
+	}
+
+	public String getIconKITBackground() {
+		return iconKITBackground;
+	}
+
+	public void setIconKITBackground(String iconKITBackground) {
+		this.iconKITBackground = iconKITBackground;
 	}
 
 	public String getIconIFKM() {
@@ -185,12 +213,60 @@ public class BremoViewResource {
 		this.iconStartChart = iconStartChart;
 	}
 
-	public String getIconBackgroungWave() {
-		return iconBackgroungWave;
+	public String getIconBackgroungChart() {
+		return iconBackgroungChart;
 	}
 
-	public void setIconBackgroungWave(String iconBackgroungWave) {
-		this.iconBackgroungWave = iconBackgroungWave;
+	public void setIconBackgroungChart(String iconBackgroungChart) {
+		this.iconBackgroungChart = iconBackgroungChart;
+	}
+
+	public String getIconBackgroungColored() {
+		return iconBackgroungColored;
+	}
+
+	public void setIconBackgroungColored(String iconBackgroungColored) {
+		this.iconBackgroungColored = iconBackgroungColored;
+	}
+
+	public String getIconBackgroungColored_1() {
+		return iconBackgroungColored_1;
+	}
+
+	public void setIconBackgroungColored_1(String iconBackgroungColored_1) {
+		this.iconBackgroungColored_1 = iconBackgroungColored_1;
+	}
+
+	public String getIconRefresh() {
+		return iconRefresh;
+	}
+
+	public void setIconRefresh(String iconRefresh) {
+		this.iconRefresh = iconRefresh;
+	}
+
+	public String getIconLoader() {
+		return iconLoader;
+	}
+
+	public void setIconLoader(String iconLoader) {
+		this.iconLoader = iconLoader;
+	}
+
+	public String getIconFavAdd() {
+		return iconFavAdd;
+	}
+
+	public void setIconFavAdd(String iconFavAdd) {
+		this.iconFavAdd = iconFavAdd;
+	}
+
+	public String getIconFavLoad() {
+		return iconFavLoad;
+	}
+
+	public void setIconFavLoad(String iconFavLoad) {
+		this.iconFavLoad = iconFavLoad;
 	}
     
     

@@ -1,5 +1,6 @@
 package bremoswing.graphik;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -53,12 +54,14 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
     
     Font font ;
     BremoView parent;
+    List<List<String>> selectedItemList ;
     private BremoViewResource resource ;
     
     
     public ItemChooseFrame(BremoView parent) {
     	this.parent = parent;
         initComponents();
+        selectedItemList = null;
     }
                         
     private void initComponents() {
@@ -67,7 +70,7 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
 			public void paintComponent(Graphics g) 
             {
               
-				URL url = getClass().getResource(resource.getIconBackgroungWater());
+				URL url = getClass().getResource(resource.getIconBackgroungColored_1());
 				ImageIcon icon = new ImageIcon(url);
 			    Image img = icon.getImage();
 			    BufferedImage buffImage = 
@@ -77,7 +80,8 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
 			    	          BufferedImage.TYPE_INT_ARGB);
 			    Graphics gr = buffImage.getGraphics();
 			    gr.drawImage(img, 0, 0, null);
-			    img = buffImage.getSubimage(475, 50, 1280, 280);
+			    //img = buffImage.getSubimage(475, 50, 1280, 280);
+			    img = buffImage.getSubimage(40, 40, 1280, 280);
 				g.drawImage(img, 0, 0, null);
                 
             } 
@@ -100,11 +104,16 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
         y_achse_3_label = new JLabel();
         y_achse_4_label = new JLabel();
         
-        font = new Font("Tahoma", 0, 14);
+        font = new Font("Tahoma", 1, 14);
         y_achse_1_label.setFont(font);
         y_achse_2_label.setFont(font);
         y_achse_3_label.setFont(font);
         y_achse_4_label.setFont(font);
+        
+        y_achse_1.setSelectionBackground(Color.RED); 
+        y_achse_2.setSelectionBackground(Color.BLUE); 
+        y_achse_3.setSelectionBackground(new Color(0,102,0));  
+        y_achse_4.setSelectionBackground(Color.MAGENTA);  
         
         resource = new BremoViewResource() ;
         
@@ -251,25 +260,22 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		List<List<String>> selectedItemList = new ArrayList<List<String>>();
-		selectedItemList.add(y_achse_1.getSelectedValuesList());
-		if (y_achse_2.isEnabled())
-			selectedItemList.add(y_achse_2.getSelectedValuesList());
-		if (y_achse_3.isEnabled())
-			selectedItemList.add(y_achse_3.getSelectedValuesList());
-		if (y_achse_4.isEnabled())
-			selectedItemList.add(y_achse_4.getSelectedValuesList());
-		
-		
-		
-		parent.controller.chooseFrameData(selectedItemList);
-		parent.controller.hide();
-		try {
-			parent.controller.Chart();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		getChartForBremoView();
 	}
+	 public void getChartForBremoView() {
+		 
+		selectedItemList = new ArrayList<List<String>>();
+			selectedItemList.add(y_achse_1.getSelectedValuesList());
+			if (y_achse_2.isEnabled())
+				selectedItemList.add(y_achse_2.getSelectedValuesList());
+			if (y_achse_3.isEnabled())
+				selectedItemList.add(y_achse_3.getSelectedValuesList());
+			if (y_achse_4.isEnabled())
+				selectedItemList.add(y_achse_4.getSelectedValuesList());
+			
+			parent.controller.chooseFrameData(selectedItemList);
+			parent.controller.hide();
+			parent.controller.Chart();
+	 }
 
 }

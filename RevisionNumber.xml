@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="svnversion" name="SVNVersion">
+      <target name="svnversion">
+        <echo file="svnversion.properties">svnversion:=</echo>
+         <exec executable="svnversion"
+              output="svnversion.properties" append="true">
+         </exec>
+      </target> 
+</project> 

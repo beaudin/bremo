@@ -23,17 +23,12 @@ import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.ThreadGroup;
 import java.net.URL;
-import java.sql.Savepoint;
-
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
@@ -55,22 +50,9 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
 
-import com.sun.xml.internal.ws.api.Component;
-
-import org.tmatesoft.svn.*;
-import org.tmatesoft.svn.core.SVNException;
-import org.tmatesoft.svn.core.SVNURL;
-import org.tmatesoft.svn.core.io.SVNRepository;
-import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
-import org.tmatesoft.svn.core.wc.SVNClientManager;
-import org.tmatesoft.svn.core.wc.SVNStatus;
-
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 import bremo.main.Bremo;
 import bremoswing.graphik.BremoView;
-import bremoswing.graphik.BremoViewController;
 import bremoswing.graphik.BremoViewModel;
-import bremoswing.graphik.ItemChooseFrame;
 import bremoswing.graphik.SelectItemToPlotten;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.SucheBremo;
@@ -1059,7 +1041,7 @@ public class SwingBremo extends JFrame {
 				br = new BufferedReader(new FileReader(f));
 				if ((zeile = br.readLine()) != null) {
 					br.close();
-					zeile = zeile.split(":=")[1];
+					zeile = zeile.split(":")[1].replace("M", "");
 				} 
 			}
 		} catch (IOException e) {

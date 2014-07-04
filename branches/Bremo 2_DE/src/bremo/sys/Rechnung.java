@@ -18,11 +18,15 @@ import bremo.parameter.CasePara;
 public class Rechnung {		
 				
 	private final CasePara CP;
-	private double turbulence = -1; //Turbulenzfaktor negativ initialisiert, muss aber immer positiv sein. Falls nicht verändert wird Fehler abgefangen 
-
-
+	private double turbulence = 0; //Turbulenzfaktor unten (falls Bargende) negativ initialisiert, muss aber immer positiv sein. Falls nicht verändert wird Fehler abgefangen 
+	private boolean bargende=false;
+	
+	
 	public Rechnung(CasePara cp) {		
 		CP=cp;		
+		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
+			bargende=true;
+		}
 	}
 
 
@@ -77,13 +81,19 @@ public class Rechnung {
 				double pIst=Double.NaN;
 				boolean isConverged=false;			 
 				int idx=0;
+				
+				if (bargende){
+					turbulence = -1;
+				}
+				
 				//Erste Rechnung vor der do-while Schleife
 				znTemp=sol.solveRK(zn);					
 				pIst = znTemp[0].get_p();	
 				idx++;
 				//Nach der ersten Rechnung wird der Turbulenzfaktor mit turbulence festgehalten, sonst wird er mit jedem weiteren Rechenschritt hoch gerechnet 
 				//Später soll turbulence den entsprechenden Wert überschreiben (bisher nur für WWÜ Bargende nötig)
-				if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
+//				if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
+				if (bargende){
 					turbulence = CP.TURB_FACTORY.get_TurbulenceModel().get_k(zn, time);
 				}
 				
@@ -99,15 +109,16 @@ public class Rechnung {
 					
 				//Überschreiben von Turbulenzfaktor k (siehe oben) turbulence ist mit -1 initialisiert
 				if (turbulence >= 0) {
+//				if (turbulence >= -1E-12) {
 					CP.TURB_FACTORY.get_TurbulenceModel().set_k(turbulence, 0);
 				//Falls set_k nicht funktioniert oder Schmarrn zurück gegeben wird
 				}else{
-					System.out.println("Vorsicht, negative Turbulenz aufgetreten - sollte nicht passieren!");
+					System.err.println("Vorsicht, negative Turbulenz aufgetreten - sollte nicht passieren!");
 					}
 				}while (isConverged == false && idx<100);
 				
 				if(isConverged==false){
-					System.out.println("mangelnde Konvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
+					System.err.println("mangelnde Konvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
 					((DVA) dglSys).schreibe_DUBUGGING_Ergebnisse("NO_KON_"+
 							CP.get_CaseName()+"_"+CP.convert_SEC2KW(time)+".txt");
 				}

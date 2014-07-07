@@ -1,0 +1,140 @@
+[Bremo::Input::Start]
+Inputfile erstellt am 24.03.2014 um 09:33:17
+Inputfile erstellt an PC Messdatei: 140128_00002.mat
+ifkmpc16
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MOTORPARAMETER %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[Motor: HubKolbenMotor]
+Bohrung	 [m]	 :=	  0.1000 
+Kurbelradius	 [m]	 :=	  0.0415 
+Verdichtung	 [-]	 :=	 10.4
+Pleuellaenge	 [m]	 :=	  0.1490 
+Schraenkung	 [m]	 :=	  0.0000 
+Desachsierung	 [m]	 :=	  0.0000 
+Auslassoeffnet	 [KWnZOT]	 :=	 169.5000 
+Auslassschluss	 [KWnZOT]	 :=	 272.6000 
+Einlassoeffnet	 [KWnZOT]	 :=	 -269.3000 
+Einlassschluss	 [KWnZOT]	 :=	 -153.6000 
+EV_Hub_max	 [m]	 :=	  0.0019 
+EV_Hub	 [m]	 :=	  0.0019 
+Brennraumdachflaeche	 [m^2]	 :=	  0.0105 
+Kolbenflaeche	 [m^2]	 :=	  0.0079 
+Feuersteghoehe	 [m]	 :=	  0.0050 
+Quetschspalthoehe	 [m]	 :=	  0.0013 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% BETRIEBSPARAMETER %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Drehzahl	 [min^-1]	 :=	 2000.5033 
+mLuft_feucht	 [kg/h]	 :=	 12.92
+T_Ladeluft	 [K]	 :=	 313.9651 
+p_Ladeluft	 [Pa]	 :=	 106515.0000 
+T_FeuchteMessung	 [K]	 :=	 297.8599 
+p_FeuchteMessung	 [Pa]	 :=	 105031.6667 
+relative_Luftfeuchte	 [%]	 :=	 35.3773 
+T_Abgas	 [K]	 :=	 587.5295 
+p_Abgas	 [Pa]	 :=	 99360.0000 
+mAGR_extern	 [kg/h]	 :=	  0.0000 
+
+RestgasVorgabe LWA 
+[internesRestgasModell: RestgasVorgabe ]
+mAGR_intern_ASP	 [kg]	 :=	  4.6183378586464846E-4
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MODELLE %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[berechnungsModell: DVA_1Zonig]
+anzahlEinspritzungen	 [-]	 :=	 1 
+
+[einspritzModell_0: simpleDI]
+krst	 [-]	 :=	 RON_95 
+Hu_RON_95	 [MJ/mol]	 :=	 4.235
+InjZone	 [-]	 :=	 0 
+mKrst	 [kg/h]	 :=	  0.5764 
+BOI	 [KWnZOT]	 :=	    -300 
+EOI	 [KWnZOT]	 :=	 -290.2776 
+T_Krst_fluessig	 [K]	 :=	     333 
+vergleichsKrstVerdampfung	 [-]	 :=	 tetradecan 
+
+[Wandwaermemodell: Hans ]
+T_Head	 [K]	 :=	     433 
+T_Cyl	 [K]	 :=	     373
+T_Piston	 [K]	 :=	     433 
+refPunktWoschniHuber	 [KWnZOT]	 :=	     -60 
+
+[Wandwaermemodell_LW: Hans ]
+drallgeschwindigkeit	 [m/s]	 	 0.0 
+
+%%%%% Anpassen %%%%%
+T_Einlassschluss	 [K]	 :=	 773 
+pmi	 [bar]	 :=	 2.0 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% DATEIEN %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+indizierFileName	[-]	:= 	druckverlauf.txt
+spalte_pZyl	[-]	 :=	2
+spalte_pEin	[-]	 :=	3
+spalte_pAbg	[-]	 :=	4
+shift_pEin	[-]	 :=	nein
+shift_pAus	[-]	 :=	nein
+durchflusskennzahlEinFileName	[-]	 :=	Durchflusskennzahl_Ein.txt
+RefDurchmesserEV	[m]	 :=	0.033
+RefFlaecheEinlass	[m^2]	 :=	0.000800
+durchflusskennzahlAusFileName	[-]	 :=	Durchflusskennzahl_Aus.txt
+RefDurchmesserAV	[m]	 :=	0.026
+RefFlaecheAuslass	[m^2]	 :=	0.000500
+spalte_alphaVor	[-]	 :=	2
+spalte_alphaRueck	[-]	 :=	3
+VentilhubEinFileName	[-]	 :=	Ventilhub_EV.txt
+VentilhubAusFileName	[-]	 :=	Ventilhub_AV.txt
+
+burnFileName [-] := brennverlauf.txt
+spalte_dQburn [-] := 2
+p_Ini [Pa] := 125069
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% SYSTEMPARAMETER %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+filtern	 [-]	 :=	 nein
+sgolayOrder	 [-]	 :=	 7
+sgolayHalfWidth	 [-]	 :=	 50
+
+polytropenMethode offset 
+pressureAdjustmentMethod	 [-]	 :=	 offset 
+offset	[Pa]	 :=	 0.1e5
+kappa_Druckabgleich	[-]	 :=	1.356
+KW_Beginn_Druckabgleich	[KWnZOT]	 :=	-100
+KW_Ende_Druckabgleich	[KWnZOT]	 :=	-50
+
+MultiCycle	 [-]	 :=	 nein
+
+[OHC_Solver: Grill ]
+standardBildungsEnthalpien	[-]	 :=	ChemieStandard
+VerbrennungsBeginnAutoDetect	[-]	 :=	ja
+verbrennungsBeginn	[KWnZOT]	 :=	  -60
+arbeitsverfahren	[-]	 :=	4T
+minimaleZonenMasse	[kg]	 :=	2.00E-06
+precissionPressureTraceAnalysis	[bar]	 :=	 0.0005
+polynomKoeffizienten	[-]	 :=	Burcat
+zeit_oder_KW_Basiert	[-]	 :=	KW
+rechnungsSchrittweite	[KW]	 :=	  0.5
+rechnungsBeginn	[KWnZOT]	 :=	-119.00
+rechnungsEnde	[KWnZOT]	 :=	139.00
+relaxFactor	[-]	 :=	  0.6
+gleichGewichtsKonstanten	[-]	 :=	Burcat
+T_freeze	[K]	 :=	 1600
+debuggingMode	[-]	 :=	nein
+debuggingTime	[KWnZOT]	 :=	    8
+
+Verlustteilung [-] := nein
+
+[Bremo::Input::Stop]

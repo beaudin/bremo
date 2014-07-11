@@ -7,6 +7,7 @@ public class BremoViewResource {
 	String iconKITBackground;
 	String iconBremoSwing;
 	String iconPaintBremoSwing;
+	String iconPaintBremoSwingHD;
 	String iconPlay;
 	String iconPlayRollover;
 	String iconChoose;
@@ -23,9 +24,11 @@ public class BremoViewResource {
     String iconBackgroungColored;
     String iconBackgroungColored_1;
     String iconRefresh;
-    String iconLoader;
+    String iconRefreshRollover;
     String iconFavAdd;
     String iconFavLoad;
+    String iconFolder;
+	String iconFolderRollover;
     BremoViewResource () {
     	
     	String path = "/bremoswing/bild/";
@@ -39,6 +42,8 @@ public class BremoViewResource {
     	iconBremoSwing = path + "bremo1.png";
     	
     	iconPaintBremoSwing = path + "Abstract_Frozen_Blue.jpg";
+    	
+    	iconPaintBremoSwingHD = path + "Abstract_Frozen_Blue_hd.jpg";
     	
     	iconPlay = path + "play_blue.png";
     	
@@ -70,11 +75,15 @@ public class BremoViewResource {
     	
     	iconRefresh =path + "refresh.png";
     	
-    	iconLoader = path + "loader.gif";
+    	iconRefreshRollover = path + "refresh_inv.png";
     	
     	iconFavAdd = path + "fav_add.png";
     	
         iconFavLoad = path + "fav_load.png";
+        
+        iconFolder =  path + "folder-yellow_1.png";
+        
+    	iconFolderRollover = path + "folder-yellow_2.png";
     }
 
 	public String getIconKIT() {
@@ -115,6 +124,14 @@ public class BremoViewResource {
 
 	public void setIconPaintBremoSwing(String iconPaintBremoSwing) {
 		this.iconPaintBremoSwing = iconPaintBremoSwing;
+	}
+
+	public String getIconPaintBremoSwingHD() {
+		return iconPaintBremoSwingHD;
+	}
+
+	public void setIconPaintBremoSwingHD(String iconPaintBremoSwingHD) {
+		this.iconPaintBremoSwingHD = iconPaintBremoSwingHD;
 	}
 
 	public String getIconPlay() {
@@ -245,12 +262,12 @@ public class BremoViewResource {
 		this.iconRefresh = iconRefresh;
 	}
 
-	public String getIconLoader() {
-		return iconLoader;
+	public String getIconRefreshRollover() {
+		return iconRefreshRollover;
 	}
 
-	public void setIconLoader(String iconLoader) {
-		this.iconLoader = iconLoader;
+	public void setIconRefreshRollover(String iconRefreshRollover) {
+		this.iconRefreshRollover = iconRefreshRollover;
 	}
 
 	public String getIconFavAdd() {
@@ -267,6 +284,22 @@ public class BremoViewResource {
 
 	public void setIconFavLoad(String iconFavLoad) {
 		this.iconFavLoad = iconFavLoad;
+	}
+
+	public String getIconFolder() {
+		return iconFolder;
+	}
+
+	public void setIconFolder(String iconFolder) {
+		this.iconFolder = iconFolder;
+	}
+
+	public String getIconFolderRollover() {
+		return iconFolderRollover;
+	}
+
+	public void setIconFolderRollover(String iconFolderRollover) {
+		this.iconFolderRollover = iconFolderRollover;
 	}
     
     

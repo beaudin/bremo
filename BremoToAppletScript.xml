@@ -33,6 +33,7 @@
 			<src path="src" />
 			<classpath refid="Bremo.classpath" />
 		</javac>
+		<antcall target="SVN_version" />
 		<antcall target="-post-jar" />
 	</target>
 	<target
@@ -66,6 +67,7 @@
 
 		<jar destfile="dist/Bremo.jar">
 			<fileset dir="bin" excludes="InputFiles/**/" />
+			<fileset file = "svnversion.properties"/>
 		</jar>
 
 		<delete file="${keystoreFileName}" failonerror="false" />
@@ -94,5 +96,12 @@
 		</signjar>
 
 		<copy file="dist/BremoApplet.html" todir="Applet" />
-	</target>
+   	</target>
+	
+	<target name="SVN_version">
+		        <echo file="src/bremoswing/properties/bremo.svnversion">svnversion=</echo>
+		         <exec executable="svnversion"
+		         	output="src/bremoswing/properties/bremo.svnversion" append="true">
+		         </exec>
+	</target> 
 </project>

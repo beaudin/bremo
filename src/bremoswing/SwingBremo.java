@@ -69,8 +69,8 @@ import bremoswing.util.FertigMeldungFrame;
  */
 public class SwingBremo extends JFrame {
 	
-    public static String  RevisionNumber = getRevisionNumber();
-	private static final String title = "Bremo 2.0 rev "+ RevisionNumber + " Beta" ;
+    public  String  RevisionNumber = getRevisionNumber();
+	private final String title = "Bremo 2.0 rev "+ RevisionNumber + " Beta" ;
 	
 	private static final long serialVersionUID = 1L;
 	public static boolean ConsloseModeActive = false;
@@ -920,7 +920,7 @@ public class SwingBremo extends JFrame {
 	 * @throws IOException 
 	 */
 	public static void savePathToFile(String path)  {
-		File f = new File(".path");
+		File f = new File("bremo.path");
 		BufferedWriter wr;
 		try {
 			wr = new BufferedWriter(new FileWriter(f,false));
@@ -938,7 +938,7 @@ public class SwingBremo extends JFrame {
 	 * @throws IOException
 	 */
 	public static String loadPathFromFile() {
-		File f = new File(".path");
+		File f = new File("bremo.path");
 		BufferedReader br;
 		BufferedWriter wr;
 		String zeile = null;
@@ -1019,7 +1019,7 @@ public class SwingBremo extends JFrame {
 	 * 
 	 * @return
 	 */
-	public static String getRevisionNumber() {
+	public String getRevisionNumber() {
 //		File f = new File("RevisionNumber.xml");
 //		String path_f = "";
 //		if (f.exists()) {
@@ -1033,7 +1033,8 @@ public class SwingBremo extends JFrame {
 //        } catch (Exception e) {
 //                e.printStackTrace();
 //        }
-		File f = new File("svnversion.properties");
+		URL url = getClass().getResource("properties/bremo.svnversion");
+		File f = new File(url.toString());
 		BufferedReader br;
 		String zeile = "????";
 		try {

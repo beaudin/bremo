@@ -1,6 +1,7 @@
 package bremoswing.graphik;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -27,6 +28,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+
 import org.jfree.chart.ChartPanel;
 
 import bremoswing.SwingBremo;
@@ -108,6 +110,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 		
 		
 		TitelPanel   = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,20,50);
+		//TitelPanel   = new ImageBackgroundJPanel(resource.iconPaintBremoSwingHD,300,310);
     	GraphikPanel = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,100,100);
     	TabellePanel = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,300,50);
     	GroupPanel   = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,20,70);
@@ -244,7 +247,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         /** Size and Border of All Panel of the Frame************************************/
         
         TitelPanel.setPreferredSize(new Dimension(1280,50));
-        //TitelPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        //TitelPanel.setBorder(BorderFactory.createTitledBorder(""));
         GraphikPanel.setPreferredSize(new Dimension (1010,675));
         GraphikPanel.setBorder(BorderFactory.createTitledBorder(""));
         TabellePanel.setPreferredSize(new Dimension(270,675));
@@ -309,11 +312,11 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
       openFileButton.setToolTipText("Open a file to plot the Graphic.");
       refreshButton.setToolTipText("Refresh the Chart.");
       
-      openFileButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconChoose()))); 
-	  openFileButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconChooseRollover())));
+      openFileButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconFolder()))); 
+	  openFileButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconFolderRollover())));
       
       refreshButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconRefresh()))); 
-	  refreshButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconLoader())));
+	  refreshButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconRefreshRollover())));
 		
       
       virtualPanel.add(openFileButton);
@@ -716,6 +719,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 		case "l_favs_3":
 			controller.loadfavs(3);
 			break;
+			
 		case "l_favs_4":
 			controller.loadfavs(4);
 			break;

@@ -5,6 +5,5 @@
 	<classpathentry kind="lib" path="bibliothek/jcommon-1.0.18/jcommon-1.0.18.jar" sourcepath="bibliothek/jcommon-1.0.18/source"/>
 	<classpathentry kind="lib" path="bibliothek/jfreechart-1.0.15/jfreechart-1.0.15.jar" sourcepath="bibliothek/jfreechart-1.0.15/source"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Programme/Java/jre7/lib/jfxrt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

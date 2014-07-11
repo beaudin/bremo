@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SVN task to get Revision Number and log file for the Bremo Project -->
+<!-- Autor : Ngueneko Steve                                             -->
+	
+<project basedir="."  default="SVN_log" name="BremoSVN">
+
+	<!-- Setup  SvnAnt -->
+	<path id="svnant.path">
+	        <fileset dir="bibliothek/svnant-1.3.1/">
+	            <include name="**/*.jar"/>
+	        </fileset>
+	    </path>
+	
+	<!-- Load SvnAnt -->
+		    <typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svnant.path" />  
+	
+	<!-- Set svnSetting -->
+	<svnSetting  id="svn.settings"
+		         svnkit="false"
+		         javahl="false"
+		    	 username="${svn.username}"
+		    	 password="${svn.password}"/>
+
+   <target name="SVN_revision" description="get the HEAD revison">	 
+	        
+	    <svn refid="svn.settings" >
+	    	<info target="${basedir}" />
+	    </svn>
+   	
+	
+	    <!-- Display svn revision number -->
+	    <echo>Last Revision = ${svn.info.lastRev} by ${svn.info.author} on ${svn.info.lastDate} </echo>
+   	    <antcall target="SVN_log"/>
+	</target>
+	
+	<target name="SVN_log" description="get Log information">	 
+		   
+		    <svn refid="svn.settings" >
+		    	<log path="${basedir}" destfile="bremo.log" asxml="false" />
+		    </svn>
+	        <antcall target="SVN_version"/>
+	</target>
+	
+	<target name="SVN_version">
+	        <echo file="src/bremoswing/properties/bremo.svnversion">svnversion=</echo>
+	         <exec executable="svnversion"
+	         	output="src/bremoswing/properties/bremo.svnversion" append="true">
+	         </exec>
+	</target> 
+	
+	
+</project>

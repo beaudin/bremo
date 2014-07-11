@@ -1745,7 +1745,7 @@ public class BremoViewModel implements Observable {
 	 */
 	public boolean checkFavsfile() {
 
-		File f = new File(file.getParent() + "/FAVS_6.txt");
+		File f = new File(file.getParent() + "/FAVS_1.txt");
 		if (f.exists()) {
 			favsFile = f;
 			return true;

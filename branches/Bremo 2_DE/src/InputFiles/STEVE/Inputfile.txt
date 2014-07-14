@@ -71,7 +71,8 @@ T_Ladeluft	[K]	:=	328.919
 				
 T_Abgas	[K]	:=	511.75	
 				
-p_Ladeluft	[Pa]	:=	98500
+p_Ladeluft	[Pa]	:=	94970	
+98500
 94970	
 p_Abgas	[Pa]	:=	100615	
 				

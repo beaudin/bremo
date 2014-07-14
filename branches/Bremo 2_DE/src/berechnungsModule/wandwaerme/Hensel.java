@@ -49,6 +49,7 @@ public class Hensel extends WandWaermeUebergang {
 	    xCO2_Ex = 1;
 	}
 
+	//@Override
 	public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN,double fortschritt) {
 		// Ansatz wie bei Bargende: 
 		// 4 Terme: alpha = C * d^(m-1) * lambda * (w*rho/eta)^m * Verbr.term

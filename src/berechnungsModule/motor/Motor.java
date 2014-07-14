@@ -11,7 +11,7 @@ public abstract class Motor  {
 	protected Motor(CasePara cp){
 		CP=cp;		
 	}
-
+		
 	public abstract double get_V(double time); 
 	public abstract double get_dV(double time);
 	/**
@@ -45,4 +45,11 @@ public abstract class Motor  {
 		// TODO mittels diffquotienten checken ob das ergebnis stimmt
 		return dKW*(CP.get_DrehzahlInUproSec()*360)*(CP.get_DrehzahlInUproSec()*360);	
 	}	
+	
+	
+	//////Kerrom////////////////////
+	public double get_OT_Versatz() {
+		return 0;
+	}
+	////////////////////////////////
 }

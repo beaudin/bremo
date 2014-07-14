@@ -87,7 +87,7 @@ public class Verlustteilung {
 //		time=x0+k*CP.SYS.WRITE_INTERVAL_SEC;
 		//
 		//Versatz zwischen -360 und Rechnungsbeginn
-		int versatz = (int)((360+CP.SYS.RECHNUNGS_BEGINN_DVA_KW)/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC));
+		int versatz = (int)Math.round((360+CP.SYS.RECHNUNGS_BEGINN_DVA_KW)/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)); //Kerrom: Math.round() hinzugefügt
 		//Anzahl Werte von -360 bis 360
 		int anz = (int)(CP.SYS.DAUER_ASP_KW/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC));
 
@@ -134,17 +134,23 @@ public class Verlustteilung {
 		
 		for (int k = 0; k <pMit.length; k++) {
 			pGesamt [k+versatz]= pMit[k]; //[Pa]
-			}		
+			}	
+		
+		////////////////////Kerrom//////////////////////////////
+		// Orte im Array
+		int UTvorZOTimArray =(int)Math.round(180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC));
+		int UTnachZOTimArray = (int)Math.round(540/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC));
+		/////////////////////////////////////////////////////////////////////////////////////////////
 		
 		//ideale Ladungswechselverluste FALL 1g
 		i+=1;
 		
-		for (int k = 0; k < 180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC); k++) {
-//			pGesamt [k]= CP.get_p_LadeLuft();
-			pGesamt [k]= pGesamt [(int)(180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC))];
+		for (int k = 0; k < UTvorZOTimArray; k++) {	//Kerrom: 180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC) durch UTvorZOTimArray ersetzt
+			pGesamt [k]= CP.get_p_LadeLuft();
+//			pGesamt [k]= pGesamt [UTvorZOTimArray]; //Kerrom: (int)(180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)) durch UTvorZOTimArray ersetzt
 			}
 		
-		for (int k = (int)(540/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)) ; k < pGesamt.length; k++) {
+		for (int k = UTnachZOTimArray ; k < pGesamt.length; k++) { //Kerrom: (int)(540/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)) durch UTnachZOTimArray ersetzt
 			pGesamt [k]= CP.get_p_Abgas();
 			}
 			
@@ -156,15 +162,16 @@ public class Verlustteilung {
 		etaLWAideal = pmi2eta(pmiLWAideal);
 		System.err.println("Verlustteilung FALL 1g: Ladungswechselverluste, ideal");
 		
+		
 		//Ladungswechselschleife löschen
-		for (int k = 0; k < 180/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC); k++) {
+		for (int k = 0; k < UTvorZOTimArray; k++) { //Kerrom: UTvorZOTimArray (s.o)
 			pGesamt [k]= 0;
 			}
 		
-		for (int k = (int)(540/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC)) ; k < pGesamt.length; k++) {
+		for (int k = UTnachZOTimArray ; k < pGesamt.length; k++) { //Kerrom: s.o
 			pGesamt [k]= 0;
 			}
-		//
+		
 		
 		//Mit Wandwärmeverlust FALL 1f
 		i+=1;		
@@ -311,8 +318,54 @@ public class Verlustteilung {
 		System.err.println("Verlustteilung FALL 1b: Punktuelle Wärmefreisetzung in OT, adiabat");
 		
 		//Idealer Gleichraumprozess FALL 1a
-		
 		//TODO: hier noch Verlauf berechnen mit kappa = 1.4 = const.
+		
+		////////////////////////Kerrom////////////////////////////////////////////////////////	
+		double OT_Versatz = motor.get_OT_Versatz(); //[KWnZOT]
+		
+		// Orte im Array pGesamt -> "Indizes" des Druckarrays
+		int OTimArray = (int)Math.round((360+OT_Versatz)/CP.convert_ProKW_2_ProSEC(CP.SYS.WRITE_INTERVAL_SEC));
+		int anfangExpansionImArray = OTimArray + 1;
+		
+		// Berechnungszeitpunkte
+		double t_UTvorZOT = CP.convert_KW2SEC(-180); //Beginn der Kompression bei -180 KW
+		double t_OT = CP.convert_KW2SEC(0+OT_Versatz); //Ende der Kompression bei 0 KW (bzw. OT-Versatz)
+		double t_anfangExpansion = t_OT + CP.SYS.WRITE_INTERVAL_SEC; //Ende der Wärmezufuhr=Beginn der Expansion (Wärme wird in einem Zeitschritt zugeführt)
+						
+		// polytrope Kompression
+		//Startzustand (Zustand 1) bei UTvorZOT
+		double p_anfangKompression = indi.get_pZyl(t_UTvorZOT); //Druck aus Indizierdaten
+		double v_anfangKompression = motor.get_V(t_UTvorZOT);  //Volumen V
+		
+		berechnePolytropeZustandsaenderung(pGesamt, UTvorZOTimArray, OTimArray, t_UTvorZOT, v_anfangKompression, p_anfangKompression); 
+		
+		// Wärmezufuhr
+		double R = 287.1; // [J/(kg K)]
+		double cv =R/(kappa-1); // [J/(kg K)]
+		double v_endeKompression = motor.get_V(t_OT);
+		
+		double pMaxGleichraum = berechneDruckNachWaermezufuhr(R, Qmax, cv, pGesamt[OTimArray], v_endeKompression);
+			
+		// polytrope Expansion
+		berechnePolytropeZustandsaenderung(pGesamt, (anfangExpansionImArray-1), UTnachZOTimArray-1, t_anfangExpansion, v_endeKompression, 
+											pMaxGleichraum);
+											// UTnachZOTimArray-1, weil der Wert bei "ende" noch berechnet wird
+											// anfangExpansion-1, damit Druck- und Volumenspur übereinstimmen. 
+											// Der max. Druck taucht nicht in der Druckspur auf
+											// (Druck nach Wärmezufuhr im Array = erster expandierter Wert, damit Druck- u. Volumenspur im Folgenden zusammenpassen)
+				
+		// Druckverlauf in Ausgabedatei schreiben
+		i += 1; //Spalte
+		for (int k = 0; k < pGesamt.length; k++) { 
+			Ergebnis.buffer_EinzelErgebnis("p_Gleichraumprozess [bar] ", pGesamt[k] / 1e5, i);
+		}
+		
+		//Wirkungsgrad des eben berechneten Gleichraumprozesses
+		double pmiGleichraum = LittleHelpers.berechnePmi (CP, pGesamt);
+		double etaGleichraum = pmi2eta(pmiGleichraum);
+		
+		//Wirkungsgrad des idealen Gleichraumprozesses abhängig von epsilon
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////
 		double pmiIdeal = berechnePmiIdeal();
 		double etaIdeal = berechneEtaIdeal();
 		System.err.println("Verlustteilung FALL 1a: Idealer Gleichraumprozess");
@@ -532,15 +585,54 @@ public class Verlustteilung {
 		//////////////////
 		//Ausgabebereich//
 		//////////////////
+		
+		
+		///////////Kerrom//////////////////////////////////
+		//Ausgabe von pMaxGleichraum in eigene Datei
+		String [] headerPmaxGleichraum = {"Kurbelwinkel [°KW]","Zeit [s n. Rechenbeginn]","Brennraumvolumen [m3]","pMax Gleichraumprozess [bar]"};
+		double [] pMaxGleichraumArray = {Math.round(CP.convert_SEC2KW(t_OT)*10)/10.0,t_anfangExpansion, motor.get_V(t_anfangExpansion),pMaxGleichraum/1e5};
+		FileWriter_txt txtFilePmax = new FileWriter_txt(CP.get_workingDirectory()+"Verlustteilung-pMaxGleichraum_"+CP.get_CaseName()+".txt");
+		txtFilePmax.writeTextLineToFile(headerPmaxGleichraum, false);
+		txtFilePmax.writeLineToFile(pMaxGleichraumArray, true);
+		
+		// Ausgabe in Fenster
+		System.err.println("\n"+"Verlustteilung_Post_Ergebnisse:");
+		System.err.println("====================================");
+		System.err.println("pMax_Gleichraumprozess = " + pMaxGleichraum/1e5 + " [bar]\n");
+		System.err.println("pmi_Ideal = " + pmiIdeal*1e-5 + " [bar]\n" +
+							"pmi_Real = " + pmiReal*1e-5 + " [bar]\n" +
+							"pmi_Verbrennungslage = " + pmiVerbrennungslage*1e-5 + " [bar]\n" +
+							"pmi_HCCO = " + pmiHCCO*1e-5 + " [bar]\n" +
+							"pmi_Brennverlauf = "+ pmiBrennverlauf*1e-5+ " [bar]\n"+
+							"pmi_Wandwärmeverlust = "+pmiMit*1e-5+ " [bar]\n" +
+							"pmi_LWAideal = " +pmiLWAideal*1e-5+ " [bar]\n" +
+							"pmi_LWA_Original = " + pmiOriginal*1e-5 + " [bar]\n" +
+							"pmi_Reibung = " + pme*1e-5 + " [bar]\n" +
+							"pmi_Gleichraumprozess = " + pmiGleichraum*1e-5 +" [bar]\n");
+		System.err.println("Wirkungsgrade:\n" + 
+							"eta_Ideal = " +etaIdeal + " [-]\n" + 
+							"eta_Real = " + etaReal + " [-]\n" +
+							"eta_Verbrennungslage = " + etaVerbrennungslage + " [-]\n" +
+							"eta_HCCO = " + etaHCCO + " [-]\n" +
+							"eta_Brennverlauf = " + etaBrennverlauf + " [-]\n" +
+							"eta_Wandwärmeverlust = " + etaMit +" [-]\n" +
+							"eta_Original = " + etaOriginal+ " [-]\n" +
+							"eta_LWAideal = " + etaLWAideal + " [-]\n" +
+							"eta_Reibung = " + etaMech + " [-]\n" +
+							"eta_Gleichraumprozess =  " + etaGleichraum + " [-]");
+		/////////////////////////////////////////////////////////////////////////////////////////
+		
+		
+		
 //		double[] pmi = {Double.NaN,Double.NaN,pmiIdeal*1e-5,pmiReal*1e-5,pmiVerbrennungslage*1e-5, pmiHCCO*1e-5,pmiBrennverlauf*1e-5,pmiMit*1e-5,pmiLWAideal*1e-5,pmiOriginal*1e-5,pmiLWArealGem*1e-5,pmiLWA*1e-5,pmr*1e-5};
 //		String [] headerPmi = {"pmi-Werte [bar]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","LWArealGemittelt","LWA real","Reibmitteldruck"};
-		double[] pmi = {Double.NaN,Double.NaN,pmiIdeal*1e-5,pmiReal*1e-5,pmiVerbrennungslage*1e-5, pmiHCCO*1e-5,pmiBrennverlauf*1e-5,pmiMit*1e-5,pmiLWAideal*1e-5,pmiOriginal*1e-5,pme*1e-5};
-		String [] headerPmi = {"pmi-Werte [bar]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","Reibung"};
+		double[] pmi = {Double.NaN,Double.NaN,pmiIdeal*1e-5,pmiReal*1e-5,pmiVerbrennungslage*1e-5, pmiHCCO*1e-5,pmiBrennverlauf*1e-5,pmiMit*1e-5,pmiLWAideal*1e-5,pmiOriginal*1e-5,pme*1e-5,pmiGleichraum*1e-5};
+		String [] headerPmi = {"pmi-Werte [bar]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","Reibung","Gleichraumprozess"};
 	
 //		double[] eta = {Double.NaN,Double.NaN,etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaLWAideal,etaLWArealGem,etaLWA,etaMech};
 //		String [] headerEta = {"Wirkungsgrade [%]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWArealGemittelt","LWA real","Mechanischer Wirkungsgrad"};
-		double[] eta = {Double.NaN,Double.NaN,etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaOriginal,etaLWAideal,etaMech};
-		String [] headerEta = {"Wirkungsgrade [%]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","Reibung"};
+		double[] eta = {Double.NaN,Double.NaN,etaIdeal,etaReal,etaVerbrennungslage,etaHCCO,etaBrennverlauf,etaMit,etaOriginal,etaLWAideal,etaMech, etaGleichraum};
+		String [] headerEta = {"Wirkungsgrade [%]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","Reibung","Gleichraumprozess"};
 		
 		//String name="Verlustteilung-Verläufe_"+CP.get_CaseName()+".txt";
 		Ergebnis.schreibeErgebnisFile("Verlustteilung-APR-Verlauf_"+CP.get_CaseName()+".txt");
@@ -577,10 +669,7 @@ public class Verlustteilung {
 //		txtFile.writeLineToFile (pmi, true);
 		txtFile.writeMatrixToFile(matrix, true);
 	
-*/		
-		
-		
-		
+*/	
 
 	}
 
@@ -818,5 +907,43 @@ private int sucheOT(double Vmin){
 		}
 	  return -1;
 	}
+
+
+
+	/////////////////////////Kerrom///////////////////////////////////////
+	/**
+	 * @param pGesamt Druckarray
+	 * @param anfang Ort im Druckarray (Anfangszustand)
+	 * @param ende Ort im Druckarray (Endzustand)
+	 * @param t_anfang Zeit (Anfangszustand) [s]
+	 * @param v_anfang Volumen (Anfangszustand) [m^3]
+	 * @param p_anfang Druck (Anfangszustand) [Pa]
+	 * berechnet werden die Werte von "anfang+1" bis einschließlich "ende"
+		}
+	 */
+	private void berechnePolytropeZustandsaenderung(double[] pGesamt, int anfang, int ende, double t_anfang, 
+			double v_anfang, double p_anfang) {
+		
+		for (int i = anfang; i < ende; i++) { 
+			double zeitpunkt = t_anfang + (i - anfang)* CP.SYS.WRITE_INTERVAL_SEC;
+			double volumen = motor.get_V(zeitpunkt);
+			pGesamt[i+1] = p_anfang * Math.pow(v_anfang / volumen, kappa); 
+		}
+	}
+
+	/**
+	 * idealer Gleichraumprozess:
+	 * @param R Gaskonstante [J/(kgK)]
+	 * @param qzu (Qzu) Wärmezufuhr [J]
+	 * @param cv isochore Wärmekapazität [J/(kgK)]
+	 * @param pAnfang Druck Anfangszustand [Pa]
+	 * @param vAnfang Volumen Anfangszustand [m^3]
+	 * @return Druck nach Wärmezufuhr [Pa]
+	 */
+	private double berechneDruckNachWaermezufuhr(double R, double qzu,
+			double cv, double pAnfang, double vAnfang) {
+		return qzu * R / (cv * vAnfang) + pAnfang;
+	}
+	///////////////////////////////////////////////////////////////////////////////////
 
 }

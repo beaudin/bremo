@@ -26,9 +26,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.ThreadGroup;
 import java.net.URL;
+
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
@@ -909,6 +911,9 @@ public class SwingBremo extends JFrame {
         	
         }
 	}
+	/**
+	 * Update the Path Variable
+	 */
 	public static void updatePath(String path) {
 		
 		SwingBremo.path = path;
@@ -963,6 +968,32 @@ public class SwingBremo extends JFrame {
 		}
 		return zeile;
 	}
+	/**
+	 * get The revision number of the Project from SVN
+	 * @return   
+	 *           Revision as String
+	 */
+	public String getRevisionNumber() {
+
+		BufferedReader br;
+		String zeile = "???";
+		try {
+			URL url = getClass().getResource("/bremoswing/properties/bremo.svnversion");
+			br = new BufferedReader(new InputStreamReader(url.openStream()));
+			if ((zeile = br.readLine()) != null) {
+				br.close();
+				zeile = zeile.split("=")[1];
+				if (zeile.contains(":")) {
+					zeile = zeile.split(":")[1];
+				}
+				zeile = zeile.replace("M", "");
+			}
+
+		} catch (IOException e) {
+                 e.printStackTrace();
+		}
+		return zeile;
+	}
 
 	/**
 	 * @param args
@@ -1012,42 +1043,5 @@ public class SwingBremo extends JFrame {
 				swingBremo.setVisible(true); 
 			}
 		});
-	}
-
-	/**
-	 * get The revision number of the Project from SVN
-	 * 
-	 * @return
-	 */
-	public String getRevisionNumber() {
-//		File f = new File("RevisionNumber.xml");
-//		String path_f = "";
-//		if (f.exists()) {
-//			path_f = f.getAbsolutePath();
-//			System.err.println(path_f);
-//		}
-//		Process process;
-//        try {
-//                process = new ProcessBuilder("cmd.exe","/c","ant","-f" ,path_f).start();
-//                process.waitFor();
-//        } catch (Exception e) {
-//                e.printStackTrace();
-//        }
-		URL url = getClass().getResource("properties/bremo.svnversion");
-		File f = new File(url.toString());
-		BufferedReader br;
-		String zeile = "????";
-		try {
-			if (f.exists()) {
-				br = new BufferedReader(new FileReader(f));
-				if ((zeile = br.readLine()) != null) {
-					br.close();
-					zeile = zeile.split(":")[1].replace("M", "");
-				} 
-			}
-		} catch (IOException e) {
-
-		}
-		return zeile;
 	}
 }

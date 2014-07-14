@@ -67,7 +67,6 @@
 
 		<jar destfile="dist/Bremo.jar">
 			<fileset dir="bin" excludes="InputFiles/**/" />
-			<fileset file = "svnversion.properties"/>
 		</jar>
 
 		<delete file="${keystoreFileName}" failonerror="false" />

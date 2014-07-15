@@ -38,6 +38,7 @@ public class APR_homogen_EinZonig extends APR{
 	private MasterEinspritzung masterEinspritzung;
 	private BlowBy blowbyModell;
 	private TurbulenceModel turb; //für Bargende
+	private IndizierDaten indiD;
 	
 	private final int ANZAHL_ZONEN;
 	
@@ -167,10 +168,11 @@ public class APR_homogen_EinZonig extends APR{
 //		}
 ////ENDE Urspruengliche Abfrage für Initialdruck		
 		if(cp.compareToExp()){
-			IndizierDaten indiD = new IndizierDaten(cp);
+			indiD = new IndizierDaten(cp);
 			p_init= indiD.get_pZyl(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC);
 		}
 		else{
+			indiD = null;
 			p_init = cp.get_p_ini();
 		}
 		
@@ -402,6 +404,14 @@ public class APR_homogen_EinZonig extends APR{
 
 		i+=1;
 		super.buffer_EinzelErgebnis("p [bar]",zn[0].get_p()*1e-5,i);
+		
+		i+=1;
+		if(CP.compareToExp()){
+			double pExp = indiD.get_pZyl(time);
+			super.buffer_EinzelErgebnis("p_Exp [bar]", pExp, i);
+		} else {
+			super.buffer_EinzelErgebnis("p_Exp [bar]", 0, i);
+		}
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("dQh [J/s]",dQburn-dQw,i);

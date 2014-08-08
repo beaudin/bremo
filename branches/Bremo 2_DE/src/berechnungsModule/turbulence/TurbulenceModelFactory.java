@@ -8,7 +8,7 @@ import bremoExceptions.BirdBrainedProgrammerException;
 public class TurbulenceModelFactory extends ModulFabrik {
 	
 	public static final String MODEL_FLAG="turbModel";
-	public static final  String[] TURBLMODELS={"FromFile" , "k", "k-eps"};
+	public static final  String[] TURBLMODELS={"FromFile" , "k", "k-eps", "ohne"};
 	private TurbulenceModel turbModel=null;
 	
 	public TurbulenceModelFactory(CasePara cp, MakeMeUnique mmu) {
@@ -24,7 +24,8 @@ public class TurbulenceModelFactory extends ModulFabrik {
 			turbModel=new Turbulence_k(super.CP);
 		else if(modelFlagInput.equals("k-eps"))
 			turbModel=new Turbulence_k_eps(super.CP); //für Bargende
-			//turbModel=null;
+		else if(modelFlagInput.equals("ohne"))
+			turbModel=new Turbulence_Zero(super.CP);
 		else{
 			try {
 				throw new BirdBrainedProgrammerException(

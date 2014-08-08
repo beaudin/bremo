@@ -223,7 +223,7 @@ public class CasePara {
 			s=this.set_StringPara(INPUTFILE_PARAMETER, "compareToExp",s2);
 		} catch (ParameterFileWrongInputException e){	
 			compareToExp=false;
-			e.log_Warning("Bei der APR wird kein Vergleich mit einem Experiment durchgeführt. "
+			e.log_Warning("Bei der APR wird kein Vergleich mit einem Experiment (\"compareToExp\") durchgeführt. "
 					+ "Es müssen keine Indizierdaten vorgegeben werden. "
 					+ "Dafür sind alle Daten zur Initialisierung von Hand vorzugeben.");
 			s="nein";

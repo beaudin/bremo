@@ -19,7 +19,7 @@ public class MotorFabrik extends ModulFabrik {
 		if(motorVorgabe.equals("HubKolbenMotor"))
 			MOTOR=new Motor_HubKolbenMotor(cp) ;
 		else if(motorVorgabe.equals("ausDatei"))
-			MOTOR=null;
+			MOTOR=new Motor_VolumenFunktionAusDatei(cp);
 		else if(motorVorgabe.equals("DruckKammer"))
 			MOTOR=new Motor_DruckKammer(cp);
 		else{

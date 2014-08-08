@@ -991,6 +991,8 @@ public class SwingBremo extends JFrame {
 
                 } catch (IOException e) {
                  e.printStackTrace();
+                } catch (ArrayIndexOutOfBoundsException e) {
+                	
                 }
                 return zeile;
         }

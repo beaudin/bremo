@@ -407,7 +407,7 @@ public class APR_homogen_EinZonig extends APR{
 		
 		i+=1;
 		if(CP.compareToExp()){
-			double pExp = indiD.get_pZyl(time);
+			double pExp = indiD.get_pZyl(time) * 1e-5;
 			super.buffer_EinzelErgebnis("p_Exp [bar]", pExp, i);
 		} else {
 			super.buffer_EinzelErgebnis("p_Exp [bar]", 0, i);

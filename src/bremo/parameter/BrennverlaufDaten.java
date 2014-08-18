@@ -56,39 +56,97 @@ public class BrennverlaufDaten {
 		//TODO: interne Verarbeitung des Brennverlaufes aus der vorangegangenen DVA-Rechnung einbauen?
 		
 		if(art=="Vorgabe"){
+			File burnFile=CP.get_FileToRead("burnFileName");
+		    int indexOf=burnFile.getName().indexOf(".");
+			String EINGABEDATEI_FORMAT_BURN=burnFile.getName().substring(indexOf+1); //Dateiendung
+			int dQburnNr=CP.get_ColumnToRead("spalte_dQburn");
+//			File burnFile= CP.SYS.BRENNVERLAUF_FILE;		
+			String fileName=burnFile.getName();
+					
+			double dauerASP=CP.SYS.DAUER_ASP_KW;
+//			int dQburnNr=CP.SYS.KANAL_SPALTEN_NR_DQBURN;
+			
+			BrennverlaufFileReader burnReader = null;
+			
+			if (fileName.endsWith("txt") || fileName.endsWith("TXT"))
+				burnReader=new BrennverlaufFileReader(CP,burnFile.getAbsolutePath(),dQburnNr,dauerASP);
+			if(burnReader==null){
+				try{
+					throw new ParameterFileWrongInputException("Der Dateityp des Brennverlaufdatenfiles \""+fileName +"\"" +
+					"kann nicht verarbeitet werden" );
+				}catch(ParameterFileWrongInputException e){
+					e.stopBremo();
+					}
 		
-		File burnFile=CP.get_FileToRead("burnFileName");
-	    int indexOf=burnFile.getName().indexOf(".");
-		String EINGABEDATEI_FORMAT_BURN=burnFile.getName().substring(indexOf+1); //Dateiendung
-		int dQburnNr=CP.get_ColumnToRead("spalte_dQburn");
-//		File burnFile= CP.SYS.BRENNVERLAUF_FILE;		
-		String fileName=burnFile.getName();
-				
-		double dauerASP=CP.SYS.DAUER_ASP_KW;
-//		int dQburnNr=CP.SYS.KANAL_SPALTEN_NR_DQBURN;
-		
-		BrennverlaufFileReader burnReader = null;
-		
-		if (fileName.endsWith("txt") || fileName.endsWith("TXT"))
-			burnReader=new BrennverlaufFileReader(CP,burnFile.getAbsolutePath(),dQburnNr,dauerASP);
-		if(burnReader==null){
-			try{
-				throw new ParameterFileWrongInputException("Der Dateityp des Brennverlaufdatenfiles \""+fileName +"\"" +
-				"kann nicht verarbeitet werden" );
-			}catch(ParameterFileWrongInputException e){
-				e.stopBremo();
-				}
 	
-
-			}
-		
-		dQburn = burnReader.getdQburn();
-		dQburn[0] = 0; //ersten Wert auf NULL ziehen
-		dQburn[dQburn.length-1] = 0; //letzten Wert auf NULL ziehen
-		zeitAchse= burnReader.getZeitachse();
-		zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
-		zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
+				}
+			
+			dQburn = burnReader.getdQburn();
+			dQburn[0] = 0; //ersten Wert auf NULL ziehen
+			dQburn[dQburn.length-1] = 0; //letzten Wert auf NULL ziehen
+			zeitAchse= burnReader.getZeitachse();
+			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
+			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
 		}
+		
+		//NEUROHR 08.2014
+		if(art.equalsIgnoreCase("Vibe")){
+			double anzVibe = cp.get_anzVibe();
+			
+			int anzSimWerte = cp.SYS.ANZ_BERECHNETER_WERTE;
+			double[] zeitAchseTemp = new double[anzSimWerte];
+			zeitAchseKW = new double[anzSimWerte];
+			double[] dQburnTemp = new double [anzSimWerte];
+			int idx_start=0, idx_ende=0;
+			int idx_start_alt=anzSimWerte+1, idx_ende_alt=-1;
+			for(int v=0;v<anzVibe;v++){
+				boolean start=false, ende=false;
+				double[] vibePara = cp.get_vibe_parameter(v); // [brennbeginn, brenndauer, formfaktor, energie]
+				for(int i=0;i<anzSimWerte-1;i++){
+					if(v==0){ //Zeitachsen nur einmal füllen --> gemeinsame Zeitachse definieren
+						zeitAchseTemp[i] = cp.SYS.RECHNUNGS_BEGINN_DVA_SEC + i*cp.SYS.WRITE_INTERVAL_SEC;
+						zeitAchseKW[i] = cp.convert_SEC2KW(zeitAchseTemp[i]);
+					}
+					double alpha_vibe = (zeitAchseKW[i] - vibePara[0]) / vibePara[1];
+					if(alpha_vibe>=0){
+						if(!start){
+							idx_start = i-2;
+							start = true;
+						}
+						dQburnTemp[i] = dQburnTemp[i] + cp.convert_ProKW_2_ProSEC(vibePara[3] / vibePara[1] 
+								* 6.9 * (1 + vibePara[2]) * Math.pow(alpha_vibe, vibePara[2])
+								* Math.exp(-6.9 * Math.pow(alpha_vibe, 1+vibePara[2])));
+//						dQburn[alpha]=QB_ges/alpha_ges*6.9*(1+m)*(alpha_vibe^m)*EXP(-6.9*(alpha_vibe^(1+m)))
+						if(dQburnTemp[i]<1e-6 && zeitAchseTemp[i]>cp.convert_KW2SEC(vibePara[0])){
+							dQburnTemp[i] = 0;
+							if(!ende){
+								idx_ende = i+2;
+								ende = true;
+							}
+						}
+					}
+				}
+				if(idx_start<idx_start_alt){
+					idx_start_alt = idx_start;
+				}
+				if(idx_ende>idx_ende_alt){
+					idx_ende_alt = idx_ende;
+				}
+			}
+			
+//			Zur Verkleinerung des Arrays und damit Sparen von Speicher und Beschleunigen der Rechnung -- Neurohr
+			zeitAchse = new double[idx_ende_alt - idx_start_alt];
+			dQburn = new double[idx_ende_alt - idx_start_alt];
+			for(int i=0;i<zeitAchse.length;i++){
+				zeitAchse[i] = zeitAchseTemp[i+idx_start_alt];
+				dQburn[i] = dQburnTemp[i+idx_start_alt];
+			}
+			zeitAchse[0]=0;
+			zeitAchse[zeitAchse.length-1]=cp.SYS.RECHNUNGS_ENDE_DVA_SEC;
+			dQburn[0] = 0;
+			dQburn[zeitAchse.length-1] = 0;
+		}
+		
 		if(art=="Punktuell-OT")
 		{
 			masterEinspritzung=CP.MASTER_EINSPRITZUNG;
@@ -219,7 +277,7 @@ public class BrennverlaufDaten {
 			}
 			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
 			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
-		double[][] matrix ={zeitAchseKW,dQburn};
+//		double[][] matrix ={zeitAchseKW,dQburn};
 	    //FileWriter_txt txtFile = new FileWriter_txt("F://Workspace//Bremo//src//InputFiles//Brennverlauf-startQ.txt");
 		//txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);
 		}

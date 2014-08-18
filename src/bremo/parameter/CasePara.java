@@ -409,6 +409,67 @@ public class CasePara {
 	public double get_time(){
 		return aktuelle_RZ;
 	}
+	
+	/**
+	 * Alle 4 Vibe-Parameter einlesen, 
+	 * @return
+	 */
+	public double[] get_vibe_parameter(int index){
+		double[] vibePara = new double[4];
+		boolean fehler = false;
+		try{
+			vibePara[0] = set_doublePara(INPUTFILE_PARAMETER, "brennbeginn_"+index, "[KWnZOT]", SYS.RECHNUNGS_BEGINN_DVA_KW+this.convert_SEC2KW(SYS.WRITE_INTERVAL_SEC),SYS.RECHNUNGS_ENDE_DVA_KW);
+		}catch(ParameterFileWrongInputException e){
+			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
+					"Bitte \"brennbeginn_"+index+"\" in \"[KWnZOT]\" mit angeben.");
+			fehler = true;
+			vibePara[0] = 0;
+		}
+		try{
+			vibePara[1] = set_doublePara(INPUTFILE_PARAMETER, "brenndauer_"+index, "[KW]", 0,(SYS.RECHNUNGS_ENDE_DVA_KW - vibePara[0] - this.convert_SEC2KW(SYS.WRITE_INTERVAL_SEC)));
+		}catch(ParameterFileWrongInputException e){
+			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
+					"Bitte \"brenndauer_"+index+"\" in \"[KW]\" mit angeben.");
+			fehler = true;
+		}
+		try{
+			vibePara[2] = set_doublePara(INPUTFILE_PARAMETER, "vibeFormfaktor_"+index, "[-]", 0,10);
+		}catch(ParameterFileWrongInputException e){
+			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
+					"Bitte \"vibeFormfaktor_"+index+"\" in \"[-]\" mit angeben.");
+			fehler = true;
+		}
+		try{
+			vibePara[3] = set_doublePara(INPUTFILE_PARAMETER, "vibeBrennEnergie_"+index, "[J]", 0,Double.POSITIVE_INFINITY);
+		}catch(ParameterFileWrongInputException e){
+			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
+					"Bitte \"vibeBrennEnergie_"+index+"\" in \"[J]\" mit angeben.");
+			fehler = true;
+		}
+		if(fehler){
+			try{
+				throw new ParameterFileWrongInputException("Vibe-Fehler");
+			}catch(ParameterFileWrongInputException e){
+				e.stopBremo();
+			}
+		}
+		return vibePara;
+	}
+	
+	/**
+	 * Anzahl an Vibefunktionen angeben.
+	 * @return
+	 */
+	public double get_anzVibe(){
+		double anzVibe;
+		try{
+			anzVibe = set_doublePara(INPUTFILE_PARAMETER, "anzVibe", "[-]", 1, Double.POSITIVE_INFINITY);
+			return anzVibe;
+		}catch(ParameterFileWrongInputException e){
+			e.stopBremo();
+			return Double.NaN;
+		}
+	}
 
 	/**
 	 * Gibt an ab welchem Zeitpunkt die Verbrennung beginnen soll. Ab diesem Zeitpunkt wird 
@@ -1798,6 +1859,8 @@ public class CasePara {
 			return 0;
 		}
 	}
+	
+	
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////

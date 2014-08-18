@@ -19,6 +19,7 @@ import misc.VektorBuffer;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 import bremo.parameter.CasePara;
+import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.MiscException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
@@ -107,6 +108,27 @@ public class APR_homogen_EinZonig extends APR{
 		ANZAHL_ZONEN=1;
 		this.createMe(cp, waermeVerluste);
 		
+	}
+	
+	/**
+	 * Brennverlauf mit Vibeparametern vorgeben
+	 * @param cp
+	 * @param vibeBV
+	 */
+	protected APR_homogen_EinZonig (CasePara cp, String rechenBV){
+		super(cp);
+		if(rechenBV.equalsIgnoreCase("Vibe")){
+			brennverlauf = new BrennverlaufDaten(cp,"Vibe");
+		}else{
+			brennverlauf = null;
+			try{
+				throw new BirdBrainedProgrammerException("Es ist nur Vibe implementiert!");
+			}catch(BirdBrainedProgrammerException e){
+				e.stopBremo();
+			}
+		}
+		ANZAHL_ZONEN = 1;
+		this.createMe(cp, true);
 	}
 	
 	protected APR_homogen_EinZonig (CasePara cp) {
@@ -572,7 +594,12 @@ public VektorBuffer get_p_buffer() {
 		return p_buffer;
 	}
 
+private double verbrennungsBeginn = -5.55;
 public double t_VerbrennungsBeginn () { //TODO: Schlecht programmiert! Besser machen! (Abbruchkriterium, etc.
+	if(verbrennungsBeginn!=-5.55){
+		return verbrennungsBeginn;
+	}
+	
 	double x0 =CP.SYS.RECHNUNGS_BEGINN_DVA_SEC;
 	double time=0;
 	double Qbtemp=0;
@@ -584,9 +611,10 @@ public double t_VerbrennungsBeginn () { //TODO: Schlecht programmiert! Besser ma
 		time=x0+i*CP.SYS.WRITE_INTERVAL_SEC;
 		double dQburn = brennverlauf.get_dQburn(time);
 		Qbtemp=Qbtemp+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;
-		double xQ=Qb/Qmax;
+		double xQ=Qbtemp/Qmax;
 	if(xQ>0.05){
 		verbrennungsbeginnGefunden=true;
+		verbrennungsBeginn = time;
 	return time;}
 	}
 //	}

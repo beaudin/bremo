@@ -30,7 +30,9 @@ public abstract class DVA extends BerechnungsModell{
 	private double precission, relaxFactor;
 
 	protected DVA(CasePara cp) {		
-		super(cp,new ErgebnisBuffer(cp,"DVA_"));	
+		super(cp,new ErgebnisBuffer(cp,"DVA_"));
+//		Für Verlustteilung burnFileName setzen. Die Spalte wird in den einzelnen DVA-Berechnungen definiert. -- Neurohr
+		cp.set_ParaInputfile("burnFileName", "[-]", "DVA_"+cp.get_CaseName()+".txt");
 		indiD=new IndizierDaten(cp);
 		dQburn=0;
 		ergBuffDebug=new ErgebnisBuffer(cp,"DVA_DEBUG_");

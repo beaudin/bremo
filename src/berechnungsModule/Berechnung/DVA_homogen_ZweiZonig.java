@@ -431,7 +431,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("dQb [J/s]",dQburn,i);
-		CP.set_ParaInputfile("spalte_dQburn", "[-]", i);
+		CP.set_ParaInputfile("spalte_dQburn", "[-]", i+1);
 
 		i+=1;
 		super.buffer_EinzelErgebnis("dQb [J/KW]", super.CP.convert_ProSEC_2_ProKW(dQburn),i);

@@ -229,7 +229,7 @@ public class WoschniHuber extends WandWaermeUebergang {
 		double v_Huber = mittlereKolbengeschwindigkeit*(1 + 2 * (Kompressionsvolumen / Volumen) * (Kompressionsvolumen / Volumen) * Math.pow(p_mi,-0.2) );
 		//		if(cp.convert_SEC2KW(time)>-20){
 		//			System.out.println("");}
-		v_Huber=0;
+//		v_Huber=0; //So ein QUATSCH!!
 		double v = Math.max(v_Woschni,v_Huber);
 
 		// Alpha in W/(m²K)

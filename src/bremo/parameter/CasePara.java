@@ -1706,6 +1706,36 @@ public class CasePara {
 			return whtfCorr;
 		}					
 	}
+	
+	/**
+	 * Returns a factor to multiply the wall heat transfer during combustion.
+	 * e.g. for knocking, hcci
+	 * @return
+	 */
+	public double get_whtfMult_burn(){
+		double whtfCorr=1;
+		try {
+			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, "whtfMult_burn","[-]",0,Double.MAX_VALUE); 
+			return whtfCorr;
+		} catch (ParameterFileWrongInputException e) {	
+			return whtfCorr;
+		}
+	}
+	
+	/**
+	 * Returns a duration in CA when multiplier whtfMult_burn is active
+	 * e.g. for knocking, hcci
+	 * @return
+	 */
+	public double get_whtfMult_burn_duration(){
+		double whtfDur=this.convert_KW2SEC(50+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
+		try {
+			whtfDur= this.convert_KW2SEC(set_doublePara(INPUTFILE_PARAMETER, "whtfMult_dauer","[KW]",0,180)+this.SYS.RECHNUNGS_BEGINN_DVA_KW); 
+			return whtfDur;
+		} catch (ParameterFileWrongInputException e) {	
+			return whtfDur;
+		}
+	}
 		
 	/**
 	 * Returns the polytropic exponent needed for WHTF models like Woschni or Chang (this method 

@@ -57,8 +57,8 @@ public class KrstApproxSpezies extends Spezies  {
 				this.anzO_Atome*PhysKonst.get_M_O();
 		
 		N_Hn=anzH_Atome/anzC_Atome;
-//		N_On=anzO_Atome/anzC_Atome;//Eichmeier
-		N_On=anzO_Atome/anzH_Atome;//lt. Paper
+		N_On=anzO_Atome/anzC_Atome;//Eichmeier
+//		N_On=anzO_Atome/anzH_Atome;//lt. Paper ACHTUNG DRUCKFEHLER IM SAE PAPER (FVV-Zylindermodul)
 		
 		K_H=-0.0265*N_Hn*N_Hn*N_Hn*N_Hn*N_Hn
 			+0.3783*N_Hn*N_Hn*N_Hn*N_Hn
@@ -116,7 +116,7 @@ public class KrstApproxSpezies extends Spezies  {
 				4*2.235*0.00000001*T*T*T
 				-3*5.587*0.0001*T*T
 				+2*1.763*T
-				-46.506);	
+				-46.506)*get_M();	//Neurohr2014, Umrechnung in J/molK erforderlich !!
 	}
 
 
@@ -127,7 +127,7 @@ public class KrstApproxSpezies extends Spezies  {
 				2.235*0.00000001*T*T*T*T
 				-5.587*0.0001*T*T*T
 				+1.763*T*T
-				//-46.506*T-126575.419))*get_M();	//Eichmeister
+//				-46.506*T-126575.419))*get_M();	//Eichmeister
 				-46.506*T))*get_M();		//Neurohr2014, nach SAE Paper2007-01-0936 
 		
 	}

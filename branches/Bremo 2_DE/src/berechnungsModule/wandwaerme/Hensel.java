@@ -35,6 +35,7 @@ public class Hensel extends WandWaermeUebergang {
     double x_rg;
     double lambda;
     double xCO2_Ex;
+    double time_MultStart, time_MultMax, burnMult, burnDurMult;
 
 
 	
@@ -47,6 +48,8 @@ public class Hensel extends WandWaermeUebergang {
 	    t_zzp = 0;
 	    p_zzp = 0;
 	    xCO2_Ex = 1;
+	    burnMult = cp.get_whtfMult_burn();
+	    burnDurMult = cp.get_whtfMult_burn_duration();
 	}
 
 	//@Override
@@ -199,7 +202,7 @@ public class Hensel extends WandWaermeUebergang {
 //		// geschwindigkeit =  C4 * Verbr.term
 //		// wird erst mal vernachlässigt... =1
 //		// Verbrennungsglied abhängig von XRG => mit steigender Last 
-//		double verbrennungsterm = 0; // [m]
+		double verbrennungsterm = 0; // [m]
 //		double C4 = 1;
 //		double verbrennung = 1;
 //		double t_uv =0, t_v = 0, verbrannt = 0, unverbrannt = 0;
@@ -252,8 +255,19 @@ public class Hensel extends WandWaermeUebergang {
 //		//setVerbrennungstermausgabe(verbrennungsterm);
 //		// System.out.println(verbrennungsterm);
 //		verbrennungsterm = C4  * verbrennung;
-//		verbrennungsterm = 1.0;
-		return 1.0;
+		verbrennungsterm = 1.0;
+		
+//		Multiplier für den Wärmeübergang während der Verbrennung für eine bestimmte Zeit. Anschließend klingt Multiplier
+//		linear in 1/3 der angegebenen Zeit ab. --> Zur Berücksichtigung von Grenzschicht-Störung durch extrem schnelle Verbrennung.
+		if(neuerfortschritt<0.1){
+			time_MultStart = time;
+		}else if(neuerfortschritt>=0.1 && time <= time_MultStart+burnDurMult){
+			verbrennungsterm = verbrennungsterm * burnMult;
+			time_MultMax = time + burnDurMult/3; //Einfach mal so gewählt 
+		}else if(time<time_MultMax){
+			verbrennungsterm = verbrennungsterm * (time_MultMax - time) / (burnDurMult/3) * burnMult;
+		}
+		return verbrennungsterm;
 	}
 	
 	//...und hiermit die Wärmestromdichte in W/m^2

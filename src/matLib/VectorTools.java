@@ -63,4 +63,33 @@ public class VectorTools {
 		}	   	 	   
     return mittelwertAusgabe; 
    }
+   
+   /**
+    * Lineare Regression von Werten -- neurohr 08/2014
+    * @param xArray
+    * @param yArray
+    * @return coeff[] [0 Steigung, 1 y-AchsenAbschnitt]
+    */
+   public static double[] lineareRegression(double[] xArray, double[] yArray){
+	  double b1 = 0;
+	  double b2 = 0;
+	  double xMean=0,yMean=0;
+	  for(int i=0; i<xArray.length;i++){
+		  xMean =+ xArray[i]/xArray.length;
+		  yMean =+ yArray[i]/yArray.length;
+	  }
+	  
+	  for (int i = 0 ; i < xArray.length ; ++i) {
+		  b1 += xArray[i]*yArray[i];
+		  b2 += xArray[i]*xArray[i];
+	  }
+	  b1 -= ((double)xArray.length)*xMean*yMean; 
+	  b2 -= ((double)xArray.length)*xMean*xMean; 
+
+	  double coeff[] = new double[2];
+	  coeff[0] = b1 /b2; 
+	  coeff[1] = yMean - coeff[0]*xMean;
+	  System.out.println(coeff[0]+"*x+"+coeff[1]);
+	  return coeff;
+   }
 }

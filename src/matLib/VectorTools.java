@@ -69,6 +69,7 @@ public class VectorTools {
     * @param xArray
     * @param yArray
     * @return coeff[] [0 Steigung, 1 y-AchsenAbschnitt]
+    * @author neurohr
     */
    public static double[] lineareRegression(double[] xArray, double[] yArray){
 	  double b1 = 0;
@@ -89,7 +90,7 @@ public class VectorTools {
 	  double coeff[] = new double[2];
 	  coeff[0] = b1 /b2; 
 	  coeff[1] = yMean - coeff[0]*xMean;
-	  System.out.println(coeff[0]+"*x+"+coeff[1]);
+//	  System.out.println(coeff[0]+"*x+"+coeff[1]);
 	  return coeff;
    }
 }

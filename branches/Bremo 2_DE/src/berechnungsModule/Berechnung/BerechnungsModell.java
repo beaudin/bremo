@@ -70,6 +70,13 @@ public abstract class BerechnungsModell  {
 	public void clearErgebnisBuffer(){
 		this.ergBuf.clearErgebnisBuffer();		
 	}
-		
+	
+	/**
+	 * Für die iterative Berechnung benötigt man die Weitergabe des ErgebnisBuffers 
+	 * @author neurohr
+	 */
+	public ErgebnisBuffer get_ErgebnisBuffer(){
+		return ergBuf;
+	}
 
 }

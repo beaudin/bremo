@@ -236,6 +236,9 @@ public class IndizierDaten {
 		}else if(nlm.equalsIgnoreCase("offset")){
 			pOffset = CP.get_pressureOffset();
 			pZylRoh = this.shiftMe(pZylRoh, pOffset);
+		}else if(nlm.equalsIgnoreCase("summenbrennverlauf")){
+			pOffset = CP.get_pressureOffset();
+			pZylRoh = this.shiftMe(pZylRoh, pOffset);
 		}else if(nlm.equalsIgnoreCase("ohne")){
 			
 		}else{
@@ -244,7 +247,7 @@ public class IndizierDaten {
 						"Die gewaehlte Methode zur Nullinienkorrektur des Zylinderdrucks " +
 						"ist nicht zulaessig. Moegliche Methoden sind: \n" +
 						"polytropenMethode \n abgleichSaugrohr \n kanalMethode \n abgleichKruemmer \n " +
-						"referenzWert \n ohne");
+						"referenzWert \n summenbrennverlauf \n ohne");
 			} catch (ParameterFileWrongInputException e) {				
 				e.stopBremo();
 			}
@@ -691,6 +694,15 @@ public class IndizierDaten {
 	
 	public double get_kappa_druckabgleich(){
 		return kappa_druckabgleich;
+	}
+	
+	/**
+	 * Aktualisieren der Nulllinienkorrektur für die Summenbrennverlaufsmethode
+	 */
+	public void aktualisiere_pZyl_sbv(){
+		double newOffset = CP.get_pressureOffset();
+		pZyl = shiftMe(pZyl, newOffset-pOffset);
+		pOffset = newOffset;
 	}
 
 }

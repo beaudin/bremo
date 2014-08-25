@@ -495,6 +495,11 @@ public class DVA_Homogen_EinZonig extends DVA{
 			super.buffer_EinzelErgebnis(CP.SPEZIES_FABRIK.get_Spez(idx).get_name()
 					+"_Massenbruch [kg]" ,mi[idx]/zn[0].get_m(),iter+idx);	
 
+		
+		if(CP.ITERATIVE_BERECHNUNG.isIterativ()){
+			double wert = super.get_ErgebnisBuffer().get_bufferedErgebnis(time, CP.ITERATIVE_BERECHNUNG.get_Parameter2Save());
+			CP.ITERATIVE_BERECHNUNG.bufferParameter(time, wert);
+		}
 	}
 	
 	

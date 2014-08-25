@@ -651,7 +651,14 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		i+=1;
 		pV=zn[1].get_p()*zn[1].get_V();
 		mRT=zn[1].get_m()*zn[1].get_ggZone().get_R()*zn[1].get_T();
-		super.buffer_EinzelErgebnis("pV-mRT zn1", (pV-mRT)/pV*100,i);	
+		super.buffer_EinzelErgebnis("pV-mRT zn1", (pV-mRT)/pV*100,i);
+		
+		
+		if(CP.ITERATIVE_BERECHNUNG.isIterativ()){
+			double wert = super.get_ErgebnisBuffer().get_bufferedErgebnis(time, CP.ITERATIVE_BERECHNUNG.get_Parameter2Save());
+			CP.ITERATIVE_BERECHNUNG.bufferParameter(time, wert);
+		}
+
 	}
 
 

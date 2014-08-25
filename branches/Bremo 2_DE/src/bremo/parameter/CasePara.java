@@ -15,6 +15,7 @@ import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
 import io.InputFileReader;
 import berechnungsModule.ErgebnisBuffer;
+import berechnungsModule.IterativeBerechnung;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.BerechnungsModellFabrik;
 import berechnungsModule.Berechnung.CanteraCaller;
@@ -63,6 +64,7 @@ public class CasePara {
 	public final Solver SOLVER;
 	public final TurbulenceModelFactory TURB_FACTORY;
 	public final BlowBy BLOW_BY_MODELL;
+	public IterativeBerechnung ITERATIVE_BERECHNUNG;
 	protected final boolean callsCantera;
 	private boolean calledFromGUI;
 
@@ -175,6 +177,10 @@ public class CasePara {
 
 		}
 	}
+	
+	public void set_IterativeBerechnung(IterativeBerechnung iR){
+		ITERATIVE_BERECHNUNG = iR;	
+	}
 
 	/**
 	 * Für einen BerechnungsCase sind alle ErgebnisBuffer in einem Vector gespeichert. Hiermit wird dem 
@@ -183,7 +189,7 @@ public class CasePara {
 	 * @param ergB
 	 */
 	public void ergBufferCheckIN(ErgebnisBuffer ergB){
-		if(!alleErgBuffers.contains(ergB))//nur wenn der ErgebnisBuffer noch nich tim Vector steht wird er eingecheckt
+		if(!alleErgBuffers.contains(ergB))//nur wenn der ErgebnisBuffer noch nicht im Vector steht wird er eingecheckt
 			this.alleErgBuffers.add(ergB);		
 	}
 
@@ -297,7 +303,7 @@ public class CasePara {
 	public String get_pressureAdjustmentMethod(String methodIdentifier){
 		String method=null;
 		try {		
-			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","kanalMethode","abgleichKruemmer","offset","ohne"};			
+			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","kanalMethode","abgleichKruemmer","offset","summenbrennverlauf","ohne"};			
 			method=set_StringPara(this.INPUTFILE_PARAMETER,methodIdentifier,s1);
 		}catch(ParameterFileWrongInputException e){
 			e.stopBremo();
@@ -307,7 +313,7 @@ public class CasePara {
 	
 	public double get_pressureOffset(){
 		try{
-			double offset = set_doublePara(INPUTFILE_PARAMETER, "offset", "[Pa]",-1e6,1e6);
+			double offset = set_doublePara(INPUTFILE_PARAMETER, "offset", "[Pa]",-1e9,1e9);
 			return offset;
 		} catch (ParameterFileWrongInputException p) {
 			p.log_Warning("Der Parameter \"offset\" wurde nicht gesetzt, es wird ohne gerechnet.");
@@ -1890,7 +1896,13 @@ public class CasePara {
 		}
 	}
 	
-	
+	public String get_iterativeMethode(String[] mglMethoden){
+		try{
+			return set_StringPara(INPUTFILE_PARAMETER, "iterativeMethode", mglMethoden);
+		}catch(ParameterFileWrongInputException e) {			
+			return "ohne";
+		}
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////

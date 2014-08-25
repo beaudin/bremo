@@ -11,7 +11,7 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 	public static final String WANDWAERME_FLAG="Wandwaermemodell";
 	private static final String WANDWAERME_FLAG_LW="Wandwaermemodell_LW";
 	public  static final String[] WANDWAERMEMODELLE
-	={"WoschniHuber", "Woschni", "Hohenberg", "Hensel", "Hans", "Bargende", "Chang", "ohne","FromFile"};
+	={"Bargende", "BargendeFVV", "Chang", "FromFile", "Hans", "Hensel", "Hohenberg", "ohne", "Woschni", "WoschniHuber"};
 	public final  WandWaermeUebergang WAND_WAERME_MODUL;
 	public final  WandWaermeUebergang WAND_WAERME_MODUL_LW;
 	
@@ -91,23 +91,43 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 //					"Die Rechnung erfolgt ohne Waermeuebergangsmodell");
 //				}
 //			}
-			else if(wandwaermemodellVorgabe.equals("Bargende")){	
+			else if(wandwaermemodellVorgabe.equals("Bargende")){
+				System.out.println("Mit diesem WWÜ wird die ursprüngliche Vorgehensweise nach Diss. Bargende gewählt."+
+						"Alternativ kann BargendeFVV als WW-Modell ausgewählt werden");
 //				String isDVA_2Zonig=CP.MODUL_VORGABEN.get("berechnungsModell"); //Welches BerechnungsModell?
 //				if(isDVA_2Zonig.equals("DVA_2Zonig")){ //Bargende erstmal nur für DVA_2Zonig...
-				if(
-						CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|
-						CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_2Zonig")|
-						CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_DualFuel")|
-						CP.MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")
-						){
-				if(motor.isHubKolbenMotor()){
-					temp=new Bargende (CP);
-				}else{
-					throw new ParameterFileWrongInputException("Das ausgewaehlte Waermeuebergangsmodell \"" +
-							wandwaermemodellVorgabe+ "\" ist nur fuer Hubkolbenmotoren geeignet.\n" +
-					"Die Rechnung erfolgt ohne Waermeuebergangsmodell");	
-				
+				if(	CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|
+					CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_2Zonig")|
+					CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_DualFuel")|
+					CP.MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")){
+					if(motor.isHubKolbenMotor()){
+						temp=new Bargende (CP);
+					}else{
+						throw new ParameterFileWrongInputException("Das ausgewaehlte Waermeuebergangsmodell \"" +
+						wandwaermemodellVorgabe+ "\" ist nur fuer Hubkolbenmotoren geeignet.\n" +
+						"Die Rechnung erfolgt ohne Waermeuebergangsmodell");	
+						}
 				}
+				else{
+					temp=null; //Das wird dann unten abgefangen und dann halt ohne ohne WWÜ gerechnet...
+				}
+			}
+			else if(wandwaermemodellVorgabe.equals("BargendeFVV")){
+				System.out.println("Mit diesem WWÜ wird nach der Vorgehensweise der FVV gerechnet (S. Diss. Grill)."+
+						"Alternativ kann Bargende als WW-Modell ausgewählt werden");
+//				String isDVA_2Zonig=CP.MODUL_VORGABEN.get("berechnungsModell"); //Welches BerechnungsModell?
+//				if(isDVA_2Zonig.equals("DVA_2Zonig")){ //Bargende erstmal nur für DVA_2Zonig...
+				if(	CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|
+					CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_2Zonig")|
+					CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_DualFuel")|
+					CP.MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")){
+					if(motor.isHubKolbenMotor()){
+						temp=new BargendeFVV (CP);
+					}else{
+						throw new ParameterFileWrongInputException("Das ausgewaehlte Waermeuebergangsmodell \"" +
+						wandwaermemodellVorgabe+ "\" ist nur fuer Hubkolbenmotoren geeignet.\n" +
+						"Die Rechnung erfolgt ohne Waermeuebergangsmodell");	
+						}
 				}
 				else{
 					temp=null; //Das wird dann unten abgefangen und dann halt ohne ohne WWÜ gerechnet...

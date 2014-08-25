@@ -211,4 +211,8 @@ public class IterativeBerechnung {
 			}
 		}
 	}
+
+	public void deleteFile() {
+		newInputFile.delete();
+	}
 }

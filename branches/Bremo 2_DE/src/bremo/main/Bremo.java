@@ -154,6 +154,7 @@ public class Bremo extends Thread {
 				e.printStackTrace();
 			}
 		}while(iterRechnung.isIterativ());
+		iterRechnung.deleteFile();
 		if (casePara.is_Verlustteilung()) {
 			if (calledFromGUI) {
 				SwingBremo.VerlustteilungThread();

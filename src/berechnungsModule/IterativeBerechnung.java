@@ -177,6 +177,7 @@ public class IterativeBerechnung {
 	 */
 	private void set_iterativeMethode(){
 		if(iterativeMethode==null){
+			iterativeMethode = "ohne";
 			try{
 				iterativeMethode = cp.get_iterativeMethode(mglMethoden);
 			}catch(Exception e){
@@ -200,6 +201,9 @@ public class IterativeBerechnung {
 						}
 					}
 					switch(iterativeMethode){
+					case "ohne":
+						changedValue = 0;
+						eintrag = "";
 					case "summenbrennverlaufsmethode":
 						changedValue = offset;
 						eintrag = "offset [Pa] := "+Double.toString(changedValue);

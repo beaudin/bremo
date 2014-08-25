@@ -55,6 +55,8 @@ public class DVA_DualFuel extends DVA {
 
 	private double dQburnMAX=0;
 	private double fortschritt=0;	
+	private boolean bargende = false; //Nur wenn Bargende  
+	private boolean fvv = false;	//bzw. BargendeFVV
 
 
 	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen
@@ -77,7 +79,14 @@ public class DVA_DualFuel extends DVA {
 		checkEinspritzungen(masterEinspritzung); //checkt ob alle Einspritzungen in die richtigen Zonen erfolgen
 		gg=CP.OHC_SOLVER;
 		blowbyModell = CP.BLOW_BY_MODELL;
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+		
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){
+			bargende = true;
+		}
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")){
+			fvv = true;
+		}
+		if(bargende||fvv){ //Nur wenn Bargende
 			turb = CP.TURB_FACTORY.get_TurbulenceModel(); //für Bargende
 		}
 		T_buffer = new VektorBuffer(cp);
@@ -158,8 +167,9 @@ public class DVA_DualFuel extends DVA {
 		//				1e-55,rauchgas, true,1);
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
-
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+		
+		
+		if(bargende||fvv){ //Nur wenn Bargende
 			turb.initialize(initialZones, 0);
 		}
 	}
@@ -350,7 +360,7 @@ public class DVA_DualFuel extends DVA {
 			}
 		}
 		
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+		if(bargende||fvv){ //Nur wenn Bargende
 			this.turb.update(zonen_IN, time);
 		}
 		return zonen_IN;	
@@ -549,7 +559,7 @@ public class DVA_DualFuel extends DVA {
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);
 		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
 		
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+		if(bargende||fvv){ //Nur wenn Bargende
 			i+=1;
 			double k=turb.get_k(zn, time);
 			super.buffer_EinzelErgebnis("k_turb [m^2/s^2]", k, i);

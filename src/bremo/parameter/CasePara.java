@@ -1904,7 +1904,73 @@ public class CasePara {
 		}
 	}
 
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Vorfaktor für Startwert k_esInit im k-epsilon Modell (Bargende)
+	 * kann an jeweilige Motorgeometrie angepasst werden -> 
+	 * siehe Noske G.: "Ein Quasidimensionales Modell..."
+	 * Werte zwischen 0,01 und 0,6 üblich
+	**/
+	public double get_Konstante_TKE(){
+		double konstante_TKE;
+		try {
+			konstante_TKE = set_doublePara(INPUTFILE_PARAMETER, "c_k","[-]",0,1);
+			return konstante_TKE;
+		} catch (ParameterFileWrongInputException e) {		
+			e.log_Warning("Konstante c_k für Vorfaktor des Turbulenz-Startwerts fehlt. "
+					+ "Es wird mit Default Wert von 0.125 gerechnet.");	
+			return 0.125;
+		}		
+	}
+	
+	/**
+	 * Anzahl der Einlassventile wird für die Berechnung des Turbulenz-Startwerts benötigt
+	**/
+	public double get_AnzahlEinlassventile(){
+		double anz_EV;
+		try {
+			anz_EV = set_doublePara(INPUTFILE_PARAMETER, "n_EV","[-]",1,10);
+			return anz_EV;
+		} catch (ParameterFileWrongInputException e) {		
+			e.log_Warning("Konstante n_EV zur Berechnung des Turbulenz-Startwerts fehlt. "
+					+ "Es werden 2 Einlassventile angenommen.");	
+			return 2;
+		}		
+	}
+
+	
+	public double get_Kappa_Bargende() {
+		double kappa_B;
+		try {
+			kappa_B = set_doublePara(INPUTFILE_PARAMETER, "kappa_Bargende","[-]",1,1.7);
+			return kappa_B;
+		} catch (ParameterFileWrongInputException e) {		
+			e.log_Warning("kappa_Bargende zur Berechnung des WWÜ nach Bargende fehlt. "
+					+ "Es wird mit Default Wert von 1.34 gerechnet.");	
+			return 1.34;
+		}		
+	}
+	
+	public double get_Delta_k() {
+		double delta_k;
+		try {
+			delta_k = set_doublePara(INPUTFILE_PARAMETER, "delta_k","[-]",0,3);
+			return delta_k;
+		} catch (ParameterFileWrongInputException e) {		
+			e.log_Warning("Konstante delta_k als Multiplikator für Verbrennungsterm nicht angegeben. "
+					+ "Es wird mit Default Wert von 1 gerechnet.");	
+			return 1;
+		}		
+	}
+	
+	
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -3031,5 +3097,7 @@ public class CasePara {
 		String[] paraWertEinheit = {paraWert, paraEinheit};
 		INPUTFILE_PARAMETER.put(paraName, paraWertEinheit);
 	}
+
+
 
 }//Klasse CasePara

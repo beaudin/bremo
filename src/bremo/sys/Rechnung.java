@@ -19,13 +19,17 @@ public class Rechnung {
 				
 	private final CasePara CP;
 	private double turbulence = 0; //Turbulenzfaktor unten (falls Bargende) negativ initialisiert, muss aber immer positiv sein. Falls nicht verändert wird Fehler abgefangen 
-	private boolean bargende=false;
+	private boolean bargende = false;
+	private boolean fvv = false;
 	
 	
 	public Rechnung(CasePara cp) {		
 		CP=cp;		
 		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
 			bargende=true;
+		}
+		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")){ //für Bargende nach FVV
+			fvv=true;
 		}
 	}
 
@@ -82,7 +86,7 @@ public class Rechnung {
 				boolean isConverged=false;			 
 				int idx=0;
 				
-				if (bargende){
+				if (bargende||fvv){
 					turbulence = -1;
 				}
 				
@@ -93,7 +97,7 @@ public class Rechnung {
 				//Nach der ersten Rechnung wird der Turbulenzfaktor mit turbulence festgehalten, sonst wird er mit jedem weiteren Rechenschritt hoch gerechnet 
 				//Später soll turbulence den entsprechenden Wert überschreiben (bisher nur für WWÜ Bargende nötig)
 //				if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
-				if (bargende){
+				if (bargende||fvv){
 					turbulence = CP.TURB_FACTORY.get_TurbulenceModel().get_k(zn, time);
 				}
 				

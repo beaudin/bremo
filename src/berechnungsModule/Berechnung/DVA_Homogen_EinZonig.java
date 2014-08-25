@@ -39,6 +39,8 @@ public class DVA_Homogen_EinZonig extends DVA{
 	private BlowBy blowbyModell;
 	private TurbulenceModel turb; //für Bargende
 	private boolean krstVerbrannt=false;
+	private boolean bargende = false; //Nur wenn Bargende  
+	private boolean fvv = false;	//bzw. BargendeFVV
 	
 	
 	private final int ANZAHL_ZONEN;
@@ -88,8 +90,14 @@ public class DVA_Homogen_EinZonig extends DVA{
 		gg=CP.OHC_SOLVER;
 		this.checkEinspritzungen(masterEinspritzung);
 		blowbyModell = CP.BLOW_BY_MODELL;
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
-			turb = CP.TURB_FACTORY.get_TurbulenceModel(); //für Bargende
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){
+			bargende = true;
+		}
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")){
+			fvv = true;
+		}
+		if(bargende||fvv){ //Nur wenn Bargende oder BargendeFVV
+			turb = CP.TURB_FACTORY.get_TurbulenceModel();
 		}
 		T_buffer = new misc.VektorBuffer(cp);
 		dQb_buffer = new misc.VektorBuffer(cp);
@@ -133,7 +141,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
 		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
 		
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+		if(bargende||fvv){ //Nur wenn Bargende
 			turb.initialize(initialZones, 0);
 		}
 	}
@@ -241,7 +249,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 				krstVerbrannt=true;
 			}	
 		}
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+		if(bargende||fvv){ //Nur wenn Bargende
 			this.turb.update(zonen_IN, time);
 		}
 		return zonen_IN;			
@@ -379,7 +387,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);
 		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
 		
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //Nur wenn Bargende
+		if(bargende||fvv){ //Nur wenn Bargende
 			i+=1;
 			double k=turb.get_k(zn, time);
 			super.buffer_EinzelErgebnis("k_turb [m^2/s^2]", k, i);
@@ -484,6 +492,9 @@ public class DVA_Homogen_EinZonig extends DVA{
 
 		i+=1;
 		super.buffer_EinzelErgebnis(" kappa [-]", zn[0].get_ggZone().get_kappa(zn[0].get_T()),i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis(" lambda [-]", zn[0].get_ggZone().get_lambda(), i);
 		
 		i+=1;
 		super.buffer_EinzelErgebnis(" U [J]", zn[0].get_ggZone().get_u_mass(zn[0].get_T())*zn[0].get_m(),i);			

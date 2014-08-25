@@ -9,6 +9,7 @@ import matLib.VectorTools;
 import berechnungsModule.Berechnung.DVA;
 import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
+import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
 
 /**
@@ -151,18 +152,21 @@ public class IterativeBerechnung {
 		String line;
 		boolean found = false;
 		while((line = br.readLine()) != null){
-			String tmp = line.replace(" ", "");
-			if(iterativeMethode.equalsIgnoreCase("summenbrennverlaufsmethode") && tmp.startsWith("offset[Pa]") && !found){
-				pw.println(eintrag);
-				found = true;
-			}else if(iterativeMethode.equalsIgnoreCase("summenbrennverlaufsmethode") && tmp.startsWith("rechnungsEnde") && !lastTurn){
-					pw.println(rechnungsEnde);
+			String tmp = line.replace(" ", "").replace("\t", "");
+			if(isIterativ){
+				if(iterativeMethode.equalsIgnoreCase("summenbrennverlaufsmethode") && tmp.startsWith("offset[Pa]") && !found){
+					pw.println(eintrag);
+					found = true;
+				}else if(iterativeMethode.equalsIgnoreCase("summenbrennverlaufsmethode") && tmp.startsWith("rechnungsEnde") && !lastTurn){
+						pw.println(rechnungsEnde);
+				}else if(tmp.startsWith("[Bremo::Input::Stop]") && !found){
+					pw.println(eintrag);
+					pw.println("[Bremo::Input::Stop]");
+				}else{
+					pw.println(line);
+				}
 			}else{
 				pw.println(line);
-			}
-			if(tmp.startsWith("[Bremo::Input::Stop]") && !found){
-				pw.println(eintrag);
-				pw.println("[Bremo::Input::Stop]");
 			}
 		}
 		pw.flush();
@@ -176,6 +180,7 @@ public class IterativeBerechnung {
 	 * get-Methode verwendet.
 	 */
 	private void set_iterativeMethode(){
+		double offset=0;
 		if(iterativeMethode==null){
 			iterativeMethode = "ohne";
 			try{
@@ -185,34 +190,39 @@ public class IterativeBerechnung {
 					FileReader fr = new FileReader(newInputFile);
 					BufferedReader br = new BufferedReader(fr);
 					String line;
-					boolean schleife = true;
-					double offset = 0;
+					boolean schleife = true; //Falls in späteren Anwendungen die Schleife abgebrochen werden muss,
+					
 					while((line = br.readLine()) != null && schleife){
-						if(line.toLowerCase().contains("rechnungsende")){
+						String tmp = line.replace(" ", "").replace("\t","");
+						if(tmp.toLowerCase().contains("rechnungsende")){
 							rechnungsEnde_ORG = line;
-						}else if(line.toLowerCase().contains("pressureadjustmentmethod") && line.contains("summenbrennverlauf")){
+						}else if(tmp.toLowerCase().contains("pressureadjustmentmethod") && tmp.contains("summenbrennverlauf")){
 							iterativeMethode = "summenbrennverlaufsmethode";
-						}else if(line.replace(" ", "").contains("offset[Pa]")){
-//							String xx  =line.replace(" ", "").substring(line.lastIndexOf(":="));
-							offset = Double.parseDouble(line.replace(" ", "").substring(line.lastIndexOf(":=")));
-						}else if(line.replace(" ", "").toLowerCase().contains(("KW_Ende_Druckabgleich").toLowerCase())){
-							double xx = Double.parseDouble(line.replace("\t","").replace(" ", "").substring(line.lastIndexOf(":=")-1));
-							rechnungsEnde = "rechnungsEnde [KWnZOT] := " + (1+Double.parseDouble(line.replace("\t","").replace(" ", "").substring(line.lastIndexOf(":=")-1)));
+						}else if(tmp.contains("offset[Pa]")){
+							offset = Double.parseDouble(tmp.substring(line.lastIndexOf(":=")).replace("=", "").replace(":", ""));
+						}else if(tmp.toLowerCase().contains(("KW_Ende_Druckabgleich").toLowerCase())){
+							rechnungsEnde = "rechnungsEnde [KWnZOT] := " + (1+Double.parseDouble(tmp.substring(line.lastIndexOf(":=")).replace("=", "").replace(":", "")));
 						}
 					}
-					switch(iterativeMethode){
-					case "ohne":
-						changedValue = 0;
-						eintrag = "";
-					case "summenbrennverlaufsmethode":
-						changedValue = offset;
-						eintrag = "offset [Pa] := "+Double.toString(changedValue);
-					}
-					
 					br.close();
 					fr.close();
-				}catch(Exception f){}
+				}catch(Exception f){
+					try{
+						throw new BirdBrainedProgrammerException("Fehler beim durchgehen des Inputfiles du Depp!");
+					}catch(BirdBrainedProgrammerException b) {
+						b.stopBremo();
+					}
+				}
 			}
+		}
+		switch(iterativeMethode){
+		case "ohne":
+			this.isIterativ = false;
+			changedValue = 0;
+			eintrag = "";
+		case "summenbrennverlaufsmethode":
+			changedValue = offset;
+			eintrag = "offset [Pa] := "+Double.toString(changedValue);
 		}
 	}
 

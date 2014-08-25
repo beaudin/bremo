@@ -16,8 +16,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import funktionenTests.FunktionsTester; 			//fuer Verlustteilung Frank Haertel
+import berechnungsModule.IterativeBerechnung;
 import berechnungsModule.Berechnung.Verlustteilung;	//fuer Verlustteilung Frank Haertel
-
 import matLib.ConstantsOptimizer;
 import matLib.MatLibBase;
 import matLib.Optimizer;
@@ -120,33 +120,40 @@ public class Bremo extends Thread {
 	 * @see CasePara
 	 */
 	public void run() {
-		try {
-			casePara = new CasePara(inputFile);
-			caseParaerzeugt=true;
-			casePara.set_CalledFromGUI(calledFromGUI);
-			SwingBremo.SetDebbugingMode(casePara.SYS.DUBUGGING_MODE) ; 
-			r = new Rechnung(casePara);
-		} catch (ParameterFileWrongInputException e) {
-			if(calledFromGUI){
-			SwingBremo.setNrOfBremoAlive();
-			
-			new FertigMeldungFrame(this.getName(),"<html><u>Thread</u> : Eine Fehler ist in der File <b>"+this.getName()+"</b> aufgetreten !!! <p>" +
-					"\n "+e.getMessage()+"</p></html>", JOptionPane.ERROR_MESSAGE);
-			SwingBremo.StateBremoThread();
-		  } 
-			e.stopBremo();			
-		}
-		try {
-			casePara.set_CalledFromGUI(calledFromGUI);
-			r.berechnungDurchfuehren();
-			if(calledFromGUI){
-				new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
-				SwingBremo.PutInBremoThreadFertig(this.getName());
+		IterativeBerechnung iterRechnung = new IterativeBerechnung(inputFile);
+		do{
+			try {
+				casePara = new CasePara(inputFile);
+				caseParaerzeugt=true;
+				casePara.set_CalledFromGUI(calledFromGUI);
+				SwingBremo.SetDebbugingMode(casePara.SYS.DUBUGGING_MODE);
+				iterRechnung.initialisieren(casePara);
+//				iterRechnung.set_CasePara();
+				casePara.set_IterativeBerechnung(iterRechnung);
+				r = new Rechnung(casePara);
+			} catch (ParameterFileWrongInputException e) {
+				if(calledFromGUI){
+				SwingBremo.setNrOfBremoAlive();
+				
+				new FertigMeldungFrame(this.getName(),"<html><u>Thread</u> : Eine Fehler ist in der File <b>"+this.getName()+"</b> aufgetreten !!! <p>" +
+						"\n "+e.getMessage()+"</p></html>", JOptionPane.ERROR_MESSAGE);
+				SwingBremo.StateBremoThread();
+			  } 
+				e.stopBremo();			
 			}
-		} catch (Exception  e) {
-			this.interrupt();
-			e.printStackTrace();
-		}
+			try {
+				casePara.set_CalledFromGUI(calledFromGUI);
+				r.berechnungDurchfuehren();
+				iterRechnung.auswerten();
+				if(calledFromGUI && !iterRechnung.isIterativ()){
+					new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
+					SwingBremo.PutInBremoThreadFertig(this.getName());
+				}
+			} catch (Exception  e) {
+				this.interrupt();
+				e.printStackTrace();
+			}
+		}while(iterRechnung.isIterativ());
 		if (casePara.is_Verlustteilung()) {
 			if (calledFromGUI) {
 				SwingBremo.VerlustteilungThread();
@@ -222,7 +229,7 @@ public class Bremo extends Thread {
 		//Um Funktionen zu testen gibt es die Klasse FunktionsTester
 		//Hier einige Beisspile wie Funktionen getestet werden können
 		System.out.println(System.getProperty("home"));
-		File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//STEVE//Inputfile.txt"); //TODO Filename
+		File fileCP = new File("D://Daten//Bremo//Referenzmessungen//iterativ//bremo_setup_140702_00002_zyklus0.txt"); //TODO Filename
 //		File fileCP = new File("D://Daten//Studenten//Carolin Sturm//Studentenordner//von_philipp//BREMO//20140205//05_neu//PhH//Inputfile_P_202_Huegel_20140205_0005-p_m.txt");
 //		File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//PhH//20140225//19//Inputfile_P_202_Huegel_20140225_0019-p_m.txt"); //TODO Filename
 		//File fileCP = new File("D://Daten//workspace//Bremo 2_DE//src//InputFiles//PhH//Messpunkt_10_Schichtreferenz//Bremo_Inputfile_Messpunkt_99.txt");

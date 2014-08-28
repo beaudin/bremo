@@ -20,7 +20,8 @@ public class MasterEinspritzung extends ModulFabrik{
 	public  final static String[] MOEGLICHE_EINSPRITZ_MODELLE={SaugrohrEinspritzungHomogen.FLAG,
 															SaugrohrEinspritzungHomogen.FLAG2, 
 															Spray.FLAG,
-															SimpleDirektEinspritzung.FLAG};	
+															SimpleDirektEinspritzung.FLAG,
+															Frommelt.FLAG};	
 	
 
 	//Vielleicht kann hier noch eine extra Klasse verwendet werden, ist aber doppelt gemoppelt. 
@@ -56,6 +57,8 @@ public class MasterEinspritzung extends ModulFabrik{
 			
 		}else if(einspritzungsModellVorgabe.equals(SimpleDirektEinspritzung.FLAG)){			
 			einspritzung=new SimpleDirektEinspritzung(cp, index);			
+		}else if(einspritzungsModellVorgabe.equals(Frommelt.FLAG)){
+			einspritzung=new Frommelt(cp, index);
 		}
 
 		if(einspritzung==null){

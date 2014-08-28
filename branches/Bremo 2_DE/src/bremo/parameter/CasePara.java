@@ -395,6 +395,39 @@ public class CasePara {
 		return fileName;
 	}
 	
+	/**
+	 * checks if file exists
+	 * @param filename
+	 * @return yesno
+	 */
+	public boolean fileExist(String filename){
+		boolean exists;
+		String fileName=null;
+		try {
+			fileName = set_FileName(this.INPUTFILE_PARAMETER,filename);
+			exists = true;
+		} catch (ParameterFileWrongInputException e) {
+			e.log_Warning(filename + " wurde nicht Angegeben. Es wird ohne weitergerechnet.");
+			exists = false;
+		}
+		if(exists){
+			File file = new File(WD+fileName);
+			if(!file.exists()){
+				try {
+					throw new ParameterFileWrongInputException(
+							"The specified path does not point to a file \n"
+									+ (WD+fileName));
+				} catch (ParameterFileWrongInputException e) {
+					e.log_Warning("Der Angegebene Pfad zeigt nicht auf eine Datei: \n"
+									+ (WD+filename) + ". Es wird ohne weitergerechnet");
+					exists = false;
+				}
+			}
+		}	
+		
+		return exists;
+	}
+	
 	
 
 	/**
@@ -1344,6 +1377,43 @@ public class CasePara {
 			e.stopBremo();
 			return Double.NaN;
 		}		
+	}
+	
+	/**
+	 * returns the specific evaporation time in [s] for the injection 
+	 * injection with the index: idxOfInjection
+	 * @param idxOfInjection
+	 * @return time
+	 */
+	public double get_tau(int idxOfInjection){
+		int anzEinspr=this.get_AnzahlEinspritzungen();
+		double tau;
+		if(idxOfInjection>anzEinspr-1){
+			try {
+				throw new ParameterFileWrongInputException("The injection index ("
+					+idxOfInjection+") " +"you asked the specific evaporation "
+							+ "time for does not exist");
+			} catch (ParameterFileWrongInputException e) {			
+				e.stopBremo();				
+			}
+		}
+		String tauFlag;
+		if(anzEinspr==1){
+			tauFlag="tau";	
+		}else{
+			tauFlag="tau_"+idxOfInjection;
+		}		
+
+		try {
+			tau =  this.set_doublePara(INPUTFILE_PARAMETER, tauFlag,"[s]",0,
+					Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {
+			e.log_Warning("Es wurde im Parameterfile keine spezifische "
+					+ "Verdampfungszeit tau fuer die Einspritzung "
+					+idxOfInjection+ " angegeben. Der Wert wurde auf 0.5 ms gesetzt");
+			tau =  0.5*Math.pow(10,-3);
+		}	
+		return tau;
 	}
 
 

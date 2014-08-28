@@ -181,14 +181,16 @@ public class IterativeBerechnung {
 	 */
 	private void set_iterativeMethode(){
 		double offset=0;
+		FileReader fr;
+		BufferedReader br;
 		if(iterativeMethode==null){
 			iterativeMethode = "ohne";
 			try{
 				iterativeMethode = cp.get_iterativeMethode(mglMethoden);
 			}catch(Exception e){
 				try{
-					FileReader fr = new FileReader(newInputFile);
-					BufferedReader br = new BufferedReader(fr);
+					fr = new FileReader(newInputFile);
+					br = new BufferedReader(fr);
 					String line;
 					boolean schleife = true; //Falls in späteren Anwendungen die Schleife abgebrochen werden muss,
 					

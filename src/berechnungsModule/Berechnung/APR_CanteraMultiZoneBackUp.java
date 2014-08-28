@@ -355,7 +355,7 @@
 //
 //		int i=-1;
 //		i+=1;
-//		super.buffer_EinzelErgebnis("CrankAngle [°KW]",super.CP.convert_SEC2KW(time),i);
+//		super.buffer_EinzelErgebnis("CrankAngle [Â°KW]",super.CP.convert_SEC2KW(time),i);
 //
 //		i+=1;
 //		super.buffer_EinzelErgebnis("Time [s n. Rechenbeginn]",time,i);		

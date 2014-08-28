@@ -191,7 +191,7 @@
 //			
 //			int i=-1;
 //			i+=1;
-//			super.buffer_EinzelErgebnis("CrankAngle [∞KW]",super.CP.convert_SEC2KW(time),i);
+//			super.buffer_EinzelErgebnis("CrankAngle [¬∞KW]",super.CP.convert_SEC2KW(time),i);
 //
 //			i+=1;
 //			super.buffer_EinzelErgebnis("Time [s n. Rechenbeginn]",time,i);		
@@ -351,8 +351,8 @@
 //					if(es.get_Krst().get_name().equalsIgnoreCase("nc7h16")==false){
 //						//ToDo checken dass die EInspritzung ein pakestModell ist!
 //						try {
-//							throw new ParameterFileWrongInputException("F¸r das gwaehlte Berechnungsmodell " +
-//									"darf ausschlieﬂlich nc7h16 in Zone 1 eingespritzwerden \n" +
+//							throw new ParameterFileWrongInputException("F√ºr das gwaehlte Berechnungsmodell " +
+//									"darf ausschlie√ülich nc7h16 in Zone 1 eingespritzwerden \n" +
 //									" Eingespritzt wurde aber " +es.get_Krst().get_name());
 //						} catch (ParameterFileWrongInputException e) {				
 //							e.stopBremo();
@@ -361,7 +361,7 @@
 //				}
 //				if(es.get_ID_Zone()>1){				
 //					try {
-//						throw new ParameterFileWrongInputException("Einspritzungen sind ausschlieﬂlich in die " +
+//						throw new ParameterFileWrongInputException("Einspritzungen sind ausschlie√ülich in die " +
 //								"Zonen 0 und 1 moeglich! \n" +
 //								"Gewaehlt wurde aber Zone " +es.get_ID_Zone())  ;
 //					} catch (ParameterFileWrongInputException e) {				

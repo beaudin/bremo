@@ -40,9 +40,21 @@ public class VektorBuffer {
 				timeVekt.add(timeToAdd);
 				werteVekt.add(valueToAdd);
 			}
-		
-
 		}
+		
+		/**
+		 * Ein Zeitstempel und ein Wert werden den entsprechenden ArrayLists hinzugefügt
+		 * @param timeToAdd
+		 * @param valueToAdd
+		 */
+		public void addValueByForce(double timeToAdd, double valueToAdd){
+			if(timeToAdd>maxTime)
+				maxTime=timeToAdd;
+			timeVekt.add(timeToAdd);
+			werteVekt.add(valueToAdd);
+		}
+		
+		
 		/**
 		 * 
 		 * @param time
@@ -89,8 +101,13 @@ public class VektorBuffer {
 		}
 		
 		
-		
-		
+		/**
+		 * changes the starting index in case to search an array from a specific point
+		 * @param index
+		 */
+		public void setLastSearchIndex(int index){
+			L_Interp.set_lastsearchedIndex(index);
+		}	
 		
 	}	
 	

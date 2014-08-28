@@ -13,6 +13,7 @@ import berechnungsModule.Berechnung.Zone;
 import misc.VektorBuffer;
 import berechnungsModule.blowby.BlowBy;
 import berechnungsModule.blowby.BlowByFabrik;
+import berechnungsModule.gemischbildung.Frommelt;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
@@ -425,6 +426,22 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		super.buffer_EinzelErgebnis("mL [kg]", mL, i);
 		i++;
 		super.buffer_EinzelErgebnis("T_Saug [K]",this.TSaug,i);
+		
+		// buffer mass of fuel and characteristic evaporation time for each injection
+		int einspritzungen = CP.MASTER_EINSPRITZUNG.get_AllInjections().length;
+		for(int index=0; index<einspritzungen; index++){
+			if(CP.MASTER_EINSPRITZUNG.get_ModulWahl(CP.MASTER_EINSPRITZUNG.EINSPRITZ_MODELL_FLAG+index, CP.MASTER_EINSPRITZUNG.MOEGLICHE_EINSPRITZ_MODELLE).equals(Frommelt.FLAG)){ //Nur wenn Frommelt
+				i+=1;
+				super.buffer_EinzelErgebnis("Kraftstoffmasse_" + index + " [kg]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Mass(time), i);
+				i+=1;
+				super.buffer_EinzelErgebnis("Kraftstoffrate_" + index + " [kg/s]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Rate(time), i);
+				i+=1;
+				super.buffer_EinzelErgebnis("Tau_" + index + " [s]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Tau(time), i);
+			}
+			i+=1;
+			super.buffer_EinzelErgebnis("Kraftstoffdampf_" + index + " [kg]", this.masterEinspritzung.get_Einspritzung(index).get_mKrst_verdampft(time), i);	
+		}
+		
 		i++;
 		double []mi=zonen[0].get_mi();
 		for(int idx=0;idx<mi.length;idx++)

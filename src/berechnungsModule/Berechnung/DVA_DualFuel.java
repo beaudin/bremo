@@ -9,6 +9,7 @@ import misc.LittleHelpers;
 import misc.VektorBuffer;
 import berechnungsModule.blowby.BlowBy;
 import berechnungsModule.gemischbildung.Einspritzung;
+import berechnungsModule.gemischbildung.Frommelt;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.gemischbildung.Spray;
 import berechnungsModule.motor.Motor;
@@ -626,7 +627,21 @@ public class DVA_DualFuel extends DVA {
 
 		i+=1;		
 		super.buffer_EinzelErgebnis("m_2[kg]", zn[2].get_m(),i);
-
+		
+		// buffer mass of fuel and characteristic evaporation time for each injection
+		int einspritzungen = CP.MASTER_EINSPRITZUNG.get_AllInjections().length;
+		for(int index=0; index<einspritzungen; index++){
+			if(CP.MASTER_EINSPRITZUNG.get_ModulWahl(CP.MASTER_EINSPRITZUNG.EINSPRITZ_MODELL_FLAG+index, CP.MASTER_EINSPRITZUNG.MOEGLICHE_EINSPRITZ_MODELLE).equals(Frommelt.FLAG)){ //Nur wenn Frommelt
+				i+=1;
+				super.buffer_EinzelErgebnis("Kraftstoffmasse_" + index + " [kg]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Mass(time), i);
+				i+=1;
+				super.buffer_EinzelErgebnis("Kraftstoffrate_" + index + " [kg/s]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Rate(time), i);
+				i+=1;
+				super.buffer_EinzelErgebnis("Tau_" + index + " [s]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Tau(time), i);
+			}
+			i+=1;
+			super.buffer_EinzelErgebnis("Kraftstoffdampf_" + index + " [kg]", this.masterEinspritzung.get_Einspritzung(index).get_mKrst_verdampft(time), i);	
+		}
 
 		i+=1;
 		int iter=i;		

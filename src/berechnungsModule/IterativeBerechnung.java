@@ -196,13 +196,13 @@ public class IterativeBerechnung {
 					
 					while((line = br.readLine()) != null && schleife){
 						String tmp = line.replace(" ", "").replace("\t","");
-						if(tmp.toLowerCase().contains("rechnungsende")){
+						if(tmp.toLowerCase().contains("rechnungsende[")){
 							rechnungsEnde_ORG = line;
-						}else if(tmp.toLowerCase().contains("pressureadjustmentmethod") && tmp.contains("summenbrennverlauf")){
+						}else if(tmp.toLowerCase().contains("pressureadjustmentmethod[") && tmp.contains("summenbrennverlauf")){
 							iterativeMethode = "summenbrennverlaufsmethode";
-						}else if(tmp.contains("offset[Pa]")){
+						}else if(tmp.contains("offset[")){
 							offset = Double.parseDouble(tmp.substring(line.lastIndexOf(":=")).replace("=", "").replace(":", ""));
-						}else if(tmp.toLowerCase().contains(("KW_Ende_Druckabgleich").toLowerCase())){
+						}else if(tmp.toLowerCase().contains(("KW_Ende_Druckabgleich[").toLowerCase())){
 							rechnungsEnde = "rechnungsEnde [KWnZOT] := " + (1+Double.parseDouble(tmp.substring(line.lastIndexOf(":=")).replace("=", "").replace(":", "")));
 						}
 					}

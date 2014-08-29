@@ -30,7 +30,7 @@ public abstract class MasterLWA extends BerechnungsModell{
 		super(cp, ergBuf);
 		indiD = new IndizierDaten(cp);
 		dQburn = 0;
-		ergBuffDebug=new ErgebnisBuffer(cp,"LWA_DEBUG_");
+		ergBuffDebug=new ErgebnisBuffer(cp,"dbl"); //früher "LWA_DEBUG_"
 		precission=CP.get_precissionPressureTraceAnalysis();
 		relaxFactor=CP.get_relaxFactor();
 	}

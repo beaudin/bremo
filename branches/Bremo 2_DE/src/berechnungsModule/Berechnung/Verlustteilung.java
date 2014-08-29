@@ -75,7 +75,7 @@ public class Verlustteilung {
 		
 		masterEinspritzung = CP.MASTER_EINSPRITZUNG;
 		
-		Ergebnis = new ErgebnisBuffer(CP,"");		
+		Ergebnis = new ErgebnisBuffer(CP,"vlt");		
 		double x0;
 		// initial value of x
 		x0 =CP.SYS.RECHNUNGS_BEGINN_DVA_SEC; 
@@ -635,7 +635,7 @@ public class Verlustteilung {
 		String [] headerEta = {"Wirkungsgrade [%]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","Reibung","Gleichraumprozess"};
 		
 		//String name="Verlustteilung-Verläufe_"+CP.get_CaseName()+".txt";
-		Ergebnis.schreibeErgebnisFile("Verlustteilung-APR-Verlauf_"+CP.get_CaseName()+".txt");
+		Ergebnis.schreibeErgebnisFile(CP.get_CaseName()+".txt"); //früher "Verlustteilung-Verläufe_"+CP.get_CaseName()+".txt"
 		
 		//if(CP.MODUL_VORGABEN.get("internesRestgasModell").equals("LWA")){ //START: LWA
 		//ErgebnisLWA.schreibeErgebnisFile("Verlustteilung-LWA-Verlauf_"+CP.get_CaseName()+".txt");

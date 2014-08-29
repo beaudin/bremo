@@ -71,14 +71,14 @@ public class LadungsWechselAnalyse extends MasterLWA {
 	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen 
 	private misc.VektorBuffer p_buffer ;							//fuer Verlustteilung Frank Haertel 
 	public LadungsWechselAnalyse(CasePara cp) {
-		super(cp,new ErgebnisBuffer(cp,"LWA_"));
+		super(cp,new ErgebnisBuffer(cp,"lwa")); //früher "LWA_"
 		
 		indiD=super.indiD; 											//fuer Verlustteilung Frank Haertel
 		Qburn = 0;
 	    createMe(cp); 												//fuer Verlustteilung Frank Haertel 
 	  } 															//fuer Verlustteilung Frank Haertel 
-	public LadungsWechselAnalyse(CasePara cp, boolean gemittelt){//fuer Verlustteilung Frank Haertel  
-	    super(cp,new ErgebnisBuffer(cp,"LWA_"));					//fuer Verlustteilung Frank Haertel  
+	public LadungsWechselAnalyse(CasePara cp, boolean gemittelt){	//fuer Verlustteilung Frank Haertel  
+	    super(cp,new ErgebnisBuffer(cp,"lwa")); //früher "LWA_"		//fuer Verlustteilung Frank Haertel  
 	    if (gemittelt == true) 										//fuer Verlustteilung Frank Haertel 
 	      indiD=new IndizierDaten(cp,true); 						//fuer Verlustteilung Frank Haertel 
 	    else 														//fuer Verlustteilung Frank Haertel 

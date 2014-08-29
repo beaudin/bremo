@@ -58,13 +58,13 @@ public class LadungsWechselAnalyse_ohneQb extends BerechnungsModell {
 	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen 
 	private misc.VektorBuffer p_buffer ;							//fuer Verlustteilung Frank Haertel 
 	public LadungsWechselAnalyse_ohneQb(CasePara cp) {
-		super(cp,new ErgebnisBuffer(cp,"LWA_"));
+		super(cp,new ErgebnisBuffer(cp,"lwa")); //früher "LWA_"
 		
 		indiD=new IndizierDaten(cp); 								//fuer Verlustteilung Frank Haertel 
 	    createMe(cp); 												//fuer Verlustteilung Frank Haertel 
 	  } //fuer Verlustteilung Frank Haertel 
 	  public LadungsWechselAnalyse_ohneQb(CasePara cp, boolean gemittelt){	//fuer Verlustteilung Frank Haertel  
-	    super(cp,new ErgebnisBuffer(cp,"LWA_"));					//fuer Verlustteilung Frank Haertel  
+	    super(cp,new ErgebnisBuffer(cp,"lwa")); //früher "LWA_"		//fuer Verlustteilung Frank Haertel  
 	    if (gemittelt == true) 										//fuer Verlustteilung Frank Haertel 
 	      indiD=new IndizierDaten(cp,true); 						//fuer Verlustteilung Frank Haertel 
 	    else 														//fuer Verlustteilung Frank Haertel 

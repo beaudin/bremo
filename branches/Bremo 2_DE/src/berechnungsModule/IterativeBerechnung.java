@@ -146,33 +146,35 @@ public class IterativeBerechnung {
 	 * @throws IOException
 	 */
 	private void copyCasePara(File file) throws IOException{
-		FileReader fr = new FileReader(file);
-		PrintWriter pw = new PrintWriter(fileName);
-		BufferedReader br = new BufferedReader(fr);
-		String line;
-		boolean found = false;
-		while((line = br.readLine()) != null){
-			String tmp = line.replace(" ", "").replace("\t", "");
-			if(isIterativ){
-				if(iterativeMethode.equalsIgnoreCase("summenbrennverlaufsmethode") && tmp.startsWith("offset[Pa]") && !found){
-					pw.println(eintrag);
-					found = true;
-				}else if(iterativeMethode.equalsIgnoreCase("summenbrennverlaufsmethode") && tmp.startsWith("rechnungsEnde") && !lastTurn){
-						pw.println(rechnungsEnde);
-				}else if(tmp.startsWith("[Bremo::Input::Stop]") && !found){
-					pw.println(eintrag);
-					pw.println("[Bremo::Input::Stop]");
+		if(isIterativ){
+			FileReader fr = new FileReader(file);
+			PrintWriter pw = new PrintWriter(fileName);
+			BufferedReader br = new BufferedReader(fr);
+			String line;
+			boolean found = false;
+			while((line = br.readLine()) != null){
+				String tmp = line.replace(" ", "").replace("\t", "");
+				if(isIterativ){
+					if(iterativeMethode.equalsIgnoreCase("summenbrennverlaufsmethode") && tmp.startsWith("offset[Pa]") && !found){
+						pw.println(eintrag);
+						found = true;
+					}else if(iterativeMethode.equalsIgnoreCase("summenbrennverlaufsmethode") && tmp.startsWith("rechnungsEnde") && !lastTurn){
+							pw.println(rechnungsEnde);
+					}else if(tmp.startsWith("[Bremo::Input::Stop]") && !found){
+						pw.println(eintrag);
+						pw.println("[Bremo::Input::Stop]");
+					}else{
+						pw.println(line);
+					}
 				}else{
 					pw.println(line);
 				}
-			}else{
-				pw.println(line);
 			}
+			pw.flush();
+			pw.close();
+			br.close();
+			fr.close();
 		}
-		pw.flush();
-		pw.close();
-		br.close();
-		fr.close();
 	}
 	
 	/**
@@ -220,6 +222,7 @@ public class IterativeBerechnung {
 		switch(iterativeMethode){
 		case "ohne":
 			this.isIterativ = false;
+			this.lastTurn = true;
 			changedValue = 0;
 			eintrag = "";
 		case "summenbrennverlaufsmethode":

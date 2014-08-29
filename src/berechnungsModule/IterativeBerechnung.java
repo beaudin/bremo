@@ -1,9 +1,11 @@
 package berechnungsModule;
 
 import io.FileWriter_txt;
+import io.InputFileReader;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import matLib.VectorTools;
 import berechnungsModule.Berechnung.DVA;
@@ -21,28 +23,31 @@ public class IterativeBerechnung {
 	public static final String[] mglMethoden={"ohne", 
 											"summenbrennverlaufsmethode"};
 	
-	private boolean isIterativ, lastTurn=false;
+	private boolean isIterativ, lastTurn=false, delete=false;
 	private CasePara cp;
 	private misc.VektorBuffer vekBuf;
 	private String iterativeMethode;
 	private double changedValue;
 	private String fileName;
 	private String eintrag;
-	private File newInputFile;
+	private File orgInputFile;
 	private String rechnungsEnde, rechnungsEnde_ORG;
 	
 	public IterativeBerechnung(File input){
 		isIterativ = true;																		//Es wird erst einmal von true ausgegangen
 		File inputFile = input;
-		fileName = inputFile.getAbsolutePath();
-		newInputFile = new File(fileName.substring(0, fileName.lastIndexOf(".")+1)+"org");
-		inputFile.renameTo(newInputFile);														//Original-Inputfile wird umbenannt zu *.org 
+		fileName = inputFile.getAbsolutePath();													//Original-Inputfile wird umbenannt zu *.org 
 		changedValue = 0;
-		this.set_iterativeMethode();
-		try{
-			copyCasePara(newInputFile);															//Original-Inputfile wird zeilenweise kopiert 
-		}catch(IOException io){
-			io.printStackTrace();
+		this.set_iterativeMethode(inputFile);
+		if(isIterativ){
+			try{
+				orgInputFile = new File(fileName.substring(0, fileName.lastIndexOf(".")+1)+"org");
+				inputFile.renameTo(orgInputFile);
+				copyCasePara(orgInputFile);															//Original-Inputfile wird zeilenweise kopiert
+				delete = true;
+			}catch(IOException io){
+				io.printStackTrace();
+			}
 		}
 	}
 	
@@ -101,7 +106,7 @@ public class IterativeBerechnung {
 			}
 			
 			try {
-				copyCasePara(newInputFile);
+				copyCasePara(orgInputFile);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -174,6 +179,9 @@ public class IterativeBerechnung {
 			pw.close();
 			br.close();
 			fr.close();
+		}else{
+			File inputFile = new File(fileName);
+			orgInputFile.renameTo(inputFile);
 		}
 	}
 	
@@ -181,57 +189,58 @@ public class IterativeBerechnung {
 	 * Zum Setzen der "iterativenMethode" am Anfang, bevor die CasePara erstellt wurde. Wurde die Input-Datei schon eingelesen, wird die
 	 * get-Methode verwendet.
 	 */
-	private void set_iterativeMethode(){
-		double offset=0;
-		FileReader fr;
-		BufferedReader br;
-		if(iterativeMethode==null){
-			iterativeMethode = "ohne";
-			try{
-				iterativeMethode = cp.get_iterativeMethode(mglMethoden);
-			}catch(Exception e){
+	private void set_iterativeMethode(File file){
+		InputFileReader	ifr =new InputFileReader(file);
+		Hashtable<String,String[]> INPUTFILE_PARAMETER=ifr.get_eingabeParameter();
+		iterativeMethode = "ohne";
+		this.isIterativ = false;
+		this.lastTurn = true;
+		eintrag = "";
+		
+//		################################################################################################################
+//		Für Summenbrennverlaufsmethode:
+		try{
+			String[] werte = INPUTFILE_PARAMETER.get("pressureAdjustmentMethod");
+			if(werte[0].equalsIgnoreCase("summenbrennverlauf")){
+				iterativeMethode = "summenbrennverlaufsmethode";
+				this.isIterativ = true;
+				this.lastTurn = false;
 				try{
-					fr = new FileReader(newInputFile);
-					br = new BufferedReader(fr);
-					String line;
-					boolean schleife = true; //Falls in späteren Anwendungen die Schleife abgebrochen werden muss,
-					
-					while((line = br.readLine()) != null && schleife){
-						String tmp = line.replace(" ", "").replace("\t","");
-						if(tmp.toLowerCase().contains("rechnungsende[")){
-							rechnungsEnde_ORG = line;
-						}else if(tmp.toLowerCase().contains("pressureadjustmentmethod[") && tmp.contains("summenbrennverlauf")){
-							iterativeMethode = "summenbrennverlaufsmethode";
-						}else if(tmp.contains("offset[")){
-							offset = Double.parseDouble(tmp.substring(line.lastIndexOf(":=")).replace("=", "").replace(":", ""));
-						}else if(tmp.toLowerCase().contains(("KW_Ende_Druckabgleich[").toLowerCase())){
-							rechnungsEnde = "rechnungsEnde [KWnZOT] := " + (1+Double.parseDouble(tmp.substring(line.lastIndexOf(":=")).replace("=", "").replace(":", "")));
-						}
-					}
-					br.close();
-					fr.close();
-				}catch(Exception f){
-					try{
-						throw new BirdBrainedProgrammerException("Fehler beim durchgehen des Inputfiles du Depp!");
-					}catch(BirdBrainedProgrammerException b) {
-						b.stopBremo();
+					werte = INPUTFILE_PARAMETER.get("offset");
+					changedValue = Double.parseDouble(werte[0]);
+				}catch(Exception e){
+					werte[0] = "0";
+					werte[1] = "[Pa]";
+				}
+				eintrag = "offset "+werte[1]+" := "+werte[0];
+				try{
+					werte = INPUTFILE_PARAMETER.get("KW_Ende_Druckabgleich");
+				}catch(Exception e){
+					werte[0] = "-50";
+					werte[1] = "[KWnZOT]";
+				}
+				double plus;
+				if(werte[1].contains("KWnZOT")){
+					plus = 1;
+				}else{
+					if(INPUTFILE_PARAMETER.get("rechnungsSchrittweite")[1].contains("KW")){
+						plus = Double.parseDouble(INPUTFILE_PARAMETER.get("rechnungsSchrittweite")[0]) / Double.parseDouble(INPUTFILE_PARAMETER.get("Drehzahl")[0]) / 6;
+					}else{
+						plus = Double.parseDouble(INPUTFILE_PARAMETER.get("rechnungsSchrittweite")[0]);
 					}
 				}
+				rechnungsEnde = "rechnungsEnde "+werte[1]+" := "+(Double.parseDouble(werte[0])+plus);
+				werte = INPUTFILE_PARAMETER.get("rechnungsEnde");
+				rechnungsEnde_ORG = "rechnungsEnde "+werte[1]+" := "+werte[0];
 			}
-		}
-		switch(iterativeMethode){
-		case "ohne":
-			this.isIterativ = false;
-			this.lastTurn = true;
-			changedValue = 0;
-			eintrag = "";
-		case "summenbrennverlaufsmethode":
-			changedValue = offset;
-			eintrag = "offset [Pa] := "+Double.toString(changedValue);
-		}
+		}catch(Exception e){}
+//		################################################################################################################
+		
 	}
 
 	public void deleteFile() {
-		newInputFile.delete();
+		if(delete){
+			orgInputFile.delete();
+		}
 	}
 }

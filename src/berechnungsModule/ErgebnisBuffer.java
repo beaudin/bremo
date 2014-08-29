@@ -17,14 +17,15 @@ public class ErgebnisBuffer {
 
 	private Hashtable<String, Vector<Double>> ergebnisHash=new Hashtable<String, Vector<Double>>();
 	private Hashtable<String, Integer> ergebnisSpalteHash=new Hashtable<String, Integer>();
-	private String praefix;
+	private String praefix, endung;
 	
 	private CasePara cp;
 
 
-	public ErgebnisBuffer(CasePara cp,String praefix){	
+	public ErgebnisBuffer(CasePara cp, String endung){	
 		this.cp=cp;
-		this.praefix=praefix;
+//		this.praefix=praefix;
+		this.endung = endung;
 		cp.ergBufferCheckIN(this);	
 	}	
 
@@ -97,7 +98,8 @@ public class ErgebnisBuffer {
 
 
 	public  void schreibeErgebnisFile(String name){
-		String pfadFinal=cp.get_workingDirectory()+this.praefix+name;
+//		String pfadFinal=cp.get_workingDirectory()+this.praefix+name;
+		String pfadFinal=cp.get_workingDirectory()+name.replace(".txt", "."+this.endung);
 		String Separator  ="\n**************************************************\n";
 //		System.err.println(Separator);
 		System.err.println(Separator+"Schreibe "+praefix+"Datei:\n"+pfadFinal+Separator);

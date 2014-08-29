@@ -29,7 +29,7 @@ public class PostProcessor {
 	public PostProcessor(VektorBuffer dm_buffer,VektorBuffer dQb_buffer,VektorBuffer dQw_buffer, CasePara cp){
 			this.CP=cp;
 			
-			ergB=new ErgebnisBuffer(CP,"DVA_Post_");
+			ergB=new ErgebnisBuffer(CP,"pfd"); // Post-File-DVA, früher "DVA_Post_"
 			inti=new Integrator();
 			double dt=CP.SYS.WRITE_INTERVAL_SEC;
 			Qw=inti.get_IntegralVerlauf(dt,dQw_buffer.getValues());		
@@ -242,7 +242,7 @@ public class PostProcessor {
 	public PostProcessor(VektorBuffer dm_buffer,VektorBuffer dQb_buffer,VektorBuffer dQw_buffer, VektorBuffer p_buffer, CasePara cp){
 		this.CP=cp;
 		
-		ergB=new ErgebnisBuffer(CP,"APR_Post_");
+		ergB=new ErgebnisBuffer(CP,"pfa"); //Post-File-APR, früher "APR_Post_"
 		inti=new Integrator();
 		double dt=CP.SYS.WRITE_INTERVAL_SEC;
 		Qw=inti.get_IntegralVerlauf(dt,dQw_buffer.getValues());		

@@ -29,7 +29,7 @@ public class Spray extends Einspritzung {
 
 	public Spray (CasePara cp,int idxOfInjection){
 		super(cp,idxOfInjection);
-		ergBuf=new ErgebnisBuffer(cp,"Hiroyasu_");
+		ergBuf=new ErgebnisBuffer(cp,"hir"); //früher "Hiroyasu_"
 		dmKRst_buffer =new VektorBuffer(cp);
 
 		this.ANZ_SPL=CP.get_anzSPL(idxOfInjection);

@@ -8,7 +8,7 @@ public abstract class APR extends BerechnungsModell {
 
 
 	protected APR(CasePara cp) {
-		super(cp,new ErgebnisBuffer(cp,"APR_"));
+		super(cp,new ErgebnisBuffer(cp,"apr"));
 	}
 
 	@Override

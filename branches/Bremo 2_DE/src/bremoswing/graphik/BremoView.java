@@ -32,6 +32,7 @@ import javax.swing.JOptionPane;
 import org.jfree.chart.ChartPanel;
 
 import bremoswing.SwingBremo;
+import bremoswing.util.BremoExtensionFileFilter;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.FertigMeldungFrame;
 import bremoswing.util.ImageBackgroundJPanel;
@@ -594,10 +595,11 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			fileChooser = new JFileChooser(SwingBremo.loadPathFromFile());
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			fileChooser.setMultiSelectionEnabled(false);
-			ExtensionFileFilter txtFilter = new ExtensionFileFilter(null,
-					new String[] { "txt" });
-
-			fileChooser.addChoosableFileFilter(txtFilter);
+			BremoExtensionFileFilter bremoExtensionFileFilter = new BremoExtensionFileFilter();
+			ExtensionFileFilter [] bremoListExtentionFilter = bremoExtensionFileFilter.getBremoListExtentionFilter();
+	        for (int i = 0 ; i < bremoListExtentionFilter.length; i++) {
+	        	fileChooser.addChoosableFileFilter(bremoListExtentionFilter[i]);
+	        }
 			try {
 				int status = fileChooser.showOpenDialog(getRootPane());
 

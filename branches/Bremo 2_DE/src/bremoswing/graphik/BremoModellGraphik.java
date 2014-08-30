@@ -81,6 +81,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import bremo.main.Bremo;
 import bremoExceptions.ParameterFileWrongInputException;
+import bremoswing.util.BremoExtensionFileFilter;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.FertigMeldungFrame;
 import bremoswing.util.PdfFilePrinting;
@@ -1745,10 +1746,11 @@ public abstract class BremoModellGraphik extends JFrame{
 	    JFileChooser fileChooser = new JFileChooser(currentPath);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(false);
-		ExtensionFileFilter txtFilter = new ExtensionFileFilter(null,
-				new String[] { "txt" });
-
-		fileChooser.addChoosableFileFilter(txtFilter);
+		BremoExtensionFileFilter bremoExtensionFileFilter = new BremoExtensionFileFilter();
+		ExtensionFileFilter [] bremoListExtentionFilter = bremoExtensionFileFilter.getBremoListExtentionFilter();
+        for (int i = 0 ; i < bremoListExtentionFilter.length; i++) {
+        	fileChooser.addChoosableFileFilter(bremoListExtentionFilter[i]);
+        }
 		try {
 			int status = fileChooser.showOpenDialog(getRootPane());
 

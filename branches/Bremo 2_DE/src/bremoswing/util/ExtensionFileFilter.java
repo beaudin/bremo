@@ -11,7 +11,7 @@ public class ExtensionFileFilter extends FileFilter {
   String description;
 
   String extensions[];
-
+    
   public ExtensionFileFilter(String description, String extension) {
     this(description, new String[] { extension });
   }
@@ -25,7 +25,7 @@ public class ExtensionFileFilter extends FileFilter {
     this.extensions = (String[]) extensions.clone();
     toLower(this.extensions);
   }
-
+  
   private void toLower(String array[]) {
     for (int i = 0, n = array.length; i < n; i++) {
       array[i] = array[i].toLowerCase();

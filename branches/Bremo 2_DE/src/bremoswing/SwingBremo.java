@@ -56,6 +56,7 @@ import bremo.main.Bremo;
 import bremoswing.graphik.BremoView;
 import bremoswing.graphik.BremoViewModel;
 import bremoswing.graphik.SelectItemToPlotten;
+import bremoswing.util.BremoExtensionFileFilter;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.SucheBremo;
 import bremoswing.util.FertigMeldungFrame;
@@ -169,7 +170,7 @@ public class SwingBremo extends JFrame {
         private void initComponents() {
 
                 System.setOut(outStream);
-                System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
+                //System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
 
                 manager = new JPanel(){
                         /**
@@ -697,10 +698,11 @@ public class SwingBremo extends JFrame {
                 JFileChooser fileChooser = new JFileChooser(path);
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 fileChooser.setMultiSelectionEnabled(true);
-                ExtensionFileFilter txtFilter = new ExtensionFileFilter(null,
-                                new String[] { "txt" });
-
-                fileChooser.addChoosableFileFilter(txtFilter);
+                BremoExtensionFileFilter bremoExtensionFileFilter = new BremoExtensionFileFilter();
+        		ExtensionFileFilter [] bremoListExtentionFilter = bremoExtensionFileFilter.getBremoListExtentionFilter();
+                for (int i = 0 ; i < bremoListExtentionFilter.length; i++) {
+                	fileChooser.addChoosableFileFilter(bremoListExtentionFilter[i]);
+                }
                 try {
                         label.setText(" Datei Werden geladen ... ");
                

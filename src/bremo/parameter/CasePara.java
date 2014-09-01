@@ -2691,7 +2691,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	
 	/** 
 	 * @return Gibt den Einlassventildurchmesser zurück, der für das
-	 * Wandwärmemodell nach BArgende verwendet werden soll.
+	 * Wandwärmemodell nach Bargende verwendet werden soll.
 	 * */
 	public double get_EV_Durchmesser() {
 		double Durchmesser_EV;

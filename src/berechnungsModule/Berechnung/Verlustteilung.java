@@ -22,7 +22,7 @@ public class Verlustteilung {
 	protected CasePara CP;
 	double kappa = 1.4 ;
 	double epsilon;
-	
+
 	private MasterEinspritzung masterEinspritzung;
 	private Motor motor;
 	
@@ -75,7 +75,7 @@ public class Verlustteilung {
 		
 		masterEinspritzung = CP.MASTER_EINSPRITZUNG;
 		
-		Ergebnis = new ErgebnisBuffer(CP,"vlt");		
+		Ergebnis = new ErgebnisBuffer(CP,"txt");		
 		double x0;
 		// initial value of x
 		x0 =CP.SYS.RECHNUNGS_BEGINN_DVA_SEC; 
@@ -318,7 +318,6 @@ public class Verlustteilung {
 		System.err.println("Verlustteilung FALL 1b: Punktuelle Wärmefreisetzung in OT, adiabat");
 		
 		//Idealer Gleichraumprozess FALL 1a
-		//TODO: hier noch Verlauf berechnen mit kappa = 1.4 = const.
 		
 		////////////////////////Kerrom////////////////////////////////////////////////////////	
 		double OT_Versatz = motor.get_OT_Versatz(); //[KWnZOT]
@@ -591,35 +590,37 @@ public class Verlustteilung {
 		//Ausgabe von pMaxGleichraum in eigene Datei
 		String [] headerPmaxGleichraum = {"Kurbelwinkel [°KW]","Zeit [s n. Rechenbeginn]","Brennraumvolumen [m3]","pMax Gleichraumprozess [bar]"};
 		double [] pMaxGleichraumArray = {Math.round(CP.convert_SEC2KW(t_OT)*10)/10.0,t_anfangExpansion, motor.get_V(t_anfangExpansion),pMaxGleichraum/1e5};
-		FileWriter_txt txtFilePmax = new FileWriter_txt(CP.get_workingDirectory()+"Verlustteilung-pMaxGleichraum_"+CP.get_CaseName()+".txt");
+		FileWriter_txt txtFilePmax = new FileWriter_txt(CP.get_workingDirectory()+CP.get_CaseName()+"_Verlustteilung-pMaxGleichraum"+".txt");
 		txtFilePmax.writeTextLineToFile(headerPmaxGleichraum, false);
 		txtFilePmax.writeLineToFile(pMaxGleichraumArray, true);
 		
 		// Ausgabe in Fenster
-		System.err.println("\n"+"Verlustteilung_Post_Ergebnisse:");
+		System.err.println("\n"+"Verlustteilung_Post_Ergebnisse (s. MTZ 2/2005 S.120f):");
 		System.err.println("====================================");
-		System.err.println("pMax_Gleichraumprozess = " + pMaxGleichraum/1e5 + " [bar]\n");
-		System.err.println("pmi_Ideal = " + pmiIdeal*1e-5 + " [bar]\n" +
-							"pmi_Real = " + pmiReal*1e-5 + " [bar]\n" +
+		System.err.println("pMax_Gleichraumprozess (@Vmin)= " + pMaxGleichraum/1e5 + " [bar]\n");
+		System.err.println("pmi_Idealprozess = " + pmiIdeal*1e-5 + " [bar]\n" +
+							"pmi_RealeLadung = " + pmiReal*1e-5 + " [bar]\n" +
 							"pmi_Verbrennungslage = " + pmiVerbrennungslage*1e-5 + " [bar]\n" +
 							"pmi_HCCO = " + pmiHCCO*1e-5 + " [bar]\n" +
 							"pmi_Brennverlauf = "+ pmiBrennverlauf*1e-5+ " [bar]\n"+
 							"pmi_Wandwärmeverlust = "+pmiMit*1e-5+ " [bar]\n" +
 							"pmi_LWAideal = " +pmiLWAideal*1e-5+ " [bar]\n" +
-							"pmi_LWA_Original = " + pmiOriginal*1e-5 + " [bar]\n" +
-							"pmi_Reibung = " + pme*1e-5 + " [bar]\n" +
-							"pmi_Gleichraumprozess = " + pmiGleichraum*1e-5 +" [bar]\n");
+							"pmi_Realprozess = " + pmiOriginal*1e-5 + " [bar]\n" +
+							"pmi_Reibung = " + pme*1e-5 + " [bar]\n"
+							//+"pmi_Gleichraumprozess = " + pmiGleichraum*1e-5 +" [bar]\n"
+							);
 		System.err.println("Wirkungsgrade:\n" + 
-							"eta_Ideal = " +etaIdeal + " [-]\n" + 
-							"eta_Real = " + etaReal + " [-]\n" +
+							"eta_Idealprozess = " +etaIdeal + " [-]\n" + 
+							"eta_RealeLadung = " + etaReal + " [-]\n" +
 							"eta_Verbrennungslage = " + etaVerbrennungslage + " [-]\n" +
 							"eta_HCCO = " + etaHCCO + " [-]\n" +
 							"eta_Brennverlauf = " + etaBrennverlauf + " [-]\n" +
 							"eta_Wandwärmeverlust = " + etaMit +" [-]\n" +
-							"eta_Original = " + etaOriginal+ " [-]\n" +
 							"eta_LWAideal = " + etaLWAideal + " [-]\n" +
-							"eta_Reibung = " + etaMech + " [-]\n" +
-							"eta_Gleichraumprozess =  " + etaGleichraum + " [-]");
+							"eta_Realprozess = " + etaOriginal+ " [-]\n" +
+							"eta_Reibung = " + etaMech + " [-]\n"
+							//+"eta_Gleichraumprozess =  " + etaGleichraum + " [-]"
+							);
 		/////////////////////////////////////////////////////////////////////////////////////////
 		
 		
@@ -635,13 +636,13 @@ public class Verlustteilung {
 		String [] headerEta = {"Wirkungsgrade [%]","----->>","Idealprozess","Reale Ladung","Verbrennungslage","HC-/CO-Emissionen","Realer Brennverlauf","Wandwärmeverlust","LWAideal","LWA_Original","Reibung","Gleichraumprozess"};
 		
 		//String name="Verlustteilung-Verläufe_"+CP.get_CaseName()+".txt";
-		Ergebnis.schreibeErgebnisFile(CP.get_CaseName()+".txt"); //früher "Verlustteilung-Verläufe_"+CP.get_CaseName()+".txt"
+		Ergebnis.schreibeErgebnisFile(CP.get_CaseName()+"_Verlustteilung-APR-Verlauf"+".txt");
 		
 		//if(CP.MODUL_VORGABEN.get("internesRestgasModell").equals("LWA")){ //START: LWA
 		//ErgebnisLWA.schreibeErgebnisFile("Verlustteilung-LWA-Verlauf_"+CP.get_CaseName()+".txt");
 		//}// ENDE: LWA
 		
-		FileWriter_txt txtFile = new FileWriter_txt(CP.get_workingDirectory()+"Verlustteilung-Wirkungsgrade_"+CP.get_CaseName()+".txt");		
+		FileWriter_txt txtFile = new FileWriter_txt(CP.get_workingDirectory()+CP.get_CaseName()+"_Verlustteilung-Wirkungsgrade"+".txt");		
 		txtFile.writeTextLineToFile(headerPmi, false);
 		txtFile.writeLineToFile (pmi, true);
 		txtFile.writeTextLineToFile(headerEta, true);
@@ -812,7 +813,8 @@ private VektorBuffer ladungswechselAnalyseDurchfuehren(BerechnungsModell dglSys_
 					LW_SOL.setInitialValueOfX(time);
 					if(CP.SYS.DUBUGGING_MODE){						
 						if(Math.abs(time-CP.SYS.DUBUGGING_TIME_SEC)<0.5*CP.SYS.WRITE_INTERVAL_SEC){ //Rechnet bis KW und schreibt dann alle Werte ins txt-file
-							dglSys_LW.schreibeErgebnisFile("DEBUG_"+CP.get_CaseName()+".txt");	
+//							dglSys_LW.schreibeErgebnisFile("DEBUG_"+CP.get_CaseName()+".txt");
+							dglSys_LW.schreibeErgebnisFile(CP.get_CaseName()+"_Verlustteilung.dbl");	//Früher DEBUG_
 							System.out.println("I am plotting...");
 						}
 					}				

@@ -32,7 +32,8 @@ public abstract class DVA extends BerechnungsModell{
 	protected DVA(CasePara cp) {		
 		super(cp,new ErgebnisBuffer(cp,"dva"));
 //		Für Verlustteilung burnFileName setzen. Die Spalte wird in den einzelnen DVA-Berechnungen definiert. -- Neurohr
-		cp.set_ParaInputfile("burnFileName", "[-]", "DVA_"+cp.get_CaseName()+".txt");
+//		cp.set_ParaInputfile("burnFileName", "[-]", "DVA_"+cp.get_CaseName()+".txt");
+		cp.set_ParaInputfile("burnFileName", "[-]", cp.get_CaseName()+".dva");
 		indiD=new IndizierDaten(cp);
 		dQburn=0;
 		ergBuffDebug=new ErgebnisBuffer(cp,"dbd"); //Debug DVA, früher "DVA_DEBUG_"
@@ -238,14 +239,16 @@ public abstract class DVA extends BerechnungsModell{
 				//Jetzt wird  nach der ersten Nullstelle vor dem 1%-Umsatzpunkt gesucht
 				//Das ist dann der Verbrennungsbeginn!
 				foundVerbrennungsBeginn=false;
-				do{					
+								
+				do{
+					if(index>=0){
 					if(dQb_buffer[index]<=0){
 						foundVerbrennungsBeginn=true;
 						t_VerbrennungsBeginn=t_VerbrennungsBeginn+1*dt;
 					}
 					t_VerbrennungsBeginn=t_VerbrennungsBeginn-dt;
 					index=index-1;
-					
+					}
 				}while(foundVerbrennungsBeginn==false&&index>=0);
 				
 				//Falls es keine Nullstelle vor dem 1%-Umsatzpunkt gibt

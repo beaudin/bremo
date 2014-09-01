@@ -20,6 +20,7 @@ import bremoExceptions.ParameterFileWrongInputException;
 public class BrennverlaufFileReader {
 	
 	private static String ext = ".txt";
+	private static String dvaext = ".dva";
 	private int spalte_dQburn;
 	private int anzahlZyklen;
 	private double dauerASP;
@@ -43,7 +44,8 @@ public class BrennverlaufFileReader {
 		this.dauerASP=dauerASP;
 		anzahlZyklen=1; 
 		 
-		if( !pfad.endsWith(ext))
+//		if( !pfad.endsWith(ext))
+		if( !(pfad.endsWith(ext)|pfad.endsWith(dvaext)))
 			 throw new IllegalArgumentException("TXT_datei: kein gültiges Dateiformat");
 		
 		file = new File(pfad);

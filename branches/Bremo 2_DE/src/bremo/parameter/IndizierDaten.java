@@ -160,7 +160,7 @@ public class IndizierDaten {
 			
 			if(gemittelt == false){ //fuer Verlustteilung Frank Haertel
 			pEinRoh=indiReader.get_pEin();
-			//Anpassendes Mittelwertes von Saugrohrdrucksensor und Piezo		
+			//Anpassen des Mittelwertes von Saugrohrdrucksensor und Piezo		
 			if(CP.shift_pInlet()){
 				double offset=CP.get_p_LadeLuft()-matLib.MatLibBase.mw_aus_1DArray(pEinRoh);
 				pEinRoh=this.shiftMe(pEinRoh, offset);
@@ -217,7 +217,7 @@ public class IndizierDaten {
 	    //fuer Verlustteilung Frank Haertel
 		
 		////////////////////////////////////
-		//Definieren des Zylidnerdrucks
+		//Definieren des Zyliderdrucks
 		///////////////////////////////////
 		pZylRoh=indiReader.get_pZyl();
 		//Abgleich der Zylinderdruckkorrektur

@@ -201,7 +201,7 @@ PistonBowlDepth	[m]	:=	0
 #########APR/VERLUSTTEILUNG########				
 ###############################				
 Verlustteilung	[-]	:=	ja	
-burnFileName	[-]	:=	DVA_Inputfile.txt	
+burnFileName	[-]	:=	Inputfile.dva	
 spalte_dQburn	[-]	:=	12	
 compareToExp	[-]	:=	ja	
 p_Ini	[Pa]	=		

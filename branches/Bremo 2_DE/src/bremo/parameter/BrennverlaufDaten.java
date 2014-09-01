@@ -68,7 +68,7 @@ public class BrennverlaufDaten {
 			
 			BrennverlaufFileReader burnReader = null;
 			
-			if (fileName.endsWith("txt") || fileName.endsWith("TXT"))
+			if (fileName.endsWith("txt") || fileName.endsWith("TXT") || fileName.endsWith("dva"))
 				burnReader=new BrennverlaufFileReader(CP,burnFile.getAbsolutePath(),dQburnNr,dauerASP);
 			if(burnReader==null){
 				try{
@@ -147,6 +147,41 @@ public class BrennverlaufDaten {
 			dQburn[zeitAchse.length-1] = 0;
 		}
 		
+
+//		if(art=="Punktuell-OT")
+//		{
+//			masterEinspritzung=CP.MASTER_EINSPRITZUNG;
+//			double schrittweiteSEC = CP.SYS.WRITE_INTERVAL_SEC;
+//			double schrittweiteKW = Math.round(CP.convert_ProKW_2_ProSEC(schrittweiteSEC)*10)/10.0;
+//			double beginnKW = -180;
+//			double endeKW = 180;
+//			double beginnSEC = CP.convert_KW2SEC(beginnKW);
+//			int anzSimWerte=(int)((CP.convert_KW2SEC(endeKW)-CP.convert_KW2SEC(beginnKW))/schrittweiteSEC);
+//			zeitAchseKW= new double[anzSimWerte];
+//			zeitAchseKW[0] = beginnKW;
+//			for(int i=1; i<anzSimWerte; i++){
+//				zeitAchseKW[i] = beginnKW+i*schrittweiteKW;
+//			}
+//			zeitAchse= new double[anzSimWerte];
+//			zeitAchse[0] = beginnSEC;
+//			for(int i=1; i<anzSimWerte; i++){
+//				zeitAchse[i]=beginnSEC+i*schrittweiteSEC;	//Zeitachsen-Erzeugung wie in Klasse "Rechnung"
+//			}
+//			
+//			dQmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass()/schrittweiteSEC;	
+//			
+//				dQburn= new double[anzSimWerte];
+//
+//			for(int k=0; k<anzSimWerte; k++){
+//				double zeitwert2 = zeitAchseKW[k];
+//				if(zeitwert2>0 & zeitwert2<=schrittweiteKW)
+//				dQburn[k]= dQmax;
+//				else
+//				dQburn[k]= 0;
+//			}
+//			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
+//			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen		
+		
 		if(art=="Punktuell-OT")
 		{
 			masterEinspritzung=CP.MASTER_EINSPRITZUNG;
@@ -167,6 +202,7 @@ public class BrennverlaufDaten {
 			for(int i=1; i<anzSimWerte; i++){
 				zeitwertSEC=zeitwertSEC+schrittweiteSEC;
 				zeitAchse[i] = zeitwertSEC;
+
 			}
 			
 			dQmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass()/schrittweiteSEC;	
@@ -176,7 +212,9 @@ public class BrennverlaufDaten {
 			for(int j=0; j<anzSimWerte; j++){
 					double zeitwert = zeitAchseKW[j];
 					if(zeitwert>-schrittweiteKW && zeitwert<schrittweiteKW)
-					{cnt+=1;}
+					{
+					cnt+=1;
+					}
 			}
 			for(int k=0; k<anzSimWerte; k++){
 				double zeitwert2 = zeitAchseKW[k];
@@ -203,8 +241,9 @@ public class BrennverlaufDaten {
 			zeitAchseKW= new double[anzSimWerte];
 			zeitAchseKW[0] = beginnKW;
 			for(int i=1; i<anzSimWerte; i++){
-				zeitwertKW = zeitAchseKW[i-1]+ schrittweiteKW;
-				zeitAchseKW[i] = zeitwertKW;
+//				zeitwertKW = zeitAchseKW[i-1]+ schrittweiteKW;
+//				zeitAchseKW[i] = zeitwertKW;
+				zeitAchse[i]=beginnSEC+i*schrittweiteSEC;	//Zeitachsen-Erzeugung wie in Klasse "Rechnung"
 			}
 			zeitAchse= new double[anzSimWerte];
 			zeitAchse[0] = beginnSEC;
@@ -219,14 +258,17 @@ public class BrennverlaufDaten {
 				dQburn= new double[anzSimWerte];
 				int cnt = 0;
 			for(int j=0; j<anzSimWerte; j++){
-					double zeitwert = zeitAchseKW[j];
-					if(zeitwert>-schrittweiteKW && zeitwert<schrittweiteKW)
-					{cnt+=1;}
+				double zeitwert = zeitAchseKW[j];
+				if(zeitwert>-schrittweiteKW && zeitwert<schrittweiteKW)
+				{
+				cnt+=1;
+				}
 			}
 			for(int k=0; k<anzSimWerte; k++){
 				double zeitwert2 = zeitAchseKW[k];
 				if(zeitwert2>-schrittweiteKW && zeitwert2<schrittweiteKW)
 				dQburn[k]= dQmax/cnt;
+
 				else
 				dQburn[k]= 0;
 			}
@@ -239,7 +281,7 @@ public class BrennverlaufDaten {
 		
 		if(art=="Qneu-startNeu")
 		{
-			
+			startQ = Math.round(startQ*10)/10.0;
 			int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
 			double schrittweiteSEC = CP.SYS.WRITE_INTERVAL_SEC;
 			double schrittweiteKW = CP.convert_ProKW_2_ProSEC(schrittweiteSEC);
@@ -255,8 +297,9 @@ public class BrennverlaufDaten {
 			zeitAchse[0] = beginnSEC;
 			zeitwertSEC = beginnSEC;
 			for(int i=1; i<anzSimWerte; i++){
-				zeitwertSEC=zeitwertSEC+schrittweiteSEC;
-				zeitAchse[i] = zeitwertSEC;
+//				zeitwertSEC=zeitwertSEC+schrittweiteSEC;
+//				zeitAchse[i] = zeitwertSEC;
+				zeitAchse[i]=beginnSEC+i*schrittweiteSEC;	//Zeitachsen-Erzeugung wie in Klasse "Rechnung"
 			}
 			
 			dQmax=wertQ/schrittweiteSEC;	
@@ -266,7 +309,9 @@ public class BrennverlaufDaten {
 			for(int j=0; j<anzSimWerte; j++){
 					double zeitwert = zeitAchseKW[j];
 					if(zeitwert>(startQ-schrittweiteKW) && zeitwert<(startQ+schrittweiteKW))
-					{cnt+=1;}
+					{
+					cnt+=1;
+					}
 			}
 			for(int k=0; k<anzSimWerte; k++){
 				double zeitwert2 = zeitAchseKW[k];
@@ -277,7 +322,9 @@ public class BrennverlaufDaten {
 			}
 			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
 			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
+
 //		double[][] matrix ={zeitAchseKW,dQburn};
+
 	    //FileWriter_txt txtFile = new FileWriter_txt("F://Workspace//Bremo//src//InputFiles//Brennverlauf-startQ.txt");
 		//txtFile.writeMatrixToFile(MatLibBase.transp_2d_array(matrix), false);
 		}
@@ -287,7 +334,7 @@ public class BrennverlaufDaten {
 		
 
 	
-			
+			//0.0014153574610152278
 		public double get_dQburn (double time){
 		return L_Interp.linInterPol(time, zeitAchse, dQburn);		
 	}

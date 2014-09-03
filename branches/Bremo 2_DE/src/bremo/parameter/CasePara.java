@@ -2735,6 +2735,38 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		}
 	}
 	//////////////////////////////////////////////////////////
+	
+	public double get_offsetTemperatur() {
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "offsetTemperatur", "[K]", 0,
+						Double.POSITIVE_INFINITY);
+			} catch (ParameterFileWrongInputException e) {
+				e.log_Warning("Im Input File wurde keine offsetTemperatur angegeben!");
+				return 0;
+			}
+	}	
+	
+	public double get_AV_innerer_Ventilteller_Durchmesser(){ //"inner seat diameter"
+		double Durchmesser_AV;
+		try {
+			Durchmesser_AV = set_doublePara(INPUTFILE_PARAMETER, "AV_innerer_Ventilteller_Durchmesser","[m]",1e-3,0.1);
+			return Durchmesser_AV;
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
+	
+	public double get_EV_innerer_Ventilteller_Durchmesser(){ //"inner seat diameter"
+		double Durchmesser_EV;
+		try {
+			Durchmesser_EV = set_doublePara(INPUTFILE_PARAMETER, "EV_innerer_Ventilteller_Durchmesser","[m]",1e-3,0.1);
+			return Durchmesser_EV;
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+			return Double.NaN;
+		}		
+	}
 
 	private double set_doublePara(Hashtable<String,String []> parameterInHash, 
 			String paraNameToSet, 

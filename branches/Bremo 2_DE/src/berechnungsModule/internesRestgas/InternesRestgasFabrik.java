@@ -31,27 +31,27 @@ public class InternesRestgasFabrik extends ModulFabrik {
 			RESTGAS_MODELL=(InternesRestgas) new RestgasVorgabe(cp);
 			
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[1])){
-//			restgasModell=(InternesRestgas) new MuellerBertling(cp);
-			RESTGAS_MODELL=null;
-			try {
-				throw new BirdBrainedProgrammerException(
-						"Das ausgewaehlte Restgasmodell \"" +internesRestgas_ModellVorgabe + 
-						" \" wurde im InputFile " +
-						"zwar als valide akzeptiert, ist im Programm aber noch nicht implementiert worden.");
-			} catch (BirdBrainedProgrammerException e) {
-				e.stopBremo();
-			}
+			RESTGAS_MODELL=(InternesRestgas) new MuellerBertling(cp); //Kerrom
+//			RESTGAS_MODELL=null;
+//			try {
+//				throw new BirdBrainedProgrammerException(
+//						"Das ausgewaehlte Restgasmodell \"" +internesRestgas_ModellVorgabe + 
+//						" \" wurde im InputFile " +
+//						"zwar als valide akzeptiert, ist im Programm aber noch nicht implementiert worden.");
+//			} catch (BirdBrainedProgrammerException e) {
+//				e.stopBremo();
+//			}
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[2])){
-//			restgasModell=(InternesRestgas) new Heywood(cp);
-			RESTGAS_MODELL=null;
-			try {
-				throw new BirdBrainedProgrammerException(
-						"Das ausgewaehlte Restgasmodell \"" +internesRestgas_ModellVorgabe + 
-						" \" wurde im InputFile " +
-						"zwar als valide akzeptiert, ist im Programm aber noch nicht implementiert worden.");
-			} catch (BirdBrainedProgrammerException e) {
-				e.stopBremo();
-			}	
+			RESTGAS_MODELL=(InternesRestgas) new Heywood(cp);
+//			RESTGAS_MODELL=null;
+//			try {
+//				throw new BirdBrainedProgrammerException(
+//						"Das ausgewaehlte Restgasmodell \"" +internesRestgas_ModellVorgabe + 
+//						" \" wurde im InputFile " +
+//						"zwar als valide akzeptiert, ist im Programm aber noch nicht implementiert worden.");
+//			} catch (BirdBrainedProgrammerException e) {
+//				e.stopBremo();
+//			}	
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[3])){
 			RESTGAS_MODELL=(InternesRestgas) new LWA(cp, false);
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[4])){

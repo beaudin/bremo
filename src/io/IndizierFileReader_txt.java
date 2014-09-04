@@ -16,7 +16,7 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 	private static String ext = ".txt";
 	private String [] zeitEinheiten={"[KWnZOT]","[s]"};
 	private String zeitEinheit, einheitPZyl, einheitPEin,einheitPAbg, einheitPKGH; 
-	private double kf_pZyl,kf_pEin,kf_pAbg, kf_pKGH;//Faktoren für die Umrechnung von bar nach Pa
+	private double kf_pZyl,kf_pEin,kf_pAbg,kf_pKGH;//Faktoren für die Umrechnung von bar nach Pa
 	private int spalte_pZyl,spalte_pEin,spalte_pAbg,spalte_pKGH;	
 	private File file;
 	private boolean dreiDruecke=true;
@@ -174,7 +174,7 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 					Double.parseDouble(theline[0]); //wirft eine Exception wenn theline[0] keine zahl ist
 					if(!kalibrierungErfolgreich)
 						throw new ParameterFileWrongInputException("Im angegebenen Indizierfile wurden keine Einheiten angegeben. \n" +
-								"Diese muessen vor den eigentlicehn Druckdaten in eckigen Klammern angegeben werden: \n" +
+								"Diese muessen vor den eigentlichen Druckdaten in eckigen Klammern angegeben werden: \n" +
 								"[KW] [bar] oder [KW] [Pa] oder [s] [Pa] oder ...\n" +
 								"Eine weiter Fehlermoeglichkeit: Die Spaltenangaben stimmen nicht!!");
 
@@ -234,7 +234,8 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 				pEin=new double[nbrOfValues];
 				pAbg=new double[nbrOfValues];
 			}
-			if(spalte_pZyl != spalte_pKGH){
+			//TODO: if-Abfrage Führt zu unbehandeltem Fehler, wenn im Input-File der Zylinderdruck unsinnigerweise als Kurbelgehäusedruck gewählt wird
+			if(spalte_pZyl != spalte_pKGH){ 
 				pKGH=new double[nbrOfValues];
 			}
 			int i=0;

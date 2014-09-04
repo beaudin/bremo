@@ -14,7 +14,7 @@ public class leckagefrei extends BlowBy {
 		return 0;
 	}
 
-
+	@Override
 	public boolean is_Berechnet() {
 		return false;
 	}

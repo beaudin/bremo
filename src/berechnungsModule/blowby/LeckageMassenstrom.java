@@ -12,8 +12,8 @@ public class LeckageMassenstrom extends BlowBy {
 	protected LeckageMassenstrom(CasePara CP) {
 		super(CP);
 		if(CP.is_pKGH_indiziert()){
-			indi = new IndizierDaten(CP);
 			isIndiziert = true;
+			indi = new IndizierDaten(CP);
 		}
 		Aeff = cp.get_FlaecheBB();
 	}

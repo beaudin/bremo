@@ -73,7 +73,7 @@ public abstract class IndizierFileReader {
 			double a=pKGH[0];
 		}catch(NullPointerException e){
 			try {
-				throw new ParameterFileWrongInputException("Es wurde versucht auf den Einlassdruck zuzugreifen. \n " +
+				throw new ParameterFileWrongInputException("Es wurde versucht auf den Kurbelgehäusedruck zuzugreifen. \n " +
 						"Dieser wurde aber nicht eingelesen --> InputFile Checken ");
 			} catch (ParameterFileWrongInputException e1) {
 				e1.stopBremo();

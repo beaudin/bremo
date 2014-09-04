@@ -67,6 +67,8 @@ public class CasePara {
 	public IterativeBerechnung ITERATIVE_BERECHNUNG;
 	protected final boolean callsCantera;
 	private boolean calledFromGUI;
+	private boolean compareToExpIni=false;
+	private boolean compareToExp;
 
 	public CasePara(File inputFile) throws ParameterFileWrongInputException {			
 		InputFileReader	ifr =new InputFileReader(inputFile);
@@ -105,11 +107,11 @@ public class CasePara {
 
 		//MasterEinspritzung
 		MASTER_EINSPRITZUNG=new MasterEinspritzung(this);
-
+		
 		//Restgas benoetigt MASTER_EINSPRITZUNG
 		InternesRestgasFabrik irgf=new InternesRestgasFabrik(this);
 		RESTGASMODELL=irgf.RESTGAS_MODELL;
-		
+
 		//BlowBy
 		BlowByFabrik bbf = new BlowByFabrik(this);
 		BLOW_BY_MODELL = bbf.BLOW_BY_MODELL;
@@ -132,12 +134,13 @@ public class CasePara {
 		//ABBRUCH für Verlustteilung wenn nicht APR_1Zonig ODER DVA_1Zonig
 		if( is_Verlustteilung()
 			&!(
-					MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|(MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")&compareToExp()))
+					MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig"))
+//					MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|(MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")&compareToExp()))
 //					(MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig"))
 //					&MODUL_VORGABEN.get("internesRestgasModell").equals("LWA"))
 				){
 			try{
-				throw new BirdBrainedProgrammerException("Für die Verlsutteilung muss DVA_1Zonig oder APR_1Zonig und LWA gewählt sein");
+				throw new BirdBrainedProgrammerException("Für die Verlsutteilung muss DVA_1Zonig oder APR_1Zonig gewählt sein");
 			}catch(BirdBrainedProgrammerException bbp){
 				bbp.stopBremo();
 			}			
@@ -222,9 +225,11 @@ public class CasePara {
 	 * Dazu müssen Indizierdaten angegeben sein.
 	 */
 	public boolean compareToExp(){		
-		boolean compareToExp = false;
+		//boolean compareToExp = false;
+		compareToExp = false;
 		String s = null;
 		String s2 []= {"ja","nein"};
+		if(!compareToExpIni){
 		try {
 			s=this.set_StringPara(INPUTFILE_PARAMETER, "compareToExp",s2);
 		} catch (ParameterFileWrongInputException e){	
@@ -234,8 +239,10 @@ public class CasePara {
 					+ "Dafür sind alle Daten zur Initialisierung von Hand vorzugeben.");
 			s="nein";
 		}
+		compareToExpIni = true;
 		if(s.equalsIgnoreCase("ja"))
 			compareToExp=true;
+		}
 		return compareToExp;		
 	}
 	
@@ -626,16 +633,16 @@ public class CasePara {
 	
 	
 	public boolean is_pKGH_indiziert(){
-		boolean indiziert = false;
+		boolean pKGH_indiziert = false;
 		String s = null;
 		String[] s2 = {"ja", "nein"};
 		try{
 			s=this.set_StringPara(INPUTFILE_PARAMETER, "pKGHindiziert", s2);
-			if(s.equalsIgnoreCase("ja")) indiziert = true;
+			if(s.equalsIgnoreCase("ja")) pKGH_indiziert = true;
 		}catch (ParameterFileWrongInputException e){
 			e.stopBremo();
 		}
-		return indiziert;
+		return pKGH_indiziert;
 	}
 
 

@@ -68,7 +68,7 @@ public class CasePara {
 	protected final boolean callsCantera;
 	private boolean calledFromGUI;
 	private boolean compareToExpIni=false;
-	private boolean compareToExp;
+	private boolean compareToExp=false;
 
 	public CasePara(File inputFile) throws ParameterFileWrongInputException {			
 		InputFileReader	ifr =new InputFileReader(inputFile);
@@ -226,7 +226,6 @@ public class CasePara {
 	 */
 	public boolean compareToExp(){		
 		//boolean compareToExp = false;
-		compareToExp = false;
 		String s = null;
 		String s2 []= {"ja","nein"};
 		if(!compareToExpIni){

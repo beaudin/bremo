@@ -2016,24 +2016,45 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 			return anz_EV;
 		} catch (ParameterFileWrongInputException e) {		
 			e.log_Warning("Konstante n_EV zur Berechnung des Turbulenz-Startwerts fehlt. "
-					+ "Es werden 2 Einlassventile angenommen.");	
+					+ "Es werden 2 Einlassventile angenommen.");
 			return 2;
 		}		
 	}
 
-	
+	/**
+	 *kappa ist im FVV-Zylindermodul konstant! Für Vergleichbarkeit wird dies auch hier ermöglicht 
+	 **/
 	public double get_Kappa_Bargende() {
 		double kappa_B;
 		try {
 			kappa_B = set_doublePara(INPUTFILE_PARAMETER, "kappa_Bargende","[-]",1,1.7);
 			return kappa_B;
 		} catch (ParameterFileWrongInputException e) {		
-			e.log_Warning("kappa_Bargende zur Berechnung des WWÜ nach Bargende fehlt. "
-					+ "Es wird mit Default Wert von 1.34 gerechnet.");	
-			return 1.34;
+			e.log_Warning("kappa_Bargende zur Berechnung des WWÜ nach BargendeFVV fehlt. "
+					+ "Es wird mit dem von Bremo ermittelten kappa gerechnet.");	
+			return -5.55;
 		}		
 	}
 	
+	/**
+	*Konstante zum wechseln zwischen konservativem Bargende und BargendeFVV
+	*mit 3 wird das Verfahren nach Grill verwendet, mit 1 original nach Bargende 
+	**/
+	public double get_W_k() {
+		double w_k;
+		try {
+			w_k = set_doublePara(INPUTFILE_PARAMETER, "w_k","[-]",1,1);
+			return w_k;
+		} catch (ParameterFileWrongInputException e) {		
+			e.log_Warning("Kein w_k angegeben! Für w_k = 1 wird konservativ nach Bargende gerechnet. "
+					+ "Sonst wird die Modifikation von Grill verwendet");
+			return 3;
+		}		
+	}
+	
+	/**
+	 * Multiplikator für den Verbrennungsterm
+	 **/
 	public double get_Delta_k() {
 		double delta_k;
 		try {
@@ -2046,6 +2067,21 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		}		
 	}
 	
+	/**
+	 *Der Liefergrad soll vom Anwender vorgegeben werden können. 
+	 *Standardmäßig wird mit einem Liefergrad von 1 gerechnet. s. SAE Paper 2006-01-1107
+	 **/
+	public double get_Liefergrad(){
+		double lambda_L;
+		try {
+			lambda_L = set_doublePara(INPUTFILE_PARAMETER, "Liefergrad", "[-]", 0,1);
+			return lambda_L;
+		}catch (ParameterFileWrongInputException e) {		
+			e.log_Warning("Es wurde kein Liefergrad für die Berechnung des Turbulenzstartwerts angegeben."
+					+ " Der Liefergrad wird als 1 angenommen.");	
+			return 1;
+		}		
+	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////

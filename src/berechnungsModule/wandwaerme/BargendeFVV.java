@@ -12,7 +12,8 @@ public class BargendeFVV extends WandWaermeUebergang {
 	
 	private CasePara cp;
 	private Motor_HubKolbenMotor motor;
-	private double T_w, T_m, k, w, c_m, T_zzp, p_zzp, kappa, delta_k;
+	private double T_w, T_m, k, w, c_k, T_zzp, p_zzp, kappa, delta_k, w_k;
+	private boolean kappa_AusInputfile = true;
 	private static final double C = 27.97*1e3;
 	
 	
@@ -20,10 +21,10 @@ public class BargendeFVV extends WandWaermeUebergang {
 		super(cp);
 		this.cp = super.cp;
 		this.motor =(Motor_HubKolbenMotor) super.motor;
-		c_m = 2*motor.get_Hub()*cp.get_DrehzahlInUproSec();
 		super.feuerstegMult=0.25;
 		kappa = cp.get_Kappa_Bargende();				//kappa in FVV konstant!
 		delta_k = cp.get_Delta_k();						//Faktor zur gewichtung Verbrennungsterm
+		w_k = cp.get_W_k();								//Berechnung Bargende konservativ mit W_k = 1
 	}
 	
 	public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt) {
@@ -63,7 +64,8 @@ public class BargendeFVV extends WandWaermeUebergang {
 		T_m = (T+T_w)/2; 													//Gemittelte Temp. an Grenzschicht
 		
 		//Wärmeübergangsrelevante Geschwindigkeit
-		w = Math.sqrt(8d/3d*k+Math.pow(c_m,2))/2;							//(8/3)*k statt 8*k
+		c_k = motor.get_Kolbengeschwindigkeit(time);						//momentane Kolbengeschwindigkeit
+		w = Math.sqrt(8/w_k*k+Math.pow(c_k,2))/2;							//(8/3)*k statt 8*k 
 		
 		double verbrennungsterm = get_Verbrennungsterm(p, T, fortschritt, time, zonen_IN);
 		
@@ -74,7 +76,17 @@ public class BargendeFVV extends WandWaermeUebergang {
 
 	private double get_Verbrennungsterm(double p, double T, double fortschritt, double time, Zone[] zonen_IN) {
 		
-		double A, B, T_uv, T_v, verbrennungsbeginn = 0;		
+		double A, B, T_uv, T_v, verbrennungsbeginn = 0;
+		
+		//Wenn kappa im Inputfile nicht definiert (-5.55 aus Casepara zurück),
+		//wird mit dem Zonen-kappa gerechnet
+		if(kappa==-5.55){
+			kappa_AusInputfile = false;
+		}
+		if (kappa_AusInputfile == false){
+			kappa = zonen_IN[0].get_ggZone().get_kappa(fortschritt);
+		}
+		
 		double X = fortschritt;							//Normierter Summenbrennverlauf X durch fortschritt ausgedrückt
 		
 		if (fortschritt <= 0.02){						//Hier wird ZZP bei Umsatz von 2% angenommen

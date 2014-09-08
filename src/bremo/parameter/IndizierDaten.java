@@ -258,14 +258,6 @@ public class IndizierDaten {
 			pOffset = CP.get_pressureOffset();
 			pZylRoh = this.shiftMe(pZylRoh, pOffset);
 		}else if(nlm.equalsIgnoreCase("summenbrennverlauf")){
-			if(CP.RESTGASMODELL.involvesGasExchangeCalc()){
-				try{
-					throw new ParameterFileWrongInputException("FEHLER \"Nulllinienkorrektur\"!");
-				}catch(ParameterFileWrongInputException p){
-					p.log_Warning("Die Summenbrennverlaufsmethode kann nicht mit LWA verwendet werden!");
-					p.stopBremo();
-				}
-			}
 			pOffset = CP.get_pressureOffset();
 			pZylRoh = this.shiftMe(pZylRoh, pOffset);
 		}else if(nlm.equalsIgnoreCase("ohne")){

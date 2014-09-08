@@ -47,7 +47,7 @@ public class Turbulence_k_eps extends TurbulenceModel{
 		if (time == CP.get_Einlassschluss()){
 			
 			if(fvv){
-				lambda_L = 1;
+				lambda_L = CP.get_Liefergrad();
 			}else{
 		//Berechnung von Lambda für k_esInit!!!	
 			
@@ -84,7 +84,7 @@ public class Turbulence_k_eps extends TurbulenceModel{
 		//Berechnung nach Diss. Bargende
 			}else{
 				k_esInit = Math.pow((c_m*Math.pow(mot.get_Bohrung(),2)*lambda_L
-							/(Math.sin(45)*d_EV*h_EV)),2)/32;
+							/(Math.sqrt(2)/2*d_EV*h_EV)),2)/32;
 			}
 		}
 		//Startwert aus Inputfile auslesen, wenn Rechenbeginn nicht bei Einlassschluss

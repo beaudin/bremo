@@ -1,5 +1,7 @@
 package berechnungsModule.internesRestgas;
 
+import java.io.File;
+
 import kalorik.spezies.Spezies;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.Zone;
@@ -140,7 +142,7 @@ public class LWA extends InternesRestgas {
 			idx2+=1;
 		}while(Math.abs((mLuftFeucht_mess-mLuftFeucht)/mLuftFeucht_mess)>0.005&&idx2<=50);
 //		 "_" + (idx-1) +
-//		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ "_ERGEBNISSE_LW.txt");				
+//		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ "_ERGEBNISSE_LW.txt");
 		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ ".txt");		
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + (idx2) );	
 		double agrInt;

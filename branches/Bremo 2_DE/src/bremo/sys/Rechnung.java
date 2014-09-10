@@ -161,7 +161,8 @@ public class Rechnung {
 			CP.schreibeAlleErgebnisFiles(CP.get_CaseName()+".txt");
 		else
 			dglSys.schreibeErgebnisFile(CP.get_CaseName()+".txt");
-		if(CP.BERECHNUNGS_MODELL.isDVA()){ //Nur wenn DVA
+		String xxx = CP.BERECHNUNGS_MODELL.toString();
+		if(CP.BERECHNUNGS_MODELL.isDVA() && !CP.BERECHNUNGS_MODELL.toString().contains("Weltformel")){ //Nur wenn DVA und nicht Weltformel
 			PostProcessor pp=new PostProcessor(dglSys.get_dm_buffer(),					//war bei Juwe auskommentiert
 								dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),CP);	//war bei Juwe auskommentiert
 			pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");							//war bei Juwe auskommentiert

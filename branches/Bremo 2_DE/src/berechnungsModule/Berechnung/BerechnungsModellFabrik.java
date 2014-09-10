@@ -13,7 +13,8 @@ public class BerechnungsModellFabrik extends ModulFabrik {
 		"APR_1Zonig_Vibe",
 		"APR_CanteraMultiZoneHomogeneous",
 		"APR_Cantera2Zone",
-		"APR_CanteraMultiZoneRCCI"};	
+		"APR_CanteraMultiZoneRCCI",
+		"Weltformel"};	
 
 	public  final BerechnungsModell BERECHNUNGS_MODELL;	
 	
@@ -47,6 +48,9 @@ public class BerechnungsModellFabrik extends ModulFabrik {
 			
 		}else if(berechnungsModellVorgabe.equals("APR_CanteraMultiZoneRCCI")){			
 			BERECHNUNGS_MODELL=new APR_CanteraMultiZoneRCCI(cp);
+			
+		}else if(berechnungsModellVorgabe.equals("Weltformel")){
+			BERECHNUNGS_MODELL=new Weltformel(cp);
 			
 			
 		}else{

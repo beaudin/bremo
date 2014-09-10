@@ -155,7 +155,7 @@ public class Bremo extends Thread {
 			}
 		}while(iterRechnung.isIterativ());
 		iterRechnung.deleteFile();
-		if (casePara.is_Verlustteilung()) {
+		if (casePara.is_Verlustteilung() && !casePara.get_CaseName().toString().contains("Weltformel")) {
 			if (calledFromGUI) {
 				SwingBremo.VerlustteilungThread();
 			}

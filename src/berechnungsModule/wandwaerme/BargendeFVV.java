@@ -29,19 +29,8 @@ public class BargendeFVV extends WandWaermeUebergang {
 	
 	public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt) {
 		
-		//Typecasten von Turbulenz k aus jeweiligem Berechnungsmodell
-		if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")){		
-			k = ((DVA_Homogen_EinZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
-			}
-		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_2Zonig")){
-				k = ((DVA_homogen_ZweiZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
-			}
-		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_DualFuel")){
-				k = ((DVA_DualFuel)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN,time);
-			}
-		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")){
-				k = ((APR_homogen_EinZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
-			}
+		//Turbulenz k aus Berechnungsmodell
+		k = cp.BERECHNUNGS_MODELL.get_turbFaktor(zonen_IN, time);
 		
 		double p = zonen_IN[0].get_p();										//Zylinderdruck
 		double lambda = zonen_IN[0].get_ggZone().get_lambda();				//Luftverhältnis

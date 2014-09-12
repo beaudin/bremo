@@ -56,8 +56,7 @@ public class DVA_DualFuel extends DVA {
 
 	private double dQburnMAX=0;
 	private double fortschritt=0;	
-	private boolean bargende = false; //Nur wenn Bargende  
-	private boolean fvv = false;	//bzw. BargendeFVV
+	private boolean bargende = false; //Nur wenn Bargende
 
 
 	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen
@@ -81,13 +80,11 @@ public class DVA_DualFuel extends DVA {
 		gg=CP.OHC_SOLVER;
 		blowbyModell = CP.BLOW_BY_MODELL;
 		
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){
+		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")||
+				CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")){
 			bargende = true;
 		}
-		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")){
-			fvv = true;
-		}
-		if(bargende||fvv){ //Nur wenn Bargende
+		if(bargende){ //Nur wenn Bargende
 			turb = CP.TURB_FACTORY.get_TurbulenceModel(); //für Bargende
 		}
 		T_buffer = new VektorBuffer(cp);
@@ -170,7 +167,7 @@ public class DVA_DualFuel extends DVA {
 		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
 		
 		
-		if(bargende||fvv){ //Nur wenn Bargende
+		if(bargende){ //Nur wenn Bargende
 			turb.initialize(initialZones, 0);
 		}
 	}
@@ -361,7 +358,7 @@ public class DVA_DualFuel extends DVA {
 			}
 		}
 		
-		if(bargende||fvv){ //Nur wenn Bargende
+		if(bargende){ //Nur wenn Bargende
 			this.turb.update(zonen_IN, time);
 		}
 		return zonen_IN;	
@@ -560,7 +557,7 @@ public class DVA_DualFuel extends DVA {
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);
 		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
 		
-		if(bargende||fvv){ //Nur wenn Bargende
+		if(bargende){ //Nur wenn Bargende
 			i+=1;
 			double k=turb.get_k(zn, time);
 			super.buffer_EinzelErgebnis("k_turb [m^2/s^2]", k, i);

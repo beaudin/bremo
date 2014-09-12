@@ -164,4 +164,9 @@ public abstract class MasterLWA extends BerechnungsModell{
 			return 0;
 
 	}
+	@Override
+	public double get_turbFaktor(Zone[] zonen_IN, double time) {
+		// TODO Auto-generated method stub
+		return 0;
+	} 
 }

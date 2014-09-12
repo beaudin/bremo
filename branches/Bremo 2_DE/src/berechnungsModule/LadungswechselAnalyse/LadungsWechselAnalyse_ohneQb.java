@@ -21,7 +21,7 @@ import bremo.parameter.IndizierDaten;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
-public class LadungsWechselAnalyse_ohneQb extends BerechnungsModell {
+public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 	
 	private  WandWaermeUebergang wandWaermeModell;
 	private Motor m;

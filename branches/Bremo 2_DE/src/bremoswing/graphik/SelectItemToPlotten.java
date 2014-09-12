@@ -185,11 +185,11 @@ public  class SelectItemToPlotten extends JFrame {
 						String[] tmp =  header[1].split("_");
 						if (tmp[0].equals("DVA")){
 							berechnungModell = "DVA";
-							output = new File(input.getParent()+"/DVA_"+input.getName());
+							output = new File(input.getParent()+"/"+input.getName().replace(".txt", ".dva"));
 						}
 						else if (tmp[0].equals("APR")){
 							berechnungModell = "APR";
-							output = new File(input.getParent()+"/APR_"+input.getName());
+							output = new File(input.getParent()+"/"+input.getName().replace(".txt", ".lwa"));
 						}
 					}
 					if (header[0].equals("RestgasVorgabeLWA")){

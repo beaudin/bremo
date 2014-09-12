@@ -2478,7 +2478,7 @@ public class APR_CanteraMultiZoneRCCI extends APR_Cantera {
 
 		int i=-1;
 		i+=1;
-		super.buffer_EinzelErgebnis("CrankAngle [°KW]",super.CP.convert_SEC2KW(time),i);
+		super.buffer_EinzelErgebnis("CrankAngle [ï¿½KW]",super.CP.convert_SEC2KW(time),i);
 
 		i+=1;
 		super.buffer_EinzelErgebnis("Time [s n. Rechenbeginn]",time,i);		
@@ -2882,6 +2882,15 @@ public class APR_CanteraMultiZoneRCCI extends APR_Cantera {
 				e.stopBremo();
 			}
 		}
+	}
+	public double get_turbFaktor(Zone [] zonen_IN, double time){
+		try{
+			throw new ParameterFileWrongInputException("Kein Bargende zulÃ¤ssig!");
+		}catch(ParameterFileWrongInputException e){
+			e.log_Message();
+			e.stopBremo();
+		}
+		return Double.NaN;
 	}
 }
 

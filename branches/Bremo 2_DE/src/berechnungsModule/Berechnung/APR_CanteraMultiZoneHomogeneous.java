@@ -1510,6 +1510,15 @@ public class APR_CanteraMultiZoneHomogeneous extends APR_Cantera {
 			return dV_dT;
 		}		
 	}
+	public double get_turbFaktor(Zone [] zonen_IN, double time){
+		try{
+			throw new ParameterFileWrongInputException("Kein Bargende zulässig!");
+		}catch(ParameterFileWrongInputException e){
+			e.log_Message();
+			e.stopBremo();
+		}
+		return Double.NaN;
+	}
 
 
 }

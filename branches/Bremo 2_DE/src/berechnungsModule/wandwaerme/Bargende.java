@@ -16,7 +16,7 @@ public class Bargende extends WandWaermeUebergang {
 	private double T_w;
 	private double k;
 	private double w;
-	private double c_m;
+	private double c_k;
 	private double T_zzp;							//Temp. zum Zündzeitpunkt (ZZP)
 	private double p_zzp;							//Druck zum ZZP
 	
@@ -28,25 +28,13 @@ public class Bargende extends WandWaermeUebergang {
 		super(cp);
 		this.cp = super.cp;
 		this.motor =(Motor_HubKolbenMotor) super.motor;
-		c_m = 2*motor.get_Hub()*cp.get_DrehzahlInUproSec();
 		super.feuerstegMult=0.25;	
 	}
 
 	public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt) {
 		
-		//Typecasten von Turbulenz k aus jeweiligem Berechnungsmodell
-		if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")){
-			k = ((DVA_Homogen_EinZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
-			}
-		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_2Zonig")){
-				k = ((DVA_homogen_ZweiZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
-			}
-		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_DualFuel")){
-				k = ((DVA_DualFuel)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN,time);
-			}
-		else if (cp.MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")){
-				k = ((APR_homogen_EinZonig)cp.BERECHNUNGS_MODELL).get_turbFaktor(zonen_IN, time);
-			}
+		//Turbulenz k aus Berechnungsmodell
+		k = cp.BERECHNUNGS_MODELL.get_turbFaktor(zonen_IN, time);
 		
 		double p = zonen_IN[0].get_p();										//Zylinderdruck
 		double lambda = zonen_IN[0].get_ggZone().get_lambda();				//Luftverhältnis
@@ -71,7 +59,9 @@ public class Bargende extends WandWaermeUebergang {
 		T_m = (T+T_w)/2; 													//Gemittelte Temp. an Grenzschicht
 		
 		//Wärmeübergangsrelevante Geschwindigkeit
-		w = Math.sqrt(8*k+Math.pow(c_m,2))/2;
+		c_k = motor.get_Kolbengeschwindigkeit(time);						//momentane Kolbengeschwindigkeit
+		w = Math.sqrt(8*k+Math.pow(c_k,2))/2;
+		//in Bargende sqrt(8*k+c_k^2), aber Grill und Merker verwenden 8/3*k!!!
 		
 		double verbrennungsterm = get_Verbrennungsterm(p, T, fortschritt, time, zonen_IN);
 		
@@ -90,7 +80,7 @@ public class Bargende extends WandWaermeUebergang {
 		//Normierter Summenbrennverlauf X durch fortschritt ausgedrückt
 		double X = fortschritt;
 		
-		if (fortschritt <= 0.01){											//Hier wird ZZP bei Umsatz von 1% angenommen
+		if (fortschritt <= 0.02){											//Hier wird ZZP bei Umsatz von 1% angenommen
 			verbrennungsbeginn = fortschritt;
 			T_zzp = T;														//Temp und Druck zum ZZP "festhalten"
 			p_zzp = p;

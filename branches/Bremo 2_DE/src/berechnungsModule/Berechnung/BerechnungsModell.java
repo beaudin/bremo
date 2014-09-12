@@ -78,5 +78,5 @@ public abstract class BerechnungsModell  {
 	public ErgebnisBuffer get_ErgebnisBuffer(){
 		return ergBuf;
 	}
-
+	public abstract double get_turbFaktor(Zone[] zonen_IN, double time);
 }

@@ -1139,7 +1139,7 @@ public abstract class BremoModellGraphik extends JFrame{
     	
     	String parent = inputfile.getParent();
     	
-    	BufferedReader in = new BufferedReader(new FileReader(parent+"/DVA_Post_"+inputfile.getName()));
+    	BufferedReader in = new BufferedReader(new FileReader(parent+"/"+inputfile.getName().replace(".txt", ".pfd")));
 		String zeile = null;
 		String [] header1 = null;
 		String [] header2 = null;

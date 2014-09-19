@@ -209,14 +209,16 @@ public class IterativeBerechnung {
 					werte = INPUTFILE_PARAMETER.get("offset");
 					changedValue = Double.parseDouble(werte[0]);
 				}catch(Exception e){
-					werte[0] = "0";
+					werte = new String[2];
+					werte[0] = Double.toString(0);
 					werte[1] = "[Pa]";
 				}
 				eintrag = "offset "+werte[1]+" := "+werte[0];
 				try{
 					werte = INPUTFILE_PARAMETER.get("KW_Ende_Druckabgleich");
 				}catch(Exception e){
-					werte[0] = "-50";
+					werte = new String[2];
+					werte[0] = Double.toString(-50);
 					werte[1] = "[KWnZOT]";
 				}
 				double plus;

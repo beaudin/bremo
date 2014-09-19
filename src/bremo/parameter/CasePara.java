@@ -876,9 +876,18 @@ public class CasePara {
 	public double get_DrehzahlInUproSec(){
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "Drehzahl","[min^-1]",0,Double.POSITIVE_INFINITY)/60;
-		} catch (ParameterFileWrongInputException e) {			
-			e.stopBremo();
-			return Double.NaN;
+		} catch (ParameterFileWrongInputException e) {
+			String[] parameter = {"Drehzahl", "[min^-1]"};
+			String vorgabe = "";
+			e.eingabeErforderlich(this, parameter, vorgabe);
+			try{ 
+//				TODO Warte, bis du das Signal bekommst weiterzumachen
+				return set_doublePara(INPUTFILE_PARAMETER, "Drehzahl","[min^-1]",0,Double.POSITIVE_INFINITY)/60;
+			}catch(Exception f){
+				e.stopBremo();
+				return Double.NaN;
+			}
+			
 		}		
 	}
 

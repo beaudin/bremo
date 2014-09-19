@@ -1,10 +1,20 @@
 package bremoExceptions;
 
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import bremo.parameter.CasePara;
+
 public class ParameterFileWrongInputException extends StopBremoException{
 
 	public ParameterFileWrongInputException(String message) {
 		super(message);		
 	}
-//hier könnte man versuchen den Fehler abzufangen indem man so etwas aufruft wie 
-	//set_ParameterFile();	
+	
+	public void eingabeErforderlich(CasePara cp, String[] parameter, String vorgabe){
+		new eingabeFeld(cp, parameter, vorgabe);
+	}
 }

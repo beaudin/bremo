@@ -9,6 +9,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
+import javax.swing.plaf.synth.SynthViewportUI;
+
+import com.sun.org.apache.xerces.internal.parsers.CachingParserPool.SynchronizedGrammarPool;
+
 import misc.PhysKonst;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.SpeziesFabrik;
@@ -880,8 +884,18 @@ public class CasePara {
 			String[] parameter = {"Drehzahl", "[min^-1]"};
 			String vorgabe = "";
 			e.eingabeErforderlich(this, parameter, vorgabe);
-			try{ 
-//				TODO Warte, bis du das Signal bekommst weiterzumachen
+			
+			//Warte, bis du das Signal bekommst weiterzumachen
+			synchronized (this) {
+				try {
+					wait();
+				} catch (InterruptedException e1) {
+					
+				}
+			}
+			
+			try {
+				
 				return set_doublePara(INPUTFILE_PARAMETER, "Drehzahl","[min^-1]",0,Double.POSITIVE_INFINITY)/60;
 			}catch(Exception f){
 				e.stopBremo();
@@ -3250,7 +3264,4 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		String[] paraWertEinheit = {paraWert, paraEinheit};
 		INPUTFILE_PARAMETER.put(paraName, paraWertEinheit);
 	}
-
-
-
 }//Klasse CasePara

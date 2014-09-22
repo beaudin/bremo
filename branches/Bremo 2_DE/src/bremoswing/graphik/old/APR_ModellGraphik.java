@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bremoswing.graphik;
+package bremoswing.graphik.old;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

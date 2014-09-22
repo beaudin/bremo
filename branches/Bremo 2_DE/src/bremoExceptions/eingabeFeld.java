@@ -6,20 +6,14 @@ import javax.swing.*;
 import bremo.parameter.CasePara;
 
 
-public class eingabeFeld extends JFrame implements ActionListener{
+public class eingabeFeld extends JFrame {
 	
-	CasePara CP;
-	JFrame exceptionFrame;
 	JTextField tfWert;
 	JButton buttonOK;
-	String[] para;
 	
-	public eingabeFeld(CasePara cp, String[] parameter, String vorgabe){
-		this.CP = cp;
-		this.para = parameter;
-		exceptionFrame = new JFrame();
-		exceptionFrame.setTitle("Fehlender Parameter im Inputfile");
-		this.setSize(400, 200);
+	public eingabeFeld(final CasePara cp, final String[] parameter, String vorgabe){
+		setTitle("Fehlender Parameter im Inputfile");
+		setSize(400, 200);
         JPanel panel = new JPanel();
         // Leeres JLabel-Objekt wird erzeugt
         JLabel label = new JLabel();
@@ -29,22 +23,25 @@ public class eingabeFeld extends JFrame implements ActionListener{
         //OK-Button hinzufügen
         buttonOK = new JButton("OK"); 
         //Button wird dem Listener zugeordnet
-        buttonOK.addActionListener(this);
+        buttonOK.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if(!tfWert.getText().replace(" ", "").equals("")){
+					cp.set_ParaInputfile(parameter[0], parameter[1], tfWert.getText());
+				}
+				synchronized (cp) {
+					cp.notify();
+				}
+				dispose();
+			}
+		});
         //Label und Button werden dem JPanel hinzugefügt
         panel.add(label);
         panel.add(tfWert);
         panel.add(buttonOK);
-        this.add(panel);
-        exceptionFrame.pack();
-        this.setVisible(true);
+        add(panel);
+        setVisible(true);
 	}
-	public void actionPerformed(ActionEvent ae) {
-		if(!tfWert.getText().replace(" ", "").equals("")){
-			CP.set_ParaInputfile(para[0], para[1], tfWert.getText());
-		}
-		this.setVisible(false);
-		CP.notify();
-	}
-	
-
 }

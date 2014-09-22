@@ -109,7 +109,7 @@ public class BremoViewModel implements Observable {
 	/**
 	 * Notify Observer to show the Path of the Inputfile
 	 */
-	public void notifyObserver(List list) {
+	public void notifyObserver(List<Object> list) {
 		bremoViewObserver.update(null, list);
 		
 	}
@@ -246,11 +246,11 @@ public class BremoViewModel implements Observable {
 		this.file = file;
 		StringBuilder stb = new StringBuilder();
 		stb.append(file.getName());
-		stb.delete(stb.length()-4,stb.length());
+		//stb.delete(stb.length()-4,stb.length());
 		notifyObserver(stb.toString());
 		
 		stb = new StringBuilder();
-		stb.append(file.getParent());
+		stb.append(file.getParent()+File.separator);
 		notifyObserver(stb);
 		notifyObserver(showHeader());
 		
@@ -259,8 +259,10 @@ public class BremoViewModel implements Observable {
 			Diagramm_From_Index(log_param);
 		} else {
 			indexStoreReset();
-			IndexStore.add(0, new int[] {0});
-			IndexStore.add(1,new int [] {2});
+			int []  x_default = new int[] {0};
+			int []  y_default = new int[] {1};
+			IndexStore.add(0, x_default);
+			IndexStore.add(1, y_default);
 			notifyObserver(Build_Diagramm(1, "No Log"));
 		}
 	}
@@ -489,7 +491,7 @@ public class BremoViewModel implements Observable {
         
 		/**send Index to Bremoview and ItemChooseFrame to select Item in JList & JCombobox */
 		
-		List indexItem = new ArrayList() ;
+		List <Object> indexItem = new ArrayList<Object>() ;
 		// add in the 1.place the index of axe
 		indexItem.add(axe-1);
 		// add in the 2.place the Log param

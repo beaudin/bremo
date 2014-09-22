@@ -19,6 +19,7 @@ public class BremoViewResource {
     String iconInputDocRollover;
     String iconQuestion;
     String iconStartChart;
+    String iconButtonChart ;
     String iconBackgroungWater;
     String iconBackgroungChart;
     String iconBackgroungColored;
@@ -29,6 +30,10 @@ public class BremoViewResource {
     String iconFavLoad;
     String iconFolder;
 	String iconFolderRollover;
+	String iconBarChart;
+	String iconBarChartOut;
+	String iconBarChartBig;
+	
     BremoViewResource () {
     	
     	String path = "/bremoswing/bild/";
@@ -65,6 +70,8 @@ public class BremoViewResource {
     	
     	iconStartChart = path + "chart.png";
     	
+    	iconButtonChart = path + "chart_2.png";
+    	
     	iconBackgroungWater = path + "water6.jpg";
     	
     	iconBackgroungChart = path + "chart.png";
@@ -84,6 +91,12 @@ public class BremoViewResource {
         iconFolder =  path + "folder-yellow_1.png";
         
     	iconFolderRollover = path + "folder-yellow_2.png";
+    	
+    	iconBarChart = path + "barChart.png";
+    	
+    	iconBarChartOut = path + "barChartOut.png";
+    	
+    	iconBarChartBig = path + "barChartBig.png";
     }
 
 	public String getIconKIT() {
@@ -234,6 +247,14 @@ public class BremoViewResource {
 		return iconBackgroungChart;
 	}
 
+	public String getIconButtonChart() {
+		return iconButtonChart;
+	}
+
+	public void setIconButtonChart(String iconButtonChart) {
+		this.iconButtonChart = iconButtonChart;
+	}
+
 	public void setIconBackgroungChart(String iconBackgroungChart) {
 		this.iconBackgroungChart = iconBackgroungChart;
 	}
@@ -300,6 +321,30 @@ public class BremoViewResource {
 
 	public void setIconFolderRollover(String iconFolderRollover) {
 		this.iconFolderRollover = iconFolderRollover;
+	}
+
+	public String getIconBarChart() {
+		return iconBarChart;
+	}
+
+	public void setIconBarChart(String iconBarChart) {
+		this.iconBarChart = iconBarChart;
+	}
+
+	public String getIconBarChartOut() {
+		return iconBarChartOut;
+	}
+
+	public void setIconBarChartOut(String iconBarChartOut) {
+		this.iconBarChartOut = iconBarChartOut;
+	}
+
+	public String getIconBarChartBig() {
+		return iconBarChartBig;
+	}
+
+	public void setIconBarChartBig(String iconBarChartBig) {
+		this.iconBarChartBig = iconBarChartBig;
 	}
     
     

@@ -243,7 +243,8 @@ public class Verlustteilung {
 			}
 		}
 */		double Hu_CO=282.9*1e3; //[J/mol] aus R. Pischinger S. 93
-		double Hu_HC=600*1e3;	//[J/mol] aus R. Pischinger S. 93
+//		double Hu_HC=600*1e3;	//[J/mol] aus R. Pischinger S. 93
+		double Hu_HC=2044.2*1e3;	//Ge Liu
 		double Qcohc=mGes*(hc*Hu_HC+co*Hu_CO)/M;
 				
 		APR_homogen_EinZonig APRhcCo = new APR_homogen_EinZonig(CP, false,"Qneu-startNeu",Qmax-Qcohc,verbrennungschwerpunkt);

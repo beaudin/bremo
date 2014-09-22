@@ -490,7 +490,9 @@ public class PostProcessor {
 		double hc=CP.get_HC();
 		double co=CP.get_CO();
 		double Hu_CO=282.9*1e3; //[J/mol] aus R. Pischinger S. 93
-		double Hu_HC=600*1e3;	//[J/mol] aus R. Pischinger S. 93
+//		double Hu_HC=600*1e3;	//[J/mol] aus R. Pischinger S. 93
+		double Hu_HC=2044.2*1e3;	//Ge Liu
+//		double Hu_HC=2222*1e3;	//Ho
 		double Qcohc=mGes*(hc*Hu_HC+co*Hu_CO)/M;
 		double h3=Qcohc/Qmax;		
 		h3=h2-h3;	
@@ -542,14 +544,16 @@ public class PostProcessor {
 	abgas.set_Gasmischung_molenBruch(
 	CP.OHC_SOLVER.get_GG_molenBrueche(1e5, 300, frischGemisch));
 	
-	double Qmax = me.get_mKrst_Sum_ASP()*me.get_spezKrstALL().get_Hu_mass();
+//	double Qmax = me.get_mKrst_Sum_ASP()*me.get_spezKrstALL().get_Hu_mass();
 	
 	double M=abgas.get_M();
 	double hc=CP.get_HC();
 	double co=CP.get_CO();
 	if(hc!=0 && co!=0){
 		double Hu_CO=282.9*1e3; //[J/mol] aus R. Pischinger S. 93
-	double Hu_HC=600*1e3;	//[J/mol] aus R. Pischinger S. 93
+//		double Hu_HC=600*1e3;	//[J/mol] aus R. Pischinger S. 93
+		double Hu_HC=2044.2*1e3;	//Ge Liu
+//		double Hu_HC=2222*1e3;	//Ho
 	double Qcohc=mGes*(hc*Hu_HC+co*Hu_CO)/M;
 	return Qcohc;
 	}

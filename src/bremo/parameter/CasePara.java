@@ -887,17 +887,11 @@ public class CasePara {
 			
 			//Warte, bis du das Signal bekommst weiterzumachen
 			synchronized (this) {
-				try {
-					wait();
-				} catch (InterruptedException e1) {
-					
-				}
+				try {wait();}catch(InterruptedException e1){}
 			}
-			
 			try {
-				
 				return set_doublePara(INPUTFILE_PARAMETER, "Drehzahl","[min^-1]",0,Double.POSITIVE_INFINITY)/60;
-			}catch(Exception f){
+			}catch(ParameterFileWrongInputException f){
 				e.stopBremo();
 				return Double.NaN;
 			}

@@ -133,6 +133,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         y_achseButton = new JButton("Y-Axe");
         barChartButton= new JButton();
         
+        
         openFileButton.setName("openFileButton");
         refreshButton.setName("refreshButton");
         y_achseButton.setName("y_achseButton");
@@ -328,7 +329,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	  
 	  barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconBarChart()))); 
 	 // barChartButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconBarChartOut())));
-      
+	  barChartButton.setEnabled(false);
 	  
 	  openFileButton.setText(" ");
 	  refreshButton.setText(" ");

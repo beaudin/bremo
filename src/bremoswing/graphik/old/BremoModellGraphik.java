@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bremoswing.graphik;
+package bremoswing.graphik.old;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -81,6 +81,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import bremo.main.Bremo;
 import bremoExceptions.ParameterFileWrongInputException;
+import bremoswing.graphik.SelectItemToPlotten;
 import bremoswing.util.BremoExtensionFileFilter;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.FertigMeldungFrame;
@@ -1139,7 +1140,7 @@ public abstract class BremoModellGraphik extends JFrame{
     	
     	String parent = inputfile.getParent();
     	
-    	BufferedReader in = new BufferedReader(new FileReader(parent+"/"+inputfile.getName().replace(".txt", ".pfd")));
+    	BufferedReader in = new BufferedReader(new FileReader(parent+"/DVA_Post_"+inputfile.getName()));
 		String zeile = null;
 		String [] header1 = null;
 		String [] header2 = null;

@@ -28,6 +28,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.lang.ThreadGroup;
 import java.net.URL;
 
@@ -58,6 +59,7 @@ import bremoswing.graphik.BremoViewModel;
 import bremoswing.graphik.SelectItemToPlotten;
 import bremoswing.util.BremoExtensionFileFilter;
 import bremoswing.util.ExtensionFileFilter;
+import bremoswing.util.StreamFabrik;
 import bremoswing.util.SucheBremo;
 import bremoswing.util.FertigMeldungFrame;
 
@@ -111,9 +113,51 @@ public class SwingBremo extends JFrame {
         public static int percent;
         static SelectItemToPlotten plotten;
         public static double startTime ;
-        PrintStream outStream = new PrintStream(System.out) {
+        
+        public static StringWriter warningBuffer ;
+        
+        StreamFabrik streamFabrik;
+        
+        PrintStream outStream ;
 
-                @Override
+        PrintStream errStream ;
+        
+//        PrintStream warnStream = new PrintStream(StreamFabrik.warningPrintStream) {
+//
+//        	 @Override
+//             public void println(String s) {
+//        		       kleinArea.setForeground(Color.ORANGE);
+//                     kleinArea.append(s + "\n" );
+//                     kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
+//             }
+//
+//             @Override
+//             public void print(String s) {
+//            	     kleinArea.setForeground(Color.ORANGE);
+//                     kleinArea.append(s);
+//                     kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
+//            }
+//    };
+//        BufferedReader br = new BufferedReader(StreamFabrik.warningPrintStream) ;
+//        
+
+        /************************** End of variables declaration ****************************************/
+
+        /***** Creates new form SwingBremo  *************************************************************/
+        public SwingBremo() {
+                initComponents();
+                placeFrame(this);
+        }
+
+        /***
+         * This method is called from within the constructor to initialize the form.
+         * @throws IOException
+         ***********************/
+        private void initComponents() {
+        	     
+        	outStream = new PrintStream(System.out) {
+        		
+        		@Override
                 public void println(String s) {
                         if (DebuggingMode) {
                                 ActiveConsole();
@@ -122,8 +166,7 @@ public class SwingBremo extends JFrame {
                         } else {
                                 outStream.flush();
                                 ActiveConsole();
-               
-                        }
+                                }
                 }
 
                 @Override
@@ -139,43 +182,38 @@ public class SwingBremo extends JFrame {
                 }
         };
 
-        PrintStream errStream = new PrintStream(System.err) {
+         errStream = new PrintStream(System.err) {
 
                 @Override
                 public void println(String s) {
+                	    kleinArea.setForeground(Color.RED);
                         kleinArea.append(s + "\n");
                         kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
-
-                }
+                        }
 
                 @Override
                 public void print(String s) {
+                	    kleinArea.setForeground(Color.RED);
                         kleinArea.append(s);
                         kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
                 }
         };
-
-        /************************** End of variables declaration ****************************************/
-
-        /***** Creates new form SwingBremo  *************************************************************/
-        public SwingBremo() {
-                initComponents();
-                placeFrame(this);
-        }
-
-        /***
-         * This method is called from within the constructor to initialize the form.
-         * @throws IOException
-         ***********************/
-        private void initComponents() {
-
                 System.setOut(outStream);
                 System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
-
+                
+//                warningBuffer = new StringWriter(128) {
+//                	
+//                	public void write(String str) {
+//                		kleinArea.setForeground(Color.ORANGE);
+//                        kleinArea.append(str + "\n" );
+//                        kleinArea.setCaretPosition(kleinArea.getDocument().getLength());
+//                    }
+//                
+//                };
+//                streamFabrik = new StreamFabrik();
+                
                 manager = new JPanel(){
-                        /**
-                         *
-                         */
+                	
                         private static final long serialVersionUID = 1L;
 
                         public void paintComponent(Graphics g)
@@ -201,7 +239,7 @@ public class SwingBremo extends JFrame {
                 wahlFile = new JButton();
                 stop = new JButton();
                 sehen = new JButton();
-        docfile = new JButton();
+                docfile = new JButton();
                 textFile = new JTextField();
 
                 // konsole = new JCheckBox();
@@ -256,7 +294,7 @@ public class SwingBremo extends JFrame {
                 setResizable(false);
                 setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
                 Dimension size = new Dimension(720,320);
-        setPreferredSize(size);
+                setPreferredSize(size);
                 this.addWindowListener(new WindowAdapter() {
                         public void windowClosing(WindowEvent e) {
                                 closeFrame();
@@ -463,7 +501,7 @@ public class SwingBremo extends JFrame {
                                         progressBar.setValue(percent);
                                         progressBar.repaint();
                                 } else {
-                                        label.setText(" Initialization läuft ... ");
+                                        label.setText(" Initialisierung läuft ... ");
                                 }
                         }
                 });
@@ -528,7 +566,7 @@ public class SwingBremo extends JFrame {
                 kleinArea.setLineWrap(true);
                 kleinArea.setEditable(false);
                 // kleinArea.setFont(new Font("comic sans ms", 3, 13)); // NOI18N
-                kleinArea.setForeground(new Color(255, 0, 0));
+                //kleinArea.setForeground(new Color(255, 0, 0));
                 kleinArea.setRows(5);
                 kleinArea.addKeyListener(new KeyAdapter() {
                         @Override
@@ -669,9 +707,10 @@ public class SwingBremo extends JFrame {
                                 }
 
                                 progressBarInd.setVisible(true);
-
+                                
                                 label.setText(" Operation gestartet .... ");
                                 timerCalcul.start();
+                                stop.setEnabled(false);
 
                         } catch (IllegalThreadStateException e1) {
                                 e1.printStackTrace();
@@ -702,6 +741,9 @@ public class SwingBremo extends JFrame {
         		ExtensionFileFilter [] bremoListExtentionFilter = bremoExtensionFileFilter.getBremoListExtentionFilter();
                 for (int i = 0 ; i < bremoListExtentionFilter.length; i++) {
                 	fileChooser.addChoosableFileFilter(bremoListExtentionFilter[i]);
+                	if (bremoListExtentionFilter[i].getDescription().toLowerCase().equals("txt")){
+                		fileChooser.setFileFilter(bremoListExtentionFilter[i]);
+                	}
                 }
                 try {
                         label.setText(" Datei Werden geladen ... ");
@@ -763,7 +805,7 @@ public class SwingBremo extends JFrame {
                 wahlFile.setEnabled(true);
                 berechnen.setEnabled(true);
                 stop.setEnabled(false);
-                label.setText(" Operation beendet. ");
+                label.setText(" Operationen beendet. ");
                 progressBar.setValue(0);
                 progressBar.setVisible(false);
                 progressBarInd.setVisible(false);

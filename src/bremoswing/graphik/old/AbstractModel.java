@@ -1,4 +1,4 @@
-package bremoswing.graphik;
+package bremoswing.graphik.old;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +10,8 @@ import java.util.Observer;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.data.xy.XYDataset;
+
+import bremoswing.graphik.Observable;
 
 public abstract class AbstractModel implements Observable {
 	

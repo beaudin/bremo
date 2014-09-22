@@ -44,6 +44,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	static JLabel TitelLabel;
     static JLabel datumLabel;
     static JLabel pathLabel; 
+    static JLabel GraphikLabel; 
     static JLabel Tabelle_InLabel;
     static JLabel Tabelle_PostLabel;
     
@@ -55,11 +56,13 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
     JLabel  achse_to_log_label;
     JLabel nbr_of_Achse_label;
     
+    JFileChooser fileChooser;
     
     JButton saveButton;
     JButton openFileButton;
     JButton refreshButton;
-    JButton y_achse_button;
+    JButton y_achseButton;
+    JButton barChartButton;
     
     JButton save_Fav_1 ;
     JButton save_Fav_2 ;
@@ -96,7 +99,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
     BremoViewController controller ;
     ItemChooseFrame chooseFrame  ;
     
-    
+    boolean isBarChartMode;
     
     public BremoView (BremoViewModel Model) {
     	   initComponents (Model);
@@ -108,7 +111,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 		resource = new BremoViewResource();
 		controller = new BremoViewController(Model);
 		
-		
+		isBarChartMode = false ;
 		
 		TitelPanel   = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,20,50);
 		//TitelPanel   = new ImageBackgroundJPanel(resource.iconPaintBremoSwingHD,300,310);
@@ -126,13 +129,14 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
                       
         saveButton = new JButton("Save");
         openFileButton = new JButton();
-        refreshButton = new JButton();
-        y_achse_button = new JButton("Y-Axe");
+        refreshButton =  new JButton();
+        y_achseButton = new JButton("Y-Axe");
+        barChartButton= new JButton();
         
         openFileButton.setName("openFileButton");
         refreshButton.setName("refreshButton");
-        y_achse_button.setName("y_achse_button");
-        
+        y_achseButton.setName("y_achseButton");
+        barChartButton.setName("barChartButton");
         
         save_Fav_1 = new JButton("1");
         save_Fav_2 = new JButton("2");
@@ -202,7 +206,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         
         achse_to_log.setPreferredSize(new Dimension(140, 22));
         x_achse.setPreferredSize(new Dimension(180, 22));
-        y_achse_button.setPreferredSize(new Dimension(80, 25));
+        y_achseButton.setPreferredSize(new Dimension(80, 25));
 
         pathLabel.setText(SwingBremo.loadPathFromFile());
         
@@ -222,6 +226,8 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         x_achse.addActionListener(this);
         openFileButton.addActionListener(this);
         refreshButton.addActionListener(this);
+        barChartButton.addActionListener(this);
+        
         save_Fav_1.addActionListener(this);
         save_Fav_2.addActionListener(this);
         save_Fav_3.addActionListener(this);
@@ -295,33 +301,41 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         GraphikPanelLayout.setRows(1);
         GraphikPanel.setLayout(GraphikPanelLayout);
         
-        JLabel TestLabel = new JLabel();
+        GraphikLabel = new JLabel();
         URL urlTest = getClass().getResource(resource.getIconBackgroungChart());
         ImageIcon iconTest = new ImageIcon(urlTest);
         Image imageTest = iconTest.getImage();
         imageTest  = imageTest.getScaledInstance(600, 600,java.awt.Image.SCALE_SMOOTH);
         iconTest = new ImageIcon(imageTest);
-        TestLabel.setIcon(iconTest);
-        GraphikPanel.add(TestLabel);
+        GraphikLabel.setIcon(iconTest);
+        GraphikPanel.add(GraphikLabel);
         
         /********************************************************************************/
         /** Layout of TabellePanel  and TabellePanel Processing *************************/ 
       
       ImageBackgroundJPanel virtualPanel = new ImageBackgroundJPanel(resource.getIconBackgroungColored_1(),100,140);
-      virtualPanel.setLayout(new GridLayout(1, 2, 5, 5));
+      virtualPanel.setLayout(new GridLayout(2, 2, 5, 5));
       
       openFileButton.setToolTipText("Open a file to plot the Graphic.");
       refreshButton.setToolTipText("Refresh the Chart.");
+      barChartButton.setToolTipText("Enable BarChart Mode"); 
       
       openFileButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconFolder()))); 
 	  openFileButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconFolderRollover())));
       
       refreshButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconRefresh()))); 
 	  refreshButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconRefreshRollover())));
-		
+	  
+	  barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconBarChart()))); 
+	 // barChartButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconBarChartOut())));
       
+	  
+	  openFileButton.setText(" ");
+	  refreshButton.setText(" ");
+	  
       virtualPanel.add(openFileButton);
       virtualPanel.add(refreshButton);
+      virtualPanel.add(barChartButton);
       virtualPanel.setBorder(BorderFactory.createTitledBorder("Manager"));      
       TabellePanel.add(virtualPanel);
       
@@ -398,7 +412,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         /********************************************************************************/
         refreshDate();
 		
-		y_achse_button.addActionListener(this);
+		y_achseButton.addActionListener(this);
 			
 		
 		GrouPanelInitialisation() ;
@@ -465,7 +479,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(x_achse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 30, 30)
-                        .addComponent(y_achse_button, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(y_achseButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 100, 270))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(pathLabel)
@@ -484,7 +498,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
                     .addComponent(achse_to_log, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(x_achse_label)
                     .addComponent(x_achse, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(y_achse_button, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(y_achseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pathLabel)
@@ -591,7 +605,6 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	    */
 	   void OpenFileToShowOnBremoView() {
 		   
-		    JFileChooser fileChooser;
 			fileChooser = new JFileChooser(SwingBremo.loadPathFromFile());
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			fileChooser.setMultiSelectionEnabled(false);
@@ -600,6 +613,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	        for (int i = 0 ; i < bremoListExtentionFilter.length; i++) {
 	        	fileChooser.addChoosableFileFilter(bremoListExtentionFilter[i]);
 	        }
+	       
 			try {
 				int status = fileChooser.showOpenDialog(getRootPane());
 
@@ -660,7 +674,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			refreshChart();
 			break;
 
-		case "y_achse_button":
+		case "y_achseButton":
 			try {
 			controller.bremoViewData(getAllselectedItem());
 			controller.show();
@@ -677,7 +691,17 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 		case "refreshButton":
 			refreshChart();
 			break;
+			
+		case "barChartButton":
+			if (!isBarChartMode) {
+				barChartModeEnable();
+			}
+			else {
+				barChartModeDisable();
+			}
+			break;
 
+			
 		case "s_favs_1":
 			controller.savefavs(1);
 			break;
@@ -768,8 +792,8 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         else if (arg instanceof StringBuilder ) {
         	update((StringBuilder)arg);
         }
-        else if (arg instanceof List ) {
-        	update((List)arg);
+        else if (arg instanceof List<?> ) {
+        	update((List<?>)arg);
         }
 	}
 
@@ -797,5 +821,44 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 		Date dt = new Date();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		datumLabel.setText(df.format(dt));
+	}
+	/**
+	 * Active the Mode to show BarChart
+	 */
+	public void barChartModeEnable() {
+		
+		 URL urlTest = getClass().getResource(resource.getIconBarChartBig());
+	     ImageIcon iconTest = new ImageIcon(urlTest);
+	     Image imageTest = iconTest.getImage();
+	     imageTest  = imageTest.getScaledInstance(600, 600,java.awt.Image.SCALE_SMOOTH);
+	     iconTest = new ImageIcon(imageTest);
+	     GraphikLabel.setIcon(iconTest);
+	     
+	     barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconButtonChart() )));
+	     barChartButton.setToolTipText("Enable LineChart Mode");
+	     
+	     revalidate();
+	     
+	     isBarChartMode = true ;
+		
+	}
+	
+	/**
+	 * Active the Mode to show BarChart
+	 */
+	public void barChartModeDisable() {
+		
+		URL urlTest = getClass().getResource(resource.getIconBackgroungChart());
+	     ImageIcon iconTest = new ImageIcon(urlTest);
+	     Image imageTest = iconTest.getImage();
+	     imageTest  = imageTest.getScaledInstance(600, 600,java.awt.Image.SCALE_SMOOTH);
+	     iconTest = new ImageIcon(imageTest);
+	     GraphikLabel.setIcon(iconTest);
+	     
+	     barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconBarChart())));
+	     barChartButton.setToolTipText("Enable BarChart Mode");
+	     revalidate();
+	     
+	     isBarChartMode = false;
 	}
 }

@@ -1,4 +1,4 @@
-package bremoswing.graphik;
+package bremoswing.graphik.old;
 
 import java.awt.Color;
 import java.awt.Dimension;

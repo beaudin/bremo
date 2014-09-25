@@ -315,7 +315,9 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 		super.buffer_EinzelErgebnis("T [K]",zonen[0].get_T(),i);
 		i++;
 		super.buffer_EinzelErgebnis("dQw [J/s]",dQw,i);
-		T_buffer.addValue(time, zonen[0].get_T());
+		T_buffer.addValue(time, zonen[0].get_T());		
+		i++;		
+		super.buffer_EinzelErgebnis("Brennraumfläche [m^2]",m.get_BrennraumFlaeche(time),i);	
 		i++;
 		super.buffer_EinzelErgebnis("V [m3]",zonen[0].get_V(),i);
 		i++;
@@ -398,7 +400,8 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 
 			TSaug=TSaug-relax*mLF_DIFF/dmLF_DIFF;
 		}
-				System.out.println("TSaug:" +TSaug);
+//				System.out.println("TSaug:" +TSaug);
+				System.err.println("TSaug:" +TSaug);
 	}
 
 	public Zone[] get_initialZones() {

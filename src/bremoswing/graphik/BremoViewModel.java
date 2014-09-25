@@ -259,10 +259,12 @@ public class BremoViewModel implements Observable {
 			Diagramm_From_Index(log_param);
 		} else {
 			indexStoreReset();
+
 			int []  x_default = new int[] {0};
 			int []  y_default = new int[] {1};
 			IndexStore.add(0, x_default);
 			IndexStore.add(1, y_default);
+
 			notifyObserver(Build_Diagramm(1, "No Log"));
 		}
 	}

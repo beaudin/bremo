@@ -311,6 +311,14 @@ public abstract class WandWaermeUebergang {
 	return qwc; // [W/m^2]	
 	}
 	
+	public double get_WandWaermeStromDichteUnverbrannt(double time, Zone[] zonen_IN, double fortschritt){	
+		return 0;
+	}
+	
+	public double get_WandWaermeStromDichteVerbrannt(double time, Zone[] zonen_IN, double fortschritt){	
+		return 0;
+	}
+	
 	//public double get_Schleppdruck(double time, Zone[] zonen_IN){
 	public double get_Schleppdruck(){
 		return 0;

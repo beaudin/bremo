@@ -43,7 +43,7 @@ public class ErgebnisBuffer {
 
 	/**
 	 * Methode welche die ErgebnisBuffer loescht. Dies wird fuer die LWA benoetigt, 
-	 * da heir mehrere Rechnungsdurchlaeufe mit ein und dem selben Objekt vom durchgefuehrt werden.
+	 * da hier mehrere Rechnungsdurchlaeufe mit ein und dem selben Objekt vom durchgefuehrt werden.
 	 */
 	public void clearErgebnisBuffer(){
 		ergebnisHash=new Hashtable<String, Vector<Double>>();
@@ -69,7 +69,7 @@ public class ErgebnisBuffer {
 			}catch (BirdBrainedProgrammerException bbpe){
 				bbpe.stopBremo();
 			}			
-		}			
+		}		
 		String header []= new String[hash.size()];
 		Enumeration<String> e = hash.keys();
 		for(int i=0; i<hash.size(); i++){
@@ -84,7 +84,7 @@ public class ErgebnisBuffer {
 							"richtige Position von dmb im Vektor an und es kommt zur ArrayOutOfBoundsException. \n " +
 							"Vielleicht wurde auch zweimal der selbe " +
 							"Name fuer eine Ergebnisvariable gewaehlt. \n Das fuehrt dazu, " +
-							"dass im Ergebnisvektor mehr Verte stehen als Ergebnisnamen vorhanden sind --> ArrayOutOfBoundsException \n"
+							"dass im Ergebnisvektor mehr Werte stehen als Ergebnisnamen vorhanden sind --> ArrayOutOfBoundsException \n"
 							+"Es muessen die Variablen \"ergebnisSpalteHash\" und \"ergebnisHash\" kontrolliert werden. ");
 				}catch (BirdBrainedProgrammerException bbpe){
 					bbpe.stopBremo();

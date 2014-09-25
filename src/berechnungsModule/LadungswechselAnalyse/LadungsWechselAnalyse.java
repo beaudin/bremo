@@ -373,6 +373,28 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		i++;
 		super.buffer_EinzelErgebnis("dQw [J/s]",dQw,i);
 		T_buffer.addValue(time, zonen[0].get_T());
+		
+		///
+		i+=1;
+		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zonen, fortschritt);
+		super.buffer_EinzelErgebnis("WSD [MW/m^2]",HeatFlux*1E-6,i);
+		
+		i+=1;
+		double HeatFluxPiston = wandWaermeModell.get_WandWaermeStromDichtePiston(time, zonen, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Kolben [MW/m^2]",HeatFluxPiston*1E-6,i);
+		
+		i+=1;
+		double HeatFluxHead = wandWaermeModell.get_WandWaermeStromDichteHead(time, zonen, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Head [MW/m^2]",HeatFluxHead*1E-6,i);
+		
+		i+=1;
+		double HeatFluxCyl = wandWaermeModell.get_WandWaermeStromDichteCyl(time, zonen, fortschritt);
+		super.buffer_EinzelErgebnis("WSD Liner [MW/m^2]",HeatFluxCyl*1E-6,i);
+		
+		i+=1;		
+		super.buffer_EinzelErgebnis("Brennraumfläche [m^2]",m.get_BrennraumFlaeche(time),i);	
+		///
+		
 		i++;
 		super.buffer_EinzelErgebnis("dQb [J/s]", super.get_dQburn(), i);
 		i++;
@@ -469,7 +491,8 @@ public class LadungsWechselAnalyse extends MasterLWA {
 
 			TSaug=TSaug-relax*mLF_DIFF/dmLF_DIFF;
 		}
-				System.out.println("TSaug:" +TSaug);
+//				System.out.println("TSaug:" +TSaug);
+				System.err.println("TSaug:" +TSaug);
 	}
 
 	public Zone[] get_initialZones() {

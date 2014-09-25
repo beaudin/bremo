@@ -34,8 +34,7 @@ public class BrennverlaufFileReader {
 	private double  dQburn [];
 	private double zeitAchse [];
 	private int anzSpalten=2;
-	private boolean istEinheitBrennverlaufJProKW = false;  //Kerrom
-		
+	
 	
 	public BrennverlaufFileReader( CasePara cp, String pfad,
 			int kanal_dQburn,
@@ -93,7 +92,8 @@ public class BrennverlaufFileReader {
 						einheitdQburn=theline[spalte_dQburn-1];
 						
 						
-						if(zeitEinheit.equals(zeitEinheiten[0])||zeitEinheit.equals(zeitEinheiten[1])||zeitEinheit.equals(zeitEinheiten[2])){}else{
+						if (zeitEinheit.equals(zeitEinheiten[0])|| zeitEinheit.equals(zeitEinheiten[1])|| zeitEinheit.equals(zeitEinheiten[2])) {
+						} else {
 							throw new ParameterFileWrongInputException("Die Einheit in der ersten Spalte " +
 									"des Brennverlaufstextfiles muss "+ zeitEinheiten[0]+ 
 									" oder " +zeitEinheiten[1] +" sein. Eingegeben wurde aber "+ zeitEinheit);}							
@@ -104,11 +104,7 @@ public class BrennverlaufFileReader {
 						EinheitEingelesen=true;
 					}
 					
-					//Kerrom: Abfrage, ob (angegebene) Einheit der Daten (in der 2. Spalte) [J/KW] ist (bzw. irgendwie die Rede von KW ist)
-					if(theline[1].contains("KW")|theline[1].contains("CAD")){
-						istEinheitBrennverlaufJProKW = true;						
-					}
-				
+									
 					Double.parseDouble(theline[0]); //wirft eine Exception wenn theline[0] keine Zahl ist
 					if(!EinheitEingelesen)
 						throw new ParameterFileWrongInputException("Im angegebenen Brennverlaufsfile wurden die Einheiten falsch angegeben. \n" +
@@ -143,18 +139,26 @@ public class BrennverlaufFileReader {
 		dQburn = new double[(int) punkteProArbeitsspiel];
 
 		zeitAchse = data[0];
-		   
-		// Kerrom:
-		if (istEinheitBrennverlaufJProKW) { // Umrechnung des Brennverlaufs in [J/s], wenn die Einheit [J/KW] ist
-			for (int i = 0; i < dQburn.length; i++) {
-				dQburn[i] = CP.convert_ProKW_2_ProSEC(data[1][i]);
+		
+		//Kerrom: Überprüfung der Einheit des Brennverlaufs und ggf. Umrechnung
+		try {
+			if (einheitdQburn.contains("[J/KW]") | einheitdQburn.contains("[J/CAD]")) {
+				for (int i = 0; i < dQburn.length; i++) { // Umrechnung des Brennverlaufs in [J/s], wenn die Einheit [J/KW]
+					dQburn[i] = CP.convert_ProKW_2_ProSEC(data[1][i]);
+				}
+				System.err.println("Der eingelesene Brennverlauf wurde von [J/KW] in [J/s] umgerechnet.\n");
+			} else if (einheitdQburn.contains("[J/s]")) {
+				dQburn = data[1]; // bei [J/s] eingelesene Daten einfach übernehmen
+			} else {
+				throw new ParameterFileWrongInputException( 
+								"Die Einheit des eingelesenen Brennverlaufs ist "
+								+ einheitdQburn
+								+ ", muss aber [J/KW] oder [J/s] sein.");
 			}
-			System.err.println("Der eingelesene Brennverlauf wurde für die Berechnung von [J/KW] in [J/s] umgerechnet.\n");
-		} else {
-			dQburn = data[1]; // ansonsten eingelesene Daten einfach übernehmen
+		} catch (ParameterFileWrongInputException e) {
+			e.log_Warning();
 		}
 	}
-	
 
 		
 	

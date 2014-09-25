@@ -341,7 +341,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 
 
-	public void bufferErgebnisse(double time, Zone[] zn) {			
+	public void bufferErgebnisse(double time, Zone[] zn) {
 		double dQburn=super.get_dQburn();
 		dQb_buffer.addValue(time, dQburn);
 		dQw_buffer.addValue(time, dQw);
@@ -456,9 +456,9 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 		i+=1;
 		super.buffer_EinzelErgebnis("dQw [J/s]",dQw,i);
-
+				
 		i+=1;
-		super.buffer_EinzelErgebnis("dQw [J/KW]", super.CP.convert_ProSEC_2_ProKW(dQw),i);	
+		super.buffer_EinzelErgebnis("dQw [J/KW]", super.CP.convert_ProSEC_2_ProKW(dQw),i);
 
 		i+=1;		
 		super.buffer_EinzelErgebnis("Qw [J]",Qw,i);		
@@ -558,6 +558,14 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		super.buffer_EinzelErgebnis("WSD Liner [MW/m^2]",HeatFluxCyl*1E-6,i);
 		
 		i+=1;
+		double HeatFluxU = wandWaermeModell.get_WandWaermeStromDichteUnverbrannt(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSDu [MW/m^2]",HeatFluxU*1E-6,i);
+		
+		i+=1;
+		double HeatFluxB = wandWaermeModell.get_WandWaermeStromDichteVerbrannt(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("WSDb [MW/m^2]",HeatFluxB*1E-6,i);
+		
+		i+=1;
 		double whtp = wandWaermeModell.get_WandWaermeStromPiston(time, zn, fortschritt, T_buffer);
 		super.buffer_EinzelErgebnis("dQw Kolben [J/s]",whtp,i);
 		Qwp=Qwp+whtp*super.CP.SYS.WRITE_INTERVAL_SEC; //Kommt einen Zeitschrit zu spät?
@@ -571,7 +579,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		double whtl = wandWaermeModell.get_WandWaermeStromCyl(time, zn, fortschritt, T_buffer);
 		super.buffer_EinzelErgebnis("dQw Liner [J/s]",whtl,i);
 		Qwl=Qwl+whtl*super.CP.SYS.WRITE_INTERVAL_SEC; //Kommt einen Zeitschrit zu spät?
-		
+				
 		i+=1;
 		super.buffer_EinzelErgebnis("Qw Kolben [J]",Qwp,i);
 		

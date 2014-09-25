@@ -116,7 +116,8 @@ public class Woschni extends WandWaermeUebergang {
 		if(setRefConditions){ //Schleife für Referenzbedingungen bei Rechnungsstart
 			setRefConditions=false; //Damit Referenzbedingungen nur einmal aufgerufen werden		
 		
-		if(cp.BERECHNUNGS_MODELL.isDVA()|cp.compareToExp()){ //nur wenn DVA oder APR mit Vergleich zu Experiment: alles aus Druckspur holen, egal wann Rechnung startet!
+		if(cp.RESTGASMODELL.involvesGasExchangeCalc()||cp.BERECHNUNGS_MODELL.isDVA()||cp.compareToExp()){ //nur wenn LWA, DVA oder APR mit Vergleich zu Experiment	
+//		if(cp.BERECHNUNGS_MODELL.isDVA()|cp.compareToExp()){ //nur wenn DVA oder APR mit Vergleich zu Experiment: alles aus Druckspur holen, egal wann Rechnung startet!
 			indiD=new IndizierDaten(cp);	//TODO: umprogrammieren, so dass die Indizierdatei nur ein einziges Mal eingelesen wird
 			
 			//Polytropenexponent für die Schleppdruckberechnung ermitteln.
@@ -146,24 +147,24 @@ public class Woschni extends WandWaermeUebergang {
 			Druck_1=indiD.get_pZyl(cp.get_Einlassschluss()); //[bar] //Druck
 			Volumen_1=motor.get_V(cp.get_Einlassschluss());	//[m^3]	//Volumen
 
-			/////////T-Berechnung aus id. Gasgl./////////////////
-			//Frischgemisch als Spezies Objekt erstellen
-			//Ersatz des Verbrennungsluftaufrufes mit AGRintern=0
-			Spezies verbrennungsLuft=cp.get_spezVerbrennungsLuft();
-			//Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuftPolytropenmethode();	
-			MasterEinspritzung me=cp.MASTER_EINSPRITZUNG;
-			Spezies krst=me.get_spezKrstALL();	
-			Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
-			double mKrst=me.get_mKrst_Sum_ASP();
-			double mVerbrennungsLuft=cp.get_mVerbrennungsLuft_ASP();	
-			double mGes= mVerbrennungsLuft+mKrst;
-			frischGemisch_MassenbruchHash.put(verbrennungsLuft, mVerbrennungsLuft/mGes);
-			frischGemisch_MassenbruchHash.put(krst, mKrst/mGes);		
-
-			GasGemisch frischGemisch=new GasGemisch("Frischgemisch");	
-			frischGemisch.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);//			
-			Temperatur_1=Druck_1*Volumen_1/(mGes*frischGemisch.get_R()); //[K] //Temperatur aus idealer Gasgleichung
-			//Temperatur_1=cp.get_T_IVC_WHT(); //[K]
+//			/////////T-Berechnung aus id. Gasgl./////////////////
+//			//Frischgemisch als Spezies Objekt erstellen
+//			//Ersatz des Verbrennungsluftaufrufes mit AGRintern=0
+//			Spezies verbrennungsLuft=cp.get_spezVerbrennungsLuft();
+//			//Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuftPolytropenmethode();	
+//			MasterEinspritzung me=cp.MASTER_EINSPRITZUNG;
+//			Spezies krst=me.get_spezKrstALL();	
+//			Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();
+//			double mKrst=me.get_mKrst_Sum_ASP();
+//			double mVerbrennungsLuft=cp.get_mVerbrennungsLuft_ASP();	
+//			double mGes= mVerbrennungsLuft+mKrst;
+//			frischGemisch_MassenbruchHash.put(verbrennungsLuft, mVerbrennungsLuft/mGes);
+//			frischGemisch_MassenbruchHash.put(krst, mKrst/mGes);		
+//
+//			GasGemisch frischGemisch=new GasGemisch("Frischgemisch");	
+//			frischGemisch.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);//		
+//			Temperatur_1=Druck_1*Volumen_1/(mGes*frischGemisch.get_R()); //[K] //Temperatur aus idealer Gasgleichung
+			Temperatur_1=cp.get_T_IVC_WHT(); //[K]
 			///////////////////////////////////////////////////
 			
 		} //Ende mit Druckspur
@@ -211,10 +212,22 @@ public class Woschni extends WandWaermeUebergang {
 			)
 		{	// Hochdruckberechnung
 			C_1 = 2.28 + 0.308 * vDrall / mittlereKolbengeschwindigkeit;
+			
+			//TODO: Einlesen von Schleppdruckdatei einpflegen
+			//Schleppdruckberechnung im Hochdruckteil für Verbrennungsglied
+			if(cp.RESTGASMODELL.involvesGasExchangeCalc()||cp.BERECHNUNGS_MODELL.isDVA()|cp.compareToExp()){ //nur wenn DVA oder APR mit Vergleich zu Experiment
+				//polytrope Schleppdruckberechnung bezüglich refPunktWoschniHuber für Woschni-Modell
+				Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n); //[Pa]
+			}
+			else{ //Also klassische APR ohne bekannten Druckverlauf	
+				//polytrope Schleppdruckberechnung bezüglich Einlassschluss für Woschni-Modell
+				Schleppdruck = Druck_1*Math.pow((Volumen_1/motor.get_V(time)),n); //[Pa]
+			}
 		}
 		else
 		{	// Ladungswechselberechnung
 			C_1 = 6.18 + 0.417 * vDrall / mittlereKolbengeschwindigkeit;
+			Schleppdruck = p; //[Pa] Um Verbrennungsglied auszuschalten 
 		}
 		//TODO: Koeffizienten von anderen Motortypen einbauen...
 		double C_2 = 0.00324; //Dieselmotoren mit Direkteinspritzung und Ottomotoren
@@ -225,15 +238,12 @@ public class Woschni extends WandWaermeUebergang {
 		//polytrope Schleppdruckberechnung bezüglich refPunktWoschniHuber für Woschni-Modell
 		//double Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n); //[Pa]
 		
-		if(cp.BERECHNUNGS_MODELL.isDVA()|cp.compareToExp()){ //nur wenn DVA oder APR mit Vergleich zu Experiment
-			//polytrope Schleppdruckberechnung bezüglich refPunktWoschniHuber für Woschni-Modell
-			Schleppdruck = pZyl_a*Math.pow((Vol_a/motor.get_V(time)),n); //[Pa]
-		}
-		else{ //Also klassische APR ohne bekannten Druckverlauf	
-			//polytrope Schleppdruckberechnung bezüglich Einlassschluss für Woschni-Modell
-			Schleppdruck = Druck_1*Math.pow((Volumen_1/motor.get_V(time)),n); //[Pa]
-		}		
+
+
+
+
 		
+
 		//fuer Ausgabe get_Schleppdruck
 		pSchlepp = Schleppdruck;
 		
@@ -241,7 +251,7 @@ public class Woschni extends WandWaermeUebergang {
 		double v =  mittlereKolbengeschwindigkeit + C_2 / C_1 * Hubvolumen * Temperatur_1 / (Druck_1 * Volumen_1) * (p - Schleppdruck);  
 		// Alpha in W/(m²K)
 		double alpha = 130 *Math.pow( (Bohrungsdurchmesser),-0.2)*Math.pow(p*1e-5,0.8)*Math.pow(T,-0.53)*Math.pow((C_1 * v ),0.8) ;
-		//Statt p in bat einzugeben kann auch 0.013 und der Druck in Pa verwendet werden!		
+		//Statt p in bar einzugeben kann auch 0.013 und der Druck in Pa verwendet werden!		
 		return alpha;
 	}
 

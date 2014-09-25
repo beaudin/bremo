@@ -50,8 +50,10 @@ public class Motor_HubKolbenMotor extends Motor{
 		EPS=CP.get_Verdichtung();  					//-			
 		SCHRAENKUNG =CP.get_Schraenkung();			//m
 		DESACHSIERUNG =-1*CP.get_Desachsierung();		//m	
-		AUSLASSSCHLUSS =CP.get_Auslassoeffnet(); 		//°KWnZOT
-		AUSLASSOEFFNET =CP.get_Auslassschluss(); 		//°KWnZOT
+		//AUSLASSSCHLUSS =CP.get_Auslassoeffnet(); 		//°KWnZOT //FALSCH!!! Oh je, wie konnte das passieren!!!
+		AUSLASSSCHLUSS =CP.get_Auslassschluss(); 		//°KWnZOT
+		//AUSLASSOEFFNET =CP.get_Auslassschluss(); 		//°KWnZOT //FALSCH!!! Oh je, wie konnte das passieren!!!
+		AUSLASSOEFFNET =CP.get_Auslassoeffnet(); 		//°KWnZOT
 		EINLASSSCHLUSS =CP.get_Einlassschluss(); 		//°KWnZOT
 		EINLASSOEFFNET =CP.get_Einlassoeffnet(); 		//°KWnZOT	
 		ZOTBEIKOLBENOT =CP.get_ZOTbeiKolbenOT();

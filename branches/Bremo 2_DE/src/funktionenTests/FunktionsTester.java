@@ -2383,7 +2383,7 @@ public class FunktionsTester {
 	//		
 	//		double Hu_0=HeizwertRechner.calcGemischHeizwert_chemGLGW_mass(gemisch, 273.15+25, 1e5);
 	//
-	//		System.out.println("Der mittels des GasGemsichs und chmGLGW berechnete Heizwert Hu " +
+	//		System.out.println("Der mittels des GasGemischs und chmGLGW berechnete Heizwert Hu " +
 	//				" von " + krst.get_name()+ " betraegt: "+ Hu_0*m_ges*1e-6 + " [MJ/kg]");		
 	//		
 	//		

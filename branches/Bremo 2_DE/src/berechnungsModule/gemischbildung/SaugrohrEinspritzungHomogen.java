@@ -18,7 +18,7 @@ public class SaugrohrEinspritzungHomogen extends Einspritzung {
 						" (\"" +FLAG +"\" bzw. \""+ FLAG2+ "\") " +
 						"fuer die " + index+ "te Einspritzung liegt das Einspritzende " +
 						"nach dem Rechnungsbeginn. \n" +
-						"Ist die Annahme eines vollstaendig homogenen Gemsichs dann zulaessig?");
+						"Ist die Annahme eines vollstaendig homogenen Gemischs dann zulaessig?");
 			}catch(ParameterFileWrongInputException e){
 				e.log_Warning();				
 			}

@@ -172,7 +172,9 @@ public  class SelectItemToPlotten extends JFrame {
 		    	File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
 		    	File output = null ;
 		        String berechnungModell = "";
+
 //		        boolean is_RestgasVorgabe_LWA = false;
+
 		        BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
 				String zeile = null;
 				String [] header = null;
@@ -185,11 +187,15 @@ public  class SelectItemToPlotten extends JFrame {
 						String[] tmp =  header[1].split("_");
 						if (tmp[0].equals("DVA")){
 							berechnungModell = "DVA";
+
 							output = new File(input.getParent()+"/"+input.getName().replace("txt","dva"));
+
 						}
 						else if (tmp[0].equals("APR")){
 							berechnungModell = "APR";
+
 							output = new File(input.getParent()+"/"+input.getName().replace("txt", "apr"));
+
 						}
 					}
 //					if (header[0].equals("RestgasVorgabeLWA")){

@@ -35,7 +35,7 @@ public class BrennverlaufFileReader {
 	private double zeitAchse [];
 	private int anzSpalten=2;
 	private boolean istEinheitBrennverlaufJProKW = false;  //Kerrom
-	
+		
 	
 	public BrennverlaufFileReader( CasePara cp, String pfad,
 			int kanal_dQburn,

@@ -55,6 +55,7 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
     Font font ;
     BremoView parent;
     List<List<String>> selectedItemList ;
+    List<int []> selectedIndexList ;
     private BremoViewResource resource ;
     
     
@@ -253,16 +254,25 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
 		y_achse_4.setModel(new JList<String>(item).getModel());
     }
     
-    void SelectIndiceOnList() {
-    	
-    	
+    public void sendDataIndexToModel() {
+    	selectedIndexList = new ArrayList<int[]>();
+    	selectedIndexList.add(y_achse_1.getSelectedIndices());
+		if (y_achse_2.isEnabled())
+			selectedIndexList.add(y_achse_2.getSelectedIndices());
+		if (y_achse_3.isEnabled())
+			selectedIndexList.add(y_achse_3.getSelectedIndices());
+		if (y_achse_4.isEnabled())
+			selectedIndexList.add(y_achse_4.getSelectedIndices());
+		parent.controller.sendDataIndexChooseFrame(selectedIndexList);
+
     }
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		getChartForBremoView();
+		getChartForBremoView ();
 	}
-	 public void getChartForBremoView() {
+	
+	 public void sendDataItemToModel() {
 		 
 		selectedItemList = new ArrayList<List<String>>();
 			selectedItemList.add(y_achse_1.getSelectedValuesList());
@@ -275,7 +285,12 @@ public class ItemChooseFrame extends JFrame implements ActionListener {
 			
 			parent.controller.chooseFrameData(selectedItemList);
 			parent.controller.hide();
-			parent.controller.Chart();
+			sendDataIndexToModel();
+	 }
+	 
+	 public void getChartForBremoView () {
+		 sendDataItemToModel();
+		 parent.controller.Chart();
 	 }
 
 }

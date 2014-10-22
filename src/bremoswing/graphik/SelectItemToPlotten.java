@@ -172,9 +172,7 @@ public  class SelectItemToPlotten extends JFrame {
 		    	File input = new File(SwingBremo.path+"/"+fileComboBox.getSelectedItem().toString());
 		    	File output = null ;
 		        String berechnungModell = "";
-
 //		        boolean is_RestgasVorgabe_LWA = false;
-
 		        BufferedReader in = new BufferedReader(new FileReader(input.getPath()));
 				String zeile = null;
 				String [] header = null;
@@ -187,15 +185,11 @@ public  class SelectItemToPlotten extends JFrame {
 						String[] tmp =  header[1].split("_");
 						if (tmp[0].equals("DVA")){
 							berechnungModell = "DVA";
-
 							output = new File(input.getParent()+"/"+input.getName().replace("txt","dva"));
-
 						}
 						else if (tmp[0].equals("APR")){
 							berechnungModell = "APR";
-
 							output = new File(input.getParent()+"/"+input.getName().replace("txt", "apr"));
-
 						}
 					}
 //					if (header[0].equals("RestgasVorgabeLWA")){
@@ -204,18 +198,23 @@ public  class SelectItemToPlotten extends JFrame {
 				}
 				try {
 				   callBremoViewWhitFile(output);
+				   dispose();
 				} catch (NullPointerException e) {
 					     callBremoView();
+					     dispose();
 				}
 				in.close();
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				new FertigMeldungFrame("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);
+				dispose();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				new FertigMeldungFrame("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);
+				dispose();
 			} catch (NullPointerException e){
 				new FertigMeldungFrame("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);
+				dispose();
 			}
 	}
 	public static void callBremoView() {
@@ -235,7 +234,7 @@ public  class SelectItemToPlotten extends JFrame {
 		       view.getController().getModel().addObserver(view);
 		       
 			try {
-				view.getController().SendFileModel(file);
+				view.getController().SendFileModel(file,true);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				new FertigMeldungFrame("Error", e.getMessage(),JOptionPane.ERROR_MESSAGE);

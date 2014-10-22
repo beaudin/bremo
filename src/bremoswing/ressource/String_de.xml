@@ -1,0 +1,35 @@
+<?xml version = "1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE language SYSTEM "String.dtd">
+
+<language id = "DE" >
+  <JLABELS>
+    <jlabel id = "swingbremo_label_1"> Berechnung gestartet </jlabel>
+	<jlabel id = "swingbremo_label_2"> Initialisierung läuft ... </jlabel>
+	<jlabel id = "swingbremo_label_3"> Operation gestartet .... </jlabel> 
+	<jlabel id = "swingbremo_label_4"> Bitte InputFile Neu Auswählen ! </jlabel>
+	<jlabel id = "swingbremo_label_5"> Datei Werden geladen ... </jlabel>
+	<jlabel id = "swingbremo_label_6"> Datei mit Erfolg Importiert ! </jlabel>
+	<jlabel id = "swingbremo_label_7"> Import von Datei Unterbrechen ! </jlabel>
+	<jlabel id = "swingbremo_label_8"> Fehler aufgetreten ! </jlabel>
+	<jlabel id = "swingbremo_label_9"> Operationen beendet. </jlabel>
+	<jlabel id = "swingbremo_label_10"> Berechnung Fertig ! </jlabel>
+	<jlabel id = "swingbremo_label_11"> Verlustteilung wird berechnet... </jlabel>
+	<jlabel id = "swingbremo_label_12"> Externe Datei mit Erfolg Importiert ! </jlabel>
+	<jlabel id = "swingbremo">  </jlabel>
+  </JLABELS>
+
+  <JBUTTONS>
+    <jbutton id = "swingbremo_ToolTip_play"> Berechnung ausführen </jbutton>
+	<jbutton id = "swingbremo_ToolTip_choose"> InputFile auswählen </jbutton>
+	<jbutton id = "swingbremo_ToolTip_stop"> Stop Bremo </jbutton>
+	<jbutton id = "swingbremo_ToolTip_see"> Schauen Sie Ergebniss als Graphik </jbutton>
+	<jbutton id = "swingbremo_ToolTip_doc">Erzeugen/Editieren InputFile </jbutton>
+	<jbutton id = "3">button3 </jbutton>
+  </JBUTTONS>
+
+  <STRINGS>
+    <string id = "1">string1</string>
+	<string id = "2">string2</string>
+	<string id = "3">string3</string>
+  </STRINGS>
+</language>

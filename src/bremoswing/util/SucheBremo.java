@@ -5,12 +5,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 /**
  * @author Ngueneko
@@ -40,7 +41,7 @@ public class SucheBremo extends JFrame{
 		// TODO Auto-generated constructor stub
 	}
 	
-	public SucheBremo( final JTextArea area) {
+	public SucheBremo( final JTextPane area) {
 		
 		setSize(370,70);
 	    setTitle("Text Suchen im Bremo");
@@ -78,7 +79,7 @@ public class SucheBremo extends JFrame{
 		
 	}
 	
-	public void suche(JTextArea area)  {
+	public void suche(JTextPane area)  {
 		
 		if(area.getText().toLowerCase().contains(field1.getText().toLowerCase()))
         {    
@@ -114,7 +115,7 @@ public class SucheBremo extends JFrame{
 		
 	}
 	
-	void setTextArea(JTextArea area) {
+	void setTextArea(JTextPane area) {
 		
 	}
 	

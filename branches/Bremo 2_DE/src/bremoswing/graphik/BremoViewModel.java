@@ -8,33 +8,47 @@ import java.awt.Stroke;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Observer;
+
+import javafx.scene.chart.XYChart.Series;
 
 import javax.swing.JOptionPane;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.labels.XYToolTipGenerator;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYShapeRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.util.ShapeUtilities;
 
+import sun.nio.cs.ext.ISCII91;
+import bremoswing.manager.FavoriteManager;
 import bremoswing.util.FertigMeldungFrame;
 
 /**
@@ -51,21 +65,32 @@ public class BremoViewModel implements Observable {
 	private List<Object> ItemStore;
 	/**
 	 * IndexStore is a Store place for the model to store index of item from the
-	 * Output file. 1.place x_index 2.place list y_index
+	 * Output file. 1.place = x_index, at  2.place list y_index
 	 */
-	private ArrayList<int[]> IndexStore;
+	private List<int[]> IndexStore;
 	/**
 	 * Units is a Store for the Units of all possible element to represent
 	 */
 	private String [] Units ;
+	
 	private File file;
 	private File favsFile;
 	private ChartPanel Chart;
+	
+	private FavoriteManager fav_Manager;
+	
+	
+	/**
+	 * IndexStoreBarChart is a Store place for the model to store index of item from the
+	 * Output file for BarChartMode
+	 */
+	private HashMap<String, String[] > indexStorBarChart;
 
 	public BremoViewModel() {
 		ItemStore = new ArrayList<Object>();
 		IndexStore = new ArrayList<int[]>();
-
+		indexStorBarChart = new HashMap<>();
+		fav_Manager = null;
 	}
 
 	/**
@@ -177,6 +202,17 @@ public class BremoViewModel implements Observable {
 		ItemStore.add(1, selectedItemListlist);
 
 	}
+	public void storeDataIndexChooseFrame(List<int[]> selectedIndexList) {
+		int i = 1 ;
+		// TODO Auto-generated method stub
+		for (int [] index : selectedIndexList) {
+			try {
+			IndexStore.remove(i);
+			IndexStore.add(i, index );
+			i++;
+			} catch (IndexOutOfBoundsException e) {}
+		}
+	}
 
 	public void createChart() {
 		if (ItemStore.get(0) == null && ItemStore.get(1) == null)
@@ -202,11 +238,14 @@ public class BremoViewModel implements Observable {
 						dataListFromchooseFrame.get(1),
 						dataListFromchooseFrame.get(2), log);
 				break;
-			default:
+			case "4":
 				Chart = Build_Diagramm(x, dataListFromchooseFrame.get(0),
 						dataListFromchooseFrame.get(1),
 						dataListFromchooseFrame.get(2),
 						dataListFromchooseFrame.get(3), log);
+				break;
+			default : 
+				 notifyObserver("Error !!! number of Axe : "+nbr);
 				break;
 			}
 		} catch (IOException e) {
@@ -239,10 +278,12 @@ public class BremoViewModel implements Observable {
 	}
     /**
      * Read the Inputfile to set another parameters
-     * @param file
+     * @param file  inputfile
+     * @param LineChartMode  <code>true</code> when LineChart and <code>false</code> when BarChart
      * @throws IOException
      */
-	public void readInputFile(File file) throws IOException {
+	public void readInputFile(File file, boolean LineChartMode) throws IOException {
+		
 		this.file = file;
 		StringBuilder stb = new StringBuilder();
 		stb.append(file.getName());
@@ -252,20 +293,33 @@ public class BremoViewModel implements Observable {
 		stb = new StringBuilder();
 		stb.append(file.getParent()+File.separator);
 		notifyObserver(stb);
-		notifyObserver(showHeader());
-		
-		if (checkFavsfile()) {
-			String log_param = readFavsFile();
-			Diagramm_From_Index(log_param);
-		} else {
-			indexStoreReset();
-
-			int []  x_default = new int[] {0};
-			int []  y_default = new int[] {1};
-			IndexStore.add(0, x_default);
-			IndexStore.add(1, y_default);
-
-			notifyObserver(Build_Diagramm(1, "No Log"));
+		if (LineChartMode) { // Line Chart 
+			if (fav_Manager == null ){ // initialization of  fav_manager at the beginning
+				fav_Manager = new FavoriteManager(file.getParent()+File.separator);
+			}
+ 			else if (!fav_Manager.getDirectoryFavsFile().equals(null) &&    // new initialization when the User change the File Directory
+ 					 !fav_Manager.getDirectoryFavsFile().equals(file.getParent()+File.separator)) {
+ 				fav_Manager = new FavoriteManager(file.getParent()+File.separator);
+ 			}
+			notifyObserver(showHeader());
+			if (checkFavsfile()) {
+				String log_param = readFavsFile();
+				Diagramm_From_Index(log_param);
+			}
+			else {
+				indexStoreReset();
+				int[] x_default = new int[] { 0 };
+				int[] y_default = new int[] { 1 };
+				int[] y_default_1 = new int[] { 2 };
+				IndexStore.add(0, x_default);
+				IndexStore.add(1, y_default);
+				IndexStore.add(2, y_default_1);
+				notifyObserver(Build_Diagramm(2, "No Log"));
+			}
+		}
+		else {
+			readFileToBarChart();
+			notifyObserver(Build_BarChart_Diagramm());
 		}
 	}
 
@@ -516,6 +570,7 @@ public class BremoViewModel implements Observable {
 		if (axe > 3) {
 			indexItem.add(y_index_4);
 		}
+		
 		notifyObserver(indexItem);
 		/*************************************************************************************/
 		
@@ -535,7 +590,7 @@ public class BremoViewModel implements Observable {
 
 		} catch (Exception e) {
 			Units = value;
-			System.err.println(Units[0]);
+			//System.err.println(Units[0]);
 		}
         
 		while ((zeile = br.readLine()) != null) {
@@ -849,7 +904,7 @@ public class BremoViewModel implements Observable {
 
 		} catch (Exception e) {
 			Units = value;
-			System.err.println(Units[0]);
+			//System.err.println(Units[0]);
 		}
 		
 		while ((zeile = br.readLine()) != null) {
@@ -962,7 +1017,7 @@ public class BremoViewModel implements Observable {
 
 		} catch (Exception e) {
 			Units = value;
-			System.err.println(Units[0]);
+			//System.err.println(Units[0]);
 		}
 
 		while ((zeile = br.readLine()) != null) {
@@ -1121,7 +1176,7 @@ public class BremoViewModel implements Observable {
 
 		} catch (Exception e) {
 			Units = value;
-			System.err.println(Units[0]);
+			//System.err.println(Units[0]);
 		}
 
 		while ((zeile = br.readLine()) != null) {
@@ -1321,7 +1376,7 @@ public class BremoViewModel implements Observable {
 
 		} catch (Exception e) {
 			Units = value;
-			System.err.println(Units[0]);
+			//System.err.println(Units[0]);
 		}
 
 		/************************** READ THE REST OF LINE OF INPUTFILE *********/
@@ -1467,6 +1522,30 @@ public class BremoViewModel implements Observable {
 
 		return chartVerlauf;
 
+	}
+	/**
+	 * Build BarChat Graphic 
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	public ChartPanel Build_BarChart_Diagramm(){
+		
+		DefaultCategoryDataset datasetVerlauf = new DefaultCategoryDataset();
+		
+		for (Entry<String, String[]> entry : indexStorBarChart.entrySet()) {
+		    String serie = entry.getKey();
+		    String [] category = entry.getValue()[0].split("\t");
+		    String [] values = entry.getValue()[1].split("\t");
+		    if (category.length == values.length) {
+		    	for (int j = 0 ; j < category.length; j++ )
+		    		datasetVerlauf.addValue(Double.parseDouble(values[j]), serie, category[j]);
+		  }
+		}
+		ChartPanel chart = null;
+		chart = createBarChartPanel(null, null, null , datasetVerlauf);
+		return chart;
+		
 	}
 
 	/**
@@ -1696,6 +1775,43 @@ public class BremoViewModel implements Observable {
 		final ChartPanel chartPanel = new ChartPanel(chart);
 		return chartPanel;
 	}
+	/**
+     * draw BarChart in  Panel with this Parameters:    
+     * @param Titel
+     * @param XLabel
+     * @param YLabel
+     * @param data      set von Daten zum zeichnen 
+     * @return
+     */
+    public ChartPanel createBarChartPanel(String Titel, String XLabel,String YLabel,CategoryDataset data) {
+    	
+    	JFreeChart chart = ChartFactory.createBarChart(Titel, XLabel , YLabel ,  data , PlotOrientation.VERTICAL, true, true, false);
+    	
+        CategoryPlot categoryplot = (CategoryPlot)chart.getPlot();
+//        if (is_Wirkungsgrade_Diagramm){
+//            BarRenderer barrenderer = (BarRenderer)categoryplot.getRenderer();
+//            //GradientPaint gradientpaint = new GradientPaint(0.0F, 0.0F, Color.red, 0.0F, 0.0F, new Color(64, 0, 0));
+//            barrenderer.setSeriesPaint(0, Color.blue);
+//        }
+//        CategoryAxis categoryaxis = categoryplot.getDomainAxis();
+//        categoryaxis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(0.52359877559829882D));
+//        categoryaxis.setLabelFont(new Font("serif", Font.PLAIN, 10));
+//        
+//        NumberAxis numberaxis = (NumberAxis)categoryplot.getRangeAxis();
+//        numberaxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits()); 
+//        barrenderer.setDrawBarOutline(false);
+//        GradientPaint gradientpaint = new GradientPaint(0.0F, 0.0F, Color.blue, 0.0F, 0.0F, new Color(0, 0, 64));
+//        GradientPaint gradientpaint1 = new GradientPaint(0.0F, 0.0F, Color.green, 0.0F, 0.0F, new Color(0, 64, 0));
+//        GradientPaint gradientpaint2 = new GradientPaint(0.0F, 0.0F, Color.red, 0.0F, 0.0F, new Color(64, 0, 0));
+//        barrenderer.setSeriesPaint(0, gradientpaint2);
+//        barrenderer.setSeriesPaint(2, gradientpaint2);
+        CategoryAxis categoryaxis = categoryplot.getDomainAxis();
+        categoryaxis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(0.52359877559829882D));
+    	
+        final ChartPanel chartPanel = new ChartPanel(chart);
+    	return chartPanel;
+    }
+
 
 	/**
 	 * save the index of selected item as favs for the user
@@ -1703,27 +1819,20 @@ public class BremoViewModel implements Observable {
 	public void saveFavs(int nbr) {
 		FertigMeldungFrame info;
 		try {
-			File f = new File(file.getParent() + "/FAVS_" + nbr + ".txt");
-			BufferedWriter output = new BufferedWriter(new FileWriter(f));
-			output.write("Log := " + getDataFromBremoView()[1]);
-			output.newLine();
-			output.write("x_index := " + Arrays.toString(IndexStore.get(0)));
-			output.newLine();
+			 
+			List<String> value = new ArrayList<String>();
+			value.add(getDataFromBremoView()[1]);
+			value.add(Arrays.toString(IndexStore.get(0)));
+			
 			for (int i = 1; i < IndexStore.size(); i++) {
-				output.write("y_index_" + i + " := "
-						+ Arrays.toString(IndexStore.get(i)));
-				output.newLine();
+				value.add(Arrays.toString(IndexStore.get(i)));
 			}
-			output.close();
+			fav_Manager.addFavsNummer(nbr, value);
+			
 			info = new FertigMeldungFrame("favorite",
 					"index-Data has been successfully saved as Favorite \"" + nbr+"\"",
 					JOptionPane.INFORMATION_MESSAGE);
-		} catch (IOException e) {
-			e.printStackTrace();
-			info = new FertigMeldungFrame("favorite",
-					"an error occured while saving favorites",
-					JOptionPane.ERROR_MESSAGE);
-		} catch (NullPointerException e ){
+		} catch (Exception e ){
 			info = new FertigMeldungFrame("favorite",
 					"No Input file found !",
 					JOptionPane.ERROR_MESSAGE);
@@ -1732,29 +1841,11 @@ public class BremoViewModel implements Observable {
 		}
 
 	/**
-	 * check if the favs file of the input file exist
-	 */
-	public boolean checkFavsfile(int nbr) {
-
-		File f = new File(file.getParent() + "/FAVS_" + nbr + ".txt");
-		if (f.exists()) {
-			favsFile = f;
-			return true;
-		} else
-			return false;
-	}
-
-	/**
-	 * check if the favs file of the input file exist
+	 * check if the favs file in the favoriteManager exist
 	 */
 	public boolean checkFavsfile() {
 
-		File f = new File(file.getParent() + "/FAVS_1.txt");
-		if (f.exists()) {
-			favsFile = f;
-			return true;
-		} else
-			return false;
+		return !fav_Manager.isEmpty();
 	}
 
 	/**
@@ -1770,41 +1861,108 @@ public class BremoViewModel implements Observable {
 	 * @return
 	 * @throws IOException
 	 */
-	public String readFavsFile() throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(favsFile));
+	public String readFavsFile() {
+		
+		String log="";
 		indexStoreReset();
-		String zeile = null;
-		String log = "";
-		String value = null;
-		int[] index = null;
-
-		if ((zeile = br.readLine()) != null) {
-			log = zeile.split(" := ")[1];
+		for  (Entry<String, List<String>> entry : fav_Manager.getFavsList().entrySet()) {
+		    List<String> favs = entry.getValue();
+            log = favs.get(0);
+		    for ( int i = 1 ; i < favs.size(); i++) {
+		    	String ele = favs.get(i);
+		        ele = ele.replace("[", "");
+		        ele = ele.replace("]", "");
+		        ele = ele.replaceAll(" ", "");
+		        String[] val = ele.split(",");
+				int [] index = new int[val.length];
+				for (int j = 0; j < val.length; j++) {
+					index[j] = Integer.parseInt(val[j]);
+				}
+				IndexStore.add(index);
+		    }
+		    break;
 		}
-		while ((zeile = br.readLine()) != null) {
-			value = zeile.split(" := ")[1];
-			value = value.replace("[", "");
-			value = value.replace("]", "");
-			value = value.replaceAll(" ", "");
-			String[] val = value.split(",");
-			index = new int[val.length];
-			for (int i = 0; i < val.length; i++) {
-				index[i] = Integer.parseInt(val[i]);
+		
+		return log;
+	}
+	/**
+	 * Read the Favorite File 
+	 * @param nbr
+	 * @return
+	 */
+	public String readFavsFile(int nbr) {
+		
+		String log = "";
+		indexStoreReset();
+		List<String> favs = fav_Manager.getFavNummer(nbr);
+        log = favs.get(0);
+		for (int i = 1; i < favs.size(); i++) {
+			String ele = favs.get(i);
+	        ele = ele.replace("[", "");
+	        ele = ele.replace("]", "");
+	        ele = ele.replaceAll(" ", "");
+	        String[] val = ele.split(",");
+			int [] index = new int[val.length];
+			for (int j = 0; j < val.length; j++) {
+				index[j] = Integer.parseInt(val[j]);
 			}
 			IndexStore.add(index);
 		}
-		br.close();
-
+		
 		return log;
 	}
-
+	/**
+	 *  check if the favs file in the favoriteManager exist
+	 */
+	public boolean checkFavsfile(int nbr) {
+        if ( fav_Manager.getFavNummer(nbr) != null)
+        	return true;
+        else 
+        	return false;
+	}
+    /**
+     * Read file and identification of Value for BarChart 
+     */
+	public void readFileToBarChart() {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String zeile = null;
+			String [] value = null;
+			int counter = 0;
+			String key = "";
+			String keyValue1= "";
+			String keyvalue2= "";
+			while((zeile = br.readLine()) != null) {
+				if (zeile.contains("----->>")) {
+					value = zeile.split("\t----->>\t");
+					key = value[0];
+					keyValue1 = value[1];
+				} 
+				else {
+					if (zeile.contains("NaN")) {
+						value = zeile.split("NaN\t");
+						keyvalue2 = value[value.length-1];
+						indexStorBarChart.put(key, new String[] {keyValue1,keyvalue2});
+					}
+				}
+			}
+			
+			br.close();
+		} catch (IOException e) {
+			System.err.println("File"+file.getAbsolutePath() +" Not Found !!!");
+		}
+		Build_BarChart_Diagramm();
+	}
 	public void loadFavs(int i) {
 		// TODO Auto-generated method stub
 		try {
 
 			if (checkFavsfile(i)) {
-				String log_param = readFavsFile();
+				String log_param = readFavsFile(i);
 				Diagramm_From_Index(log_param);
+			}
+			else {
+				throw new NullPointerException();
 			}
 			
 		} catch (IOException e) {

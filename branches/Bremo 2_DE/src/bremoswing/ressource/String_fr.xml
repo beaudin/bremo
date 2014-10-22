@@ -1,0 +1,35 @@
+<?xml version = "1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE language SYSTEM "String.dtd">
+
+<language id = "FR" >
+  <JLABELS>
+    <jlabel id = "swingbremo_label_1"> Demarage des Calcules </jlabel>
+	<jlabel id = "swingbremo_label_2"> Initialisation en Cours ... </jlabel>
+	<jlabel id = "swingbremo_label_3"> Demarage des Operationen.... </jlabel> 
+	<jlabel id = "swingbremo_label_4"> Choisir de nouveau le fichier d´entré ! </jlabel>
+	<jlabel id = "swingbremo_label_5"> Chargement du Fichier en Cours ... </jlabel>
+	<jlabel id = "swingbremo_label_6"> Fichier importé avec succes ! </jlabel>
+	<jlabel id = "swingbremo_label_7"> Importation du fichier interrompue ! </jlabel>
+	<jlabel id = "swingbremo_label_8"> une Erreur est Survenue ! </jlabel>
+	<jlabel id = "swingbremo_label_9"> Fin des Operations </jlabel>
+	<jlabel id = "swingbremo_label_10"> Fin des Calculs </jlabel>
+	<jlabel id = "swingbremo_label_11"> Calcul de Perte en cours... </jlabel>
+	<jlabel id = "swingbremo_label_12"> Fichier externe importé avec succes ! </jlabel>
+	<jlabel id = "swingbremo">  </jlabel>
+  </JLABELS>
+
+  <JBUTTONS>
+    <jbutton id = "swingbremo_ToolTip_play"> Demarer Bremo </jbutton>
+	<jbutton id = "swingbremo_ToolTip_choose"> Choisir fichier d´entré </jbutton>
+	<jbutton id = "swingbremo_ToolTip_stop"> Stoper Bremo </jbutton>
+	<jbutton id = "swingbremo_ToolTip_see"> Regarder les Resultats sous forme Graphique </jbutton>
+	<jbutton id = "swingbremo_ToolTip_doc"> Creer / Editer Fichier d´entré </jbutton>
+	<jbutton id = "3">button3 </jbutton>
+  </JBUTTONS>
+
+  <STRINGS>
+    <string id = "1">string1</string>
+	<string id = "2">string2</string>
+	<string id = "3">string3</string>
+  </STRINGS>
+</language>

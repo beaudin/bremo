@@ -1,0 +1,22 @@
+?xml version = "1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE language SYSTEM "String.dtd">
+
+<language id = "EN" >
+  <JLABELS>
+    <jlabel id = "1">label1</jlabel>
+	<jlabel id = "2">label2</jlabel>
+	<jlabel id = "3">label3</jlabel>
+  </JLABELS>
+
+  <JBUTTONS>
+    <jbutton id = "1">button1</jbutton>
+	<jbutton id = "2">button2</jbutton>
+	<jbutton id = "3">button3 </jbutton>
+  </JBUTTONS>
+
+  <STRINGS>
+    <string id = "1">string1</string>
+	<string id = "2">string2</string>
+	<string id = "3">string3</string>
+  </STRINGS>
+</language>

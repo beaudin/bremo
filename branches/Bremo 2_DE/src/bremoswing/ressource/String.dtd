@@ -1,0 +1,23 @@
+<?xml encoding="UTF-8"?>
+
+<!ELEMENT language (JLABELS,JBUTTONS,STRINGS)>
+<!ATTLIST language
+    id ID #REQUIRED>
+
+<!ELEMENT JLABELS (jlabel*)>
+
+<!ELEMENT JBUTTONS (jbutton*)>
+
+<!ELEMENT STRINGS (string*)>
+
+<!ELEMENT jlabel (#PCDATA)>
+<!ATTLIST jlabel
+   id ID #REQUIRED>
+
+<!ELEMENT jbutton (#PCDATA)>
+<!ATTLIST jbutton
+    id ID #REQUIRED>
+
+<!ELEMENT string (#PCDATA)>
+<!ATTLIST string
+    id ID #REQUIRED>

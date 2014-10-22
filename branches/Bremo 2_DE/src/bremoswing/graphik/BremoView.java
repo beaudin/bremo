@@ -1,7 +1,6 @@
 package bremoswing.graphik;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -36,6 +35,7 @@ import bremoswing.util.BremoExtensionFileFilter;
 import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.FertigMeldungFrame;
 import bremoswing.util.ImageBackgroundJPanel;
+import bremoswing.graphik.BremoViewModel;
 
 public  class BremoView extends JFrame implements ActionListener, Observer {
 
@@ -109,8 +109,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
      
 		/**  initialization of Variable ***********************************************/
 		resource = new BremoViewResource();
-		controller = new BremoViewController(Model);
-		
+		controller = new BremoViewController(Model);		
 		isBarChartMode = false ;
 		
 		TitelPanel   = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,20,50);
@@ -209,8 +208,8 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         x_achse.setPreferredSize(new Dimension(180, 22));
         y_achseButton.setPreferredSize(new Dimension(80, 25));
 
-        pathLabel.setText(SwingBremo.loadPathFromFile());
-        
+        pathLabel.setText(SwingBremo.loadPathFromFile()+File.separator);
+              
         controller = new BremoViewController(new BremoViewModel());
         chooseFrame = new ItemChooseFrame(this);
         
@@ -309,8 +308,9 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         imageTest  = imageTest.getScaledInstance(600, 600,java.awt.Image.SCALE_SMOOTH);
         iconTest = new ImageIcon(imageTest);
         GraphikLabel.setIcon(iconTest);
-        GraphikPanel.add(GraphikLabel);
-        
+        ImageBackgroundJPanel panel = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,100,100);
+	    panel.add(GraphikLabel);
+	    update(panel);
         /********************************************************************************/
         /** Layout of TabellePanel  and TabellePanel Processing *************************/ 
       
@@ -329,7 +329,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	  
 	  barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconBarChart()))); 
 	 // barChartButton.setRolloverIcon(new ImageIcon(getClass().getResource(resource.getIconBarChartOut())));
-	  barChartButton.setEnabled(false);
+	 // barChartButton.setEnabled(false);
 	  
 	  openFileButton.setText(" ");
 	  refreshButton.setText(" ");
@@ -513,14 +513,14 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
      * Update the Visibility of the Y-axe ChooseFrame
      * @param bol
      */
-	public void update( boolean bol) {
+	private void update( boolean bol) {
 		chooseFrame.setVisible(bol);
 	}
 	/**
 	 * Update the Titel 
 	 * @param str
 	 */
-	public void update(String str) {
+	private void update(String str) {
 		setTitle(str);
 		//TitelLabel.setText(str.replace(".txt", ""));
 		//TitelPanel.revalidate();
@@ -529,16 +529,17 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	 * Update the chart of the GraphicPanel
 	 * @param chart
 	 */
-	public void update(ChartPanel chart) {
-		GraphikPanel.removeAll();
-		GraphikPanel.add(chart);
-		GraphikPanel.revalidate();
+	private void update( Component chart) {
+				GraphikPanel.removeAll();;
+				GraphikPanel.add(chart);
+				GraphikPanel.revalidate();
+	
 	}
 	/**
 	 * Update the X_achse Combobox
 	 * @param item
 	 */
-	public void update(String [] item) {
+	private void update(String [] item) {
 		addItemToComboBox(x_achse, item);
 		chooseFrame.addItemtoListBox(item);
 		GroupPanel.revalidate();
@@ -547,7 +548,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	 * Update the path of the Inputfile
 	 * @param stb
 	 */
-	public void update(StringBuilder stb) {
+	private void update(StringBuilder stb) {
 		pathLabel.setText(stb.toString());
 		GroupPanel.revalidate();
 	}
@@ -555,7 +556,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	 * Select Item to Combobox and List in Bremoview and ItemChooseFrame
 	 * @param list
 	 */
-	public void update(List list) {
+	private void update(List<Object> list) {
 		
 		int indexAxe =  (int) list.get(0);
 		nbr_of_Achse.setSelectedIndex(indexAxe);
@@ -584,6 +585,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			int [] y_index_4 = (int[]) list.get(6);
 			chooseFrame.y_achse_4.setSelectedIndices(y_index_4);
 		}
+		chooseFrame.sendDataItemToModel();
 	}
 	
 	/**
@@ -621,7 +623,12 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 				if (status == JFileChooser.APPROVE_OPTION) {
 					if (fileChooser.getSelectedFile() != null) {
 						File file = fileChooser.getSelectedFile();
-						controller.SendFileModel(file);
+						if (!isBarChartMode){
+							controller.SendFileModel(file,true);
+						}
+						else {
+							controller.SendFileModel(file,false);
+						}
 						SwingBremo.savePathToFile(file.getParent());
 											}
 				} else if (status == JFileChooser.CANCEL_OPTION) {
@@ -686,10 +693,11 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			break;
 
 		case "openFileButton":
-			OpenFileToShowOnBremoView();
+				 OpenFileToShowOnBremoView();	
 			break;
 			
 		case "refreshButton":
+			
 			refreshChart();
 			break;
 			
@@ -775,6 +783,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void update(Observable o, Object arg) {
 
@@ -793,8 +802,8 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
         else if (arg instanceof StringBuilder ) {
         	update((StringBuilder)arg);
         }
-        else if (arg instanceof List<?> ) {
-        	update((List<?>)arg);
+        else if (arg instanceof List ) {
+        	update((List<Object>)arg);
         }
 	}
 
@@ -808,7 +817,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	public void refreshChart() {
 		try {
 			controller.bremoViewData(getAllselectedItem());
-			chooseFrame.getChartForBremoView();
+			chooseFrame.getChartForBremoView ();
 			refreshDate();
 		} catch (NullPointerException e) {
 
@@ -827,39 +836,90 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	 * Active the Mode to show BarChart
 	 */
 	public void barChartModeEnable() {
-		
+		 
+		 barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconButtonChart())));
+	     barChartButton.setToolTipText("Enable LineChart Mode");
+	     DeactiveComponent();	     
+	     isBarChartMode = true ;
 		 URL urlTest = getClass().getResource(resource.getIconBarChartBig());
 	     ImageIcon iconTest = new ImageIcon(urlTest);
 	     Image imageTest = iconTest.getImage();
 	     imageTest  = imageTest.getScaledInstance(600, 600,java.awt.Image.SCALE_SMOOTH);
 	     iconTest = new ImageIcon(imageTest);
 	     GraphikLabel.setIcon(iconTest);
-	     
-	     barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconButtonChart() )));
-	     barChartButton.setToolTipText("Enable LineChart Mode");
-	     
-	     revalidate();
-	     
-	     isBarChartMode = true ;
-		
+	     GraphikLabel.revalidate();
+	     ImageBackgroundJPanel panel = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,100,100);
+	     panel.add(GraphikLabel);
+	     update(panel);
+	     update("BarChart Mode");
 	}
 	
 	/**
 	 * Active the Mode to show BarChart
 	 */
 	public void barChartModeDisable() {
-		
-		URL urlTest = getClass().getResource(resource.getIconBackgroungChart());
+		 
+		 barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconBarChart())));
+	     barChartButton.setToolTipText("Enable BarChart Mode");
+	     ActiveComponent();
+	     isBarChartMode = false;
+		 URL urlTest = getClass().getResource(resource.getIconBackgroungChart());
 	     ImageIcon iconTest = new ImageIcon(urlTest);
 	     Image imageTest = iconTest.getImage();
 	     imageTest  = imageTest.getScaledInstance(600, 600,java.awt.Image.SCALE_SMOOTH);
 	     iconTest = new ImageIcon(imageTest);
 	     GraphikLabel.setIcon(iconTest);
+	     GraphikLabel.revalidate();
+	     ImageBackgroundJPanel panel = new ImageBackgroundJPanel(resource.iconBackgroungColored_1,100,100);
+	     panel.add(GraphikLabel);
+	     update(panel);
+	     update("LineChart Mode");
 	     
-	     barChartButton.setIcon(new ImageIcon(getClass().getResource(resource.getIconBarChart())));
-	     barChartButton.setToolTipText("Enable BarChart Mode");
-	     revalidate();
+	}
+	
+	protected void ActiveComponent() {
+		x_achse.setEnabled(true);
+	    nbr_of_Achse.setEnabled(true);
+	    achse_to_log.setEnabled(true);
+	    y_achseButton.setEnabled(true);
+	    save_Fav_1.setEnabled(true);
+		save_Fav_2.setEnabled(true);
+		save_Fav_3.setEnabled(true);
+		save_Fav_4.setEnabled(true);
+		save_Fav_5.setEnabled(true);
+		save_Fav_6.setEnabled(true);
+		save_Fav_7.setEnabled(true);
+		save_Fav_8.setEnabled(true);
+		load_Fav_1.setEnabled(true);
+		load_Fav_2.setEnabled(true);
+		load_Fav_3.setEnabled(true);
+		load_Fav_4.setEnabled(true);
+		load_Fav_5.setEnabled(true);
+		load_Fav_6.setEnabled(true);
+		load_Fav_7.setEnabled(true);
+		load_Fav_8.setEnabled(true);
 	     
-	     isBarChartMode = false;
+	}
+    protected void DeactiveComponent() {
+		x_achse.setEnabled(false);
+		nbr_of_Achse.setEnabled(false);
+		achse_to_log.setEnabled(false);
+		y_achseButton.setEnabled(false);
+	    save_Fav_1.setEnabled(false);
+		save_Fav_2.setEnabled(false);
+		save_Fav_3.setEnabled(false);
+		save_Fav_4.setEnabled(false);
+		save_Fav_5.setEnabled(false);
+		save_Fav_6.setEnabled(false);
+		save_Fav_7.setEnabled(false);
+		save_Fav_8.setEnabled(false);
+		load_Fav_1.setEnabled(false);
+		load_Fav_2.setEnabled(false);
+		load_Fav_3.setEnabled(false);
+		load_Fav_4.setEnabled(false);
+		load_Fav_5.setEnabled(false);
+		load_Fav_6.setEnabled(false);
+		load_Fav_7.setEnabled(false);
+		load_Fav_8.setEnabled(false);
 	}
 }

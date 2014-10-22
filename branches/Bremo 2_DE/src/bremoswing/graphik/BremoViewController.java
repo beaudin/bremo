@@ -58,8 +58,8 @@ public class BremoViewController  {
 		
 	}
 
-	public void SendFileModel(File file) throws IOException {
-		model.readInputFile(file);
+	public void SendFileModel(File file, boolean LineChartMode) throws IOException {
+		model.readInputFile(file,LineChartMode);
 		
 	}
 
@@ -76,7 +76,10 @@ public class BremoViewController  {
 		// TODO Auto-generated method stub
 		model.loadFavs(i);
 	}
-	
-	
+
+	public void sendDataIndexChooseFrame(List<int[]> selectedIndexList) {
+		// TODO Auto-generated method stub
+		model.storeDataIndexChooseFrame (selectedIndexList);
+	}
 	
 }

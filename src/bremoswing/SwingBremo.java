@@ -129,8 +129,7 @@ public class SwingBremo extends JFrame {
         public static int percent;
         static SelectItemToPlotten plotten;
         public static double startTime ;
-        public static JComboBox language;
-        public String[] sprachen = {"Deutsch", "English", "Francais" };
+    
         
         private TextPaneOutputStream outputStreamKleinArea;
         /**
@@ -163,10 +162,8 @@ public class SwingBremo extends JFrame {
          * @throws IOException
          ***********************/
         private void initComponents() {
-        	
-//        	languageManager = new LanguageManager("de");
-        	
-            ManagerLanguage.managerLanguage(Locale.getDefault());
+        	        	
+            ManagerLanguage.managerLanguage(new Locale("de, DE"));
         	
         	kleinArea = new JTextPane();
            
@@ -261,7 +258,7 @@ public class SwingBremo extends JFrame {
                 stop = new JButton();
                 sehen = new JButton();
                 docfile = new JButton();
-                language = new JComboBox(sprachen);
+                //language = new JComboBox(sprachen);
                 textFile = new JTextField();
 
                 // konsole = new JCheckBox();
@@ -308,7 +305,7 @@ public class SwingBremo extends JFrame {
                 setBackground(new Color(255, 255, 255));
                 setIconImage(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/bremo1.png")).getImage());
-                setName("BremoSwing");
+                setName(ManagerLanguage.getRb().getString("swingbremo_app_titel"));
                 setResizable(false);
                 setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
                 Dimension size = new Dimension(720,320);
@@ -461,41 +458,41 @@ public class SwingBremo extends JFrame {
                 manager.add(docfile, gc);
                 
                 /*************************COMBO BOX LANGUAGE****************************/
-                language.setEditable(false);
-                language.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						// TODO Auto-generated method stub
-						int index = language.getSelectedIndex();
-						if (index == 0) {
-							
-							ManagerLanguage.setLocale(new Locale("de, DE"));
-							ManagerLanguage.managerLanguage(Locale.GERMANY);
-							 updateLanguage();
-							
-						} else if(index == 1) {
-							
-							ManagerLanguage.setLocale(new Locale("en, EN"));
-							ManagerLanguage.managerLanguage(Locale.ENGLISH);
-							updateLanguage();
-					
-							
-						} else if (index == 2) {
-							ManagerLanguage.setLocale(new Locale("fr, FR"));
-							ManagerLanguage.managerLanguage(Locale.FRANCE);
-							updateLanguage();
-						}
-					}
-                });
-                gc.fill = GridBagConstraints.NONE;
-                gc.insets = new Insets(0, 0, 0, 0);
-                gc.weightx = 0;
-                gc.gridx = 5;
-                gc.gridy = 0;
-                gc.ipadx = 0;
-                manager.add(language, gc);
+//                language.setEditable(false);
+//               language.addActionListener(new ActionListener() {
+//					
+//					@Override
+//					public void actionPerformed(ActionEvent e) {
+//						// TODO Auto-generated method stub
+//						// TODO Auto-generated method stub
+//						int index = language.getSelectedIndex();
+//						if (index == 0) {
+//							
+//							ManagerLanguage.setLocale(new Locale("de, DE"));
+//							ManagerLanguage.managerLanguage(Locale.GERMANY);
+//							 updateLanguage();
+//							
+//						} else if(index == 1) {
+//							
+//							ManagerLanguage.setLocale(new Locale("en, EN"));
+//							ManagerLanguage.managerLanguage(Locale.ENGLISH);
+//							updateLanguage();
+//					
+//							
+//						} else if (index == 2) {
+//							ManagerLanguage.setLocale(new Locale("fr, FR"));
+//							ManagerLanguage.managerLanguage(Locale.FRANCE);
+//							updateLanguage();
+//						}
+//					}
+//                });
+//                gc.fill = GridBagConstraints.NONE;
+//                gc.insets = new Insets(0, 0, 0, 0);
+//                gc.weightx = 0;
+//                gc.gridx = 5;
+//                gc.gridy = 0;
+//                gc.ipadx = 0;
+//                manager.add(language, gc);
 
                 /************ LABEL ************************************/
 //              label.setOpaque(true);
@@ -595,7 +592,7 @@ public class SwingBremo extends JFrame {
                 grosArea.setEditable(false);
                 // grosArea.setFont(new Font("comic sans ms", 3, 16)); // NOI18N
                 //grosArea.setRows(5);
-                grosArea.setText("Programm läuft... \nWählen Sie die Input Datei Und Dann Einfach die Berechnung Ausführen .");
+                //grosArea.setText("Programm läuft... \nWählen Sie die Input Datei Und Dann Einfach die Berechnung Ausführen .");
                 grosArea.setMinimumSize(new Dimension(76, 22));
                 grosArea.addKeyListener(new KeyAdapter() {
                         @Override
@@ -726,16 +723,20 @@ public class SwingBremo extends JFrame {
                         view.getController().SendFileModel(file,true);
                 } catch (IOException e) {
                         // TODO Auto-generated catch block
-                        new FertigMeldungFrame("Error", e.getMessage(),JOptionPane.ERROR_MESSAGE);
+                        new FertigMeldungFrame(ManagerLanguage.getRb().getString("Error"), e.getMessage(),JOptionPane.ERROR_MESSAGE);
                 }
                
                view.setVisible(true);
                        
                 }
 
-        /** Warning Massage **********/
+        /** Warning Message **********/
         protected void messsage() {
-                new FertigMeldungFrame("Achtung","Berechnung läuf gerade... Warten Sie bis Ende ",JOptionPane.WARNING_MESSAGE);
+                new FertigMeldungFrame(ManagerLanguage.getRb().getString("warning"),
+                		               ManagerLanguage.getRb().getString("swingbremo_warning_message_1")+
+                		               ManagerLanguage.getRb().getString("swingbremo_point")+
+                		               ManagerLanguage.getRb().getString("swingbremo_warning_message_2"),
+                		               JOptionPane.WARNING_MESSAGE);
 //              JOptionPane.showMessageDialog(this,
 //                              "Berechnung läuf gerade... Warten Sie bis Ende ", "Achtung",
 //                              JOptionPane.WARNING_MESSAGE);
@@ -746,7 +747,9 @@ public class SwingBremo extends JFrame {
                 grosArea.setText("");
                 kleinArea.setText("");
                 if (textFile.getText().equals("")) {
-                        new FertigMeldungFrame("Achtung","Überprüfen Sie Bitte die InputDatei !!!",JOptionPane.WARNING_MESSAGE);
+                        new FertigMeldungFrame(ManagerLanguage.getRb().getString("warning"),
+                        		               ManagerLanguage.getRb().getString("swingbremo_warning_message_3"),
+                        		               JOptionPane.WARNING_MESSAGE);
 //                      JOptionPane.showMessageDialog(this,
 //                                      "Überprüfen Sie Bitte die InputDatei !!!", "Achtung",
 //                                      JOptionPane.WARNING_MESSAGE);
@@ -854,8 +857,9 @@ public class SwingBremo extends JFrame {
         private void stopPush(ActionEvent e) {
                 if (!control) {
                         JOptionPane.showMessageDialog(this,
-                                        "Starten Sie Zu erst die Berechnung.", "Achtung",
-                                        JOptionPane.WARNING_MESSAGE);
+                                                      "Starten Sie Zu erst die Berechnung.", 
+                                                      ManagerLanguage.getRb().getString("warning"),
+                                                      JOptionPane.WARNING_MESSAGE);
                 } else {
                         errStream.flush();
                         group.interrupt();
@@ -930,7 +934,8 @@ public class SwingBremo extends JFrame {
                                
                         	label.setText(ManagerLanguage.getRb().getString("swingbremo_label_10"));
 //                                label.setText(languageManager.getJLabelTextByID("swingbremo_label_10"));  //swingbremo_label_10
-                            PopUp("Zustand Berechnung", "Die Berechnung ist Fertig !!!");    
+                            PopUp(ManagerLanguage.getRb().getString("swingbremo_popup_titel"),
+                            	  ManagerLanguage.getRb().getString("swingbremo_popup_message"));    
 //                        	new FertigMeldungFrame("Zustand Berechnung","Die Berechnung ist Fertig !!!",JOptionPane.INFORMATION_MESSAGE);
 //                              JOptionPane.showMessageDialog(popup,
 //                                              "Die Berechnung ist Fertig !!!", "Zustand Berechnung",
@@ -938,7 +943,9 @@ public class SwingBremo extends JFrame {
                         }
                         for (String str : bremoThreadFertig) {
                                 if (str != null)
-                                        System.err.println("Thread "+str+" ist fertig!");
+                                        System.err.println(ManagerLanguage.getRb().getString("thread")+
+                                        		           " "+str+" "+
+                                        		           ManagerLanguage.getRb().getString("warning_message_terminate"));
                         }
                         ActiveIcon();
                         progressBar.setVisible(false);
@@ -998,8 +1005,10 @@ public class SwingBremo extends JFrame {
                  URL url = getClass().getResource("/bremoswing/bild/questionIcon.png");
              ImageIcon icon = new ImageIcon(url);
                 final JOptionPane optionPane = new JOptionPane(
-                                "Wollen Sie Wirklich das Program beendet ?",
-                                JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, icon);
+                                ManagerLanguage.getRb().getString("swingbremo_warning_message_close"),
+                                JOptionPane.QUESTION_MESSAGE,
+                                JOptionPane.YES_NO_OPTION,
+                                icon);
                          
 
                 final JDialog dialog = optionPane.createDialog(this, "Exit");
@@ -1146,27 +1155,7 @@ public class SwingBremo extends JFrame {
 			}
         }
         
-        /**
-         * Update the Text when Language change 
-         */
-        public void updateLanguage() {
-        	try {
-        	berechnen.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_play"));
-			stop.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_stop"));
-			wahlFile.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_choose"));
-			sehen.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_see"));
-			docfile.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_doc"));
-			
-			String nameLabel = label.getText();
-			nameLabel = nameLabel.replaceAll(" ", "_");
-			nameLabel = nameLabel.substring(0,nameLabel.lastIndexOf("_"));
-			label.setText(ManagerLanguage.getRb().getString(nameLabel));						
-			validate();
-        	}
-        	catch (MissingResourceException e) {
-				e.printStackTrace();
-			}
-        }
+        
         /**
          * Show PopUp to prevent the User.
          */

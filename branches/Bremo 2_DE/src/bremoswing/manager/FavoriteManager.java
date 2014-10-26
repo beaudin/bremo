@@ -121,7 +121,7 @@ public class FavoriteManager {
 	
 	public void addFavsNummer (int nbr, List<String> entry) {
 		if (getFavNummer(nbr)!= null )
-			favorite.remove("FAV_"+nbr, entry);
+			favorite.remove("FAV_"+nbr);
 		favorite.put("FAV_"+nbr, entry);
 		saveToFavsFile();
 	}

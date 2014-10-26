@@ -28,6 +28,7 @@ import bremo.sys.Rechnung;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
 import bremoswing.SwingBremo;
+import bremoswing.manager.ManagerLanguage;
 import bremoswing.util.FertigMeldungFrame;
 
 
@@ -135,8 +136,14 @@ public class Bremo extends Thread {
 				if(calledFromGUI){
 				SwingBremo.setNrOfBremoAlive();
 				
-				new FertigMeldungFrame(this.getName(),"<html><u>Thread</u> : Eine Fehler ist in der File <b>"+this.getName()+"</b> aufgetreten !!! <p>" +
-						"\n "+e.getMessage()+"</p></html>", JOptionPane.ERROR_MESSAGE);
+				new FertigMeldungFrame(this.getName(),"<html>"
+						                              +"<u>"+ManagerLanguage.getRb().getString("thread")+ "</u> : "+
+				                                      ManagerLanguage.getRb().getString("bremo_error_message_1") +
+				                                      "<b>"+this.getName()+"</b> "+
+				                                      ManagerLanguage.getRb().getString("bremo_error_message_2")+
+				                                      " <p> \n "+e.getMessage()+"</p>"+
+				                                      "</html>", 
+						                              JOptionPane.ERROR_MESSAGE);
 				SwingBremo.StateBremoThread();
 			  } 
 				e.stopBremo();			
@@ -146,7 +153,10 @@ public class Bremo extends Thread {
 				r.berechnungDurchfuehren();
 				iterRechnung.auswerten();
 				if(calledFromGUI && !iterRechnung.isIterativ()){
-					SwingBremo.PopUp("Info", "Thread "+this.getName()+" ist fertig!");
+					SwingBremo.PopUp(ManagerLanguage.getRb().getString("info"),
+							         ManagerLanguage.getRb().getString("thread")+
+					                 " "+this.getName()+" "+
+					                 ManagerLanguage.getRb().getString("warning_message_terminate"));
 //					new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
 					SwingBremo.PutInBremoThreadFertig(this.getName());
 				}
@@ -162,19 +172,19 @@ public class Bremo extends Thread {
 			}
 			Verlustteilung verl = new Verlustteilung(casePara);
 			verl.berechneVerluste();
-			System.err.println("Verlustteilung fertig");
+			SwingBremo.label.setText("swingbremo_label_13");
 			if (calledFromGUI) {
 				SwingBremo.StateBremoThread();
-				System.err.println("Rechungszeit:"
+				System.err.println(ManagerLanguage.getRb().getString("calcul_time")
 						+ (System.currentTimeMillis() - SwingBremo.startTime)
-						+ " ms");
+						+ " "+ManagerLanguage.getRb().getString("time_ms"));
 			}
 		} else {
 			if (calledFromGUI) {
 				SwingBremo.StateBremoThread();
-				System.err.println("Rechungszeit:"
+				System.err.println(ManagerLanguage.getRb().getString("calcul_time")
 						+ (System.currentTimeMillis() - SwingBremo.startTime)
-						+ " ms");
+						+ " "+ManagerLanguage.getRb().getString("time_ms"));
 			}
           }
 	}	

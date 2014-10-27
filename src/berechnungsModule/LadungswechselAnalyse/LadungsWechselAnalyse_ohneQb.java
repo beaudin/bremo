@@ -418,7 +418,15 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 		double mVerbrennungsLuft=mLuft_tr+mW+mAGRex;
 		double mKrst=masterEinspritzung.get_mKrst_Sum_ASP(); 
 		double mInit= mVerbrennungsLuft+mKrst;	//Gesamtmasse
-				
+
+		//Startwert für interne AGR-Masse auslesen, falls angegeben. Dadurch können falsche Zonenwerte ohne Probleme bei
+		//der ohc-Berechnung während der ersten Schleifen umgangen werden.
+		try{
+			double mAGRin = CP.get_mAGR_intern_ASP_aus_InputFile();
+			mInit+=mAGRin;
+		}catch(Exception p){
+		}
+		
 		double TInit =pInit*VInit/(mInit*sInit.get_R());
 		
 		zn[0]=new Zone(CP,pInit, VInit, TInit, mInit, sInit, false, 0);

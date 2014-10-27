@@ -513,8 +513,8 @@ public class LadungsWechselAnalyse extends MasterLWA {
 		//Startwert für interne AGR-Masse auslesen, falls angegeben. Dadurch können falsche Zonenwerte
 		//während der ersten Schleifen umgangen werden.
 		try{
-			double mAGR = CP.get_mAGR_intern_ASP_aus_InputFile();
-			mInit+=mAGR;
+			double mAGRin = CP.get_mAGR_intern_ASP_aus_InputFile();
+			mInit+=mAGRin;
 		}catch(Exception p){
 		}
 				

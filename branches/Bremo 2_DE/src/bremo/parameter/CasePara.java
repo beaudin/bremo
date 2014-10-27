@@ -3121,12 +3121,22 @@ private void Werte_und_Variablen_zur_Berechnung_des_WW‹_Bargende(){}
 				//TODO Grenzwerte mittels Einlassoeffnet und Auslassschlieﬂt definieren. 
 				//Fuer die Ladungswechselanalyse werden eigene Rechenbeginne und Rechenenden definiert.
 				WRITE_INTERVAL_SEC= WRITE_INTERVAL_KW/(360*get_DrehzahlInUproSec());
-
-				RECHNUNGS_BEGINN_DVA_KW=set_doublePara(PARAMETER, "rechnungsBeginn","[KWnZOT]",
+				double temp;
+				try{
+					temp = set_doublePara(PARAMETER, "rechnungsBeginn","[KWnZOT]",
 						KW_UNTERGRENZE,KW_OBERGRENZE);				
+				}catch(ParameterFileWrongInputException p){
+					temp = convert_SEC2KW(get_Einlassschluss());
+				}
+				RECHNUNGS_BEGINN_DVA_KW = temp;
 
-				RECHNUNGS_ENDE_DVA_KW=set_doublePara(PARAMETER, "rechnungsEnde","[KWnZOT]",
-						RECHNUNGS_BEGINN_DVA_KW,KW_OBERGRENZE);		
+				try{
+					temp=set_doublePara(PARAMETER, "rechnungsEnde","[KWnZOT]",
+						RECHNUNGS_BEGINN_DVA_KW,KW_OBERGRENZE);
+				}catch(ParameterFileWrongInputException p){
+					temp = get_Auslassoeffnet_KW();
+				}
+				RECHNUNGS_ENDE_DVA_KW = temp;
 				//der Anfang zaehlt mit
 				ANZ_BERECHNETER_WERTE=(int)((RECHNUNGS_ENDE_DVA_KW-RECHNUNGS_BEGINN_DVA_KW)/WRITE_INTERVAL_KW)+1;
 
@@ -3152,11 +3162,21 @@ private void Werte_und_Variablen_zur_Berechnung_des_WW‹_Bargende(){}
 				WRITE_INTERVAL_SEC=set_doublePara(PARAMETER, "rechnungsSchrittweite","[s]",9.5e-7,6.7e-3);
 
 				//muss eigentlich nur passend zum MotorFile und DruckFile sein
-				RECHNUNGS_BEGINN_DVA_SEC=set_doublePara(PARAMETER, "rechnungsBeginn","[s]",
-						Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);				
-
-				RECHNUNGS_ENDE_DVA_SEC=set_doublePara(PARAMETER, "rechnungsEnde","[s]",
-						RECHNUNGS_BEGINN_DVA_SEC,Double.POSITIVE_INFINITY);		
+				double temp;
+				try{
+					temp = set_doublePara(PARAMETER, "rechnungsBeginn","[s]",
+						Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);	
+				}catch(ParameterFileWrongInputException p){
+					temp = get_Einlassschluss();
+				}
+				RECHNUNGS_BEGINN_DVA_SEC = temp;
+				try{
+					temp = set_doublePara(PARAMETER, "rechnungsEnde","[s]",
+						RECHNUNGS_BEGINN_DVA_SEC,Double.POSITIVE_INFINITY);
+				}catch(ParameterFileWrongInputException p){
+					temp = get_Auslassoeffnet();
+				}
+				RECHNUNGS_ENDE_DVA_SEC = temp;
 
 				ANZ_BERECHNETER_WERTE=(int)(( RECHNUNGS_ENDE_DVA_SEC-RECHNUNGS_BEGINN_DVA_SEC)/WRITE_INTERVAL_SEC)+1;
 

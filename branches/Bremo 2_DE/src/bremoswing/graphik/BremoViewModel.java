@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Observer;
 
-import javafx.scene.chart.XYChart.Series;
+//import javafx.scene.chart.XYChart.Series;
 
 import javax.swing.JOptionPane;
 

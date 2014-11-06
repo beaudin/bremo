@@ -255,6 +255,13 @@ public class Motor_HubKolbenMotor extends Motor{
 		w=r*Math.cos(phi)+Math.pow(Math.pow(l,2)-Math.pow(d+s+r*Math.sin(phi), 2), 0.5); //Code(Juwe)	
 		return w;
 	}
+	
+	/**
+	 * @return maximaler Kolbenhub
+	 */
+	public double get_sMax(){
+		return SMAX;
+	}
 
 	/**
 	 * Liefert die momentane Kolbengeschwindigkeit in [m/s]

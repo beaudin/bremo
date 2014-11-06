@@ -21,6 +21,9 @@ import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
 
+/**
+ * Inputfileparameter: mLuft_feucht [kg/h], mAGR_extern [kg/h]
+ */
 public class DVA_DualFuel extends DVA {
 
 	private WandWaermeUebergang wandWaermeModell;
@@ -611,7 +614,7 @@ public class DVA_DualFuel extends DVA {
 //		super.buffer_EinzelErgebnis("PQw [W]",HeatFlux*motor.get_BrennraumFlaeche(time),i);	
 
 		i+=1;		
-		super.buffer_EinzelErgebnis("Brennraumfläche [m^2]",motor.get_BrennraumFlaeche(time),i);		
+		super.buffer_EinzelErgebnis("Brennraumfläche [m^2]",wandWaermeModell.get_BrennraumFlaeche(time),i);		
 
 		i+=1;
 		super.buffer_EinzelErgebnis("Gesamtmasse [kg]", zn[0].get_m()+zn[1].get_m()+zn[2].get_m(),i);

@@ -25,5 +25,14 @@ public class PerfektIsoliert extends WandWaermeUebergang {
 	public double get_WandWaermeStrom(double time, Zone[] zonen_IN, double fortschritt, VektorBuffer tBuffer){
 		return 0;
 	}	
+	
+	public double get_WandWaermeStromDichte(double time, Zone[] zonen_IN, double fortschritt){
+		return 0;
+	}
+	
+	public double get_WandWaermeStromCyl(double time, Zone[] zonen_IN,
+			double fortschritt, VektorBuffer tBuffer) {
+		return 0;
+	}
 
 }

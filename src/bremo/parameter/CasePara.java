@@ -73,6 +73,15 @@ public class CasePara {
 	private boolean calledFromGUI;
 	private boolean compareToExpIni=false;
 	private boolean compareToExp=false;
+	
+	//Kerrom: Heizwerte (Werte überprüfen/anpassen/vereinheitlichen)
+	//eventuell an andere Stelle, neue Klasse Abgas erstellen
+	//verwendet in PostProcessor, Verlustteilung
+	public final double HU_CO = 282.9*1e3; //[J/mol] aus R. Pischinger S. 93
+	public final double HU_HC = 2044.2*1e3;	//Ge Liu	// Alternativ für C3H8: 406.9*1e3 aus Merker/Schwarz/Teichmann (S.353) oder 2041*1e3 aus Screenshot von Philipp
+	public final double HU_H2 = 241.1*1e3; // [J/mol] aus Screenshot von Philipp
+	public final double HU_C = 2041.367*1e3;	// [J/mol] aus Merker/Schwarz/Teichmann "Grundlagen Verbrennungsmotoren" S.353
+	
 
 	public CasePara(File inputFile) throws ParameterFileWrongInputException {			
 		InputFileReader	ifr =new InputFileReader(inputFile);
@@ -260,7 +269,6 @@ public class CasePara {
 		}
 		return filter;		
 	}
-	
 	
 	public int get_savitzkyGolayOrder(){
 		double tmpSgolayOrder=5;
@@ -660,7 +668,7 @@ public class CasePara {
 	////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	/** 
+	/** benötigt in APR_CanteraMultiZoneRCCI
 	 * @return initial mole fraction of CO2
 	 */	
 	public double get_iniMoleFrac_CO2(){
@@ -672,7 +680,7 @@ public class CasePara {
 		}		
 	}
 	
-	/** 
+	/** benötigt in APR_CanteraMultiZoneRCCI
 	 * @return initial mole fraction of O2
 	 */	
 	public double get_iniMoleFrac_O2(){
@@ -684,7 +692,7 @@ public class CasePara {
 		}		
 	}	
 	
-	/** 
+	/** benötigt in APR_CanteraMultiZoneRCCI
 	 * @return initial mole fraction of H2O
 	 */	
 	public double get_iniMoleFrac_H2O(){
@@ -696,7 +704,7 @@ public class CasePara {
 		}		
 	}	
 	
-	/** 
+	/** benötigt in APR_CanteraMultiZoneRCCI
 	 * @return initial mole fraction of N2
 	 */	
 	public double get_iniMoleFrac_N2(){
@@ -708,7 +716,7 @@ public class CasePara {
 		}		
 	}
 
-	/** 
+	/** benötigt in APR_CanteraMultiZoneRCCI
 	 * @return initial mole fraction of iC8H18
 	 */	
 	public double get_iniMoleFrac_iC8H18(){
@@ -720,7 +728,7 @@ public class CasePara {
 		}		
 	}
 	
-	/** 
+	/** benötigt in APR_CanteraMultiZoneRCCI
 	 * @return initial mole fraction of nC7H16
 	 */	
 	public double get_iniMoleFrac_nC7H16(){
@@ -732,6 +740,9 @@ public class CasePara {
 		}		
 	}
 	
+	/** benötigt in APR_CanteraMultiZoneRCCI
+	 * @return initial mole fraction of H2
+	 */
 	public double get_iniMoleFrac_H2() {
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_H2","[-]",0,1);
@@ -741,6 +752,9 @@ public class CasePara {
 		}		
 	}
 
+	/** benötigt in APR_CanteraMultiZoneRCCI
+	 * @return initial mole fraction of H
+	 */
 	public double get_iniMoleFrac_H() {
 		try {
 			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_H","[-]",0,1);
@@ -1989,6 +2003,37 @@ public class CasePara {
 		}
 	}
 	
+	/**
+	 * Liefert den Volumenbruch der C-Emissionen
+	 * <br>Wird bei der Berechnung der Wärmemenge der unverbrannten Abgasbestandteile gebraucht
+	 * @return C oder 0 wenn im inputFile nicht angegeben
+	 */
+	public double get_C() {
+		double c;		
+		try {
+			c =set_doublePara(INPUTFILE_PARAMETER, "C","[ppm]",0,Double.MAX_VALUE);
+			return c*1e-6;				
+		} catch (ParameterFileWrongInputException e) {			
+			return 0;
+		}
+	}
+	
+	/**
+	 * Liefert den Volumenbruch der H2-Emissionen
+	 * <brWird bei der Berechnung der Wärmemenge der unverbrannten Abgasbestandteile gebraucht
+	 * @return H2 oder 0 wenn im inputFile nicht angegeben
+	 */
+	public double get_H2() {
+		double h2;		
+		try {
+			h2 =set_doublePara(INPUTFILE_PARAMETER, "H2","[ppm]",0,Double.MAX_VALUE);
+			return h2*1e-6;				
+		} catch (ParameterFileWrongInputException e) {			
+			return 0;
+		}
+	}
+	
+	
 	public String get_iterativeMethode(String[] mglMethoden){
 		try{
 			return set_StringPara(INPUTFILE_PARAMETER, "iterativeMethode", mglMethoden);
@@ -2779,9 +2824,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	}	
 
 	/////////////////////Kerrom, 06.06.14 /////////////////////
-	/**
+	/** Wird zur Überprüfung des berechneten Lambda verwendet.
 	 * @return Gibt den im Input File angegebenen lambda Wert zurück. 
 	 * Warnung, wenn kein lambda im Input File angegeben ist.
+	 * 
 	 */
 	public double get_Lambda_Input() {
 	

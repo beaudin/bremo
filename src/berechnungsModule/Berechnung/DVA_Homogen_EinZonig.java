@@ -28,6 +28,8 @@ import bremoExceptions.ParameterFileWrongInputException;
  * Der Heizwert dieses Gemischs wird herangezogen um dQ in dm umzurechnen. 
  * Das verbrennende Massenelement wird der Zone entzogen verbrannt, d.h. es wird die Zusammensetzung 
  * des dissoziierenden Rauchgases bestimmt, und anschlieﬂend mit der Temperatur der Zone wieder beigemischt.
+ * 
+ * <br> Inputfileparameter: whtfMult [-], mAGR_extern [kg/h], mLuft_feucht [kg/h] 
  * @author eichmeier
  *
  */
@@ -474,7 +476,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 //		super.buffer_EinzelErgebnis("PQw [W]",HeatFlux*motor.get_BrennraumFlaeche(time),i);	
 		
 		i+=1;		
-		super.buffer_EinzelErgebnis("Brennraumfl‰che [m^2]",motor.get_BrennraumFlaeche(time),i);		
+		super.buffer_EinzelErgebnis("Brennraumfl‰che [m^2]",wandWaermeModell.get_BrennraumFlaeche(time),i);		
 
 		i+=1;
 		super.buffer_EinzelErgebnis("Zonenmasse [kg]", zn[0].get_m(),i);

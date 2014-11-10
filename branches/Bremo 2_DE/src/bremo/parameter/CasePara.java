@@ -1841,11 +1841,15 @@ public class CasePara {
 	 * @return
 	 */
 	public double get_whtfMult_burn_duration(){
-		double whtfDur=this.convert_KW2SEC(50+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
+		double whtfDur=this.convert_KW2SEC(this.SYS.RECHNUNGS_ENDE_DVA_KW+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
+		//double whtfDur=this.convert_KW2SEC(50+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
 		try {
 			whtfDur= this.convert_KW2SEC(set_doublePara(INPUTFILE_PARAMETER, "whtfMult_dauer","[KW]",0,180)+this.SYS.RECHNUNGS_BEGINN_DVA_KW); 
 			return whtfDur;
-		} catch (ParameterFileWrongInputException e) {	
+		} catch (ParameterFileWrongInputException e) {
+			System.err.println("**************************************************");
+			System.err.println("ACHTUNG: \"whtfMult_dauer\" wird mit " + convert_ProKW_2_ProSEC(whtfDur) + " [KWnZOT] angenommen!");
+			System.err.println("**************************************************");
 			return whtfDur;
 		}
 	}

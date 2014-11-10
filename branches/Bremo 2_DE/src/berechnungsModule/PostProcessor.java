@@ -202,10 +202,11 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("Q_max [J]",Qmax,i);
 			System.err.println("Q_max = " + Qmax + " [J]");
 			
-		if (CP.is_Verlustteilung()) {
+		//if (CP.is_Verlustteilung()) {
 			double x50;
 			if (CP.SYS.IS_KW_BASIERT)
 				x50 = CP.convert_KW2SEC(umspQ[4]);
+
 			else
 				x50 = umspQ[4];
 
@@ -242,7 +243,7 @@ public class PostProcessor {
 			i += 1;
 			ergB.buffer_EinzelErgebnis("delta_h_Ladungswechsel [-]", h[6], i);
 			System.err.println("delta_h_Ladungswechsel = " + h[4] + " [-]");
-		}
+		//}
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("L_St", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);

@@ -99,7 +99,8 @@ public class ErgebnisBuffer {
 
 	public  void schreibeErgebnisFile(String name){
 //		String pfadFinal=cp.get_workingDirectory()+this.praefix+name;
-		String pfadFinal=cp.get_workingDirectory()+name.replace(".txt", "."+this.endung);
+//		String pfadFinal=cp.get_workingDirectory()+name.replace(".txt", "."+this.endung);
+		String pfadFinal=cp.get_workingDirectory()+this.endung+"_"+name.replace(".txt", "."+this.endung);
 		String Separator  ="\n**************************************************\n";
 //		System.err.println(Separator);
 //		System.err.println(Separator+"Schreibe "+praefix+"Datei:\n"+pfadFinal+Separator);

@@ -93,7 +93,8 @@ import bremoswing.util.TextPaneOutputStream;
 public class SwingBremo extends JFrame {
        
         public  String  RevisionNumber = getRevisionNumber();
-        private final String title = "Bremo 2.0 rev "+ RevisionNumber + " Beta" ;
+        //private final String title = "Bremo 2.0 rev "+ RevisionNumber + " Beta" ;
+        private final String title = "Bremo 2.0 rev "+ 286 + " Beta" ;
        
         private static final long serialVersionUID = 1L;
         public static boolean ConsloseModeActive = false;
@@ -221,7 +222,7 @@ public class SwingBremo extends JFrame {
            }
    };
                 System.setOut(outStream);
-                //System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
+                System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
 //              JMenu m = new JMenu("Datei");
 //              m.add(new JMenuItem("Item 1.1"));
 //              m.add(new JMenuItem("Item 1.2"));

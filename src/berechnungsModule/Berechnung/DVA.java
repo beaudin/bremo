@@ -33,7 +33,7 @@ public abstract class DVA extends BerechnungsModell{
 		super(cp,new ErgebnisBuffer(cp,"dva"));
 //		Für Verlustteilung burnFileName setzen. Die Spalte wird in den einzelnen DVA-Berechnungen definiert. -- Neurohr
 //		cp.set_ParaInputfile("burnFileName", "[-]", "DVA_"+cp.get_CaseName()+".txt");
-		cp.set_ParaInputfile("burnFileName", "[-]", cp.get_CaseName()+".dva");
+		cp.set_ParaInputfile("burnFileName", "[-]", "dva_"+cp.get_CaseName()+".dva");
 		indiD=new IndizierDaten(cp);
 		dQburn=0;
 		ergBuffDebug=new ErgebnisBuffer(cp,"dbd"); //Debug DVA, früher "DVA_DEBUG_"

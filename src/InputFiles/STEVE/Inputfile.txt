@@ -7,7 +7,7 @@ Datum			20140616
 ###############################				
 #######BERECHNUNGSMODELL#######				
 ###############################				
-[berechnungsModell: APR_1Zonig]	
+[berechnungsModell: DVA_1Zonig]	
 DVA_1Zonig		
 debuggingMode	[-]	:=	nein	
 debuggingTime	[KWnZOT]	:=	16	
@@ -190,7 +190,7 @@ Feuersteghoehe	[m]	:=	0.005
 refPunktWoschniHuber	[KWnZOT]	:=	-60	
 whtfMult	[-]	:=	1	
 swirlRatio	[-]	:=	0	
-T_IVC_WHT	[K]	=		
+T_IVC_WHT	[K]	:=	377
 polyExp_WHT	[-]	=		
 p_IVC	[Pa]	=		
 ###############################				
@@ -207,7 +207,7 @@ PistonBowlDepth	[m]	:=	0
 #########APR/VERLUSTTEILUNG########				
 ###############################				
 Verlustteilung	[-]	:=	ja	
-burnFileName	[-]	:=	Inputfile.dva	
+burnFileName	[-]	:=	dva_Inputfile.dva	
 spalte_dQburn	[-]	:=	12	
 compareToExp	[-]	:=	ja	
 p_Ini	[Pa]	:=	100000

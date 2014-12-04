@@ -475,7 +475,7 @@ public class CasePara {
 		double[] vibePara = new double[4];
 		boolean fehler = false;
 		try{
-			vibePara[0] = set_doublePara(INPUTFILE_PARAMETER, "brennbeginn_"+index, "[KWnZOT]", SYS.RECHNUNGS_BEGINN_DVA_KW+this.convert_SEC2KW(SYS.WRITE_INTERVAL_SEC),SYS.RECHNUNGS_ENDE_DVA_KW);
+			vibePara[0] = set_doublePara(INPUTFILE_PARAMETER, "brennbeginn_"+index, "[KWnZOT]", SYS.RECHNUNGS_BEGINN_DVA_KW+this.convert_SEC2KW(SYS.WRITE_INTERVAL_SEC),180);
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
 					"Bitte \"brennbeginn_"+index+"\" in \"[KWnZOT]\" mit angeben.");
@@ -483,7 +483,7 @@ public class CasePara {
 			vibePara[0] = 0;
 		}
 		try{
-			vibePara[1] = set_doublePara(INPUTFILE_PARAMETER, "brenndauer_"+index, "[KW]", 0,(SYS.RECHNUNGS_ENDE_DVA_KW - vibePara[0] - this.convert_SEC2KW(SYS.WRITE_INTERVAL_SEC)));
+			vibePara[1] = set_doublePara(INPUTFILE_PARAMETER, "brenndauer_"+index, "[KW]", 0, (180 - vibePara[0]));
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
 					"Bitte \"brenndauer_"+index+"\" in \"[KW]\" mit angeben.");

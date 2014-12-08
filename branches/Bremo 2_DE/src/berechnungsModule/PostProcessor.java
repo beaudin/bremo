@@ -288,12 +288,20 @@ public class PostProcessor {
 			System.err.println("KolbenhubMAX = " + hkm.get_sMax() + " [m]");
 			
 			i+=1;
-			ergB.buffer_EinzelErgebnis("Vh [m]", hkm.get_Hubvolumen(), i);
-			System.err.println("Vh = " + hkm.get_Hubvolumen() + " [m]");
+			ergB.buffer_EinzelErgebnis("Vh [m3]", hkm.get_Hubvolumen(), i);
+			System.err.println("Vh = " + hkm.get_Hubvolumen() + " [m3]");
 			
 			i+=1;
-			ergB.buffer_EinzelErgebnis("Vc [m]", hkm.get_Kompressionsvolumen(), i);
-			System.err.println("Vc = " + hkm.get_Kompressionsvolumen() + " [m]");
+			ergB.buffer_EinzelErgebnis("Vc [m3]", hkm.get_Kompressionsvolumen(), i);
+			System.err.println("Vc = " + hkm.get_Kompressionsvolumen() + " [m3]");
+			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Eps [-]", hkm.get_Verdichtung(), i);
+			System.err.println("Eps=" +  hkm.get_Verdichtung()+" [-]");
+			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Eps_thermodynamisch [-]", hkm.get_Epsilon_thermo(), i);
+			System.err.println("Eps_thermodynamisch=" +  hkm.get_Epsilon_thermo()+" [-]");
 			}
 			
 			System.err.println("Berechnungs- und Steuerzeiten in KW:");

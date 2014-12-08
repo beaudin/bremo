@@ -77,7 +77,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	private boolean esBrennt=false,initialiseBurntZone=false,burntZonesAlreadyInitialised=false;
 
 	private double dQburnMAX=0;
-	private double fortschritt=0;	
+	private double fortschritt=0;		
+	private double Vc=0;
 
 
 	//Speicher fuer Rechenergebnisse die in anderen Routinen zur Verfügung stehen sollen
@@ -301,7 +302,18 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		if(bargende){ //Nur wenn Bargende
 			this.turb.update(zonen_IN, time); //für Bargende
 			}
+		//Thermodynamisches Verdichtungsverhältnis, erweitert um Wandwärmeverluste und Leckage:
+		Vc = 0;
+		double T = zonen_IN[0].get_T();
+		Vc = Vc + (dQw + zonen_IN[0].get_ggZone().get_cp_mass(T)*T*dmL)/super.get_dp(time); //dXv
+		Vc = Vc - (zonen_IN[0].get_ggZone().get_kappa(T)*zonen_IN[0].get_p()*CP.MOTOR.get_dV(time)/super.get_dp(time)); //pdV
+		Vc = Vc - (CP.MOTOR.get_V(time)-CP.MOTOR.get_V_MAX()/CP.MOTOR.get_Verdichtung()); //Vs
+		
 		return zonen_IN;			
+	}
+	
+	public double kompressionsVolumen(){
+		return Vc;
 	}
 	
 	/**

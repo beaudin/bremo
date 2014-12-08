@@ -38,6 +38,7 @@ public class Motor_HubKolbenMotor extends Motor{
 	private double ivStrokeMax=Double.NaN;			//m
 	private double squishHeigth=Double.NaN;;		//m
 	private final double SMAX;
+	private double Epsilon_thermo;
 	private final CasePara CP;	
 
 
@@ -424,6 +425,15 @@ public class Motor_HubKolbenMotor extends Motor{
 	
 	public boolean isHubKolbenMotor() {		
 		return true;
+	}
+	
+	public void set_Epsilon_thermo(double Vc){
+		double Vh = this.HUB * Math.PI / 4 * this.BOHRUNG * this.BOHRUNG;
+		Epsilon_thermo = (Vh + Vc) / Vc;
+	}
+	
+	public double get_Epsilon_thermo(){
+		return Epsilon_thermo;
 	}
 
 }

@@ -10,6 +10,7 @@ import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.DVA;
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse_ohneQb;
+import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.parameter.CasePara;
 
 
@@ -21,6 +22,8 @@ public class Rechnung {
 	private double turbulence = 0; //Turbulenzfaktor unten (falls Bargende) negativ initialisiert, muss aber immer positiv sein. Falls nicht verändert wird Fehler abgefangen 
 	private boolean bargende = false;
 	private boolean fvv = false;
+	private double Vc = 0;
+	private int index_Vc=0;
 	
 	
 	public Rechnung(CasePara cp) {		
@@ -128,6 +131,15 @@ public class Rechnung {
 				}
 				else
 					System.out.println("DVA CON: "+ (idx-1));	
+				
+//				Thermodynamisches Verdichtungsverhältnis nach der Kompressionsmethode, beschrieben in:
+//				"Christine Burkhardt (2006) - Eine praktische Methode zur Bestimmung des realen Verdichtungsverhältnisses"
+//				aus Klopfregelung für Ottomotoren II, Band 74, Kapitel 8
+				if(time>=CP.convert_KW2SEC(-40) && time<CP.convert_KW2SEC(-30) && CP.MOTOR.isHubKolbenMotor()){
+					Vc = Vc+((DVA)dglSys).kompressionsVolumen();
+					index_Vc++;
+					((Motor_HubKolbenMotor) CP.MOTOR).set_Epsilon_thermo(Vc/index_Vc);
+				}
 				
 				anzGesamtIterationen+=idx-1;				
 							

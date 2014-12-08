@@ -42,6 +42,7 @@ public abstract class DVA extends BerechnungsModell{
 	}	
 
 	public abstract Zone[] ersterHSBrennraum(double time, Zone[] zonen);	
+	public abstract double kompressionsVolumen();
 
 
 
@@ -176,6 +177,11 @@ public abstract class DVA extends BerechnungsModell{
 	public boolean isDVA(){
 		return true;
 	}	
+	
+	public double get_dp(double time){
+		double dt = CP.SYS.WRITE_INTERVAL_SEC;
+		return (indiD.get_pZyl(time+dt)-indiD.get_pZyl(time))/dt;
+	}
 
 
 	protected boolean verbrennungHatBegonnen(double time, VektorBuffer dQ_in_){

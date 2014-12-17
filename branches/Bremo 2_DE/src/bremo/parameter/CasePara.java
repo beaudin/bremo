@@ -1335,12 +1335,21 @@ public class CasePara {
 
 	public Spezies get_kraftsoff(int idxOfInjection){
 		int anzEinspr=this.get_AnzahlEinspritzungen();
-		if(idxOfInjection>anzEinspr-1){
+		if(anzEinspr==0){
 			try {
-				throw new ParameterFileWrongInputException("The injection index ("+idxOfInjection+") " +
-						"you asked the fuel for does not exist");
+				throw new ParameterFileWrongInputException("Es wurden 0 Einspritzungen angegeben, eine Berechnung ist nur für den Schleppbetrieb" +
+						" (Thermodyn_Verdichtung) möglich.");
 			} catch (ParameterFileWrongInputException e) {			
-				e.stopBremo();				
+				e.log_Warning();				
+			}
+		}else{
+			if(idxOfInjection>anzEinspr-1){
+				try {
+					throw new ParameterFileWrongInputException("The injection index ("+idxOfInjection+") " +
+							"you asked the fuel for does not exist");
+				} catch (ParameterFileWrongInputException e) {			
+					e.stopBremo();				
+				}
 			}
 		}
 		
@@ -2845,12 +2854,16 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	}
 	//////////////////////////////////////////////////////////
 	
+	/**
+	 * Temperaturoffset zwischen Abgastemperatur und Zylindertemperatur zur Berechnung der Restgasmasse nach Müller-Bertling
+	 * @return
+	 */
 	public double get_offsetTemperatur() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "offsetTemperatur", "[K]", 0,
+			return set_doublePara(INPUTFILE_PARAMETER, "offsetTemperatur", "[K]", Double.NEGATIVE_INFINITY,
 						Double.POSITIVE_INFINITY);
 			} catch (ParameterFileWrongInputException e) {
-				e.log_Warning("Im Input File wurde keine offsetTemperatur angegeben!");
+				e.log_Warning("Im Input File wurde keine offsetTemperatur angegeben, es wird mit 0 gerechnet!");
 				return 0;
 			}
 	}	

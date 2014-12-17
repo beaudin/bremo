@@ -9,6 +9,10 @@ public class SaugrohrEinspritzungHomogen extends Einspritzung {
 	public static final String FLAG="Homogen";
 	public static final String FLAG2="SRE";
 
+	public SaugrohrEinspritzungHomogen(CasePara cp){
+		super(cp);
+	}
+	
 	public SaugrohrEinspritzungHomogen(CasePara cp,int index) {
 		super(cp,index);
 		//eoi ist eigentlich auf NaN gesetzt....

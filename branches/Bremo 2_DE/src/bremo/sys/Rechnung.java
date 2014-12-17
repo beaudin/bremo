@@ -173,13 +173,16 @@ public class Rechnung {
 			CP.schreibeAlleErgebnisFiles(CP.get_CaseName()+".txt");
 		else
 			dglSys.schreibeErgebnisFile(CP.get_CaseName()+".txt");
-		String xxx = CP.BERECHNUNGS_MODELL.toString();
-		if(CP.BERECHNUNGS_MODELL.isDVA() && !CP.BERECHNUNGS_MODELL.toString().contains("Weltformel")){ //Nur wenn DVA und nicht Weltformel
+		
+		if(CP.BERECHNUNGS_MODELL.isDVA() && !CP.BERECHNUNGS_MODELL.toString().contains("Weltformel") && !CP.BERECHNUNGS_MODELL.toString().contains("ThermodynVerdichtung")){ //Nur wenn DVA und nicht Weltformel
 			PostProcessor pp=new PostProcessor(dglSys.get_dm_buffer(),					//war bei Juwe auskommentiert
 								dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),CP);	//war bei Juwe auskommentiert
 			pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");							//war bei Juwe auskommentiert
-		}
-		else{ //Wenn APR eigener Konstruktor in PostProcessor mit p_buffer
+//		Für Thermodynamisches Verdichtungsverhältnis: 
+		}else if(CP.BERECHNUNGS_MODELL.isDVA() && CP.BERECHNUNGS_MODELL.toString().contains("ThermodynVerdichtung")){
+			PostProcessor pp=new PostProcessor(dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),CP);
+			pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");
+		}else{ //Wenn APR eigener Konstruktor in PostProcessor mit p_buffer
 			PostProcessor pp=new PostProcessor(dglSys.get_dm_buffer(),					//war bei Juwe auskommentiert
 					dglSys.get_dQb_buffer(),dglSys.get_dQw_buffer(),dglSys.get_p_buffer(),CP);	//war bei Juwe auskommentiert
 			pp.schreibeErgebnisFile(CP.get_CaseName()+".txt");		

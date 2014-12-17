@@ -30,10 +30,14 @@ public class MasterEinspritzung extends ModulFabrik{
 	public  MasterEinspritzung(CasePara cp){
 		super(cp);
 		anzEinspr=CP.get_AnzahlEinspritzungen(); 
-
-		einspritzungen= new Einspritzung [anzEinspr];	
-		for(int index=0;index<anzEinspr;index++){
-			einspritzungen[index]=get_Einzeleinspritzung(cp, index); 
+		if(anzEinspr>0){
+			einspritzungen= new Einspritzung [anzEinspr];
+			for(int index=0;index<anzEinspr;index++){
+				einspritzungen[index]=get_Einzeleinspritzung(cp, index); 
+			}
+		}else{
+			einspritzungen= new Einspritzung[1];
+			einspritzungen[0] = new SaugrohrEinspritzungHomogen(cp);
 		}
 
 	}

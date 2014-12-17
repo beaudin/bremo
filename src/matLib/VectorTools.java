@@ -65,32 +65,33 @@ public class VectorTools {
    }
    
    /**
-    * Lineare Regression von Werten -- neurohr 08/2014
+    * Lineare Regression von Werten nach der Methode der kleinsten Fehlerquadrate -- neurohr 12/2014
     * @param xArray
     * @param yArray
     * @return coeff[] [0 Steigung, 1 y-AchsenAbschnitt]
     * @author neurohr
     */
-   public static double[] lineareRegression(double[] xArray, double[] yArray){
-	  double b1 = 0;
-	  double b2 = 0;
-	  double xMean=0,yMean=0;
-	  for(int i=0; i<xArray.length;i++){
-		  xMean =+ xArray[i]/xArray.length;
-		  yMean =+ yArray[i]/yArray.length;
-	  }
-	  
-	  for (int i = 0 ; i < xArray.length ; ++i) {
-		  b1 += xArray[i]*yArray[i];
-		  b2 += xArray[i]*xArray[i];
-	  }
-	  b1 -= ((double)xArray.length)*xMean*yMean; 
-	  b2 -= ((double)xArray.length)*xMean*xMean; 
-
-	  double coeff[] = new double[2];
-	  coeff[0] = b1 /b2; 
-	  coeff[1] = yMean - coeff[0]*xMean;
-//	  System.out.println(coeff[0]+"*x+"+coeff[1]);
-	  return coeff;
-   }
+    public static double[] lineareRegression(double[] xArray, double[] yArray){
+//    	nach der Form y = a + b*x
+		double a,b;
+		int n;
+		double[] coeff = new double[2];
+		double sum_xi=0,sum_xis=0,sum_yi=0,sum_xiyi=0;
+		if(xArray.length<=yArray.length){
+			n = xArray.length;
+		}else{
+			n = yArray.length;
+		}
+		for(int i=0;i<n;i++){
+			sum_xi+=xArray[i];
+			sum_xis+=(xArray[i]*xArray[i]);
+			sum_yi+=yArray[i];
+			sum_xiyi+=(xArray[i]*yArray[i]);
+		}
+		a = (sum_yi * sum_xis - sum_xi * sum_xiyi) / (n * sum_xis - sum_xi * sum_xi);
+		b = (n * sum_xiyi - sum_xi * sum_yi) / (n * sum_xis - sum_xi * sum_xi);
+		coeff[0] = b; //Steigung
+		coeff[1] = a; //y-Achsenabschnitt
+		return coeff;
+	}
 }

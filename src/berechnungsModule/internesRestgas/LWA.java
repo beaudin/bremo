@@ -5,6 +5,7 @@ import java.io.File;
 import kalorik.spezies.Spezies;
 import berechnungsModule.Berechnung.BerechnungsModell;
 import berechnungsModule.Berechnung.Zone;
+import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse_geschleppt;
 import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse_ohneQb;
 import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse;
 import berechnungsModule.LadungswechselAnalyse.MasterLWA;
@@ -13,11 +14,11 @@ import bremo.sys.Solver;
 
 public class LWA extends InternesRestgas {
 	private double mAGRint=-5.55;
-	private boolean mitZwiKo;
+	private String artLWA;
 
-	protected LWA(CasePara cp, boolean zwiko) {
+	protected LWA(CasePara cp, String art) {
 		super(cp);
-		this.mitZwiKo = zwiko;
+		this.artLWA = art;
 	}
 
 	@Override
@@ -39,8 +40,10 @@ public class LWA extends InternesRestgas {
 
 		Zone[] zn_LW;
 		BerechnungsModell dglSys_LW;
-		if(mitZwiKo){
+		if(artLWA.equalsIgnoreCase("zwiko")){
 			dglSys_LW=new LadungsWechselAnalyse(cp);
+		}else if(artLWA.equalsIgnoreCase("schlepp")){
+			dglSys_LW=new LadungsWechselAnalyse_geschleppt(cp);
 		}else{
 			dglSys_LW=new LadungsWechselAnalyse_ohneQb(cp);
 		}
@@ -78,14 +81,14 @@ public class LWA extends InternesRestgas {
 				zn_LW[0]=new Zone(CP,pInit, VInit,TInit, m_alt,
 						abgas, false, 0);
 				
-				if(mitZwiKo) {
+				if(artLWA.equalsIgnoreCase("zwiko")) {
 					((LadungsWechselAnalyse)dglSys_LW).set_mInit(m_alt);
 				}
 				
 				for(int i=1;i<anzSimWerte;i++){
 					time=x0_LW+i*cp.SYS.WRITE_INTERVAL_SEC;		
 					LW_SOL.setFinalValueOfX(time);
-					if(mitZwiKo){
+					if(artLWA.equalsIgnoreCase("zwiko")){
 						double pIst=Double.NaN;
 						boolean converged=false;
 						int idxlwa = 0;
@@ -130,7 +133,7 @@ public class LWA extends InternesRestgas {
 			}	
 
 			System.out.println("Masse bei Iteration " + idx2 + " = "+ m_neu + " kg");
-			if(mitZwiKo) {
+			if(artLWA.equalsIgnoreCase("zwiko")) {
 				mLuftFeucht=((LadungsWechselAnalyse)dglSys_LW).get_mLuftFeucht(zn_LW);
 				//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
 				((LadungsWechselAnalyse)dglSys_LW).set_TSaug(mLuftFeucht);				
@@ -146,7 +149,7 @@ public class LWA extends InternesRestgas {
 		dglSys_LW.schreibeErgebnisFile(cp.get_CaseName()+ ".txt");		
 		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + (idx2) );	
 		double agrInt;
-		if(mitZwiKo) {
+		if(artLWA.equalsIgnoreCase("zwiko")) {
 			agrInt=((LadungsWechselAnalyse)dglSys_LW).get_mAGRintern(zn_LW);
 		}else{
 			agrInt=((LadungsWechselAnalyse_ohneQb)dglSys_LW).get_mAGRintern(zn_LW);

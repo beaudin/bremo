@@ -53,9 +53,13 @@ public class InternesRestgasFabrik extends ModulFabrik {
 //				e.stopBremo();
 //			}	
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[3])){
-			RESTGAS_MODELL=(InternesRestgas) new LWA(cp, false);
+			if(cp.BERECHNUNGS_MODELL.equals("ThermodynVerdichtung"))
+				RESTGAS_MODELL=(InternesRestgas) new LWA(cp, "schlepp");
+			else
+				RESTGAS_MODELL=(InternesRestgas) new LWA(cp, "normal");
+			
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[4])){
-			RESTGAS_MODELL=(InternesRestgas) new LWA(cp,true);
+			RESTGAS_MODELL=(InternesRestgas) new LWA(cp,"zwiko");
 		}else{
 			RESTGAS_MODELL=null;
 			try {

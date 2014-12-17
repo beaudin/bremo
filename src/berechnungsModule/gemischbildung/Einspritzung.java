@@ -36,6 +36,48 @@ public abstract class Einspritzung{
 	public VektorBuffer kraftstoff;
 	private boolean isDVA=false;
 	
+	/**
+	 * Für den Schleppbetrieb
+	 * @param cp
+	 */
+	protected Einspritzung(CasePara cp){
+		this.CP=cp;	
+		INDEX=0;
+		ID_ZONE=0;
+
+		mKrst=1e-6;
+		CP.set_ParaInputfile("krst_0", "[-]", "CO");
+		krst=CP.get_kraftsoff(0);
+		CP.SPEZIES_FABRIK.integrierMich(krst); //Diese Anweisung sorgt dafür, dass nur verwendete Kraftstoffe integriert werden
+		
+		double time=-1*CP.SYS.DAUER_ASP_SEC;
+		double inc=CP.SYS.WRITE_INTERVAL_SEC;
+		boi=-3*inc;
+		eoi=-2*inc;
+		//Einspritzbeginn so legen, dass er auf einem Rechenschritt liegt!
+		do{
+			boi=time;//legt boi immer auf den letzten zeitpunkt der kleiner ist als der angegebene
+			time+=inc;
+		}while(time<=boi);
+		CP.set_ParaInputfile("BOI", "[KWnZOT]", CP.convert_SEC2KW(boi));
+
+		//Einspritzende so legen, dass es auf einem Rechenschritt liegt!				
+		do{	
+			eoi=time; //legt eoi immer auf den ersten Zeitpunkt der groesser ist als der angegebene
+			time+=inc;				
+		}while(time<=eoi);
+		CP.set_ParaInputfile("EOI", "[KWnZOT]", CP.convert_SEC2KW(boi));
+
+		if(eoi==boi)//Dass eoi groesser ist als boi wird in CasePara gecheckt
+			eoi=boi+inc;
+		
+		IS_LWA_EINSPRITZUNG=true;
+		EINSPRITZUNG_VOR_DVA=true;
+
+		mKrst_fluessig = new VektorBuffer(cp);
+		mKrst_dampf=new VektorBuffer(cp);
+		kraftstoff = new VektorBuffer(cp);
+	}
 	
 	protected Einspritzung(CasePara cp, int index){
 		this.CP=cp;	

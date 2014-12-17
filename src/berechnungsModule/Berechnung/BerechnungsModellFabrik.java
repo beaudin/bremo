@@ -14,7 +14,8 @@ public class BerechnungsModellFabrik extends ModulFabrik {
 		"APR_CanteraMultiZoneHomogeneous",
 		"APR_Cantera2Zone",
 		"APR_CanteraMultiZoneRCCI",
-		"Weltformel"};	
+		"Weltformel",
+		"Thermodyn_Verdichtung"};	
 
 	public  final BerechnungsModell BERECHNUNGS_MODELL;	
 	
@@ -51,6 +52,8 @@ public class BerechnungsModellFabrik extends ModulFabrik {
 			
 		}else if(berechnungsModellVorgabe.equals("Weltformel")){
 			BERECHNUNGS_MODELL=new Weltformel(cp);
+		}else if(berechnungsModellVorgabe.equals("Thermodyn_Verdichtung")){
+			BERECHNUNGS_MODELL=new ThermodynVerdichtung(cp);
 			
 			
 		}else{

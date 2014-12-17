@@ -81,7 +81,7 @@ public class PostProcessor {
 			i+=1;
 			ergB.buffer_EinzelErgebnis("mAGR_intern [kg]",mAGR_inter,i);
 			System.err.println("mAGR_intern = " + mAGR_inter + " [kg]");
-
+			
 			MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
 			double mKrst=me.get_mKrst_Sum_ASP();
 			double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
@@ -673,6 +673,158 @@ public class PostProcessor {
 			System.err.println("Berechnungsmodell: " + berechnungsModellVorgabe);
 				
 }
+	
+	public PostProcessor(VektorBuffer dQb_buffer,VektorBuffer dQw_buffer, CasePara cp){
+		this.CP=cp;
+				
+		ergB=new ErgebnisBuffer(CP,"pfd"); // Post-File-DVA, früher "DVA_Post_"
+		inti=new Integrator();
+		double dt=CP.SYS.WRITE_INTERVAL_SEC;
+		Qw=inti.get_IntegralVerlauf(dt,dQw_buffer.getValues());		
+
+		String Separator  ="\n**************************************************\n";
+		System.err.println("DVA_Post_Ergebnisse:"+Separator);
+
+		int i=0;
+				
+		IndizierDaten indi=new IndizierDaten(CP);
+					
+		double pmi=indi.get_pmi();
+
+		ergB.buffer_EinzelErgebnis("pmi [bar]",pmi*1e-5,i);
+		System.err.println("pmi = " + pmi*1e-5 + " [bar]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("pMax [bar]",indi.get_pZyl_MAX()*1e-5,i);
+		System.err.println("pMax = " + indi.get_pZyl_MAX()*1e-5 + " [bar]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Offset Zylinderdruck [Pa]", indi.get_pOffset(), i);
+		System.err.println("Offset Zylinderdruck = " + indi.get_pOffset() + " [Pa]");
+		
+		Motor motor=CP.MOTOR;
+		if(motor.isHubKolbenMotor()){
+			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+			double versatz=Math.round(10*(hkm.get_OT_Versatz()))/10.0+CP.get_OT_Versatz();
+			
+		i+=1;
+		ergB.buffer_EinzelErgebnis("OT-Versatz [KWnZOT]", versatz, i);
+		System.err.println("OT-Versatz= " + versatz + " [KWnZOT]");	
+		}
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Kappa Druckabgleich Polytropenmethode", indi.get_kappa_druckabgleich(), i);
+		System.err.println("Kappa Druckabgleich Polytropenmethode = " + indi.get_kappa_druckabgleich() + " [-]");
+		
+		double mAGR_inter=CP.RESTGASMODELL.get_mInternesRestgas_ASP();
+		mAGR_inter=CP.RESTGASMODELL.get_mInternesRestgas_ASP();
+		i+=1;
+		ergB.buffer_EinzelErgebnis("mAGR_intern [kg]",mAGR_inter,i);
+		System.err.println("mAGR_intern = " + mAGR_inter + " [kg]");
+		
+		Qb = inti.get_IntegralVerlauf(dt, dQb_buffer.getValues());
+		double QbMAX = getMaximum(Qb);
+		i+=1;
+		ergB.buffer_EinzelErgebnis("QbMAX [J]", QbMAX, i);
+		System.err.println("QbMAX = " + QbMAX + " [J]");
+		
+		double QwMAX =getMaximum(Qw);
+		i+=1;
+		ergB.buffer_EinzelErgebnis("QwMAX [J]", QwMAX, i);
+		System.err.println("QwMAX = " + QwMAX + " [J]");
+
+		i+=1;
+		ergB.buffer_EinzelErgebnis("QhMAX [J]", QbMAX - QwMAX, i);
+		System.err.println("QhMAX = " +  (QbMAX - QwMAX) + " [J]");
+		
+		if (motor.isHubKolbenMotor()) {
+		Motor_HubKolbenMotor hkm = ((Motor_HubKolbenMotor) motor);
+		i+=1;
+		ergB.buffer_EinzelErgebnis("KolbenhubMAX [m]", hkm.get_sMax(), i);
+		System.err.println("KolbenhubMAX = " + hkm.get_sMax() + " [m]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Vh [m3]", hkm.get_Hubvolumen(), i);
+		System.err.println("Vh = " + hkm.get_Hubvolumen() + " [m3]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Vc [m3]", hkm.get_Kompressionsvolumen(), i);
+		System.err.println("Vc = " + hkm.get_Kompressionsvolumen() + " [m3]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Eps [-]", hkm.get_Verdichtung(), i);
+		System.err.println("Eps=" +  hkm.get_Verdichtung()+" [-]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Eps_thermodynamisch_kompr [-]", hkm.get_Epsilon_thermo(), i);
+		System.err.println("Eps_thermodynamisch_kompr=" +  hkm.get_Epsilon_thermo()+" [-]");
+		
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Eps_thermodynamisch_sym [-]", hkm.get_Epsilon_thermo(), i);
+		System.err.println("Eps_thermodynamisch_sym=" +  hkm.get_Epsilon_thermo_sym()+" [-]");
+		}
+		
+		System.err.println("Berechnungs- und Steuerzeiten in KW:");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Berechnungsbeginn [KW]", cp.SYS.RECHNUNGS_BEGINN_DVA_KW, i);
+		System.err.println("Berechnungsbeginn = " + cp.SYS.RECHNUNGS_BEGINN_DVA_KW + " [KW]");
+
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Berechnungsende [KW]", cp.SYS.RECHNUNGS_ENDE_DVA_KW, i);
+		System.err.println("Berechnungsende = " + cp.SYS.RECHNUNGS_ENDE_DVA_KW + " [KW]");
+				
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Einlass öffnet [KW]", cp.convert_SEC2KW(cp.get_Einlassoeffnet()), i);
+		System.err.println("Einlass öffnet = " + cp.convert_SEC2KW(cp.get_Einlassoeffnet()) + " [KW]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Einlass schließt [KW]", cp.convert_SEC2KW(cp.get_Einlassschluss()), i);
+		System.err.println("Einlass schließt = " + cp.convert_SEC2KW(cp.get_Einlassschluss()) + " [KW]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Auslass öffnet [KW]", cp.get_Auslassoeffnet_KW(), i);
+		System.err.println("Auslass öffnet = " + cp.get_Auslassoeffnet_KW() + " [KW]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Auslass schließt [KW]", cp.convert_SEC2KW(cp.get_Auslassschluss()), i);
+		System.err.println("Auslass schließt = " + cp.convert_SEC2KW(cp.get_Auslassschluss()) + " [KW]");
+		
+		System.err.println("Berechnungs- und Steuerzeiten in s:");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Berechnungsbeginn [s]", cp.SYS.RECHNUNGS_BEGINN_DVA_SEC, i);
+		System.err.println("Berechnungsbeginn = " + cp.SYS.RECHNUNGS_BEGINN_DVA_SEC + " [s]");
+					
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Berechnungsende [s]", cp.SYS.RECHNUNGS_ENDE_DVA_SEC, i);
+		System.err.println("Berechnungsende = " + cp.SYS.RECHNUNGS_ENDE_DVA_SEC + " [s]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Einlass öffnet [s]", cp.get_Einlassoeffnet(), i);
+		System.err.println("Einlass öffnet = " + cp.get_Einlassoeffnet() + " [s]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Einlass schließt [s]", cp.get_Einlassschluss(), i);
+		System.err.println("Einlass schließt = " + cp.get_Einlassschluss() + " [s]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Auslass öffnet [s]", cp.get_Auslassoeffnet(), i);
+		System.err.println("Auslass öffnet = " + cp.get_Auslassoeffnet() + " [s]");
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Auslass schließt [s]", cp.get_Auslassschluss(), i);
+		System.err.println("Auslass schließt = " + cp.get_Auslassschluss() + " [s]");
+		
+		BerechnungsModellFabrik bmf =new BerechnungsModellFabrik(cp);
+		String berechnungsModellVorgabe=bmf.get_ModulWahl(bmf.DVAmodulFlag, bmf.DVA_MODULE);
+		
+		i+=1;
+		ergB.buffer_EinzelErgebnis("Berechnungsmodell: " + berechnungsModellVorgabe, Double.NaN, i);
+		System.err.println("Berechnungsmodell: " + berechnungsModellVorgabe);
+					
+	}
 	
 	public void schreibeErgebnisFile(String name){	
 		ergB.schreibeErgebnisFile(name);

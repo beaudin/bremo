@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 
 import funktionenTests.FunktionsTester; 			//fuer Verlustteilung Frank Haertel
 import berechnungsModule.IterativeBerechnung;
+import berechnungsModule.Berechnung.APR_kompletterZyklus;
 import berechnungsModule.Berechnung.Verlustteilung;	//fuer Verlustteilung Frank Haertel
 import matLib.ConstantsOptimizer;
 import matLib.MatLibBase;
@@ -131,7 +132,12 @@ public class Bremo extends Thread {
 				iterRechnung.initialisieren(casePara);
 //				iterRechnung.set_CasePara();
 				casePara.set_IterativeBerechnung(iterRechnung);
+				if (casePara.MODUL_VORGABEN.get("berechnungsModell").equals("APR_kompletterZyklus")){ //Kerrom
+					APR_kompletterZyklus apr_kpl = new APR_kompletterZyklus(casePara);
+					apr_kpl.berechne_APRkompletterZyklus();
+				}else{
 				r = new Rechnung(casePara);
+				}
 			} catch (ParameterFileWrongInputException e) {
 				if(calledFromGUI){
 				SwingBremo.setNrOfBremoAlive();
@@ -148,6 +154,7 @@ public class Bremo extends Thread {
 			  } 
 				e.stopBremo();			
 			}
+
 			try {
 				casePara.set_CalledFromGUI(calledFromGUI);
 				r.berechnungDurchfuehren();
@@ -167,6 +174,7 @@ public class Bremo extends Thread {
 		}while(iterRechnung.isIterativ());
 		iterRechnung.deleteFile();
 		if (casePara.is_Verlustteilung() && !casePara.get_CaseName().toString().contains("Weltformel")) {
+
 			if (calledFromGUI) {
 				SwingBremo.VerlustteilungThread();
 			}

@@ -15,6 +15,7 @@ public class BerechnungsModellFabrik extends ModulFabrik {
 		"APR_Cantera2Zone",
 		"APR_CanteraMultiZoneRCCI",
 		"Weltformel",
+		"APR_kompletterZyklus",
 		"Thermodyn_Verdichtung"};	
 
 	public  final BerechnungsModell BERECHNUNGS_MODELL;	
@@ -54,6 +55,10 @@ public class BerechnungsModellFabrik extends ModulFabrik {
 			BERECHNUNGS_MODELL=new Weltformel(cp);
 		}else if(berechnungsModellVorgabe.equals("Thermodyn_Verdichtung")){
 			BERECHNUNGS_MODELL=new ThermodynVerdichtung(cp);
+			
+		// Kerrom
+		}else if(berechnungsModellVorgabe.equals("APR_kompletterZyklus")){
+			BERECHNUNGS_MODELL = new APR_kompletterZyklus(cp);
 			
 			
 		}else{

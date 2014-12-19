@@ -2854,6 +2854,25 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	}
 	//////////////////////////////////////////////////////////
 	
+	// Kerrom: für kompletten Zyklus
+	public double get_m_ini_APRkpl(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "m_ini", "[kg]", 0, Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {
+			return Double.NaN;
+		}
+	}
+	
+	// für kompletten Zyklus (eventuell nicht nötig)
+	public double get_T_ini_APRkpl(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, "T_ini_APRkpl", "[K]", 0, Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {
+			return Double.NaN;
+		}
+	}
+	
+	
 	/**
 	 * Temperaturoffset zwischen Abgastemperatur und Zylindertemperatur zur Berechnung der Restgasmasse nach Müller-Bertling
 	 * @return

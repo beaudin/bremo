@@ -1238,11 +1238,11 @@ public class CasePara {
 			}			
 		}
 
-		if (anzEinspr==1){
-			suchString="BOI";
-		}else{
+//		if (anzEinspr==1){
+//			suchString="BOI";
+//		}else{
 			suchString="BOI_"+idxOfInjection;
-		}
+//		}
 		try {
 			if(SYS.IS_KW_BASIERT){	
 				double boi;
@@ -1277,11 +1277,11 @@ public class CasePara {
 			}			
 		}		
 
-		if (anzEinspr==1){
-			suchString="EOI";
-		}else{
+//		if (anzEinspr==1){
+//			suchString="EOI";
+//		}else{
 			suchString="EOI_"+idxOfInjection;
-		}
+//		}
 		try {
 			if(SYS.IS_KW_BASIERT){			
 				double eoi;
@@ -1306,11 +1306,11 @@ public class CasePara {
 		String  suchString;
 		int anzEinspr=get_AnzahlEinspritzungen();		
 		int injZone=-1;
-		if (anzEinspr==1){
-			suchString="InjZone";
-		}else{
+//		if (anzEinspr==1){
+//			suchString="InjZone";
+//		}else{
 			suchString="InjZone_"+idxOfInjection;
-		}
+//		}
 
 		if(idxOfInjection>anzEinspr-1){
 			try {
@@ -1354,11 +1354,11 @@ public class CasePara {
 		}
 		
 		String krstFlag;
-		if(anzEinspr==1){
-			krstFlag="krst";	
-		}else{
+//		if(anzEinspr==1){
+//			krstFlag="krst";	
+//		}else{
 			krstFlag="krst_"+idxOfInjection;
-		}		
+//		}		
 
 		//Die Koeffizienten Speziesfabrik liefert eine hashtable mit allen moeglichen Krafstoffen
 		Hashtable<String,Spezies> krstHash=this.SPEZIES_FABRIK.get_alleKrafstoffe();
@@ -1410,11 +1410,11 @@ public class CasePara {
 			}
 		}
 		String krstFlag;
-		if(anzEinspr==1){
-			krstFlag="mKrst";	
-		}else{
+//		if(anzEinspr==1){
+//			krstFlag="mKrst";	
+//		}else{
 			krstFlag="mKrst_"+idxOfInjection;
-		}		
+//		}		
 
 		try {
 			return this.convert_ProStunde_2_ProASP(
@@ -1444,11 +1444,11 @@ public class CasePara {
 			}
 		}
 		String tauFlag;
-		if(anzEinspr==1){
-			tauFlag="tau";	
-		}else{
+//		if(anzEinspr==1){
+//			tauFlag="tau";	
+//		}else{
 			tauFlag="tau_"+idxOfInjection;
-		}		
+//		}		
 
 		try {
 			tau =  this.set_doublePara(INPUTFILE_PARAMETER, tauFlag,"[s]",0,
@@ -1480,11 +1480,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="anzAxialPakete";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="anzAxialPakete";	
+//		}else{
 			flag="anzAxialPakete_"+idxOfInjection;
-		}		
+//		}		
 
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1,1000);
@@ -1511,11 +1511,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="anzRadialPakete";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="anzRadialPakete";	
+//		}else{
 			flag="anzRadialPakete_"+idxOfInjection;
-		}		
+//		}		
 
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1,1000);
@@ -1542,11 +1542,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="einspritzDruck";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="einspritzDruck";	
+//		}else{
 			flag="einspritzDruck_"+einspritzungsNr;
-		}			
+//		}			
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[Pa]",0,Double.MAX_VALUE);
 		} catch (ParameterFileWrongInputException e) {
@@ -1568,11 +1568,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="anzSpritzloecher";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="anzSpritzloecher";	
+//		}else{
 			flag="anzSpritzloecher_"+einspritzungsNr;
-		}			
+//		}			
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1,Double.MAX_VALUE);
 		} catch (ParameterFileWrongInputException e) {
@@ -1593,11 +1593,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="cdFaktor";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="cdFaktor";	
+//		}else{
 			flag="cdFaktor_"+einspritzungsNr;
-		}			
+//		}			
 		try {
 			return 	 set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",0.1,1);
 		} catch (ParameterFileWrongInputException e) {
@@ -1617,11 +1617,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="EntrainmentFaktor";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="EntrainmentFaktor";	
+//		}else{
 			flag="EntrainmentFaktor_"+einspritzungsNr;
-		}			
+//		}			
 		try {
 			return 	 set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1e-9,100); //beliebig gewaehlt
 		} catch (ParameterFileWrongInputException e) {
@@ -1641,11 +1641,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="ProfilFaktor";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="ProfilFaktor";	
+//		}else{
 			flag="ProfilFaktor_"+einspritzungsNr;
-		}			
+//		}			
 		try {
 			return 	 set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1e-9,100); //beliebig gewaehlt
 		} catch (ParameterFileWrongInputException e) {
@@ -1665,11 +1665,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="durchmSpritzloch";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="durchmSpritzloch";	
+//		}else{
 			flag="durchmSpritzloch_"+einspritzungsNr;
-		}			
+//		}			
 		try {
 			return 	set_doublePara(INPUTFILE_PARAMETER, flag,"[m]",0.00001,0.001);
 		} catch (ParameterFileWrongInputException e) {
@@ -1691,11 +1691,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-		if(anzEinspr==1){
-			flag="vergleichsKrstVerdampfung";	
-		}else{
+//		if(anzEinspr==1){
+//			flag="vergleichsKrstVerdampfung";	
+//		}else{
 			flag="vergleichsKrstVerdampfung_"+einspritzungsNr;
-		}			
+//		}			
 		try {
 			return this.set_StringPara(INPUTFILE_PARAMETER, flag, Kraftstoff_Eigenschaften.kraftstoffe);
 		} catch (ParameterFileWrongInputException e) {

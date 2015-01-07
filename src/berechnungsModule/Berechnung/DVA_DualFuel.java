@@ -59,7 +59,7 @@ public class DVA_DualFuel extends DVA {
 
 	private double dQburnMAX=0;
 	private double fortschritt=0;	
-	private double Vc=0;	
+	private double x,y;	
 	private boolean bargende = false; //Nur wenn Bargende
 
 
@@ -366,17 +366,29 @@ public class DVA_DualFuel extends DVA {
 			this.turb.update(zonen_IN, time);
 		}
 		//Thermodynamisches Verdichtungsverhältnis, erweitert um Wandwärmeverluste und Leckage:
-		Vc = 0;
-		double T = zonen_IN[0].get_T();
-		Vc = Vc + (dQw + zonen_IN[0].get_ggZone().get_cp_mass(T)*T*dmL)/super.get_dp(time); //dXv
-		Vc = Vc - (zonen_IN[0].get_ggZone().get_kappa(T)*zonen_IN[0].get_p()*CP.MOTOR.get_dV(time)/super.get_dp(time)); //pdV
-		Vc = Vc - (CP.MOTOR.get_V(time)-CP.MOTOR.get_V_MAX()/CP.MOTOR.get_Verdichtung()); //Vs
+		y = 0;
+		x = 0;
+		if(CP.BERECHNUNGS_MODELL.isDVA()){
+			double kappa = zonen_IN[0].get_ggZone().get_kappa(T0);
+			y = y + (dQw/CP.SYS.WRITE_INTERVAL_SEC + zonen_IN[0].get_ggZone().get_cp_mass(T0)*T0*dmL) * (kappa-1) /
+					super.get_dp(time); //dXv
+			y = y - (kappa * zonen_IN[0].get_p()*
+					(CP.MOTOR.get_V(time)-CP.MOTOR.get_V(time-CP.SYS.WRITE_INTERVAL_SEC) / CP.SYS.WRITE_INTERVAL_SEC) /
+					super.get_dp(time)); //pdV
+			y = y - (CP.MOTOR.get_V(time) - CP.MOTOR.get_V_MAX()/CP.MOTOR.get_Verdichtung()); //Vs
+			
+			x = kappa * (CP.MOTOR.get_V(time)-CP.MOTOR.get_V(time-CP.SYS.WRITE_INTERVAL_SEC) / CP.SYS.WRITE_INTERVAL_SEC) / 
+					super.get_dp(time);
+		}
 		
-		return zonen_IN;	
+		return zonen_IN;			
 	}
 	
-	public double kompressionsVolumen(){
-		return Vc;
+	public double[] kompressionsVolumen(){
+		double[] ret = new double[2];
+		ret[0] = x;
+		ret[1] = y;
+		return ret;
 	}
 
 	public Zone[] get_initialZones() {		

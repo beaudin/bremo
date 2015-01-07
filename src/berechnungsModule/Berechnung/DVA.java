@@ -41,8 +41,11 @@ public abstract class DVA extends BerechnungsModell{
 		relaxFactor=CP.get_relaxFactor();
 	}	
 
-	public abstract Zone[] ersterHSBrennraum(double time, Zone[] zonen);	
-	public abstract double kompressionsVolumen();
+	public abstract Zone[] ersterHSBrennraum(double time, Zone[] zonen);
+	/**
+	 * @return [0] x [1]y
+	 */
+	public abstract double[] kompressionsVolumen();
 
 
 

@@ -1,6 +1,7 @@
 package bremo.sys;
 
 
+import matLib.VectorTools;
 import kalorik.spezies.Spezies;
 import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.PostProcessor;
@@ -22,12 +23,16 @@ public class Rechnung {
 	private double turbulence = 0; //Turbulenzfaktor unten (falls Bargende) negativ initialisiert, muss aber immer positiv sein. Falls nicht verändert wird Fehler abgefangen 
 	private boolean bargende = false;
 	private boolean fvv = false;
-	private double Vc = 0;
+	private double[] xVc, yVc;
 	private int index_Vc=0;
 	
 	
 	public Rechnung(CasePara cp) {		
-		CP=cp;		
+		CP=cp;
+		double n=(cp.convert_KW2SEC(-30)-cp.convert_KW2SEC(-40))/cp.SYS.WRITE_INTERVAL_SEC;
+		int s = (int) Math.round(n);
+		xVc = new double[s];
+		yVc = new double[s];
 		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
 			bargende=true;
 		}
@@ -135,10 +140,16 @@ public class Rechnung {
 //				Thermodynamisches Verdichtungsverhältnis nach der Kompressionsmethode, beschrieben in:
 //				"Christine Burkhardt (2006) - Eine praktische Methode zur Bestimmung des realen Verdichtungsverhältnisses"
 //				aus Klopfregelung für Ottomotoren II, Band 74, Kapitel 8
-				if(time>=CP.convert_KW2SEC(-40) && time<CP.convert_KW2SEC(-30) && CP.MOTOR.isHubKolbenMotor()){
-					Vc = Vc+((DVA)dglSys).kompressionsVolumen();
+				if(time>=CP.convert_KW2SEC(-40) && time<CP.convert_KW2SEC(-30) && CP.MOTOR.isHubKolbenMotor() &&
+						CP.BERECHNUNGS_MODELL.isDVA() && index_Vc<xVc.length){
+					double[] coeff = ((DVA)dglSys).kompressionsVolumen();
+					xVc[index_Vc] = coeff[0];
+					yVc[index_Vc] = coeff[1];
 					index_Vc++;
-					((Motor_HubKolbenMotor) CP.MOTOR).set_Epsilon_thermo(Vc/index_Vc);
+					if(index_Vc==xVc.length){
+						coeff = VectorTools.lineareRegression(xVc, yVc);
+						((Motor_HubKolbenMotor) CP.MOTOR).set_Epsilon_thermo(coeff[1]);
+					}
 				}
 				
 				anzGesamtIterationen+=idx-1;				

@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -81,6 +82,8 @@ import bremoswing.util.FertigMeldungFrame;
 import bremoswing.util.SucheBremo;
 import bremoswing.util.TextPaneOutputStream;
 
+import java.awt.Desktop;
+import java.net.URI;
 
 /*
  * SwingBremo.java
@@ -110,6 +113,7 @@ public class SwingBremo extends JFrame {
         public static JButton berechnen;
         public static JButton sehen ;
         public static JButton docfile;
+        public static JButton help;
         public static JTextPane grosArea;
         private JScrollPane jScrollPane1;
         private JScrollPane jScrollPane2;
@@ -222,7 +226,7 @@ public class SwingBremo extends JFrame {
            }
    };
                 System.setOut(outStream);
-                System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
+                //System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
 //              JMenu m = new JMenu("Datei");
 //              m.add(new JMenuItem("Item 1.1"));
 //              m.add(new JMenuItem("Item 1.2"));
@@ -259,7 +263,7 @@ public class SwingBremo extends JFrame {
                 stop = new JButton();
                 sehen = new JButton();
                 docfile = new JButton();
-                //language = new JComboBox(sprachen);
+                help = new JButton();
                 textFile = new JTextField();
 
                 // konsole = new JCheckBox();
@@ -306,7 +310,7 @@ public class SwingBremo extends JFrame {
                 setBackground(new Color(255, 255, 255));
                 setIconImage(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/bremo1.png")).getImage());
-                setName(ManagerLanguage.getRb().getString("swingbremo_app_titel"));
+                setName(ManagerLanguage.getString("swingbremo_app_titel"));
                 setResizable(false);
                 setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
                 Dimension size = new Dimension(720,320);
@@ -343,7 +347,7 @@ public class SwingBremo extends JFrame {
                 berechnen.setIcon(beri); // NOI18N
                 berechnen.setRolloverIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/play_blue_2.png")));
-                  berechnen.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_play"));
+                  berechnen.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_play"));
 //                berechnen.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_play")); //swingbremo_ToolTip_play
                 berechnen.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -364,7 +368,7 @@ public class SwingBremo extends JFrame {
                 wahlFile.setIcon(wfi); // NOI18N
                 wahlFile.setRolloverIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/folder_blue_2.png")));
-                wahlFile.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_choose"));
+                wahlFile.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_choose"));
 //                wahlFile.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_choose")); //swingbremo_ToolTip_choose
                 wahlFile.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -384,7 +388,7 @@ public class SwingBremo extends JFrame {
                 /************ BUTTON STOP ************************************/
                 stop.setIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/stop_blue.png")));
-                stop.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_stop"));
+                stop.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_stop"));
 //                stop.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_stop")); //swingbremo_ToolTip_stop
                 stop.setEnabled(false);
                 stop.setMargin(new Insets(0, 0, 0, 0));
@@ -406,7 +410,7 @@ public class SwingBremo extends JFrame {
                 /************ BUTTON Graphic ************************************/
                 sehen.setIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/see_graphik.png")));
-                sehen.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_see"));
+                sehen.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_see"));
 //                sehen.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_see")); //swingbremo_ToolTip_see
                 sehen.addActionListener(new ActionListener() {
 
@@ -440,7 +444,7 @@ public class SwingBremo extends JFrame {
                                 "/bremoswing/bild/doc-icon.png")));
                 docfile.setRolloverIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/doc-icon2.png")));
-                docfile.setToolTipText(ManagerLanguage.getRb().getString("swingbremo_ToolTip_doc"));
+                docfile.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_doc"));
 //                docfile.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_doc"));  //swingbremo_ToolTip_doc
                 docfile.addActionListener(new ActionListener() {
                        
@@ -540,7 +544,7 @@ public class SwingBremo extends JFrame {
                                                 bremoActiv = true;
                                 }
                                 if (bremoActiv) {
-                                	label.setText(ManagerLanguage.getRb().getString("swingbremo_label_1"));
+                                	label.setText(ManagerLanguage.getString("swingbremo_label_1"));
 //                                        label.setText(languageManager.getJLabelTextByID("swingbremo_label_1")); // swingbremo_label_1
                                         progressBar.setVisible(true);
                                         double Sum = 0;
@@ -560,12 +564,40 @@ public class SwingBremo extends JFrame {
                                         progressBar.setValue(percent);
                                         progressBar.repaint();
                                 } else {
-                                	label.setText(ManagerLanguage.getRb().getString("swingbremo_label_2"));
+                                	label.setText(ManagerLanguage.getString("swingbremo_label_2"));
 //                                        label.setText(languageManager.getJLabelTextByID("swingbremo_label_2")); //swingbremo_label_2
                                 }
                         }
                 });
+                
+		gc.fill = GridBagConstraints.LAST_LINE_END;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.weightx = 0;
+		gc.gridx = 8;
+		gc.gridy = 0;
+		ImageIcon hilfe = new ImageIcon(getClass().getResource(
+				"/bremoswing/bild/help.png"));
+		help.setIcon(hilfe); // NOI18N
+		help.setRolloverIcon(new ImageIcon(getClass().getResource(
+				"/bremoswing/bild/help.png")));
+		help.setToolTipText(ManagerLanguage
+				.getString("swingbremo_ToolTip_help"));
+		help.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Desktop.getDesktop().browse(new URI("http://ifkmhp3.mach.uni-karlsruhe.de/Bremo/Help.html"));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 
+		manager.add(help, gc);
+		
                 /************ TEXTFIELD TEXTFILE ************************************/
                 textFile.setEditable(false);
                 textFile.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -574,14 +606,14 @@ public class SwingBremo extends JFrame {
                 textFile.setMinimumSize(new Dimension(0, 0));
                 textFile.setPreferredSize(new Dimension(0, 0));
                 textFile.setBounds(180, 20, 0, 0);
-                gc.fill = GridBagConstraints.LAST_LINE_END;
-                gc.insets = new Insets(0, 0, 0, 0);
-                gc.weightx = 0.5;
-                gc.gridx = 4;
-                gc.gridy = 0;
-                gc.ipadx = 0;
-                gc.ipady = 0;
-
+//                gc.fill = GridBagConstraints.LAST_LINE_END;
+//                gc.insets = new Insets(0, 0, 0, 0);
+//                gc.weightx = 0.5;
+//                //gc.gridx = 4;
+//                gc.gridy = 0;
+//                gc.ipadx = 0;
+//                gc.ipady = 0;
+                
                 /************ PANEL KONSOLE ************************************/
                 // konsole2.setBorder(BorderFactory.createTitledBorder(null, "Konsole",
                 // TitledBorder.DEFAULT_JUSTIFICATION,
@@ -724,7 +756,7 @@ public class SwingBremo extends JFrame {
                         view.getController().SendFileModel(file,true);
                 } catch (IOException e) {
                         // TODO Auto-generated catch block
-                        new FertigMeldungFrame(ManagerLanguage.getRb().getString("Error"), e.getMessage(),JOptionPane.ERROR_MESSAGE);
+                        new FertigMeldungFrame(ManagerLanguage.getString("Error"), e.getMessage(),JOptionPane.ERROR_MESSAGE);
                 }
                
                view.setVisible(true);
@@ -733,10 +765,10 @@ public class SwingBremo extends JFrame {
 
         /** Warning Message **********/
         protected void messsage() {
-                new FertigMeldungFrame(ManagerLanguage.getRb().getString("warning"),
-                		               ManagerLanguage.getRb().getString("swingbremo_warning_message_1")+
-                		               ManagerLanguage.getRb().getString("swingbremo_point")+
-                		               ManagerLanguage.getRb().getString("swingbremo_warning_message_2"),
+                new FertigMeldungFrame(ManagerLanguage.getString("warning"),
+                		               ManagerLanguage.getString("swingbremo_warning_message_1")+
+                		               ManagerLanguage.getString("swingbremo_point")+
+                		               ManagerLanguage.getString("swingbremo_warning_message_2"),
                 		               JOptionPane.WARNING_MESSAGE);
 //              JOptionPane.showMessageDialog(this,
 //                              "Berechnung läuf gerade... Warten Sie bis Ende ", "Achtung",
@@ -748,8 +780,8 @@ public class SwingBremo extends JFrame {
                 grosArea.setText("");
                 kleinArea.setText("");
                 if (textFile.getText().equals("")) {
-                        new FertigMeldungFrame(ManagerLanguage.getRb().getString("warning"),
-                        		               ManagerLanguage.getRb().getString("swingbremo_warning_message_3"),
+                        new FertigMeldungFrame(ManagerLanguage.getString("warning"),
+                        		               ManagerLanguage.getString("swingbremo_warning_message_3"),
                         		               JOptionPane.WARNING_MESSAGE);
 //                      JOptionPane.showMessageDialog(this,
 //                                      "Überprüfen Sie Bitte die InputDatei !!!", "Achtung",
@@ -774,7 +806,7 @@ public class SwingBremo extends JFrame {
 
                                 progressBarInd.setVisible(true);
                                   
-                                label.setText(ManagerLanguage.getRb().getString("swingbremo_label_3"));
+                                label.setText(ManagerLanguage.getString("swingbremo_label_3"));
 //                                label.setText(.getJLabelTextByID("swingbremo_label_3")); //swingbremo_label_3
                                 timerCalcul.start();
                                 stop.setEnabled(false);
@@ -783,7 +815,7 @@ public class SwingBremo extends JFrame {
                                 e1.printStackTrace();
                                 ActiveIcon();
                                 
-                                label.setText(ManagerLanguage.getRb().getString("swingbremo_label_4"));
+                                label.setText(ManagerLanguage.getString("swingbremo_label_4"));
 //                                label.setText(languageManager.getJLabelTextByID("swingbremo_label_4")); //swingbremo_label_4
                         }
                                
@@ -814,7 +846,7 @@ public class SwingBremo extends JFrame {
                 	}
                 }
                 try {
-                	      label.setText(ManagerLanguage.getRb().getString("swingbremo_label_5"));
+                	      label.setText(ManagerLanguage.getString("swingbremo_label_5"));
 //                        label.setText(languageManager.getJLabelTextByID("swingbremo_label_5")); //swingbremo_label_5
                
                         int status = fileChooser.showOpenDialog(getRootPane());
@@ -834,20 +866,20 @@ public class SwingBremo extends JFrame {
                                         NrBremoAlive = files.length;
                                         if (NrOfFile == 1)
                                                 SetDebbugingMode(true);
-                                        label.setText(ManagerLanguage.getRb().getString("swingbremo_label_6"));
+                                        label.setText(ManagerLanguage.getString("swingbremo_label_6"));
 //                                        label.setText(languageManager.getJLabelTextByID("swingbremo_label_6")); //swingbremo_label_6
 
                                         ActiveConsole();
                                 }
                         } else if (status == JFileChooser.CANCEL_OPTION) {
                                
-                        	label.setText(ManagerLanguage.getRb().getString("swingbremo_label_7"));
+                        	label.setText(ManagerLanguage.getString("swingbremo_label_7"));
                //                 label.setText(languageManager.getJLabelTextByID("swingbremo_label_7")); //swingbremo_label_7
 
                                 fileChooser.cancelSelection();
                         }
                 } catch (Exception e) {
-                	label.setText(ManagerLanguage.getRb().getString("swingbremo_label_8"));
+                	label.setText(ManagerLanguage.getString("swingbremo_label_8"));
 //                        label.setText(languageManager.getJLabelTextByID("swingbremo_label_8")); //swingbremo_label_8
                         e.printStackTrace();
                 }
@@ -859,7 +891,7 @@ public class SwingBremo extends JFrame {
                 if (!control) {
                         JOptionPane.showMessageDialog(this,
                                                       "Starten Sie Zu erst die Berechnung.", 
-                                                      ManagerLanguage.getRb().getString("warning"),
+                                                      ManagerLanguage.getString("warning"),
                                                       JOptionPane.WARNING_MESSAGE);
                 } else {
                         errStream.flush();
@@ -878,7 +910,7 @@ public class SwingBremo extends JFrame {
                 wahlFile.setEnabled(true);
                 berechnen.setEnabled(true);
                 stop.setEnabled(false);
-                label.setText(ManagerLanguage.getRb().getString("swingbremo_label_9"));
+                label.setText(ManagerLanguage.getString("swingbremo_label_9"));
 //                label.setText(languageManager.getJLabelTextByID("swingbremo_label_9")); //swingbremo_label_9
                 progressBar.setValue(0);
                 progressBar.setVisible(false);
@@ -933,10 +965,10 @@ public class SwingBremo extends JFrame {
                        
                         if (bremoThreadFertig[0] != null) {
                                
-                        	label.setText(ManagerLanguage.getRb().getString("swingbremo_label_10"));
+                        	label.setText(ManagerLanguage.getString("swingbremo_label_10"));
 //                                label.setText(languageManager.getJLabelTextByID("swingbremo_label_10"));  //swingbremo_label_10
-                            PopUp(ManagerLanguage.getRb().getString("swingbremo_popup_titel"),
-                            	  ManagerLanguage.getRb().getString("swingbremo_popup_message"));    
+                            PopUp(ManagerLanguage.getString("swingbremo_popup_titel"),
+                            	  ManagerLanguage.getString("swingbremo_popup_message"));    
 //                        	new FertigMeldungFrame("Zustand Berechnung","Die Berechnung ist Fertig !!!",JOptionPane.INFORMATION_MESSAGE);
 //                              JOptionPane.showMessageDialog(popup,
 //                                              "Die Berechnung ist Fertig !!!", "Zustand Berechnung",
@@ -944,9 +976,9 @@ public class SwingBremo extends JFrame {
                         }
                         for (String str : bremoThreadFertig) {
                                 if (str != null)
-                                        System.err.println(ManagerLanguage.getRb().getString("thread")+
+                                        System.err.println(ManagerLanguage.getString("thread")+
                                         		           " "+str+" "+
-                                        		           ManagerLanguage.getRb().getString("warning_message_terminate"));
+                                        		           ManagerLanguage.getString("warning_message_terminate"));
                         }
                         ActiveIcon();
                         progressBar.setVisible(false);
@@ -962,7 +994,7 @@ public class SwingBremo extends JFrame {
                 progressBar.setVisible(false);
                 progressBarInd.setVisible(true);
                 stop.setEnabled(false);
-                label.setText(ManagerLanguage.getRb().getString("swingbremo_label_11"));
+                label.setText(ManagerLanguage.getString("swingbremo_label_11"));
 //                label.setText(languageManager.getJLabelTextByID("swingbremo_label_11")); //swingbremo_label_11
         }
        
@@ -989,7 +1021,7 @@ public class SwingBremo extends JFrame {
                 NrBremoAlive = files.length;
                 if (NrOfFile == 1)
                         SetDebbugingMode(true);
-                label.setText(ManagerLanguage.getRb().getString("swingbremo_label_12"));
+                label.setText(ManagerLanguage.getString("swingbremo_label_12"));
 //                label.setText(languageManager.getJLabelTextByID("swingbremo_label_12")); //swingbremo_label_12
                
         }
@@ -1006,7 +1038,7 @@ public class SwingBremo extends JFrame {
                  URL url = getClass().getResource("/bremoswing/bild/questionIcon.png");
              ImageIcon icon = new ImageIcon(url);
                 final JOptionPane optionPane = new JOptionPane(
-                                ManagerLanguage.getRb().getString("swingbremo_warning_message_close"),
+                                ManagerLanguage.getString("swingbremo_warning_message_close"),
                                 JOptionPane.QUESTION_MESSAGE,
                                 JOptionPane.YES_NO_OPTION,
                                 icon);

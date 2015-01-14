@@ -33,6 +33,7 @@ public class BremoViewResource {
 	String iconBarChart;
 	String iconBarChartOut;
 	String iconBarChartBig;
+	String iconHelp;
 	
     BremoViewResource () {
     	
@@ -97,7 +98,17 @@ public class BremoViewResource {
     	iconBarChartOut = path + "barChartOut.png";
     	
     	iconBarChartBig = path + "barChartBig.png";
+    	
+    	iconHelp = path + "help.png";
     }
+
+	public String getIconHelp() {
+		return iconHelp;
+	}
+
+	public void setIconHelp(String iconHelp) {
+		this.iconHelp = iconHelp;
+	}
 
 	public String getIconKIT() {
 		return iconKIT;

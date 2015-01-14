@@ -2850,6 +2850,23 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		}
 	}
 	//////////////////////////////////////////////////////////
+	// Kerrom: für kompletten Zyklus
+			public double get_m_ini_APRkpl(){
+				try {
+					return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("m_ini"), "["+ManagerLanguage.getString("kg")+"]", 0, Double.POSITIVE_INFINITY);
+				} catch (ParameterFileWrongInputException e) {
+					return Double.NaN;
+				}
+			}
+		
+			// für kompletten Zyklus (eventuell nicht nötig)
+			public double get_T_ini_APRkpl(){
+				try {
+					return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_ini_APRkpl"), "["+ManagerLanguage.getString("K")+"]", 0, Double.POSITIVE_INFINITY);
+				} catch (ParameterFileWrongInputException e) {
+					return Double.NaN;
+				}
+			}
 	
 	public double get_offsetTemperatur() {
 		try {

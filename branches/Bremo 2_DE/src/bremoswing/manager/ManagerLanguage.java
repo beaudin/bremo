@@ -27,6 +27,9 @@ private static ResourceBundle rb;
 	public static void setLocale(Locale locale) {
 		ManagerLanguage.locale = locale;
 	}
+	public static String getString( String key) {
+		return	rb.getString(key);	
+	}
 	    
 }
 

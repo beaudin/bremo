@@ -302,7 +302,7 @@ public class BremoViewModel implements Observable {
  				fav_Manager = new FavoriteManager(file.getParent()+File.separator);
  			}
 			notifyObserver(showHeader());
-			if (checkFavsfile()) {
+			if (checkFavsfile()) { 
 				String log_param = readFavsFile();
 				Diagramm_From_Index(log_param);
 			}
@@ -317,7 +317,7 @@ public class BremoViewModel implements Observable {
 				notifyObserver(Build_Diagramm(2, "No Log"));
 			}
 		}
-		else {
+		else { //barChart
 			readFileToBarChart();
 			notifyObserver(Build_BarChart_Diagramm());
 		}
@@ -1932,18 +1932,24 @@ public class BremoViewModel implements Observable {
 			String key = "";
 			String keyValue1= "";
 			String keyvalue2= "";
+			indexStorBarChart.clear();
+			int i = 1;
 			while((zeile = br.readLine()) != null) {
 				if (zeile.contains("----->>")) {
 					value = zeile.split("\t----->>\t");
 					key = value[0];
 					keyValue1 = value[1];
-				} 
-				else {
-					if (zeile.contains("NaN")) {
+				} else if (zeile.contains("[")&& zeile.contains("]")){
+					key = "category "+i;
+					keyValue1 = zeile;
+					i++;
+				}else if (zeile.contains("NaN")) {
 						value = zeile.split("NaN\t");
 						keyvalue2 = value[value.length-1];
 						indexStorBarChart.put(key, new String[] {keyValue1,keyvalue2});
-					}
+				}else {
+					keyvalue2 = zeile;
+					indexStorBarChart.put(key, new String[] {keyValue1,keyvalue2});
 				}
 			}
 			

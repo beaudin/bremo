@@ -603,7 +603,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 				
 	}
 	
-	/**
+	   /**
 	    * open a FileChoser to select result file to show on the view
 	    */
 	   void OpenFileToShowOnBremoView() {
@@ -816,11 +816,16 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	 */
 	public void refreshChart() {
 		try {
-			controller.bremoViewData(getAllselectedItem());
-			chooseFrame.getChartForBremoView ();
-			refreshDate();
+			if (!isBarChartMode) {
+				controller.bremoViewData(getAllselectedItem());
+				chooseFrame.getChartForBremoView();
+				refreshDate();
+			}else {
+				controller.getModel().readFileToBarChart();
+				refreshDate();
+			}
 		} catch (NullPointerException e) {
-
+             e.printStackTrace();
 		}
 	}
 	/**
@@ -829,7 +834,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 	public void refreshDate() {
 		datumLabel.setFont(new Font("Tahoma",Font.PLAIN, 14)); // NOI18N
 		Date dt = new Date();
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy   HH:mm:ss");
 		datumLabel.setText(df.format(dt));
 	}
 	/**

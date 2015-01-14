@@ -39,6 +39,7 @@ import berechnungsModule.wandwaerme.WandWaermeUebergangFabrik;
 import bremo.sys.Solver;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
+import bremoswing.manager.ManagerLanguage;
 
 
 
@@ -90,12 +91,12 @@ public class CasePara {
 		MODUL_VORGABEN=ifr.get_berechnungsModule();
 
 		//		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
-		String Separator  ="\n**************************************************\n";
-		System.err.println(Separator+"Inputfile wurde eingelesen!");
+		String separator  =ManagerLanguage.getString("separator");
+		System.err.println(separator+"Inputfile wurde eingelesen!");
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));
 		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 
-		System.err.println(WD+CASE_NAME + ".txt"+Separator);
+		System.err.println(WD+CASE_NAME + ".txt"+separator);
 //		//Is doof aber geht jetzt nicht besser
 		callsCantera=BerechnungsModellFabrik.callsCantera(this);	
 		
@@ -147,13 +148,13 @@ public class CasePara {
 		//ABBRUCH für Verlustteilung wenn nicht APR_1Zonig ODER DVA_1Zonig
 		if( is_Verlustteilung()
 			&!(
-					MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig"))
+					MODUL_VORGABEN.get(ManagerLanguage.getString("berechnungsModell")).equals(ManagerLanguage.getString("DVA_1Zonig"))|MODUL_VORGABEN.get(ManagerLanguage.getString("berechnungsModell")).equals(ManagerLanguage.getString("APR_1Zonig")))
 //					MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|(MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig")&compareToExp()))
 //					(MODUL_VORGABEN.get("berechnungsModell").equals("DVA_1Zonig")|MODUL_VORGABEN.get("berechnungsModell").equals("APR_1Zonig"))
 //					&MODUL_VORGABEN.get("internesRestgasModell").equals("LWA"))
 				){
 			try{
-				throw new BirdBrainedProgrammerException("Für die Verlsutteilung muss DVA_1Zonig oder APR_1Zonig gewählt sein");
+				throw new BirdBrainedProgrammerException("Für die Verlsutteilung muss "+ManagerLanguage.getString("DVA_1Zonig")+" oder "+ManagerLanguage.getString("APR_1Zonig")+" gewählt sein");
 			}catch(BirdBrainedProgrammerException bbp){
 				bbp.stopBremo();
 			}			
@@ -169,13 +170,13 @@ public class CasePara {
 
 			// Warnung, wenn die Differenz größer als 0.01 ist
 			if (diff > 0.01) {
-				System.err.println( Separator 
+				System.err.println( separator 
 						+ "ACHTUNG: Die Differenz zwischen eingelesenem Lambda und berechnetem Lambda beträgt " + diff
-						+ ". \nEs wurden folgende Werte verwendet:\nmLuft_feucht = " + get_mLuft_feucht_ASP()
-						+ "\nmKrst (Summe aller Einspritzungen) = "	+ MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP()
-						+ "\nLst = " + MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst()
-						+ "\nLambda (eingelesenes) = " + get_Lambda_Input()
-						+ "\nberechnetes lambda = " + lambda_berechnet + Separator);
+						+ ". \nEs wurden folgende Werte verwendet:\n"+ManagerLanguage.getString("mLuft_feucht")+" = " + get_mLuft_feucht_ASP()
+						+ "\n"+ManagerLanguage.getString("mKrst")+" (Summe aller Einspritzungen) = "	+ MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP()
+						+ "\n"+ManagerLanguage.getString("Lst")+" = " + MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst()
+						+ "\n"+ManagerLanguage.getString("Lambda")+" (eingelesenes) = " + get_Lambda_Input()
+						+ "\nberechnetes lambda = " + lambda_berechnet + separator);
 			}
 		}
 		
@@ -240,13 +241,13 @@ public class CasePara {
 	public boolean compareToExp(){		
 		//boolean compareToExp = false;
 		String s = null;
-		String s2 []= {"ja","nein"};
+		String s2 []= {ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")};
 		if(!compareToExpIni){
 		try {
-			s=this.set_StringPara(INPUTFILE_PARAMETER, "compareToExp",s2);
+			s=this.set_StringPara(INPUTFILE_PARAMETER, ManagerLanguage.getString("compareToExp"),s2);
 		} catch (ParameterFileWrongInputException e){	
 			compareToExp=false;
-			e.log_Warning("Bei der APR wird kein Vergleich mit einem Experiment (\"compareToExp\") durchgeführt. "
+			e.log_Warning("Bei der APR wird kein Vergleich mit einem Experiment (\""+ManagerLanguage.getString("compareToExp")+"\") durchgeführt. "
 					+ "Es müssen keine Indizierdaten vorgegeben werden. "
 					+ "Dafür sind alle Daten zur Initialisierung von Hand vorzugeben.");
 			s="nein";
@@ -259,10 +260,10 @@ public class CasePara {
 	}
 	
 	public boolean filterPressureData(){
-		String [] yesno={"ja","nein"};
+		String [] yesno={ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")};
 		boolean filter=false;
 		try {
-			if(set_StringPara(INPUTFILE_PARAMETER,"filtern",yesno ).equalsIgnoreCase("ja"))
+			if(set_StringPara(INPUTFILE_PARAMETER,ManagerLanguage.getString("filtern"),yesno ).equalsIgnoreCase(ManagerLanguage.getString("ja")))
 				filter=true;
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -273,10 +274,10 @@ public class CasePara {
 	public int get_savitzkyGolayOrder(){
 		double tmpSgolayOrder=5;
 		try{				
-			tmpSgolayOrder=set_doublePara(INPUTFILE_PARAMETER,"sgolayOrder","[-]", 2,12);
+			tmpSgolayOrder=set_doublePara(INPUTFILE_PARAMETER,ManagerLanguage.getString("sgolayOrder"),"[-]", 2,12);
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning();
-			e.log_Warning("The parameter \"sgolayOrder\" for the SavitzkyGolay-Filter has not been defined or was defined in a wrong way! \n" +
+			e.log_Warning("The parameter \""+ManagerLanguage.getString("sgolayOrder")+"\" for the SavitzkyGolay-Filter has not been defined or was defined in a wrong way! \n" +
 					"The filtering will be performed with a polynomial of order 5.\n");
 		}
 		return (int)tmpSgolayOrder;		
@@ -285,20 +286,20 @@ public class CasePara {
 	public int get_savitzkyGolayHalfWidth(){			
 		double tmpSgolayHalfWidth=2*get_savitzkyGolayOrder()+1;
 		try{				
-			tmpSgolayHalfWidth=set_doublePara(INPUTFILE_PARAMETER,"sgolayHalfWidth","[-]", tmpSgolayHalfWidth,50);
+			tmpSgolayHalfWidth=set_doublePara(INPUTFILE_PARAMETER,ManagerLanguage.getString("sgolayHalfWidth"),"[-]", tmpSgolayHalfWidth,50);
 		}catch(ParameterFileWrongInputException e){	
 			e.log_Warning();
-			e.log_Warning("The parameter \"sgolayHalfWidth\" for the SavitzkyGolay-Filter has not been defined or was defined in a wrong way! \n" +
+			e.log_Warning("The parameter \""+ManagerLanguage.getString("sgolayHalfWidth")+"\" for the SavitzkyGolay-Filter has not been defined or was defined in a wrong way! \n" +
 					"The filtering will be performed with a half-witdh of "+tmpSgolayHalfWidth);
 		}
 		return (int)tmpSgolayHalfWidth;
 	}
 	
 	public boolean shift_pInlet(){
-		String [] yesno={"ja","nein"};
+		String [] yesno={ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")};
 		boolean shift_pIn=false;
 		try {
-			if(set_StringPara(INPUTFILE_PARAMETER,"shift_pEin",yesno ).equalsIgnoreCase("ja"))
+			if(set_StringPara(INPUTFILE_PARAMETER,ManagerLanguage.getString("shift_pEin"),yesno ).equalsIgnoreCase(ManagerLanguage.getString("ja")))
 				shift_pIn=true;
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
@@ -307,10 +308,10 @@ public class CasePara {
 	}
 	
 	public boolean shift_pOutlet(){
-		String [] yesno={"ja","nein"};
+		String [] yesno={ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")};
 		boolean shift_pOut=false;
 		try {
-			if(set_StringPara(INPUTFILE_PARAMETER,"shift_pAus",yesno ).equalsIgnoreCase("ja"))
+			if(set_StringPara(INPUTFILE_PARAMETER,ManagerLanguage.getString("shift_pAus"),yesno ).equalsIgnoreCase(ManagerLanguage.getString("ja")))
 				shift_pOut=true;
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
@@ -321,7 +322,10 @@ public class CasePara {
 	public String get_pressureAdjustmentMethod(String methodIdentifier){
 		String method=null;
 		try {		
-			String []s1 ={"polytropenMethode", "referenzWert","abgleichSaugrohr","kanalMethode","abgleichKruemmer","offset","summenbrennverlauf","ohne"};			
+			String []s1 ={ManagerLanguage.getString("polytropenMethode"), ManagerLanguage.getString("referenzWert"),
+					      ManagerLanguage.getString("abgleichSaugrohr"),ManagerLanguage.getString("kanalMethode"),
+					      ManagerLanguage.getString("abgleichKruemmer"),ManagerLanguage.getString("offset"),
+					      ManagerLanguage.getString("summenbrennverlauf"),ManagerLanguage.getString("ohne")};			
 			method=set_StringPara(this.INPUTFILE_PARAMETER,methodIdentifier,s1);
 		}catch(ParameterFileWrongInputException e){
 			e.stopBremo();
@@ -331,10 +335,10 @@ public class CasePara {
 	
 	public double get_pressureOffset(){
 		try{
-			double offset = set_doublePara(INPUTFILE_PARAMETER, "offset", "[Pa]",-1e9,1e9);
+			double offset = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("offset"), "["+ManagerLanguage.getString("Pa")+"]",-1e9,1e9);
 			return offset;
 		} catch (ParameterFileWrongInputException p) {
-			p.log_Warning("Der Parameter \"offset\" wurde nicht gesetzt, es wird ohne gerechnet.");
+			p.log_Warning("Der Parameter \""+ManagerLanguage.getString("offset")+"\" wurde nicht gesetzt, es wird ohne gerechnet.");
 			return 0;
 		}
 	}
@@ -358,9 +362,9 @@ public class CasePara {
 	public double get_relaxFactor(){
 		double tmpRELAX;
 		try{				
-			tmpRELAX=set_doublePara(INPUTFILE_PARAMETER, "relaxFactor","[-]",0.1,1);	
+			tmpRELAX=set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("relaxFactor"),"[-]",0.1,1);	
 		}catch(ParameterFileWrongInputException e){
-			e.log_Warning("The parameter \"relaxFactor\" has not been defined!"+
+			e.log_Warning("The parameter \""+ManagerLanguage.getString("relaxFactor")+"\" has not been defined!"+
 					" The run will be performed with 0.7! \n");
 			tmpRELAX=0.7;
 		}
@@ -371,7 +375,7 @@ public class CasePara {
 		//Einlesen von PUBLIC FINAL doubleDaten
 		double precission=0.0005*1e5;
 		try {
-			precission=1e5*set_doublePara(INPUTFILE_PARAMETER, "precissionPressureTraceAnalysis","[bar]",0,0.1);
+			precission=1e5*set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("precissionPressureTraceAnalysis"),"["+ManagerLanguage.getString("bar")+"]",0,0.1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 		}	
@@ -475,37 +479,37 @@ public class CasePara {
 		double[] vibePara = new double[4];
 		boolean fehler = false;
 		try{
-			vibePara[0] = set_doublePara(INPUTFILE_PARAMETER, "brennbeginn_"+index, "[KWnZOT]", SYS.RECHNUNGS_BEGINN_DVA_KW+this.convert_SEC2KW(SYS.WRITE_INTERVAL_SEC),180);
+			vibePara[0] = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("brennbeginn_")+index, "["+ManagerLanguage.getString("KWnZOT")+"]", SYS.RECHNUNGS_BEGINN_DVA_KW+this.convert_SEC2KW(SYS.WRITE_INTERVAL_SEC),SYS.RECHNUNGS_ENDE_DVA_KW);
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
-					"Bitte \"brennbeginn_"+index+"\" in \"[KWnZOT]\" mit angeben.");
+					"Bitte \""+ManagerLanguage.getString("brennbeginn_")+index+"\" in \"[KWnZOT]\" mit angeben.");
 			fehler = true;
 			vibePara[0] = 0;
 		}
 		try{
-			vibePara[1] = set_doublePara(INPUTFILE_PARAMETER, "brenndauer_"+index, "[KW]", 0, (180 - vibePara[0]));
+			vibePara[1] = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("brenndauer_")+index, "["+ManagerLanguage.getString("KW")+"]", 0,(SYS.RECHNUNGS_ENDE_DVA_KW - vibePara[0] - this.convert_SEC2KW(SYS.WRITE_INTERVAL_SEC)));
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
-					"Bitte \"brenndauer_"+index+"\" in \"[KW]\" mit angeben.");
+					"Bitte \""+ManagerLanguage.getString("brenndauer_")+index+"\" in \"["+ManagerLanguage.getString("KW")+"]\" mit angeben.");
 			fehler = true;
 		}
 		try{
-			vibePara[2] = set_doublePara(INPUTFILE_PARAMETER, "vibeFormfaktor_"+index, "[-]", 0,10);
+			vibePara[2] = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("vibeFormfaktor_")+index, "[-]", 0,10);
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
 					"Bitte \"vibeFormfaktor_"+index+"\" in \"[-]\" mit angeben.");
 			fehler = true;
 		}
 		try{
-			vibePara[3] = set_doublePara(INPUTFILE_PARAMETER, "vibeBrennEnergie_"+index, "[J]", 0,Double.POSITIVE_INFINITY);
+			vibePara[3] = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("vibeBrennEnergie_")+index, "["+ManagerLanguage.getString("J")+"]", 0,Double.POSITIVE_INFINITY);
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning("Im Inputfile wurden nicht alle Vibe-Parameter angegeben." +
-					"Bitte \"vibeBrennEnergie_"+index+"\" in \"[J]\" mit angeben.");
+					"Bitte \""+ManagerLanguage.getString("vibeBrennEnergie_")+index+"\" in \"["+ManagerLanguage.getString("J")+"]\" mit angeben.");
 			fehler = true;
 		}
 		if(fehler){
 			try{
-				throw new ParameterFileWrongInputException("Vibe-Fehler");
+				throw new ParameterFileWrongInputException(ManagerLanguage.getString("Vibe-Fehler"));
 			}catch(ParameterFileWrongInputException e){
 				e.stopBremo();
 			}
@@ -520,7 +524,7 @@ public class CasePara {
 	public double get_anzVibe(){
 		double anzVibe;
 		try{
-			anzVibe = set_doublePara(INPUTFILE_PARAMETER, "anzVibe", "[-]", 1, Double.POSITIVE_INFINITY);
+			anzVibe = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("anzVibe"), "[-]", 1, Double.POSITIVE_INFINITY);
 			return anzVibe;
 		}catch(ParameterFileWrongInputException e){
 			e.stopBremo();
@@ -538,7 +542,7 @@ public class CasePara {
 
 		if(is_VerbrennungAutoDetect()){
 			try{
-				throw new BirdBrainedProgrammerException("Im InputFile wurde \"VerbrennungsBeginnAutoDetect\" auf \"ja\" " +
+				throw new BirdBrainedProgrammerException("Im InputFile wurde \""+ManagerLanguage.getString("VerbrennungsBeginnAutoDetect")+"\" auf \""+ManagerLanguage.getString("ja")+"\" " +
 						" gesetzt und diese Methode wurde trotzdem aufgerufen. VollDeppProgrammierer!" +
 						" \n Diese Methode darf NIE wirklich NIE direkt aufgerufen werden, " +
 						"sondern muss immer zusammen mit der Abfrage: \n " +
@@ -551,10 +555,10 @@ public class CasePara {
 		try {
 			if(SYS.IS_KW_BASIERT){				
 				verbrennungsBeginn =set_doublePara(
-						INPUTFILE_PARAMETER, "verbrennungsBeginn","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+						INPUTFILE_PARAMETER, ManagerLanguage.getString("verbrennungsBeginn"),"["+ManagerLanguage.getString("KWnZOT")+"]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
 				verbrennungsBeginn=convert_KW2SEC(verbrennungsBeginn);
 			}else {				
-				verbrennungsBeginn =set_doublePara(INPUTFILE_PARAMETER, "verbrennungsBeginn","[s]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
+				verbrennungsBeginn =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("verbrennungsBeginn"),"["+ManagerLanguage.getString("s")+"]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
 			}				
 			return verbrennungsBeginn;				
 		} catch (ParameterFileWrongInputException e) {			
@@ -574,16 +578,16 @@ public class CasePara {
 		try{
 			if(SYS.IS_KW_BASIERT){				
 				umsatzBeginn =set_doublePara(
-						INPUTFILE_PARAMETER, "verbrennungsBeginnLWA","[KWnZOT]",SYS.RECHNUNGS_ENDE_DVA_KW,
+						INPUTFILE_PARAMETER, ManagerLanguage.getString("verbrennungsBeginnLWA"),"["+ManagerLanguage.getString("KWnZOT")+"]",SYS.RECHNUNGS_ENDE_DVA_KW,
 						SYS.RECHNUNGS_BEGINN_DVA_KW+convert_SEC2KW(SYS.DAUER_ASP_SEC));
 				umsatzBeginn=convert_KW2SEC(umsatzBeginn);
 			}else {				
-				umsatzBeginn =set_doublePara(INPUTFILE_PARAMETER, "verbrennungsBeginnLWA","[s]",SYS.RECHNUNGS_ENDE_DVA_SEC,
+				umsatzBeginn =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("verbrennungsBeginnLWA"),"["+ManagerLanguage.getString("s")+"]",SYS.RECHNUNGS_ENDE_DVA_SEC,
 						SYS.RECHNUNGS_BEGINN_DVA_SEC+SYS.DAUER_ASP_SEC);
 			}				
 			return umsatzBeginn;				
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Im Inputfile wurde \"verbrennungsBeginnLWA\" nicht angegeben!\n"+
+			e.log_Warning("Im Inputfile wurde \""+ManagerLanguage.getString("verbrennungsBeginnLWA")+"\" nicht angegeben!\n"+
 					"Der Wärmeeintrag in der Zwischenkompression wird sofort in einen "+
 					"Massenumsatz umgerechnet.");
 			umsatzBeginn = 0;
@@ -601,14 +605,14 @@ public class CasePara {
 
 		boolean autodetect = false;
 		String s = null;
-		String s2 []= {"ja","nein"};
+		String s2 []= {ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")};
 		try {
-			s=this.set_StringPara(INPUTFILE_PARAMETER, "VerbrennungsBeginnAutoDetect",s2);
+			s=this.set_StringPara(INPUTFILE_PARAMETER, ManagerLanguage.getString("VerbrennungsBeginnAutoDetect"),s2);
 		} catch (ParameterFileWrongInputException e) {		
 			e.stopBremo();
 		}
 
-		if(s.equalsIgnoreCase("ja")) autodetect=true;
+		if(s.equalsIgnoreCase(ManagerLanguage.getString("ja"))) autodetect=true;
 
 //				if(autodetect){
 //					try{
@@ -632,12 +636,13 @@ public class CasePara {
 	public boolean is_Verlustteilung(){
 	    boolean verlustteilung = false; 
 	    String s = null; 
-	    String s2 []= {"ja","nein"}; 
+	    String s2 []= {ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")}; 
     	try { 
-    		s=this.set_StringPara(INPUTFILE_PARAMETER, "Verlustteilung",s2);
-    		if(s.equalsIgnoreCase("ja")) verlustteilung=true;
+    		s=this.set_StringPara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Verlustteilung"),s2);
+    		if(s.equalsIgnoreCase(ManagerLanguage.getString("ja")))
+    			verlustteilung=true;
     	} catch (ParameterFileWrongInputException e) { 
-    		e.log_Warning("Der Parameter \"Verlustteilung\" wurde nicht gesetzt, es wird keine durchgeführt."); //Die DVA muss ja nicht gleich abbrechen.
+    		e.log_Warning("Der Parameter \""+ManagerLanguage.getString("Verlustteilung")+"\" wurde nicht gesetzt, es wird keine durchgeführt."); //Die DVA muss ja nicht gleich abbrechen.
     	} 
 	    return verlustteilung;
 	}
@@ -646,10 +651,11 @@ public class CasePara {
 	public boolean is_pKGH_indiziert(){
 		boolean pKGH_indiziert = false;
 		String s = null;
-		String[] s2 = {"ja", "nein"};
+		String[] s2 = {ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")};
 		try{
 			s=this.set_StringPara(INPUTFILE_PARAMETER, "pKGHindiziert", s2);
-			if(s.equalsIgnoreCase("ja")) pKGH_indiziert = true;
+			if(s.equalsIgnoreCase(ManagerLanguage.getString("ja")))
+				pKGH_indiziert = true;
 		}catch (ParameterFileWrongInputException e){
 			e.stopBremo();
 		}
@@ -673,7 +679,7 @@ public class CasePara {
 	 */	
 	public double get_iniMoleFrac_CO2(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_CO2","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_CO2"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -685,7 +691,7 @@ public class CasePara {
 	 */	
 	public double get_iniMoleFrac_O2(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_O2","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_O2"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -697,7 +703,7 @@ public class CasePara {
 	 */	
 	public double get_iniMoleFrac_H2O(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_H2O","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_H2O"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -709,7 +715,7 @@ public class CasePara {
 	 */	
 	public double get_iniMoleFrac_N2(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_N2","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_N2"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -721,7 +727,7 @@ public class CasePara {
 	 */	
 	public double get_iniMoleFrac_iC8H18(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_iC8H18","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_iC8H18"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -733,7 +739,7 @@ public class CasePara {
 	 */	
 	public double get_iniMoleFrac_nC7H16(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_nC7H16","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_nC7H16"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -745,7 +751,7 @@ public class CasePara {
 	 */
 	public double get_iniMoleFrac_H2() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_H2","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_H2"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -757,7 +763,7 @@ public class CasePara {
 	 */
 	public double get_iniMoleFrac_H() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_H","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_H"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -766,7 +772,7 @@ public class CasePara {
 
 	public double get_iniMoleFrac_CO() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_CO","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_CO"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -775,7 +781,7 @@ public class CasePara {
 
 	public double get_iniMoleFrac_OH() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_OH","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_OH"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -784,7 +790,7 @@ public class CasePara {
 
 	public double get_iniMoleFrac_O() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_O","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_O"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -793,7 +799,7 @@ public class CasePara {
 
 	public double get_iniMoleFrac_NO() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_NO","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_NO"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -802,7 +808,7 @@ public class CasePara {
 
 	public double get_iniMoleFrac_N() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "iniMoleFrac_N","[-]",0,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iniMoleFrac_N"),"[-]",0,1);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -814,7 +820,7 @@ public class CasePara {
 	 */	
 	public double get_p_ini(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "p_Ini","[Pa]",0,Double.POSITIVE_INFINITY);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("p_Ini"),"["+ManagerLanguage.getString("Pa")+"]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -827,7 +833,7 @@ public class CasePara {
 	 */	
 	public double get_T_ini(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "T_Ini","[K]",0,Double.POSITIVE_INFINITY);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_Ini"),"["+ManagerLanguage.getString("K")+"]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -836,7 +842,7 @@ public class CasePara {
 	
 	public double get_turbKineticEnergy_Ini(){	
 			try {
-				return set_doublePara(INPUTFILE_PARAMETER, "TurbKineticEnergy_Ini","[m^2/s^2]",0,Double.POSITIVE_INFINITY);
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("TurbKineticEnergy_Ini"),"["+ManagerLanguage.getString("m^2/s^2")+"]",0,Double.POSITIVE_INFINITY);
 			} catch (ParameterFileWrongInputException e) {
 				e.log_Warning("Für die turbulente kinetische Energie wurde kein Vorgabewert angegeben. Dies ist z.B. nötig, wenn nicht bei Einlassschluss initialisiert werden kann."); 
 				e.stopBremo();
@@ -847,7 +853,7 @@ public class CasePara {
 	
 	public double get_C_MixRad() {		
 		try {
-			return 	 set_doublePara(INPUTFILE_PARAMETER, "C_MixRad","[-]",0.0001,1000); 
+			return 	 set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("C_MixRad"),"[-]",0.0001,1000); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return 0;
@@ -856,7 +862,7 @@ public class CasePara {
 	
 	public double get_C_Mix() {		
 		try {
-			return 	 set_doublePara(INPUTFILE_PARAMETER, "C_Mix","[-]",0,50000); 
+			return 	 set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("C_Mix"),"[-]",0,50000); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return 0;
@@ -868,7 +874,7 @@ public class CasePara {
 	 */
 	public double get_swirlRatio() {		
 		try {
-			return 	 set_doublePara(INPUTFILE_PARAMETER, "swirlRatio","[-]",0,50); 
+			return 	 set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("swirlRatio"),"[-]",0,50); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return 0;
@@ -879,7 +885,7 @@ public class CasePara {
 		int a=-1;
 		try {			
 			
-			a=(int)set_doublePara(INPUTFILE_PARAMETER, "mixingProcess","[-]",0,12); 
+			a=(int)set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("mixingProcess"),"[-]",0,12); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 		}
@@ -893,9 +899,9 @@ public class CasePara {
 	 */	
 	public double get_DrehzahlInUproSec(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Drehzahl","[min^-1]",0,Double.POSITIVE_INFINITY)/60;
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Drehzahl"),"["+ManagerLanguage.getString("min^-1")+"]",0,Double.POSITIVE_INFINITY)/60;
 		} catch (ParameterFileWrongInputException e) {
-			String[] parameter = {"Drehzahl", "[min^-1]"};
+			String[] parameter = {ManagerLanguage.getString("Drehzahl"), ManagerLanguage.getString("min^-1")};
 			String vorgabe = "";
 			e.eingabeErforderlich(this, parameter, vorgabe);
 			
@@ -904,7 +910,7 @@ public class CasePara {
 				try {wait();}catch(InterruptedException e1){}
 			}
 			try {
-				return set_doublePara(INPUTFILE_PARAMETER, "Drehzahl","[min^-1]",0,Double.POSITIVE_INFINITY)/60;
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Drehzahl"),"["+ManagerLanguage.getString("min^-1")+"]",0,Double.POSITIVE_INFINITY)/60;
 			}catch(ParameterFileWrongInputException f){
 				e.stopBremo();
 				return Double.NaN;
@@ -936,14 +942,14 @@ public class CasePara {
 			frischGemisch_MassenBruchHash.put(krst,mKrst/mFG);
 
 		//Erstellen der Frischgemischspezies
-		GasGemisch frischGemsich=new GasGemisch("Frischgemisch");
+		GasGemisch frischGemsich=new GasGemisch(ManagerLanguage.getString("Frischgemisch"));
 		frischGemsich.set_Gasmischung_massenBruch(frischGemisch_MassenBruchHash);
 
 
 		//Bestimmen der AGR-Zusammensetzung --> das Hinzufuegen von AGR hat keinen Einfluss auf die 
 		//AGR-Zusammensetzung da die Anzahl der c/h/o-Atome gleich bleibt und nur vom Frischgemisch abhaengt
 		GleichGewichtsRechner gg=this.OHC_SOLVER; //zirkuläre Referenz ;-( naja mal schauen...
-		GasGemisch abgas=new GasGemisch("Abgas");
+		GasGemisch abgas=new GasGemisch(ManagerLanguage.getString("Abgas"));
 		//eigentlich muesste die GLGW-Zusammensetzung aus der DVA kommen der Druck wuerde auf den Wert festgelegt, 
 		//den er hat wenn 1600K in der verbrannten Zone vorliegen
 		//-->die Druckabhängigikeit bei niedrigen Temperaturen ist aber so gering, dass der Druck hier keine Rolle spielt!
@@ -973,7 +979,7 @@ public class CasePara {
 		verbrennungsLuft_MassenBruchHash.put(abgas, mAGR/mGes);
 		verbrennungsLuft_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezLuft_trocken(),mLuft_tr/mGes);		
 		verbrennungsLuft_MassenBruchHash.put(this.SPEZIES_FABRIK.get_spezH2O(),mW/mGes);
-		GasGemisch verbrennungsLuft=new GasGemisch("Verbrennungsluft");
+		GasGemisch verbrennungsLuft=new GasGemisch(ManagerLanguage.getString("Verbrennungsluft"));
 		verbrennungsLuft.set_Gasmischung_massenBruch(verbrennungsLuft_MassenBruchHash);		
 
 		return verbrennungsLuft;
@@ -1019,7 +1025,7 @@ public class CasePara {
 	public double get_mAGR_extern_ASP(){
 		try {
 			return this.convert_ProStunde_2_ProASP(
-					set_doublePara(INPUTFILE_PARAMETER, "mAGR_extern","[kg/h]",0,Double.POSITIVE_INFINITY));
+					set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("mAGR_extern"),"["+ManagerLanguage.getString("kg/h")+"]",0,Double.POSITIVE_INFINITY));
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -1039,10 +1045,10 @@ public class CasePara {
 		try {
 			double mAGR;
 			String[] einheiten = new String[2];
-			einheiten[0] = "[kg]";
-			einheiten[1] = "[%]";
-			double agr = set_doublePara(INPUTFILE_PARAMETER, "mAGR_intern_ASP",einheiten,0,Double.POSITIVE_INFINITY);
-			if(INPUTFILE_PARAMETER.get("mAGR_intern_ASP")[1].equalsIgnoreCase("[%]")){
+			einheiten[0] = "["+ManagerLanguage.getString("kg")+"]";
+			einheiten[1] = "["+ManagerLanguage.getString("%")+"]";
+			double agr = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("mAGR_intern_ASP"),einheiten,0,Double.POSITIVE_INFINITY);
+			if(INPUTFILE_PARAMETER.get(ManagerLanguage.getString("mAGR_intern_ASP"))[1].equalsIgnoreCase("["+ManagerLanguage.getString("%")+"]")){
 				mAGR = agr / (100-agr) * (this.get_mAGR_extern_ASP() + this.get_mLuft_feucht_ASP() + this.MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP());
 			}else{
 				mAGR = agr;
@@ -1063,7 +1069,7 @@ public class CasePara {
 
 		try {
 			return this.convert_ProStunde_2_ProASP(
-					set_doublePara(INPUTFILE_PARAMETER, "mLuft_feucht","[kg/h]",1e-6,Double.POSITIVE_INFINITY));
+					set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("mLuft_feucht"),"["+ManagerLanguage.getString("kg/h")+"]",1e-6,Double.POSITIVE_INFINITY));
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -1108,7 +1114,7 @@ public class CasePara {
 	public double get_relativeLuftFeuchte(){
 		double phi=-1;
 		try {
-			phi= set_doublePara(INPUTFILE_PARAMETER, "relative_Luftfeuchte","[%]",0,100);
+			phi= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("relative_Luftfeuchte"),"["+ManagerLanguage.getString("%")+"]",0,100);
 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();			
@@ -1157,10 +1163,10 @@ public class CasePara {
 		double zzp;		
 		try {
 			if(SYS.IS_KW_BASIERT){				
-				zzp =set_doublePara(INPUTFILE_PARAMETER, "ZZP","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+				zzp =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("ZZP"),"["+ManagerLanguage.getString("KWnZOT")+"]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
 				zzp=convert_KW2SEC(zzp);
 			}else {				
-				zzp =set_doublePara(INPUTFILE_PARAMETER, "ZZP","[s]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
+				zzp =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("ZZP"),"["+ManagerLanguage.getString("s")+"]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
 			}				
 			return zzp;				
 		} catch (ParameterFileWrongInputException e) {			
@@ -1172,7 +1178,7 @@ public class CasePara {
 	public double get_pmi(){
 		double std_pmi=-7.77;	//Standardwert für pmi (muss negativ sein, siehe z.B. das Wandwärmemodell "WoschniHuber"
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "pmi","[bar]",0,30); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("pmi"),"["+ManagerLanguage.getString("bar")+"]",0,30); 
 		} catch (ParameterFileWrongInputException e) {				
 			e.stopBremo();
 			return std_pmi;
@@ -1183,7 +1189,7 @@ public class CasePara {
 	public double get_pme(){ 
 	    double std_pme=0; 
 	    try { 
-	      return set_doublePara(INPUTFILE_PARAMETER,"pme","[bar]",0,30); 
+	      return set_doublePara(INPUTFILE_PARAMETER,ManagerLanguage.getString("pme"),"["+ManagerLanguage.getString("bar")+"]",0,30); 
 	    } catch (ParameterFileWrongInputException e) { 
 	      e.log_Warning("Keiner oder der falsche pme-Wert wurde angegeben. "+ 
 	          "Dieser wird nicht in der Verlustteilung angezeigt"); 
@@ -1199,7 +1205,7 @@ public class CasePara {
 	 */	
 	public int get_AnzahlEinspritzungen(){		
 		try {
-			return (int) set_doublePara(INPUTFILE_PARAMETER, "anzahlEinspritzungen","",0,Double.POSITIVE_INFINITY);
+			return (int) set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("anzahlEinspritzungen"),"",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {			
 			e.log_Warning();
 			return -1;
@@ -1213,7 +1219,7 @@ public class CasePara {
 	 */
 	public int get_indexOfMainInj(){		
 		try {
-			return (int) set_doublePara(INPUTFILE_PARAMETER, "indexOfMainInj","",0,Double.POSITIVE_INFINITY);
+			return (int) set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("indexOfMainInj"),"",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {			
 			e.log_Warning();
 			return -1;
@@ -1238,18 +1244,18 @@ public class CasePara {
 			}			
 		}
 
-//		if (anzEinspr==1){
-//			suchString="BOI";
-//		}else{
-			suchString="BOI_"+idxOfInjection;
-//		}
+		if (anzEinspr==1){
+			suchString= ManagerLanguage.getString("BOI");
+		}else{
+			suchString= ManagerLanguage.getString("BOI_")+idxOfInjection;
+		}
 		try {
 			if(SYS.IS_KW_BASIERT){	
 				double boi;
-				boi =set_doublePara(INPUTFILE_PARAMETER, suchString,"[KWnZOT]",SYS.KW_UNTERGRENZE,SYS.KW_OBERGRENZE);
+				boi =set_doublePara(INPUTFILE_PARAMETER, suchString,"["+ManagerLanguage.getString("KWnZOT")+"]",SYS.KW_UNTERGRENZE,SYS.KW_OBERGRENZE);
 				return convert_KW2SEC(boi);				
 			}else {					
-				return set_doublePara(INPUTFILE_PARAMETER, suchString,"[s]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
+				return set_doublePara(INPUTFILE_PARAMETER, suchString,"["+ManagerLanguage.getString("s")+"]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
 			}
 
 		} catch (ParameterFileWrongInputException e) {			
@@ -1277,18 +1283,18 @@ public class CasePara {
 			}			
 		}		
 
-//		if (anzEinspr==1){
-//			suchString="EOI";
-//		}else{
-			suchString="EOI_"+idxOfInjection;
-//		}
+		if (anzEinspr==1){
+			suchString= ManagerLanguage.getString("EOI");
+		}else{
+			suchString= ManagerLanguage.getString("EOI_")+idxOfInjection;
+		}
 		try {
 			if(SYS.IS_KW_BASIERT){			
 				double eoi;
-				eoi =set_doublePara(INPUTFILE_PARAMETER, suchString,"[KWnZOT]",convert_SEC2KW(get_BOI(idxOfInjection)),get_Auslassoeffnet_KW());
+				eoi =set_doublePara(INPUTFILE_PARAMETER, suchString,"["+ManagerLanguage.getString("KWnZOT")+"]",convert_SEC2KW(get_BOI(idxOfInjection)),get_Auslassoeffnet_KW());
 				return convert_KW2SEC(eoi);	
 			}else {			
-				return set_doublePara(INPUTFILE_PARAMETER, suchString,"[s]",get_BOI(idxOfInjection),SYS.SEC_OBERGRENZE);
+				return set_doublePara(INPUTFILE_PARAMETER, suchString,"["+ManagerLanguage.getString("s")+"]",get_BOI(idxOfInjection),SYS.SEC_OBERGRENZE);
 			}	
 
 		} catch (ParameterFileWrongInputException e) {			
@@ -1306,11 +1312,11 @@ public class CasePara {
 		String  suchString;
 		int anzEinspr=get_AnzahlEinspritzungen();		
 		int injZone=-1;
-//		if (anzEinspr==1){
-//			suchString="InjZone";
-//		}else{
-			suchString="InjZone_"+idxOfInjection;
-//		}
+		if (anzEinspr==1){
+			suchString= ManagerLanguage.getString("InjZone");
+		}else{
+			suchString= ManagerLanguage.getString("InjZone_")+idxOfInjection;
+		}
 
 		if(idxOfInjection>anzEinspr-1){
 			try {
@@ -1335,38 +1341,29 @@ public class CasePara {
 
 	public Spezies get_kraftsoff(int idxOfInjection){
 		int anzEinspr=this.get_AnzahlEinspritzungen();
-		if(anzEinspr==0){
+		if(idxOfInjection>anzEinspr-1){
 			try {
-				throw new ParameterFileWrongInputException("Es wurden 0 Einspritzungen angegeben, eine Berechnung ist nur für den Schleppbetrieb" +
-						" (Thermodyn_Verdichtung) möglich.");
+				throw new ParameterFileWrongInputException("The injection index ("+idxOfInjection+") " +
+						"you asked the fuel for does not exist");
 			} catch (ParameterFileWrongInputException e) {			
-				e.log_Warning();				
-			}
-		}else{
-			if(idxOfInjection>anzEinspr-1){
-				try {
-					throw new ParameterFileWrongInputException("The injection index ("+idxOfInjection+") " +
-							"you asked the fuel for does not exist");
-				} catch (ParameterFileWrongInputException e) {			
-					e.stopBremo();				
-				}
+				e.stopBremo();				
 			}
 		}
 		
 		String krstFlag;
-//		if(anzEinspr==1){
-//			krstFlag="krst";	
-//		}else{
-			krstFlag="krst_"+idxOfInjection;
-//		}		
+		if(anzEinspr==1){
+			krstFlag= ManagerLanguage.getString("krst");	
+		}else{
+			krstFlag= ManagerLanguage.getString("krst_")+idxOfInjection;
+		}		
 
 		//Die Koeffizienten Speziesfabrik liefert eine hashtable mit allen moeglichen Krafstoffen
 		Hashtable<String,Spezies> krstHash=this.SPEZIES_FABRIK.get_alleKrafstoffe();
 		String moeglicheFlags []=new String[krstHash.size()+2];
 		//Die Kraftsoffapproximationsspezies ist nicht in der Hashtable enthalten
-		moeglicheFlags[0]="ohc";  //jetzt schon ;-)
+		moeglicheFlags[0]=  ManagerLanguage.getString("ohc");  //jetzt schon ;-)
 		//Wasser kann man ja auch einspritzen
-		moeglicheFlags[1]="Wasser";  //jetzt schon ;-)
+		moeglicheFlags[1]=  ManagerLanguage.getString("Wasser");  //jetzt schon ;-)
 
 		int iter=2;
 		Enumeration<String> e=krstHash.keys();		
@@ -1410,15 +1407,15 @@ public class CasePara {
 			}
 		}
 		String krstFlag;
-//		if(anzEinspr==1){
-//			krstFlag="mKrst";	
-//		}else{
-			krstFlag="mKrst_"+idxOfInjection;
-//		}		
+		if(anzEinspr==1){
+			krstFlag= ManagerLanguage.getString("mKrst");	
+		}else{
+			krstFlag= ManagerLanguage.getString("mKrst_")+idxOfInjection;
+		}		
 
 		try {
 			return this.convert_ProStunde_2_ProASP(
-					set_doublePara(INPUTFILE_PARAMETER, krstFlag,"[kg/h]",0,Double.POSITIVE_INFINITY));
+					set_doublePara(INPUTFILE_PARAMETER, krstFlag,"["+ManagerLanguage.getString("kg/h")+"]",0,Double.POSITIVE_INFINITY));
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -1444,14 +1441,14 @@ public class CasePara {
 			}
 		}
 		String tauFlag;
-//		if(anzEinspr==1){
-//			tauFlag="tau";	
-//		}else{
-			tauFlag="tau_"+idxOfInjection;
-//		}		
+		if(anzEinspr==1){
+			tauFlag= ManagerLanguage.getString("tau");	
+		}else{
+			tauFlag= ManagerLanguage.getString("tau_")+idxOfInjection;
+		}		
 
 		try {
-			tau =  this.set_doublePara(INPUTFILE_PARAMETER, tauFlag,"[s]",0,
+			tau =  this.set_doublePara(INPUTFILE_PARAMETER, tauFlag,"["+ManagerLanguage.getString("s")+"]",0,
 					Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {
 			e.log_Warning("Es wurde im Parameterfile keine spezifische "
@@ -1480,11 +1477,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="anzAxialPakete";	
-//		}else{
-			flag="anzAxialPakete_"+idxOfInjection;
-//		}		
+		if(anzEinspr==1){
+			flag= ManagerLanguage.getString("anzAxialPakete");	
+		}else{
+			flag= ManagerLanguage.getString("anzAxialPakete_")+idxOfInjection;
+		}		
 
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1,1000);
@@ -1511,11 +1508,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="anzRadialPakete";	
-//		}else{
-			flag="anzRadialPakete_"+idxOfInjection;
-//		}		
+		if(anzEinspr==1){
+			flag= ManagerLanguage.getString("anzRadialPakete");	
+		}else{
+			flag= ManagerLanguage.getString("anzRadialPakete_")+idxOfInjection;
+		}		
 
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1,1000);
@@ -1542,13 +1539,13 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="einspritzDruck";	
-//		}else{
-			flag="einspritzDruck_"+einspritzungsNr;
-//		}			
+		if(anzEinspr==1){
+			flag= ManagerLanguage.getString("einspritzDruck");	
+		}else{
+			flag= ManagerLanguage.getString("einspritzDruck_")+einspritzungsNr;
+		}			
 		try {
-			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[Pa]",0,Double.MAX_VALUE);
+			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"["+ManagerLanguage.getString("Pa")+"]",0,Double.MAX_VALUE);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return 0;
@@ -1568,11 +1565,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="anzSpritzloecher";	
-//		}else{
-			flag="anzSpritzloecher_"+einspritzungsNr;
-//		}			
+		if(anzEinspr==1){
+			flag= ManagerLanguage.getString("anzSpritzloecher");	
+		}else{
+			flag= ManagerLanguage.getString("anzSpritzloecher_")+einspritzungsNr;
+		}			
 		try {
 			return 	(int) set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1,Double.MAX_VALUE);
 		} catch (ParameterFileWrongInputException e) {
@@ -1593,11 +1590,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="cdFaktor";	
-//		}else{
-			flag="cdFaktor_"+einspritzungsNr;
-//		}			
+		if(anzEinspr==1){
+			flag= ManagerLanguage.getString("cdFaktor");	
+		}else{
+			flag= ManagerLanguage.getString("cdFaktor_")+einspritzungsNr;
+		}			
 		try {
 			return 	 set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",0.1,1);
 		} catch (ParameterFileWrongInputException e) {
@@ -1617,11 +1614,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="EntrainmentFaktor";	
-//		}else{
-			flag="EntrainmentFaktor_"+einspritzungsNr;
-//		}			
+		if(anzEinspr==1){
+			flag= ManagerLanguage.getString("EntrainmentFaktor");	
+		}else{
+			flag= ManagerLanguage.getString("EntrainmentFaktor_")+einspritzungsNr;
+		}			
 		try {
 			return 	 set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1e-9,100); //beliebig gewaehlt
 		} catch (ParameterFileWrongInputException e) {
@@ -1641,11 +1638,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="ProfilFaktor";	
-//		}else{
-			flag="ProfilFaktor_"+einspritzungsNr;
-//		}			
+		if(anzEinspr==1){
+			flag= ManagerLanguage.getString("ProfilFaktor");	
+		}else{
+			flag= ManagerLanguage.getString("ProfilFaktor_")+einspritzungsNr;
+		}			
 		try {
 			return 	 set_doublePara(INPUTFILE_PARAMETER, flag,"[-]",1e-9,100); //beliebig gewaehlt
 		} catch (ParameterFileWrongInputException e) {
@@ -1665,13 +1662,13 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="durchmSpritzloch";	
-//		}else{
-			flag="durchmSpritzloch_"+einspritzungsNr;
-//		}			
+		if(anzEinspr==1){
+			flag=ManagerLanguage.getString("durchmSpritzloch");	
+		}else{
+			flag=ManagerLanguage.getString("durchmSpritzloch_")+einspritzungsNr;
+		}			
 		try {
-			return 	set_doublePara(INPUTFILE_PARAMETER, flag,"[m]",0.00001,0.001);
+			return 	set_doublePara(INPUTFILE_PARAMETER, flag,"["+ManagerLanguage.getString("m")+"]",0.00001,0.001);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return 0;
@@ -1691,11 +1688,11 @@ public class CasePara {
 			}
 		}
 		String flag;
-//		if(anzEinspr==1){
-//			flag="vergleichsKrstVerdampfung";	
-//		}else{
-			flag="vergleichsKrstVerdampfung_"+einspritzungsNr;
-//		}			
+		if(anzEinspr==1){
+			flag=ManagerLanguage.getString("vergleichsKrstVerdampfung");	
+		}else{
+			flag=ManagerLanguage.getString("vergleichsKrstVerdampfung_")+einspritzungsNr;
+		}			
 		try {
 			return this.set_StringPara(INPUTFILE_PARAMETER, flag, Kraftstoff_Eigenschaften.kraftstoffe);
 		} catch (ParameterFileWrongInputException e) {
@@ -1712,7 +1709,7 @@ public class CasePara {
 	 */	
 	public double get_DrallGeschwindigkeit(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "drallgeschwindigkeit","[m/s]",0,Double.POSITIVE_INFINITY);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("drallgeschwindigkeit"),"["+ManagerLanguage.getString("m/s")+"]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return Double.NaN;
@@ -1727,10 +1724,10 @@ public class CasePara {
 		double stdHu=4581231.2590484;//4.5951702590484*1e6; //berechnet passend zu den Koeffizienten
 
 		try {
-			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_RON_91","[MJ/mol]",0,Double.NaN); 
+			return 1e6*set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Hu_RON_91"),"["+ManagerLanguage.getString("MJ/mol")+"]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"RON_91\" wurde kein Heizwert angegeben. \n" +
-					"Es wird mit dem Standardwert gerechnet: " +stdHu + "[J/mol]");
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \""+ManagerLanguage.getString("RON_91")+"\" wurde kein Heizwert angegeben. \n" +
+					"Es wird mit dem Standardwert gerechnet: " +stdHu + "["+ManagerLanguage.getString("J/mol")+"]");
 			return stdHu;
 		}		
 	}
@@ -1744,10 +1741,10 @@ public class CasePara {
 		double stdHu=4211277.132508449; //4.247052132508449*1e6; //berechnet  passend zu den Koeffizienten
 
 		try {
-			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_RON_95","[MJ/mol]",0,Double.NaN); 
+			return 1e6*set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Hu_RON_95"),"["+ManagerLanguage.getString("MJ/mol")+"]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"RON_95\" wurde kein Heizwert angegeben. \n" +
-					"Es wird mit dem Standardwert gerechnet: " +stdHu + "[J/mol]");
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \""+ManagerLanguage.getString("RON_95")+"\" wurde kein Heizwert angegeben. \n" +
+					"Es wird mit dem Standardwert gerechnet: " +stdHu + "["+ManagerLanguage.getString("J/mol")+"]");
 			return stdHu;
 		}		
 	}
@@ -1759,10 +1756,10 @@ public class CasePara {
 		double stdHu=4108620.6027614996;//4.1520586027615*1e6; //gerechnet passend zu den Koeffizienten		
 
 		try {
-			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_RON_98","[MJ/mol]",0,Double.NaN); 
+			return 1e6*set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Hu_RON_98"),"["+ManagerLanguage.getString("MJ/mol")+"]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"RON_98\" wurde kein Heizwert angegeben. \n" +
-					"Es wird mit dem Standardwert gerechnet: " +stdHu +  "[J/mol]");			
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \""+ManagerLanguage.getString("RON_98")+"\" wurde kein Heizwert angegeben. \n" +
+					"Es wird mit dem Standardwert gerechnet: " +stdHu +  "["+ManagerLanguage.getString("J/mol")+"]");			
 			return stdHu;
 		}		
 	}
@@ -1774,10 +1771,10 @@ public class CasePara {
 		double stdHu=7849471.20749425;//7.803475207494249*1e6; //berechnet passend zu den Koeffizienten
 
 		try {
-			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_Diesel","[MJ/mol]",0,Double.NaN); 
+			return 1e6*set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Hu_Diesel"),"["+ManagerLanguage.getString("MJ/mol")+"]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \"Diesel\" wurde kein Heizwert angegeben. \n" +
-					"Es wird mit dem Standardwert gerechnet: " +stdHu + "[J/mol]");
+			e.log_Warning("Fuer den ausgewaehlten Kraftstoff \""+ManagerLanguage.getString("Diesel")+"\" wurde kein Heizwert angegeben. \n" +
+					"Es wird mit dem Standardwert gerechnet: " +stdHu + "["+ManagerLanguage.getString("J/mol")+"]");
 			return stdHu;
 		}		
 	}
@@ -1790,7 +1787,7 @@ public class CasePara {
 
 		double stdHu=Double.NaN; //TODO Heizwert angeben
 		try {
-			return 1e6*set_doublePara(INPUTFILE_PARAMETER, "Hu_ohc","[MJ/mol]",0,Double.NaN); 
+			return 1e6*set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Hu_ohc"),"["+ManagerLanguage.getString("MJ/mol")+"]",0,Double.NaN); 
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
 			return stdHu;
@@ -1805,7 +1802,7 @@ public class CasePara {
 	public double get_lhvCorr(){
 		double lhvCorr=1;
 		try {
-			lhvCorr= set_doublePara(INPUTFILE_PARAMETER, "lhvCorr","[-]",0,1); 
+			lhvCorr= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("lhvCorr"),"[-]",0,1); 
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();	
 		}					
@@ -1820,10 +1817,10 @@ public class CasePara {
 	public double get_whtfMult(){
 		double whtfCorr=1;
 		try {
-			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, "whtfMult","[-]",0,Double.MAX_VALUE); 
+			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("whtfMult"),"[-]",0,Double.MAX_VALUE); 
 			return whtfCorr;
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Der Wert fuer \"whtfMult\" wurde im Inputfile nicht angegeben. \n " +
+			e.log_Warning("Der Wert fuer \""+ManagerLanguage.getString("whtfMult")+"\" wurde im Inputfile nicht angegeben. \n " +
 					"Es wird ohne Multiplikator für die Anpassung des Wandwaermeverlustes gerechnet!");	
 			return whtfCorr;
 		}					
@@ -1837,7 +1834,7 @@ public class CasePara {
 	public double get_whtfMult_burn(){
 		double whtfCorr=1;
 		try {
-			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, "whtfMult_burn","[-]",0,Double.MAX_VALUE); 
+			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("whtfMult_burn"),"[-]",0,Double.MAX_VALUE); 
 			return whtfCorr;
 		} catch (ParameterFileWrongInputException e) {	
 			return whtfCorr;
@@ -1853,11 +1850,11 @@ public class CasePara {
 		double whtfDur=this.convert_KW2SEC(this.SYS.RECHNUNGS_ENDE_DVA_KW+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
 		//double whtfDur=this.convert_KW2SEC(50+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
 		try {
-			whtfDur= this.convert_KW2SEC(set_doublePara(INPUTFILE_PARAMETER, "whtfMult_dauer","[KW]",0,180)+this.SYS.RECHNUNGS_BEGINN_DVA_KW); 
+			whtfDur= this.convert_KW2SEC(set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("whtfMult_dauer"),"["+ManagerLanguage.getString("KW")+"]",0,180)+this.SYS.RECHNUNGS_BEGINN_DVA_KW); 
 			return whtfDur;
 		} catch (ParameterFileWrongInputException e) {
 			System.err.println("**************************************************");
-			System.err.println("ACHTUNG: \"whtfMult_dauer\" wird mit " + convert_ProKW_2_ProSEC(whtfDur) + " [KWnZOT] angenommen!");
+			System.err.println("ACHTUNG: \"whtfMult_dauer\" wird mit " + convert_ProKW_2_ProSEC(whtfDur) + " ["+ManagerLanguage.getString("KWnZOT")+"] angenommen!");
 			System.err.println("**************************************************");
 			return whtfDur;
 		}
@@ -1871,7 +1868,7 @@ public class CasePara {
 	public double get_polyExp_WHT(){
 		double polyExp_WHT=-5;
 		try {
-			polyExp_WHT= set_doublePara(INPUTFILE_PARAMETER, "polyExp_WHT","[-]",1,1.4); 
+			polyExp_WHT= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("polyExp_WHT"),"[-]",1,1.4); 
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();	
 		}					
@@ -1885,10 +1882,10 @@ public class CasePara {
 	public double [] get_krstApprox_ohc(){
 		double ohc[]=new double [4];
 		try {			
-			ohc[0]= set_doublePara(INPUTFILE_PARAMETER, "krst_oAtome","[-]",0,Double.POSITIVE_INFINITY); 
-			ohc[1]= set_doublePara(INPUTFILE_PARAMETER, "krst_hAtome","[-]",0,Double.POSITIVE_INFINITY);
-			ohc[2]= set_doublePara(INPUTFILE_PARAMETER, "krst_cAtome","[-]",0,Double.POSITIVE_INFINITY);
-			ohc[3]= set_doublePara(INPUTFILE_PARAMETER, "krst_nAtome","[-]",0,Double.POSITIVE_INFINITY);
+			ohc[0]= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("krst_oAtome"),"[-]",0,Double.POSITIVE_INFINITY); 
+			ohc[1]= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("krst_hAtome"),"[-]",0,Double.POSITIVE_INFINITY);
+			ohc[2]= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("krst_cAtome"),"[-]",0,Double.POSITIVE_INFINITY);
+			ohc[3]= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("krst_nAtome"),"[-]",0,Double.POSITIVE_INFINITY);
 			return ohc;
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -1903,7 +1900,7 @@ public class CasePara {
 	public double get_Referenzwert(){
 //		double std_rw=1.0;	//Standardwert für Referenzwert ca. Umgebungsdruck
 //		try {
-//			return set_doublePara(INPUTFILE_PARAMETER, "Referenzwert","[bar]",0,300); 
+//			return set_doublePara(INPUTFILE_PARAMETER, "Referenzwert","["+ManagerLanguage.getString("bar")+"]",0,300); 
 //		} catch (ParameterFileWrongInputException e) {			
 //			e.log_Warning("Fuer die referenzMethode wurde kein Referenzwert angegeben. \n" +
 //					"Es wird mit dem Referenzwert" +std_rw + "[bar] gerechnet.");
@@ -1911,7 +1908,7 @@ public class CasePara {
 //		}
 		double std_rw=-7.77;	//Standardwert muss negativ
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Referenzwert","[bar]",0,300); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("referenzWert"),"["+ManagerLanguage.getString("bar")+"]",0,300); 
 		} catch (ParameterFileWrongInputException e) {				
 			e.stopBremo();
 			return std_rw;
@@ -1924,10 +1921,10 @@ public class CasePara {
 	 * @return liefert den Kanal, der für den Zylinderdruckabgleich mit der kanalMethode verwendet werden soll
 	 */
 	public boolean get_Referenzkanal(){
-		String [] yesno={"pEin","pAbg"};
+		String [] yesno={ManagerLanguage.getString("pEin"),ManagerLanguage.getString("pAbg")};
 		boolean pIn=false;
 		try {
-			if(set_StringPara(INPUTFILE_PARAMETER,"Referenzkanal",yesno ).equalsIgnoreCase("pEin"))
+			if(set_StringPara(INPUTFILE_PARAMETER,"Referenzkanal",yesno ).equalsIgnoreCase(ManagerLanguage.getString("pEin")))
 				pIn=true;
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
@@ -1942,11 +1939,11 @@ public class CasePara {
 		double KW_beginnAbgleich;		
 		try {
 			if(SYS.IS_KW_BASIERT){
-				//KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Beginn_Druckabgleich","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
-				KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Beginn_Druckabgleich","[KWnZOT]",-720,720);
+				//KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("KW_Beginn_Druckabgleich"),"["+ManagerLanguage.getString("KWnZOT")+"]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+				KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("KW_Beginn_Druckabgleich"),"["+ManagerLanguage.getString("KWnZOT")+"]",-720,720);
 				KW_beginnAbgleich=convert_KW2SEC(KW_beginnAbgleich);
 			}else {				
-				KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Beginn_Druckabgleich","[s]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
+				KW_beginnAbgleich =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("KW_Beginn_Druckabgleich"),"["+ManagerLanguage.getString("s")+"]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
 			}				
 			return KW_beginnAbgleich;				
 		} catch (ParameterFileWrongInputException e) {			
@@ -1961,11 +1958,11 @@ public class CasePara {
 		double KW_endeAbgleich;		
 		try {
 			if(SYS.IS_KW_BASIERT){
-				//KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Ende_Druckabgleich","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
-				KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Ende_Druckabgleich","[KWnZOT]",-720,720);
+				//KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Ende_Druckabgleich","["+ManagerLanguage.getString("KWnZOT")+"]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+				KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("KW_Ende_Druckabgleich"),"["+ManagerLanguage.getString("KWnZOT")+"]",-720,720);
 				KW_endeAbgleich=convert_KW2SEC(KW_endeAbgleich);
 			}else {				
-				KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, "KW_Ende_Druckabgleich","[s]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
+				KW_endeAbgleich =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("KW_Ende_Druckabgleich"),"["+ManagerLanguage.getString("s")+"]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
 			}				
 			return KW_endeAbgleich;				
 		} catch (ParameterFileWrongInputException e) {			
@@ -1979,7 +1976,7 @@ public class CasePara {
 	public double get_Kappa_Druckabgleich(){
 		double kappa_Druckabgleich;		
 		try {
-			kappa_Druckabgleich =set_doublePara(INPUTFILE_PARAMETER, "kappa_Druckabgleich","[-]",1,1.4);
+			kappa_Druckabgleich =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("kappa_Druckabgleich"),"[-]",1,1.4);
 			return kappa_Druckabgleich;				
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -1994,7 +1991,7 @@ public class CasePara {
 	public double get_HC() {
 		double hc;		
 		try {
-			hc =set_doublePara(INPUTFILE_PARAMETER, "HC","[ppm]",0,Double.MAX_VALUE);
+			hc =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("HC"),"["+ManagerLanguage.getString("ppm")+"]",0,Double.MAX_VALUE);
 			return hc*1e-6;				
 		} catch (ParameterFileWrongInputException e) {			
 			return 0;
@@ -2009,7 +2006,7 @@ public class CasePara {
 	public double get_CO() {
 		double co;		
 		try {
-			co =set_doublePara(INPUTFILE_PARAMETER, "CO","[ppm]",0,Double.MAX_VALUE);
+			co =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("CO"),"["+ManagerLanguage.getString("ppm")+"]",0,Double.MAX_VALUE);
 			return co*1e-6;				
 		} catch (ParameterFileWrongInputException e) {			
 			return 0;
@@ -2024,7 +2021,7 @@ public class CasePara {
 	public double get_C() {
 		double c;		
 		try {
-			c =set_doublePara(INPUTFILE_PARAMETER, "C","[ppm]",0,Double.MAX_VALUE);
+			c =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("C"),"["+ManagerLanguage.getString("ppm")+"]",0,Double.MAX_VALUE);
 			return c*1e-6;				
 		} catch (ParameterFileWrongInputException e) {			
 			return 0;
@@ -2039,7 +2036,7 @@ public class CasePara {
 	public double get_H2() {
 		double h2;		
 		try {
-			h2 =set_doublePara(INPUTFILE_PARAMETER, "H2","[ppm]",0,Double.MAX_VALUE);
+			h2 =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("H2"),"["+ManagerLanguage.getString("ppm")+"]",0,Double.MAX_VALUE);
 			return h2*1e-6;				
 		} catch (ParameterFileWrongInputException e) {			
 			return 0;
@@ -2049,9 +2046,9 @@ public class CasePara {
 	
 	public String get_iterativeMethode(String[] mglMethoden){
 		try{
-			return set_StringPara(INPUTFILE_PARAMETER, "iterativeMethode", mglMethoden);
+			return set_StringPara(INPUTFILE_PARAMETER, ManagerLanguage.getString("iterativeMethode"), mglMethoden);
 		}catch(ParameterFileWrongInputException e) {			
-			return "ohne";
+			return ManagerLanguage.getString("ohne");
 		}
 	}
 
@@ -2072,10 +2069,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_Konstante_TKE(){
 		double konstante_TKE;
 		try {
-			konstante_TKE = set_doublePara(INPUTFILE_PARAMETER, "c_k","[-]",0,1);
+			konstante_TKE = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("c_k"),"[-]",0,1);
 			return konstante_TKE;
 		} catch (ParameterFileWrongInputException e) {		
-			e.log_Warning("Konstante c_k für Vorfaktor des Turbulenz-Startwerts fehlt. "
+			e.log_Warning("Konstante "+ManagerLanguage.getString("c_k")+" für Vorfaktor des Turbulenz-Startwerts fehlt. "
 					+ "Es wird mit Default Wert von 0.125 gerechnet.");	
 			return 0.125;
 		}		
@@ -2087,10 +2084,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_AnzahlEinlassventile(){
 		double anz_EV;
 		try {
-			anz_EV = set_doublePara(INPUTFILE_PARAMETER, "n_EV","[-]",1,10);
+			anz_EV = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("n_EV"),"[-]",1,10);
 			return anz_EV;
 		} catch (ParameterFileWrongInputException e) {		
-			e.log_Warning("Konstante n_EV zur Berechnung des Turbulenz-Startwerts fehlt. "
+			e.log_Warning("Konstante "+ManagerLanguage.getString("n_EV")+" zur Berechnung des Turbulenz-Startwerts fehlt. "
 					+ "Es werden 2 Einlassventile angenommen.");
 			return 2;
 		}		
@@ -2102,10 +2099,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_Kappa_Bargende() {
 		double kappa_B;
 		try {
-			kappa_B = set_doublePara(INPUTFILE_PARAMETER, "kappa_Bargende","[-]",1,1.7);
+			kappa_B = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("kappa_Bargende"),"[-]",1,1.7);
 			return kappa_B;
 		} catch (ParameterFileWrongInputException e) {		
-			e.log_Warning("kappa_Bargende zur Berechnung des WWÜ nach BargendeFVV fehlt. "
+			e.log_Warning(ManagerLanguage.getString("kappa_Bargende")+" zur Berechnung des WWÜ nach BargendeFVV fehlt. "
 					+ "Es wird mit dem von Bremo ermittelten kappa gerechnet.");	
 			return -5.55;
 		}		
@@ -2118,10 +2115,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_W_k() {
 		double w_k;
 		try {
-			w_k = set_doublePara(INPUTFILE_PARAMETER, "w_k","[-]",1,1);
+			w_k = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("w_k"),"[-]",1,1);
 			return w_k;
 		} catch (ParameterFileWrongInputException e) {		
-			e.log_Warning("Kein w_k angegeben! Für w_k = 1 wird konservativ nach Bargende gerechnet. "
+			e.log_Warning("Kein "+ManagerLanguage.getString("w_k")+" angegeben! Für w_k = 1 wird konservativ nach Bargende gerechnet. "
 					+ "Sonst wird die Modifikation von Grill verwendet");
 			return 3;
 		}		
@@ -2133,10 +2130,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_Delta_k() {
 		double delta_k;
 		try {
-			delta_k = set_doublePara(INPUTFILE_PARAMETER, "delta_k","[-]",0,3);
+			delta_k = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("delta_k"),"[-]",0,3);
 			return delta_k;
 		} catch (ParameterFileWrongInputException e) {		
-			e.log_Warning("Konstante delta_k als Multiplikator für Verbrennungsterm nicht angegeben. "
+			e.log_Warning("Konstante "+ManagerLanguage.getString("delta_k")+" als Multiplikator für Verbrennungsterm nicht angegeben. "
 					+ "Es wird mit Default Wert von 1 gerechnet.");	
 			return 1;
 		}		
@@ -2149,10 +2146,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_Liefergrad(){
 		double lambda_L;
 		try {
-			lambda_L = set_doublePara(INPUTFILE_PARAMETER, "Liefergrad", "[-]", 0,1);
+			lambda_L = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Liefergrad"), "[-]", 0,1);
 			return lambda_L;
 		}catch (ParameterFileWrongInputException e) {		
-			e.log_Warning("Es wurde kein Liefergrad für die Berechnung des Turbulenzstartwerts angegeben."
+			e.log_Warning("Es wurde kein "+ManagerLanguage.getString("Liefergrad")+" für die Berechnung des Turbulenzstartwerts angegeben."
 					+ " Der Liefergrad wird als 1 angenommen.");	
 			return 1;
 		}		
@@ -2174,7 +2171,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 */
 	public double get_T_IVC_WHT(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "T_IVC_WHT","[K]",1e-6,1000);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_IVC_WHT"),"["+ManagerLanguage.getString("K")+"]",1e-6,1000);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2187,7 +2184,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_T_LadeLuft(){
 
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "T_Ladeluft","[K]",250,1000);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_Ladeluft"),"["+ManagerLanguage.getString("K")+"]",250,1000);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2200,7 +2197,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_T_Abgas(){
 
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "T_Abgas","[K]",290,2000); //früher T_min 400, ist aber zu wenig wegen Schleppmessungen
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_Abgas"),"["+ManagerLanguage.getString("K")+"]",290,2000); //früher T_min 400, ist aber zu wenig wegen Schleppmessungen
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2210,7 +2207,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_T_FeuchteMessung(){
 
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "T_FeuchteMessung","[K]",1e-6,1000);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_FeuchteMessung"),"["+ManagerLanguage.getString("K")+"]",1e-6,1000);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2227,7 +2224,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		double T_Wand=-1e100;
 		if(T_Wand==-1e100){
 			try {
-				return set_doublePara(INPUTFILE_PARAMETER, "T_Cyl","[K]",1e-6,1000);//da macht wohl jeder Stahl schlapp
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_Cyl"),"["+ManagerLanguage.getString("K")+"]",1e-6,1000);//da macht wohl jeder Stahl schlapp
 			} catch (ParameterFileWrongInputException e) {
 				e.stopBremo();
 				return Double.NaN;
@@ -2246,7 +2243,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		double T_pist=-1e100;
 		if(T_pist==-1e100){
 			try {
-				return set_doublePara(INPUTFILE_PARAMETER, "T_Piston","[K]",1e-6,1000);//da macht wohl jeder Stahl schlapp
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_Piston"),"["+ManagerLanguage.getString("K")+"]",1e-6,1000);//da macht wohl jeder Stahl schlapp
 			} catch (ParameterFileWrongInputException e) {
 				e.stopBremo();
 				return Double.NaN;
@@ -2264,7 +2261,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		double T_head=-1e100;
 		if(T_head==-1e100){
 			try {
-				return set_doublePara(INPUTFILE_PARAMETER, "T_Head","[K]",1e-6,1000);//da macht wohl jeder Stahl schlapp
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_Head"),"["+ManagerLanguage.getString("K")+"]",1e-6,1000);//da macht wohl jeder Stahl schlapp
 			} catch (ParameterFileWrongInputException e) {
 				e.stopBremo();
 				return Double.NaN;
@@ -2294,12 +2291,12 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		}		
 
 		if (anzEinspr==1){
-			suchString="T_Krst_fluessig";
+			suchString=ManagerLanguage.getString("T_Krst_fluessig");
 		}else{
-			suchString="T_Krst_fluessig_"+i;
+			suchString=ManagerLanguage.getString("T_Krst_fluessig_")+i;
 		}
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, suchString,"[K]",-273.15,Double.POSITIVE_INFINITY);			
+			return set_doublePara(INPUTFILE_PARAMETER, suchString,"["+ManagerLanguage.getString("K")+"]",-273.15,Double.POSITIVE_INFINITY);			
 
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -2324,7 +2321,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_p_LadeLuft(){
 
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "p_Ladeluft","[Pa]",0,Double.POSITIVE_INFINITY);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("p_Ladeluft"),"["+ManagerLanguage.getString("Pa")+"]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2336,7 +2333,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 */
 	public double get_pKGH(){
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "p_KGH", "[Pa]", 0, Double.POSITIVE_INFINITY);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("p_KGH"), "["+ManagerLanguage.getString("Pa")+"]", 0, Double.POSITIVE_INFINITY);
 		}catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2351,7 +2348,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 */
 	public double get_p_IVC_WHT() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "p_IVC","[Pa]",0,Double.POSITIVE_INFINITY);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("p_IVC"),"["+ManagerLanguage.getString("Pa")+"]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2364,7 +2361,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_p_Abgas() {
 
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "p_Abgas","[Pa]",0,Double.POSITIVE_INFINITY);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("p_Abgas"),"["+ManagerLanguage.getString("Pa")+"]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2373,7 +2370,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 
 	public double get_p_FeuchteMessung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "p_FeuchteMessung","[Pa]",0,Double.POSITIVE_INFINITY);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("p_FeuchteMessung"),"["+ManagerLanguage.getString("Pa")+"]",0,Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2397,16 +2394,16 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		double KW_refPunkt;		
 		try {
 			if(SYS.IS_KW_BASIERT){				
-				KW_refPunkt =set_doublePara(INPUTFILE_PARAMETER, "refPunktWoschniHuber","[KWnZOT]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
+				KW_refPunkt =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("refPunktWoschniHuber"),"["+ManagerLanguage.getString("KWnZOT")+"]",SYS.RECHNUNGS_BEGINN_DVA_KW,SYS.RECHNUNGS_ENDE_DVA_KW);
 				KW_refPunkt=convert_KW2SEC(KW_refPunkt);
 			}else {				
-				KW_refPunkt =set_doublePara(INPUTFILE_PARAMETER, "refPunktWoschniHuber","[s]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
+				KW_refPunkt =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("refPunktWoschniHuber"),"["+ManagerLanguage.getString("s")+"]",SYS.RECHNUNGS_BEGINN_DVA_SEC,SYS.RECHNUNGS_ENDE_DVA_SEC);
 			}				
 			return KW_refPunkt;				
 		} catch (ParameterFileWrongInputException e) {			
 //			e.stopBremo();
 //			return Double.NaN;
-			e.log_Warning("Der Parameter \"refPunktWoschniHuber\" wurde nicht angegeben, es wird mit dem Parameter \"Einlassschluss\" gerechnet.");
+			e.log_Warning("Der Parameter \""+ManagerLanguage.getString("refPunktWoschniHuber")+"\" wurde nicht angegeben, es wird mit dem Parameter \"Einlassschluss\" gerechnet.");
 			return get_Einlassschluss();
 		}
 	}
@@ -2425,7 +2422,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 */
 	public double get_DruckKammerVolumen() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "DruckKammerVolumen","[m^3]",1e-10,Double.MAX_VALUE); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("DruckKammerVolumen"),"["+ManagerLanguage.getString("m^3")+"]",1e-10,Double.MAX_VALUE); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2437,7 +2434,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_Pleuellaenge(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Pleuellaenge","[m]",0.01,10); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Pleuellaenge"),"["+ManagerLanguage.getString("m")+"]",0.01,10); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2449,7 +2446,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_Bohrung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Bohrung","[m]",0.005,2); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Bohrung"),"["+ManagerLanguage.getString("m")+"]",0.005,2); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2461,7 +2458,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 */
 	public double get_FlaecheBB() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "FlaecheBB","[m^2]",0,0.01*get_Bohrung()); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("FlaecheBB"),"["+ManagerLanguage.getString("m^2")+"]",0,0.01*get_Bohrung()); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2475,7 +2472,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_Kurbelradius() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Kurbelradius","[m]",0.0025,Double.POSITIVE_INFINITY); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Kurbelradius"),"["+ManagerLanguage.getString("m")+"]",0.0025,Double.POSITIVE_INFINITY); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2490,7 +2487,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public boolean get_ZOTbeiKolbenOT(){		
 		boolean ZOTbeiKolbenOT = false;
 		String s = null;
-		String s2 []= {"ja","nein"};
+		String s2 []= {ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")};
 		try {
 			s=this.set_StringPara(INPUTFILE_PARAMETER, "0KWbeiKolbenOT",s2);
 		} catch (ParameterFileWrongInputException e){	
@@ -2516,7 +2513,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_OT_Versatz(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "OT_Versatz","[KWnZOT]",-360,360); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("OT_Versatz"),"["+ManagerLanguage.getString("KWnZOT")+"]",-360,360); 
 		} catch (ParameterFileWrongInputException e) {
 			return 0;
 		}		
@@ -2528,7 +2525,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_Verdichtung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Verdichtung","",1,30); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Verdichtung"),"",1,30); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2542,7 +2539,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_pistonArea(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Kolbenflaeche","[m^2]",0.00002,5); //aus minimaler Bohrung und aus maximaler Bohrung berechnet
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Kolbenflaeche"),"["+ManagerLanguage.getString("m^2")+"]",0.00002,5); //aus minimaler Bohrung und aus maximaler Bohrung berechnet
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2555,7 +2552,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_fireDeckArea(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Brennraumdachflaeche","[m^2]",0.00002,5); //aus minimaler Bohrung und aus maximaler Bohrung berechnet
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Brennraumdachflaeche"),"["+ManagerLanguage.getString("m^2")+"]",0.00002,5); //aus minimaler Bohrung und aus maximaler Bohrung berechnet
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2567,7 +2564,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_Feuersteghoehe(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Feuersteghoehe","[m]",0,0.5); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Feuersteghoehe"),"["+ManagerLanguage.getString("m")+"]",0,0.5); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2577,7 +2574,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_Quetschspalthoehe() {
 		double Quetschspalthoehe;		
 		try {
-			Quetschspalthoehe =set_doublePara(INPUTFILE_PARAMETER, "Quetschspalthoehe","[m]",0,0.2);
+			Quetschspalthoehe =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Quetschspalthoehe"),"["+ManagerLanguage.getString("m")+"]",0,0.2);
 			return Quetschspalthoehe;				
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -2588,7 +2585,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_PistonBowlDiameter() {
 		double pistonBowlDiameter;
 		try {
-			pistonBowlDiameter =set_doublePara(INPUTFILE_PARAMETER, "PistonBowlDiameter","[m]",0,1);
+			pistonBowlDiameter =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("PistonBowlDiameter"),"["+ManagerLanguage.getString("m")+"]",0,1);
 			return pistonBowlDiameter;				
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -2599,7 +2596,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_PistonBowlDepth() {
 		double pistonBowlDepth;
 		try {
-			pistonBowlDepth =set_doublePara(INPUTFILE_PARAMETER, "PistonBowlDepth","[m]",0,1);
+			pistonBowlDepth =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("PistonBowlDepth"),"["+ManagerLanguage.getString("m")+"]",0,1);
 			return pistonBowlDepth;				
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -2612,7 +2609,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_Schraenkung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Schraenkung","[m]",-0.02,0.02); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Schraenkung"),"["+ManagerLanguage.getString("m")+"]",-0.02,0.02); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2626,7 +2623,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_Desachsierung(){		
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "Desachsierung","[m]",-0.02,0.02); 
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Desachsierung"),"["+ManagerLanguage.getString("m")+"]",-0.02,0.02); 
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
 			return Double.NaN;
@@ -2645,10 +2642,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		try {
 			if(SYS.IS_KW_BASIERT){			
 				double AV_S;
-				AV_S =set_doublePara(INPUTFILE_PARAMETER, "Auslassschluss","[KWnZOT]",get_Auslassoeffnet_KW(),SYS.KW_OBERGRENZE);
+				AV_S =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Auslassschluss"),"["+ManagerLanguage.getString("KWnZOT")+"]",get_Auslassoeffnet_KW(),SYS.KW_OBERGRENZE);
 				return convert_KW2SEC(AV_S);	
 			}else {			
-				return set_doublePara(INPUTFILE_PARAMETER, "Auslassschluss","[s]",get_Auslassoeffnet(),SYS.SEC_OBERGRENZE);
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Auslassschluss"),"["+ManagerLanguage.getString("s")+"]",get_Auslassoeffnet(),SYS.SEC_OBERGRENZE);
 			}	
 
 		} catch (ParameterFileWrongInputException e) {			
@@ -2667,10 +2664,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		try {
 			if(SYS.IS_KW_BASIERT){					
 				return  convert_KW2SEC(
-						set_doublePara(INPUTFILE_PARAMETER, "Auslassoeffnet","[KWnZOT]",SYS.KW_UNTERGRENZE,SYS.KW_OBERGRENZE));
+						set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Auslassoeffnet"),"["+ManagerLanguage.getString("KWnZOT")+"]",SYS.KW_UNTERGRENZE,SYS.KW_OBERGRENZE));
 
 			}else {			
-				return set_doublePara(INPUTFILE_PARAMETER, "Auslassoeffnet","[s]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Auslassoeffnet"),"["+ManagerLanguage.getString("s")+"]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
 			}	
 
 		} catch (ParameterFileWrongInputException e) {			
@@ -2693,10 +2690,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		try {
 			if(SYS.IS_KW_BASIERT){			
 				return convert_KW2SEC(
-						set_doublePara(INPUTFILE_PARAMETER, "Einlassoeffnet","[KWnZOT]",SYS.KW_UNTERGRENZE,SYS.KW_OBERGRENZE));
+						set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Einlassoeffnet"),"["+ManagerLanguage.getString("KWnZOT")+"]",SYS.KW_UNTERGRENZE,SYS.KW_OBERGRENZE));
 
 			}else {			
-				return set_doublePara(INPUTFILE_PARAMETER, "Einlassoeffnet","[s]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Einlassoeffnet"),"["+ManagerLanguage.getString("s")+"]",SYS.SEC_UNTERGRENZE,SYS.SEC_OBERGRENZE);
 			}	
 
 		} catch (ParameterFileWrongInputException e) {			
@@ -2720,10 +2717,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 		try {
 			if(SYS.IS_KW_BASIERT){			
 				double AV_S;
-				AV_S =set_doublePara(INPUTFILE_PARAMETER, "Einlassschluss","[KWnZOT]",get_Einlassoeffnet_KW(),SYS.KW_OBERGRENZE);
+				AV_S =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Einlassschluss"),"["+ManagerLanguage.getString("KWnZOT")+"]",get_Einlassoeffnet_KW(),SYS.KW_OBERGRENZE);
 				return convert_KW2SEC(AV_S);	
 			}else {			
-				return set_doublePara(INPUTFILE_PARAMETER, "Einlassschluss","[s]",get_Einlassoeffnet(),SYS.SEC_OBERGRENZE);
+				return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Einlassschluss"),"["+ManagerLanguage.getString("s")+"]",get_Einlassoeffnet(),SYS.SEC_OBERGRENZE);
 			}	
 
 		} catch (ParameterFileWrongInputException e) {			
@@ -2738,7 +2735,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_EV_Hub(){		
 		double EV_Hub;		
 		try {
-			EV_Hub =set_doublePara(INPUTFILE_PARAMETER, "EV_Hub","[m]",0,0.3);
+			EV_Hub =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("EV_Hub"),"["+ManagerLanguage.getString("m")+"]",0,0.3);
 			return EV_Hub;				
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -2753,7 +2750,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_EV_Hub_max(){		
 		double EV_Hub_max;		
 		try {
-			EV_Hub_max =set_doublePara(INPUTFILE_PARAMETER, "EV_Hub_max","[m]",0,0.3);
+			EV_Hub_max =set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("EV_Hub_max"),"["+ManagerLanguage.getString("m")+"]",0,0.3);
 			return EV_Hub_max;				
 		} catch (ParameterFileWrongInputException e) {			
 			e.stopBremo();
@@ -2768,10 +2765,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_ReferenzflaecheAuslass() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "RefFlaecheAuslass","[m^2]",1e-6,100^0);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("RefFlaecheAuslass"),"["+ManagerLanguage.getString("m^2")+"]",1e-6,100^0);
 		} catch (ParameterFileWrongInputException e) {
-			e.log_Warning("Der Wert fuer \"RefFlaecheAuslass\" wurde im Inputfile nicht angegeben. \n " +
-					"Es wird mit \"Kolbenflaeche\" gerechnet!");
+			e.log_Warning("Der Wert fuer \""+ManagerLanguage.getString("RefFlaecheAuslass")+"\" wurde im Inputfile nicht angegeben. \n " +
+					"Es wird mit \""+ManagerLanguage.getString("Kolbenflaeche")+"\" gerechnet!");
 			return get_pistonArea();
 		}		
 	}
@@ -2782,10 +2779,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_ReferenzflaecheEinlass() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "RefFlaecheEinlass","[m^2]",1e-6,1000);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("RefFlaecheEinlass"),"["+ManagerLanguage.getString("m^2")+"]",1e-6,1000);
 		} catch (ParameterFileWrongInputException e) {
-			e.log_Warning("Der Wert fuer \"RefFlaecheEinlass\" wurde im Inputfile nicht angegeben. \n " +
-					"Es wird mit \"Kolbenflaeche\" gerechnet!");
+			e.log_Warning("Der Wert fuer \""+ManagerLanguage.getString("RefFlaecheEinlass")+"\" wurde im Inputfile nicht angegeben. \n " +
+					"Es wird mit \""+ManagerLanguage.getString("Kolbenflaeche")+"\" gerechnet!");
 			return get_pistonArea();
 		}		
 	}
@@ -2798,10 +2795,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_ReferenzDurchmesserEV() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "RefDurchmesserEV","[m]",1e-6,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("RefDurchmesserEV"),"["+ManagerLanguage.getString("m")+"]",1e-6,1);
 		} catch (ParameterFileWrongInputException e) {
-			e.log_Warning("Der Wert fuer \"RefDurchmesserEV\" wurde im Inputfile nicht angegeben. \n " +
-					"Es wird mit \"Bohrung\" gerechnet!");
+			e.log_Warning("Der Wert fuer \""+ManagerLanguage.getString("RefDurchmesserEV")+"\" wurde im Inputfile nicht angegeben. \n " +
+					"Es wird mit \""+ManagerLanguage.getString("Bohrung")+"\" gerechnet!");
 			return get_Bohrung();
 		}	
 	}
@@ -2813,7 +2810,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_EV_Durchmesser() {
 		double Durchmesser_EV;
 		try {
-			Durchmesser_EV = set_doublePara(INPUTFILE_PARAMETER, "EV_Durchmesser","[m]",1e-3,0.1);
+			Durchmesser_EV = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("EV_Durchmesser"),"["+ManagerLanguage.getString("m")+"]",1e-3,0.1);
 			return Durchmesser_EV;
 		} catch (ParameterFileWrongInputException e) {		
 			e.stopBremo();
@@ -2828,10 +2825,10 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	 * */
 	public double get_ReferenzDurchmesserAV() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "RefDurchmesserAV","[m]",1e-6,1);
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("RefDurchmesserAV"),"["+ManagerLanguage.getString("m")+"]",1e-6,1);
 		} catch (ParameterFileWrongInputException e) {
-			e.log_Warning("Der Wert fuer \"RefDurchmesserAV\" wurde im Inputfile nicht angegeben. \n " +
-					"Es wird mit \"Bohrung\" gerechnet!");
+			e.log_Warning("Der Wert fuer \""+ManagerLanguage.getString("RefDurchmesserAV")+"\" wurde im Inputfile nicht angegeben. \n " +
+					"Es wird mit \""+ManagerLanguage.getString("Bohrung")+"\" gerechnet!");
 			return get_Bohrung();
 		}	
 	}	
@@ -2845,7 +2842,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_Lambda_Input() {
 	
 		try {
-		return set_doublePara(INPUTFILE_PARAMETER, "Lambda", "[-]", 0,
+		return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("Lambda"), "[-]", 0,
 					Double.POSITIVE_INFINITY);
 		} catch (ParameterFileWrongInputException e) {
 			e.log_Warning("Lambda ist nicht im Input File angegeben oder besitzt einen ungültigen Wert. Es findet keine Plausibilitätsüberprüfung statt!");
@@ -2854,35 +2851,12 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	}
 	//////////////////////////////////////////////////////////
 	
-	// Kerrom: für kompletten Zyklus
-	public double get_m_ini_APRkpl(){
-		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "m_ini", "[kg]", 0, Double.POSITIVE_INFINITY);
-		} catch (ParameterFileWrongInputException e) {
-			return Double.NaN;
-		}
-	}
-	
-	// für kompletten Zyklus (eventuell nicht nötig)
-	public double get_T_ini_APRkpl(){
-		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "T_ini_APRkpl", "[K]", 0, Double.POSITIVE_INFINITY);
-		} catch (ParameterFileWrongInputException e) {
-			return Double.NaN;
-		}
-	}
-	
-	
-	/**
-	 * Temperaturoffset zwischen Abgastemperatur und Zylindertemperatur zur Berechnung der Restgasmasse nach Müller-Bertling
-	 * @return
-	 */
 	public double get_offsetTemperatur() {
 		try {
-			return set_doublePara(INPUTFILE_PARAMETER, "offsetTemperatur", "[K]", Double.NEGATIVE_INFINITY,
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("offsetTemperatur"), "["+ManagerLanguage.getString("K")+"]", 0,
 						Double.POSITIVE_INFINITY);
 			} catch (ParameterFileWrongInputException e) {
-				e.log_Warning("Im Input File wurde keine offsetTemperatur angegeben, es wird mit 0 gerechnet!");
+				e.log_Warning("Im Input File wurde keine offsetTemperatur angegeben!");
 				return 0;
 			}
 	}	
@@ -2890,7 +2864,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_AV_innerer_Ventilteller_Durchmesser(){ //"inner seat diameter"
 		double Durchmesser_AV;
 		try {
-			Durchmesser_AV = set_doublePara(INPUTFILE_PARAMETER, "AV_innerer_Ventilteller_Durchmesser","[m]",1e-3,0.1);
+			Durchmesser_AV = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("AV_innerer_Ventilteller_Durchmesser"),"["+ManagerLanguage.getString("m")+"]",1e-3,0.1);
 			return Durchmesser_AV;
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
@@ -2901,7 +2875,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	public double get_EV_innerer_Ventilteller_Durchmesser(){ //"inner seat diameter"
 		double Durchmesser_EV;
 		try {
-			Durchmesser_EV = set_doublePara(INPUTFILE_PARAMETER, "EV_innerer_Ventilteller_Durchmesser","[m]",1e-3,0.1);
+			Durchmesser_EV = set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("EV_innerer_Ventilteller_Durchmesser"),"["+ManagerLanguage.getString("m")+"]",1e-3,0.1);
 			return Durchmesser_EV;
 		} catch (ParameterFileWrongInputException e) {
 			e.stopBremo();
@@ -3137,31 +3111,35 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 
 			PARAMETER=parameterVorgaben;				
 
-			String [] yesno ={"ja" , "nein"};	
-			if(set_StringPara(PARAMETER,"debuggingMode",yesno ).equalsIgnoreCase("ja"))
+			String [] yesno ={ManagerLanguage.getString("ja") , ManagerLanguage.getString("nein")};	
+			if(set_StringPara(PARAMETER,ManagerLanguage.getString("debuggingMode"),yesno ).equalsIgnoreCase(ManagerLanguage.getString("ja")))
 				DUBUGGING_MODE=true;
 			else
 				DUBUGGING_MODE=false;
 
-			MINIMALE_ZONENMASSE=set_doublePara(PARAMETER, "minimaleZonenMasse","[kg]",0,0.5); 
+			MINIMALE_ZONENMASSE=set_doublePara(PARAMETER, ManagerLanguage.getString("minimaleZonenMasse"),"["+ManagerLanguage.getString("kg")+"]",0,0.5); 
 
 			//sollten sinnvolle Grenzen sein...Grill gibt 1600K an das alte Bremo verwendet 1700K
-			T_FREEZE=set_doublePara(PARAMETER, "T_freeze","[K]",1400,1900);	
+			T_FREEZE=set_doublePara(PARAMETER, ManagerLanguage.getString("T_freeze"),"["+ManagerLanguage.getString("K")+"]",1400,1900);	
 			
 
-			String [] s2 ={"NASA9" , "Burcat", "ERC"};	
-			THERMO_POLYNOM_KOEFF_VORGABE=set_StringPara(PARAMETER,"polynomKoeffizienten", s2);
+			String [] s2 ={ManagerLanguage.getString("NASA9") , 
+					       ManagerLanguage.getString("Burcat"),
+					       ManagerLanguage.getString("ERC")};	
+			THERMO_POLYNOM_KOEFF_VORGABE=set_StringPara(PARAMETER,ManagerLanguage.getString("polynomKoeffizienten"), s2);
 
 
-			String [] s3 ={"Janaf" , "Burcat","Olikara"};	
-			GLEICHGEWICHTSKONSTANTEN_VORGABE=set_StringPara(PARAMETER,"gleichGewichtsKonstanten", s3);	
+			String [] s3 ={ManagerLanguage.getString("Janaf") , 
+					       ManagerLanguage.getString("Burcat"),
+					       ManagerLanguage.getString("Olikara")};	
+			GLEICHGEWICHTSKONSTANTEN_VORGABE=set_StringPara(PARAMETER,ManagerLanguage.getString("gleichGewichtsKonstanten"), s3);	
 
 
 			////////////////////////////////////////////////////////////////
 			//Einlesen von Daten die Abhaengig von anderen Eingaben sind////			
 			////////////////////////////////////////////////////////////////
 			String []s0 ={"2T","4T"};	
-			if(set_StringPara(PARAMETER,"arbeitsverfahren",s0).equalsIgnoreCase("4T")){
+			if(set_StringPara(PARAMETER,ManagerLanguage.getString("arbeitsverfahren"),s0).equalsIgnoreCase("4T")){
 				DAUER_ASP_KW=720;
 				UMD_ASP=2;
 			}else{
@@ -3177,20 +3155,22 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 			SEC_OBERGRENZE=Double.POSITIVE_INFINITY;
 
 
-			String []s ={"sec","sec_RechenBeginnInKW", "KW"};		
-			if(set_StringPara(PARAMETER,"zeit_oder_KW_Basiert",s).equalsIgnoreCase("KW")){
+			String []s ={ManagerLanguage.getString("sec"),
+					     ManagerLanguage.getString("sec_RechenBeginnInKW"), 
+					     ManagerLanguage.getString("KW")};		
+			if(set_StringPara(PARAMETER,ManagerLanguage.getString("zeit_oder_KW_Basiert"),s).equalsIgnoreCase("KW")){
 				IS_KW_BASIERT=true;
 				IS_ZEIT_BASIERT=false;
 				IS_ZEIT_BASIERT_START_IN_KW=false;
 
-			}else if (set_StringPara(PARAMETER,"zeit_oder_KW_Basiert",s).equalsIgnoreCase("sec")){
+			}else if (set_StringPara(PARAMETER,ManagerLanguage.getString("zeit_oder_KW_Basiert"),s).equalsIgnoreCase("sec")){
 				IS_KW_BASIERT=false;
 				IS_ZEIT_BASIERT=true;
 				IS_ZEIT_BASIERT_START_IN_KW=false;
-				if(MODUL_VORGABEN.get(MotorFabrik.MOTOR_FLAG)=="HubKolbenMotor")
+				if(MODUL_VORGABEN.get(MotorFabrik.MOTOR_FLAG)==ManagerLanguage.getString("HubKolbenMotor"))
 					throw new ParameterFileWrongInputException("Eine vollstaendig zeitbasierte Rechnung kann " +
 							"nur mit einem filebasierten Motorobjekt und einem Eingabefile der Form [ZEIT] [ZYLINDERVOLUMEN] erfolgen." +
-							"Alternativ ist \"sec_RechenBeginnInKW\" zu wählen");
+							"Alternativ ist \""+ManagerLanguage.getString("sec_RechenBeginnInKW")+"\" zu wählen");
 
 			}else{
 				IS_KW_BASIERT=false;
@@ -3205,7 +3185,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 				WRITE_INTERVAL_SEC= WRITE_INTERVAL_KW/(360*get_DrehzahlInUproSec());
 				double temp;
 				try{
-					temp = set_doublePara(PARAMETER, "rechnungsBeginn","[KWnZOT]",
+					temp = set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsBeginn"),"["+ManagerLanguage.getString("KWnZOT")+"]",
 						KW_UNTERGRENZE,KW_OBERGRENZE);				
 				}catch(ParameterFileWrongInputException p){
 					temp = convert_SEC2KW(get_Einlassschluss());
@@ -3213,7 +3193,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 				RECHNUNGS_BEGINN_DVA_KW = temp;
 
 				try{
-					temp=set_doublePara(PARAMETER, "rechnungsEnde","[KWnZOT]",
+					temp=set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsEnde"),"["+ManagerLanguage.getString("KWnZOT")+"]",
 						RECHNUNGS_BEGINN_DVA_KW,KW_OBERGRENZE);
 				}catch(ParameterFileWrongInputException p){
 					temp = get_Auslassoeffnet_KW();
@@ -3227,7 +3207,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 				RECHNUNGS_BEGINN_DVA_SEC=0;				
 
 				if(DUBUGGING_MODE){
-					double b=set_doublePara(PARAMETER, "debuggingTime","[KWnZOT]",RECHNUNGS_BEGINN_DVA_KW,RECHNUNGS_ENDE_DVA_KW+DAUER_ASP_KW);
+					double b=set_doublePara(PARAMETER, ManagerLanguage.getString("debuggingTime"),"["+ManagerLanguage.getString("KWnZOT")+"]",RECHNUNGS_BEGINN_DVA_KW,RECHNUNGS_ENDE_DVA_KW+DAUER_ASP_KW);
 
 					DUBUGGING_TIME_SEC=(b-RECHNUNGS_BEGINN_DVA_KW)/(360*get_DrehzahlInUproSec());	
 
@@ -3241,19 +3221,19 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 
 				//min-Wert --> ca. 0.01°KW bei 18000U/min
 				//max-Wert --> ca .2°KW bei 50 U/min
-				WRITE_INTERVAL_SEC=set_doublePara(PARAMETER, "rechnungsSchrittweite","[s]",9.5e-7,6.7e-3);
+				WRITE_INTERVAL_SEC=set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsSchrittweite"),"["+ManagerLanguage.getString("s")+"]",9.5e-7,6.7e-3);
 
 				//muss eigentlich nur passend zum MotorFile und DruckFile sein
 				double temp;
 				try{
-					temp = set_doublePara(PARAMETER, "rechnungsBeginn","[s]",
+					temp = set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsBeginn"),"["+ManagerLanguage.getString("s")+"]",
 						Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);	
 				}catch(ParameterFileWrongInputException p){
 					temp = get_Einlassschluss();
 				}
 				RECHNUNGS_BEGINN_DVA_SEC = temp;
 				try{
-					temp = set_doublePara(PARAMETER, "rechnungsEnde","[s]",
+					temp = set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsEnde"),"["+ManagerLanguage.getString("s")+"]",
 						RECHNUNGS_BEGINN_DVA_SEC,Double.POSITIVE_INFINITY);
 				}catch(ParameterFileWrongInputException p){
 					temp = get_Auslassoeffnet();
@@ -3267,7 +3247,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 				RECHNUNGS_ENDE_DVA_KW=555.555;
 
 				if(DUBUGGING_MODE){
-					DUBUGGING_TIME_SEC=set_doublePara(PARAMETER, "debuggingTime","[s]",RECHNUNGS_BEGINN_DVA_SEC,RECHNUNGS_ENDE_DVA_SEC);
+					DUBUGGING_TIME_SEC=set_doublePara(PARAMETER, ManagerLanguage.getString("debuggingTime"),"["+ManagerLanguage.getString("s")+"]",RECHNUNGS_BEGINN_DVA_SEC,RECHNUNGS_ENDE_DVA_SEC);
 				}else{
 					DUBUGGING_TIME_SEC=RECHNUNGS_BEGINN_DVA_SEC;
 				}				
@@ -3275,14 +3255,14 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 			}else if(IS_ZEIT_BASIERT_START_IN_KW){
 				//min-Wert --> ca. 0.01°KW bei 18000U/min
 				//max-Wert --> ca .2°KW bei 50 U/min
-				WRITE_INTERVAL_SEC=set_doublePara(PARAMETER, "rechnungsSchrittweite","[s]",9.5e-5,6.7e-3);
+				WRITE_INTERVAL_SEC=set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsSchrittweite"),"["+ManagerLanguage.getString("s")+"]",9.5e-5,6.7e-3);
 
-				RECHNUNGS_BEGINN_DVA_KW=set_doublePara(PARAMETER, "rechnungsBeginn","[KWnZOT]",
+				RECHNUNGS_BEGINN_DVA_KW=set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsBeginn"),"["+ManagerLanguage.getString("KWnZOT")+"]",
 						KW_UNTERGRENZE,KW_OBERGRENZE);	
 
 				RECHNUNGS_BEGINN_DVA_SEC=0;	
 
-				RECHNUNGS_ENDE_DVA_SEC=set_doublePara(PARAMETER, "rechnungsEnde","[s]",
+				RECHNUNGS_ENDE_DVA_SEC=set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsEnde"),"["+ManagerLanguage.getString("s")+"]",
 						RECHNUNGS_BEGINN_DVA_SEC,Double.POSITIVE_INFINITY);	
 				//die Zeitrechnung beginnt hier bei null!
 				ANZ_BERECHNETER_WERTE=(int)(RECHNUNGS_ENDE_DVA_SEC/WRITE_INTERVAL_SEC)+1;
@@ -3292,7 +3272,7 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 
 
 				if(DUBUGGING_MODE){
-					DUBUGGING_TIME_SEC=set_doublePara(PARAMETER, "debuggingTime","[s]",RECHNUNGS_BEGINN_DVA_SEC,RECHNUNGS_ENDE_DVA_SEC);
+					DUBUGGING_TIME_SEC=set_doublePara(PARAMETER, ManagerLanguage.getString("debuggingTime"),"["+ManagerLanguage.getString("s")+"]",RECHNUNGS_BEGINN_DVA_SEC,RECHNUNGS_ENDE_DVA_SEC);
 				}else{
 					DUBUGGING_TIME_SEC=RECHNUNGS_BEGINN_DVA_SEC;
 				}				

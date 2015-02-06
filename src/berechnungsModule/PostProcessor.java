@@ -1,9 +1,12 @@
 package berechnungsModule;
 
 import io.FileWriter_txt;
+
 import java.util.Hashtable;
+
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
+import berechnungsModule.Berechnung.APR_kompletterZyklus;
 import berechnungsModule.Berechnung.BerechnungsModellFabrik;
 import berechnungsModule.gemischbildung.MasterEinspritzung;
 import berechnungsModule.internesRestgas.InternesRestgas;
@@ -402,19 +405,40 @@ public class PostProcessor {
 		ergB.buffer_EinzelErgebnis("pMax [bar]",pMAX,i);
 		System.err.println("pMax = " + pMAX + " [bar]");
 		
-		i+=1;
-		double mAGR_inter=CP.RESTGASMODELL.get_mInternesRestgas_ASP();
-		ergB.buffer_EinzelErgebnis("mAGR_intern [kg]",mAGR_inter,i);
-		System.err.println("mAGR_intern = " + mAGR_inter + " [kg]");		
-
-		MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
-		double mKrst=me.get_mKrst_Sum_ASP();
-		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
-		double mGes= mVerbrennungsLuft+mKrst;
-		
-		i+=1;
-		ergB.buffer_EinzelErgebnis("AGR_intern [%]",100*mAGR_inter/mGes,i);	
-		System.err.println("mAGR_intern = " + 100*mAGR_inter/mGes + " [%]");
+		double mGes, mAGR_inter;
+		if(CP.BERECHNUNGS_MODELL.toString().contains("APR_kompletterZyklus")){
+			double[] massen = ((APR_kompletterZyklus)CP.BERECHNUNGS_MODELL).get_massen();
+			double mLuft = massen[0] * 1800 * CP.get_DrehzahlInUproSec();
+			i+=1;
+			ergB.buffer_EinzelErgebnis("mLuft [kg/h]",mLuft,i);
+			System.err.println("mLuft = " + mLuft + " [kg/h]");
+			
+			i+=1;
+			mGes = massen[1];
+			mAGR_inter = massen[1] - massen[0] - CP.MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP() - CP.get_mAGR_extern_ASP();
+			ergB.buffer_EinzelErgebnis("mAGR_intern [kg]",mAGR_inter,i);
+			System.err.println("mAGR_intern = " + mAGR_inter + " [kg]");
+			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("AGR_intern [%]",100*mAGR_inter/massen[1],i);	
+			System.err.println("mAGR_intern = " + 100*mAGR_inter/massen[1] + " [%]");
+			
+		}else{
+			
+			i+=1;
+			mAGR_inter=CP.RESTGASMODELL.get_mInternesRestgas_ASP();
+			ergB.buffer_EinzelErgebnis("mAGR_intern [kg]",mAGR_inter,i);
+			System.err.println("mAGR_intern = " + mAGR_inter + " [kg]");	
+	
+			MasterEinspritzung me=	CP.MASTER_EINSPRITZUNG;
+			double mKrst=me.get_mKrst_Sum_ASP();
+			double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();	
+			mGes= mVerbrennungsLuft+mKrst;
+			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("AGR_intern [%]",100*mAGR_inter/mGes,i);	
+			System.err.println("mAGR_intern = " + 100*mAGR_inter/mGes + " [%]");
+		}
 		
 		double temp = cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst();
 		double lambda_abgas = cp.get_mLuft_feucht_ASP()

@@ -136,19 +136,19 @@ public class BrennverlaufFileReader {
 		
 		// File wird eingelesen
 		double[][] data = readFile(abZeile);
-		dQburn = new double[(int) punkteProArbeitsspiel];
+		double[] dQburnTemp = new double[(int) punkteProArbeitsspiel];
 
-		zeitAchse = data[0];
+		double[] zeitAchseTemp = data[0];
 		
 		//Kerrom: Überprüfung der Einheit des Brennverlaufs und ggf. Umrechnung
 		try {
 			if (einheitdQburn.contains("[J/KW]") | einheitdQburn.contains("[J/CAD]")) {
-				for (int i = 0; i < dQburn.length; i++) { // Umrechnung des Brennverlaufs in [J/s], wenn die Einheit [J/KW]
-					dQburn[i] = CP.convert_ProKW_2_ProSEC(data[1][i]);
+				for (int i = 0; i < dQburnTemp.length; i++) { // Umrechnung des Brennverlaufs in [J/s], wenn die Einheit [J/KW]
+					dQburnTemp[i] = CP.convert_ProKW_2_ProSEC(data[1][i]);
 				}
 				System.err.println("Der eingelesene Brennverlauf wurde von [J/KW] in [J/s] umgerechnet.\n");
 			} else if (einheitdQburn.contains("[J/s]")) {
-				dQburn = data[1]; // bei [J/s] eingelesene Daten einfach übernehmen
+				dQburnTemp = data[1]; // bei [J/s] eingelesene Daten einfach übernehmen
 			} else {
 				throw new ParameterFileWrongInputException( 
 								"Die Einheit des eingelesenen Brennverlaufs ist "
@@ -157,6 +157,15 @@ public class BrennverlaufFileReader {
 			}
 		} catch (ParameterFileWrongInputException e) {
 			e.log_Warning();
+		}
+		//Zeitachse und Brennverlauf werden - wie Druckverlauf bei LWA - verdoppelt:
+		zeitAchse = new double[2*zeitAchseTemp.length];
+		dQburn = new double[2*zeitAchseTemp.length];
+		for(int z=0; z<zeitAchseTemp.length;z++){
+			zeitAchse[z] = zeitAchseTemp[z];
+			zeitAchse[z+zeitAchseTemp.length] = zeitAchseTemp[z]+CP.SYS.DAUER_ASP_SEC;
+			dQburn[z] = dQburnTemp[z];
+			dQburn[z+zeitAchseTemp.length] = dQburnTemp[z];
 		}
 	}
 

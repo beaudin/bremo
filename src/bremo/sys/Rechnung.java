@@ -42,18 +42,18 @@ public class Rechnung {
 	}
 
 
-	public void berechnungDurchfuehren(){	
-		double x0, xn, schrittweite;
+	public void berechnungDurchfuehren(){
+		double schrittweite;
 //		BerechnungsModell dglSys=CP.BERECHNUNGS_MODELL;		
 //		Solver sol=new Solver(CP, dglSys);
 		BerechnungsModell dglSys=CP.BERECHNUNGS_MODELL;
 		Solver sol=CP.SOLVER;
 		// initial value of x
-		x0 =CP.SYS.RECHNUNGS_BEGINN_DVA_SEC; //sollte normalerweise null sein aber man weiss ja nie
+		double x0 =CP.SYS.RECHNUNGS_BEGINN_DVA_SEC; //sollte normalerweise null sein aber man weiss ja nie
 		sol.setInitialValueOfX(x0);
 
 		// final value of x
-		xn = CP.SYS.RECHNUNGS_ENDE_DVA_SEC; //in [s]  
+		double xn = CP.SYS.RECHNUNGS_ENDE_DVA_SEC; //in [s]
 		sol.setFinalValueOfX(xn);
 
 		schrittweite = CP.SYS.WRITE_INTERVAL_SEC; //in [s]
@@ -66,7 +66,7 @@ public class Rechnung {
 		if(dglSys.isDVA()==true){ 						//fuer Verlustteilung Frank Haertel
 		
 			anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
-		//int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE; 
+		//int anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE;
 		}else 											 //fuer Verlustteilung Frank Haertel
 		    anzSimWerte=CP.SYS.ANZ_BERECHNETER_WERTE-1;  //fuer Verlustteilung Frank Haertel
 		

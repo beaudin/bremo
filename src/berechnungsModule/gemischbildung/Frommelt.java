@@ -27,11 +27,17 @@ public class Frommelt extends Einspritzung {
 		
 		// initial/boundary conditions
 		if(super.IS_LWA_EINSPRITZUNG){// checks if injection is during the charge cycle
+			super.mKrst_dampf.addValue(CP.get_Auslassoeffnet()-CP.SYS.DAUER_ASP_SEC, 0);
 			super.mKrst_dampf.addValue(CP.get_Einlassschluss(), super.mKrst);
-			super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, super.mKrst);
-			super.mKrst_dampf.addValue(CP.get_Auslassoeffnet()-
-					CP.SYS.WRITE_INTERVAL_SEC,super.mKrst);
+//			super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC, super.mKrst);
+//			super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_ENDE_DVA_SEC,super.mKrst);
+			super.mKrst_dampf.addValue(CP.get_Auslassoeffnet()-CP.SYS.WRITE_INTERVAL_SEC, 0);
 			super.mKrst_dampf.addValue(CP.get_Auslassoeffnet(), 0);
+			
+//			super.mKrst_dampf.addValue(CP.get_Einlassschluss()+CP.SYS.DAUER_ASP_SEC, super.mKrst);
+//			super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC+CP.SYS.DAUER_ASP_SEC, super.mKrst);
+//			super.mKrst_dampf.addValue(CP.SYS.RECHNUNGS_ENDE_DVA_SEC+CP.SYS.DAUER_ASP_SEC,super.mKrst);
+			super.mKrst_dampf.addValue(CP.get_Auslassoeffnet()+CP.SYS.DAUER_ASP_SEC, 0);
 		}
 		else{
 			super.mKrst_dampf.addValue(CP.get_Einlassschluss(), 0);

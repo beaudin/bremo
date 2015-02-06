@@ -24,14 +24,11 @@ import bremoExceptions.ParameterFileWrongInputException;
 
 
 /**
- * Klasse zur Durchfuehrung einer DVA mit einer Zone. Es wird zunaechst das Frischgemisch 
- * inForm eines Spezies-Objektes aus Frischluft, AGR und allen Kraftstoffen definiert. 
- * Der Heizwert dieses Gemischs wird herangezogen um dQ in dm umzurechnen. 
- * Das verbrennende Massenelement wird der Zone entzogen verbrannt, d.h. es wird die Zusammensetzung 
- * des dissoziierenden Rauchgases bestimmt, und anschließend mit der Temperatur der Zone wieder beigemischt.
+ * Klasse zur Durchfuehrung einer DVA mit einer Zone für den Schleppbetrieb. Anschließend erfolgt die Berechnung des
+ * thermodynamischen Verdichtungsverhältnisses.
  * 
  * <br> Inputfileparameter: whtfMult [-], mAGR_extern [kg/h], mLuft_feucht [kg/h] 
- * @author eichmeier
+ * @author neurohr
  *
  */
 public class ThermodynVerdichtung extends DVA{

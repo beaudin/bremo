@@ -132,12 +132,7 @@ public class Bremo extends Thread {
 				iterRechnung.initialisieren(casePara);
 //				iterRechnung.set_CasePara();
 				casePara.set_IterativeBerechnung(iterRechnung);
-				if (casePara.MODUL_VORGABEN.get("berechnungsModell").equals("APR_kompletterZyklus")){ //Kerrom
-					APR_kompletterZyklus apr_kpl = new APR_kompletterZyklus(casePara);
-					apr_kpl.berechne_APRkompletterZyklus();
-				}else{
 				r = new Rechnung(casePara);
-				}
 			} catch (ParameterFileWrongInputException e) {
 				if(calledFromGUI){
 				SwingBremo.setNrOfBremoAlive();

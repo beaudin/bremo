@@ -67,13 +67,14 @@ public class IndizierDaten {
 	 
 	 public void createMe(CasePara cp, boolean gemittelt){ 		//fuer Verlustteilung Frank Haertel
 		kghIndiziert = CP.is_pKGH_indiziert();
+		boolean APRkplZ = CP.MODUL_VORGABEN.get("berechnungsModell").equals("APR_kompletterZyklus");
 		File indiFile=CP.get_FileToRead("indizierFileName");	
 		int indexOf=indiFile.getName().indexOf(".");
 		String EINGABEDATEI_FORMAT=indiFile.getName().substring(indexOf+1); //Dateiendung		
 		int pZylNr=CP.get_ColumnToRead("spalte_pZyl");				
 		int pEinNr=pZylNr;
 		int pAusNr=pZylNr;
-		if(CP.RESTGASMODELL.involvesGasExchangeCalc()){
+		if(CP.RESTGASMODELL.involvesGasExchangeCalc() || APRkplZ){
 			pEinNr=CP.get_ColumnToRead("spalte_pEin");
 			pAusNr=CP.get_ColumnToRead("spalte_pAbg");	
 		}
@@ -85,7 +86,7 @@ public class IndizierDaten {
 				//kghIndiziert=true;
 			}
 		//}
-		if(CP.RESTGASMODELL.involvesGasExchangeCalc() && (pZylNr==pEinNr || pZylNr==pAusNr || pEinNr==pAusNr)){
+		if((CP.RESTGASMODELL.involvesGasExchangeCalc() || APRkplZ)&& (pZylNr==pEinNr || pZylNr==pAusNr || pEinNr==pAusNr)){
 			try {
 				throw new ParameterFileWrongInputException("Die angegebenen Kanalnummern bzw Spaltennummern " +
 						"für pZyl, pEin und pAbg sind teilweise identisch");
@@ -121,9 +122,9 @@ public class IndizierDaten {
 				}	
 			}
 			//if(cp.RESTGASMODELL.involvesGasExchangeCalc() && kghIndiziert){
-			if(cp.RESTGASMODELL.involvesGasExchangeCalc() & kghIndiziert){
+			if((cp.RESTGASMODELL.involvesGasExchangeCalc() || APRkplZ) & kghIndiziert){
 				indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr,pKGHNr);
-			}else if(cp.RESTGASMODELL.involvesGasExchangeCalc()){
+			}else if(cp.RESTGASMODELL.involvesGasExchangeCalc() || APRkplZ){
 				indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pEinNr,pAusNr);
 			}else if(kghIndiziert){
 				indiReader=new IndizierFileReader_txt(CP,indiFile.getAbsolutePath(),pZylNr,pKGHNr);
@@ -147,15 +148,23 @@ public class IndizierDaten {
 		///////////////////////////////////	
 		//die Zeitachse wird verdoppelt damit fuer die 
 		//LWA das zweite Arbeitsspiel zur Verfuegung steht
+		//UPDATE 01-2015 neurohr: Achsen werden für Komplettzyklusrechnung verdreifacht.
 		zeitAchse=indiReader.get_Zeitachse();
-		double temp=zeitAchse[zeitAchse.length-1]-zeitAchse[0]+zeitAchse[1]-zeitAchse[0]; //max-min+Auflösung -->Werte für den nächsten Zyklus
-		double [] temp2=new double[zeitAchse.length];
+		int laenge = zeitAchse.length;
+		double temp=zeitAchse[laenge-1]-zeitAchse[0]+zeitAchse[1]-zeitAchse[0]; //max-min+Auflösung -->Werte für den nächsten Zyklus
+		double [] temp2=new double[laenge];
 		for(int i=0; i<temp2.length; i++){
 			temp2[i]=zeitAchse[i]+temp;
 		}		   
 		zeitAchse=misc.LittleHelpers.concat(zeitAchse, temp2);
 		
-		if(CP.RESTGASMODELL.involvesGasExchangeCalc()){
+		temp2=new double[laenge];
+		for(int i=0; i<temp2.length; i++){
+			temp2[i]=zeitAchse[i]-temp;
+		}		   
+		zeitAchse=misc.LittleHelpers.concat(temp2, zeitAchse);
+		
+		if(CP.RESTGASMODELL.involvesGasExchangeCalc() || APRkplZ){
 			////////////////////////////////////
 			//Definieren des Einlassdrucks
 			///////////////////////////////////		
@@ -174,7 +183,8 @@ public class IndizierDaten {
 				pEin=pEinRoh;
 			
 			//Anpassen fuer die LWA (doppelte laenge fuer zweites ASP)
-			pEin=misc.LittleHelpers.concat(pEin, pEin);	
+			pEin=misc.LittleHelpers.concat(pEin, pEin);
+			pEin=misc.LittleHelpers.concat(pEin, pEin); //UPDATE 01-2015 neurohr
 			////////////////////////////////////
 			
 			////////////////////////////////////
@@ -191,7 +201,8 @@ public class IndizierDaten {
 			else
 				pAus=pAusRoh;
 			//Anpassen fuer die LWA (doppelte laenge fuer zweites ASP)
-			pAus=misc.LittleHelpers.concat(pAus,pAus);	
+			pAus=misc.LittleHelpers.concat(pAus,pAus);
+			pAus=misc.LittleHelpers.concat(pAus,pAus); //UPDATE 01-2015 neurohr
 			////////////////////////////////////
 			
 			////////////////////////////////////
@@ -206,7 +217,8 @@ public class IndizierDaten {
 			else
 				pKGH=pKGHRoh;	
 			//Anpassen fuer die LWA (doppelte laenge fuer zweites ASP)
-			pKGH=misc.LittleHelpers.concat(pKGH,pKGH); 	
+			pKGH=misc.LittleHelpers.concat(pKGH,pKGH);
+			pKGH=misc.LittleHelpers.concat(pKGH,pKGH); //UPDATE 01-2015 neurohr
 			}
 			////////////////////////////////////
 			
@@ -298,6 +310,7 @@ public class IndizierDaten {
 			pZyl=pZylRoh;
 		//Verdoppeln des Zylinderdrucks damit dieser fuer die LWA das naechste ASP umfasst
 		pZyl=misc.LittleHelpers.concat(pZyl, pZyl);
+		pZyl=misc.LittleHelpers.concat(pZyl, pZyl); //UPDATE 01-2015 neurohr
 		//PZYL_MAX=indiReader.get_pZylMAX();	
 		PZYL_MAX=indiReader.get_pZylMAX();
 		

@@ -2851,22 +2851,22 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 	}
 	//////////////////////////////////////////////////////////
 	// Kerrom: für kompletten Zyklus
-			public double get_m_ini_APRkpl(){
-				try {
-					return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("m_ini"), "["+ManagerLanguage.getString("kg")+"]", 0, Double.POSITIVE_INFINITY);
-				} catch (ParameterFileWrongInputException e) {
-					return Double.NaN;
-				}
-			}
-		
-			// für kompletten Zyklus (eventuell nicht nötig)
-			public double get_T_ini_APRkpl(){
-				try {
-					return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_ini_APRkpl"), "["+ManagerLanguage.getString("K")+"]", 0, Double.POSITIVE_INFINITY);
-				} catch (ParameterFileWrongInputException e) {
-					return Double.NaN;
-				}
-			}
+	public double get_m_ini_APRkpl(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("m_ini"), "["+ManagerLanguage.getString("kg")+"]", 0, Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {
+			return Double.NaN;
+		}
+	}
+
+	// für kompletten Zyklus (eventuell nicht nötig)
+	public double get_T_ini_APRkpl(){
+		try {
+			return set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("T_ini_APRkpl"), "["+ManagerLanguage.getString("K")+"]", 0, Double.POSITIVE_INFINITY);
+		} catch (ParameterFileWrongInputException e) {
+			return Double.NaN;
+		}
+	}
 	
 	public double get_offsetTemperatur() {
 		try {
@@ -3202,18 +3202,28 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 				WRITE_INTERVAL_SEC= WRITE_INTERVAL_KW/(360*get_DrehzahlInUproSec());
 				double temp;
 				try{
-					temp = set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsBeginn"),"["+ManagerLanguage.getString("KWnZOT")+"]",
-						KW_UNTERGRENZE,KW_OBERGRENZE);				
+					if(MODUL_VORGABEN.get("berechnungsModell").equals("APR_kompletterZyklus"))
+						temp = set_doublePara(PARAMETER, ManagerLanguage.getString("Auslassoeffnet"), "["+ManagerLanguage.getString("KWnZOT")+"]",
+								-1*DAUER_ASP_KW, DAUER_ASP_KW)-DAUER_ASP_KW;
+					else
+						temp = set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsBeginn"),"["+ManagerLanguage.getString("KWnZOT")+"]",
+								KW_UNTERGRENZE,KW_OBERGRENZE);				
 				}catch(ParameterFileWrongInputException p){
-					temp = convert_SEC2KW(get_Einlassschluss());
+					temp = set_doublePara(PARAMETER, ManagerLanguage.getString("Einlassschluss"), "["+ManagerLanguage.getString("KWnZOT")+"]",
+							-1*DAUER_ASP_KW, DAUER_ASP_KW);
 				}
 				RECHNUNGS_BEGINN_DVA_KW = temp;
 
 				try{
-					temp=set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsEnde"),"["+ManagerLanguage.getString("KWnZOT")+"]",
-						RECHNUNGS_BEGINN_DVA_KW,KW_OBERGRENZE);
+					if(MODUL_VORGABEN.get("berechnungsModell").equals("APR_kompletterZyklus"))
+						temp = set_doublePara(PARAMETER, ManagerLanguage.getString("Auslassoeffnet"), "["+ManagerLanguage.getString("KWnZOT")+"]",
+								-1*DAUER_ASP_KW, DAUER_ASP_KW)-WRITE_INTERVAL_KW;
+					else
+						temp=set_doublePara(PARAMETER, ManagerLanguage.getString("rechnungsEnde"),"["+ManagerLanguage.getString("KWnZOT")+"]",
+								RECHNUNGS_BEGINN_DVA_KW,KW_OBERGRENZE);
 				}catch(ParameterFileWrongInputException p){
-					temp = get_Auslassoeffnet_KW();
+					temp = set_doublePara(PARAMETER, ManagerLanguage.getString("Auslassoeffnet"), "["+ManagerLanguage.getString("KWnZOT")+"]",
+							-1*DAUER_ASP_KW, DAUER_ASP_KW);
 				}
 				RECHNUNGS_ENDE_DVA_KW = temp;
 				//der Anfang zaehlt mit

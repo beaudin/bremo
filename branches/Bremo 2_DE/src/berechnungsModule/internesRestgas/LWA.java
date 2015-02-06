@@ -30,7 +30,12 @@ public class LWA extends InternesRestgas {
 	}		
 	
 	private double ladungswechselAnalyseDurchfuehren(CasePara cp){
-		
+		if(artLWA.equalsIgnoreCase("check")){
+			if(cp.get_AnzahlEinspritzungen()==0)
+				artLWA="schlepp";
+			else
+				artLWA="normal";
+		}
 		double x0_LW, xn_LW, schrittweite_LW;
 		double time;
 		double mLuftFeucht;

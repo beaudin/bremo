@@ -32,32 +32,10 @@ public class InternesRestgasFabrik extends ModulFabrik {
 			
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[1])){
 			RESTGAS_MODELL=(InternesRestgas) new MuellerBertling(cp); //Kerrom
-//			RESTGAS_MODELL=null;
-//			try {
-//				throw new BirdBrainedProgrammerException(
-//						"Das ausgewaehlte Restgasmodell \"" +internesRestgas_ModellVorgabe + 
-//						" \" wurde im InputFile " +
-//						"zwar als valide akzeptiert, ist im Programm aber noch nicht implementiert worden.");
-//			} catch (BirdBrainedProgrammerException e) {
-//				e.stopBremo();
-//			}
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[2])){
 			RESTGAS_MODELL=(InternesRestgas) new Heywood(cp);
-//			RESTGAS_MODELL=null;
-//			try {
-//				throw new BirdBrainedProgrammerException(
-//						"Das ausgewaehlte Restgasmodell \"" +internesRestgas_ModellVorgabe + 
-//						" \" wurde im InputFile " +
-//						"zwar als valide akzeptiert, ist im Programm aber noch nicht implementiert worden.");
-//			} catch (BirdBrainedProgrammerException e) {
-//				e.stopBremo();
-//			}	
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[3])){
-			if(cp.BERECHNUNGS_MODELL.equals("ThermodynVerdichtung"))
-				RESTGAS_MODELL=(InternesRestgas) new LWA(cp, "schlepp");
-			else
-				RESTGAS_MODELL=(InternesRestgas) new LWA(cp, "normal");
-			
+			RESTGAS_MODELL=(InternesRestgas) new LWA(cp, "check");
 		}else if(internesRestgas_ModellVorgabe.equals(INTERNES_RESTGAS_MODELLE[4])){
 			RESTGAS_MODELL=(InternesRestgas) new LWA(cp,"zwiko");
 		}else{

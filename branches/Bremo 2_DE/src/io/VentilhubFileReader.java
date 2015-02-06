@@ -153,7 +153,7 @@ public class VentilhubFileReader {
 		}
 		    //File wird eingelesen
 		   double[][] data = readFile(abZeile);
-		   zeitAchse=data[0];			
+		   zeitAchse=data[0];
 		   hub = misc.LittleHelpers.concat(data[1],data[1]);
 	}	
 	
@@ -237,17 +237,12 @@ public class VentilhubFileReader {
 		letzterWert=zeitAchse[zeitAchse.length-2];
 		ersterWert=zeitAchse[0];
 		
-		double a=time-dauerASP_SEC;
-		boolean b=(time>=ersterWert);
-		boolean c=(time<=letzterWert);
-		double d=(ersterWert+dauerASP_SEC);
-		double e=(letzterWert+dauerASP_SEC);
-		
-		
 //		Schleifen-Abbruch: reicht ><= oder delta<>= sehr kleinem Wert??
 //		if(time>=(ersterWert+dauerASP_SEC) && time<=(letzterWert+dauerASP_SEC)){ //ORIGINAL
 		if((ersterWert+dauerASP_SEC)-time<=-1E-12 && (letzterWert+dauerASP_SEC)-time>=1E-12){
 			return L_Interp.linInterPol(time-dauerASP_SEC, zeitAchse, hub);
+		}else if((ersterWert-dauerASP_SEC)-time<=-1E-12 && (letzterWert-dauerASP_SEC)-time>=1E-12){
+			return L_Interp.linInterPol(time+dauerASP_SEC, zeitAchse, hub);
 //		}else if(time>=ersterWert && time<=letzterWert){ //ORIGINAL
 		}else if(1E-12>=ersterWert-time && -1E-12<=letzterWert-time){
 			return L_Interp.linInterPol(time, zeitAchse, hub);

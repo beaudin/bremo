@@ -80,13 +80,13 @@ public class BrennverlaufDaten {
 		
 	
 				}
-			
+			//TODO ISt das notwendig mit modifiziertem "public double get_dQburn (double time)" (s.u.)
 			dQburn = burnReader.getdQburn();
 			dQburn[0] = 0; //ersten Wert auf NULL ziehen
 			dQburn[dQburn.length-1] = 0; //letzten Wert auf NULL ziehen
 			zeitAchse= burnReader.getZeitachse();
-			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
-			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
+//			zeitAchse[0] = CP.convert_KW2SEC(-180); //ersten Wert auf -180°KW ziehen
+//			zeitAchse[zeitAchse.length-1] = CP.convert_KW2SEC(180); //letzten Wert auf 180°KW ziehen
 		}
 		
 		//NEUROHR 08.2014
@@ -335,8 +335,18 @@ public class BrennverlaufDaten {
 
 	
 			//0.0014153574610152278
+		/**
+		 * Abfrage von dQburn mittels linearer Interpolation. Bei einem Fehler, wie z.B. Abfrage eines Wertes 
+		 * außerhalb der Zeitachse, wird 0 zurück gegeben.
+		 * @param time
+		 * @return
+		 */
 		public double get_dQburn (double time){
-		return L_Interp.linInterPol(time, zeitAchse, dQburn);		
+			try{
+				return L_Interp.linInterPol(time, zeitAchse, dQburn);
+			}catch(Exception e){
+				return 0;
+			}
 	}
 	
 }

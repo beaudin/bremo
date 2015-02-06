@@ -35,9 +35,8 @@ import bremoExceptions.ParameterFileWrongInputException;
  * verbrennungsBeginnAutoDetect, verbrennungsBeginn [KWnZOT] / [s],
  */
 
-public class APR_kompletterZyklus extends BerechnungsModell {
+public class APR_kompletterZyklus extends APR {
 	
-	protected CasePara CP;
 	private WandWaermeUebergang wandWaermeModell;
 	private Motor motor;
 	private GleichGewichtsRechner gg;
@@ -55,13 +54,11 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 	private boolean verbrennungHatBegonnen;
 	private boolean bargende = false; // Nur wenn Bargende
 	
-	private ErgebnisBuffer Ergebnis;
-	
 	private double whtfMult;
 
 	private double mINIT;
 
-	private double dmZoneBurn = 0, Qmax;
+	private double dmZoneBurn = 0, Qzu;
 	private Zone[] initialZones;
 	private boolean esBrennt = false;
 	private double dQburnMAX = 0;
@@ -89,9 +86,9 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 	private double A_E;	//Referenzfläche für den Durchflusskennwert des Einlassventils
 	private double A_A; //Referenzfläche für den Durchflusskennwert des Auslassventils
 	private double dmEVTemp;
-	private double dm;
+	private double dm, mGes;
 	private double dmAusgabe;
-	private double dmAuslass, dmEinlass;
+	private double dmAuslass, dmEinlass, mAuslass, mEinlass;
 	private double alpha_E_vor; //Durchflusskennwert des Einlassventils, vorwärts
 	private double alpha_E_rueck; //Durchflusskennwert des Einlassventils, rückwärts
 	private double alpha_A_vor; //Durchflusskennwert des Auslassventils, vorwärts
@@ -101,7 +98,7 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 // Konstruktoren analog zur APR (erstmal nicht benötigt)
 //	protected APR_kompletterZyklus(CasePara cp, boolean waermeVerluste,	String brennverlaufsart, double wertQ, double startQ) {
 //		super(cp,new ErgebnisBuffer(cp,"apr_kpl"));
-//		this.CP = cp;
+//		cp = cp;
 //		brennverlauf = new BrennverlaufDaten(cp, brennverlaufsart, wertQ, startQ);
 //		ANZAHL_ZONEN = 1;
 //		this.createMe(cp, waermeVerluste);
@@ -110,7 +107,7 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 //
 //	protected APR_kompletterZyklus(CasePara cp, boolean waermeVerluste, String brennverlaufsart, double wertQ) {
 //		super(cp,new ErgebnisBuffer(cp,"apr_kpl"));
-//		this.CP = cp;
+//		cp = cp;
 //		brennverlauf = new BrennverlaufDaten(cp, brennverlaufsart, wertQ);
 //		ANZAHL_ZONEN = 1;
 //		this.createMe(cp, waermeVerluste);
@@ -118,7 +115,7 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 //
 //	protected APR_kompletterZyklus(CasePara cp, boolean waermeVerluste, String brennverlaufsart) {
 //		super(cp,new ErgebnisBuffer(cp,"apr_kpl"));
-//		this.CP = cp;
+//		cp = cp;
 //		brennverlauf = new BrennverlaufDaten(cp, brennverlaufsart);
 //		ANZAHL_ZONEN = 1;
 //		this.createMe(cp, waermeVerluste);
@@ -132,7 +129,7 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 //	 */
 //	protected APR_kompletterZyklus(CasePara cp, String rechenBV) {
 //		super(cp,new ErgebnisBuffer(cp,"apr_kpl"));
-//		this.CP = cp;
+//		cp = cp;
 //		if (rechenBV.equalsIgnoreCase("Vibe")) {
 //			brennverlauf = new BrennverlaufDaten(cp, "Vibe");
 //		} else {
@@ -148,9 +145,9 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 //		this.createMe(cp, true);
 //	}
 
-	public APR_kompletterZyklus(CasePara cp) {
-		super(cp,new ErgebnisBuffer(cp,"apr_kpl"));
-		this.CP = cp;
+	protected APR_kompletterZyklus(CasePara cp) {
+//		super(cp,new ErgebnisBuffer(cp,"apr_kpl"));
+		super(cp);
 		brennverlauf = new BrennverlaufDaten(cp);
 		ANZAHL_ZONEN = 1;
 		this.createMe(cp, true);
@@ -158,8 +155,8 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 
 	private void createMe(CasePara cp, boolean waermeVerluste) {
 		
-		whtfMult = cp.get_whtfMult();
-		indiD=new IndizierDaten(cp); 
+		whtfMult = CP.get_whtfMult();
+		indiD=new IndizierDaten(CP); 
 		motor = CP.MOTOR; 
 		if (waermeVerluste)
 			wandWaermeModell = CP.WAND_WAERME;
@@ -175,29 +172,33 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 		if (bargende) { // Nur wenn Bargende
 			turb = CP.TURB_FACTORY.get_TurbulenceModel(); // für Bargende
 		}
-		T_buffer = new misc.VektorBuffer(cp); 
-		dQb_buffer = new misc.VektorBuffer(cp);
-		dQw_buffer = new misc.VektorBuffer(cp);
-		dmb_buffer = new misc.VektorBuffer(cp);
-		p_buffer = new misc.VektorBuffer(cp);	
+		T_buffer = new misc.VektorBuffer(CP); 
+		dQb_buffer = new misc.VektorBuffer(CP);
+		dQw_buffer = new misc.VektorBuffer(CP);
+		dmb_buffer = new misc.VektorBuffer(CP);
+		p_buffer = new misc.VektorBuffer(CP);	
 		
 		//Initialisierung der Anfangsbedingungen
 		initialZones = new Zone[ANZAHL_ZONEN];
-						
+		
+		//Initialisierung der Anfangsmassen bei Auslassschluss:
+		double mLuft_tr = CP.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
+		double mW = CP.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel
+		double mAGRex = CP.get_mAGR_extern_ASP();	//Masse externer AGR kg/ASP
+		double mKrst = masterEinspritzung.get_mKrst_Sum_ASP();
+		this.mINIT = CP.get_m_ini_APRkpl();
+		double mAGRint = mINIT - (mLuft_tr + mW + mKrst + mAGRex);
+		
 		// analog zur LWA
-		gAbgasbehaelter = new GasGemisch("AGR_intern_LWA");
+		gAbgasbehaelter = new GasGemisch("AGR_intern");
 		gAbgasbehaelter.set_Gasmischung_molenBruch(((GasGemisch)CP.get_spezAbgas()).get_speziesMassenBruecheDetailToIntegrate());		
 		CP.SPEZIES_FABRIK.integrierMich(gAbgasbehaelter);
 		
-		// Kraftstoff aus Saugrohreinspritzungen wird unabhängig vom Zeitpunkt direkt zum Behaeltergemisch gerechnet
-		Spezies krst = masterEinspritzung.get_spezKrst_verdampft(CP.get_Auslassoeffnet(), 0);		
-		double mKrst = masterEinspritzung.get_mKrst_dampffoermig_Sum_Zone(CP.get_Auslassoeffnet(),0);
-		double mLuft_tr = CP.get_mLuft_trocken_ASP(); //trockene Luftmasse pro ASP
-		double mW = CP.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel			
-		double mAGRex = CP.get_mAGR_extern_ASP();	//Masse externer AGR kg/ASP		
+		// Kraftstoff aus allen Einspritzungen wird unabhängig vom Zeitpunkt direkt zum Behaeltergemisch gerechnet
+		Spezies krst = masterEinspritzung.get_spezKrstALL();
 	
 		//Bestimmung der Verbrennungsluftzusammensetzung	
-		GasGemisch agrEX = new GasGemisch("AGR_extern_LWA");
+		GasGemisch agrEX = new GasGemisch("AGR_extern");
 		agrEX.set_Gasmischung_molenBruch(((GasGemisch)CP.get_spezAbgas()).get_speziesMolenBrueche());	
 		CP.SPEZIES_FABRIK.integrierMich(agrEX);
 		
@@ -206,55 +207,63 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 		Hashtable<Spezies,Double>feuchteLuft_MassenBruchHash=new Hashtable<Spezies,Double>();
 		feuchteLuft_MassenBruchHash.put(CP.SPEZIES_FABRIK.get_spezLuft_trocken(),mLuft_tr/mLF);		
 		feuchteLuft_MassenBruchHash.put(CP.SPEZIES_FABRIK.get_spezH2O(),mW/mLF);
-		feuchteLuft=new GasGemisch("feuchteLuft_LWA");
+		feuchteLuft=new GasGemisch("feuchteLuft");
 		feuchteLuft.set_Gasmischung_massenBruch(feuchteLuft_MassenBruchHash);		
-		CP.SPEZIES_FABRIK.integrierMich(feuchteLuft);		
+		CP.SPEZIES_FABRIK.integrierMich(feuchteLuft);
 		
-		//gesamte Masse 
-		double mGes = mLF + mAGRex + mKrst; 
+		//gesamte Masse für Frischgemisch
+		double mKrst_SRE = 0;
+		for(int k=0;k<CP.get_AnzahlEinspritzungen();k++){
+			if(masterEinspritzung.get_Einspritzung(k).equals("SRE") || masterEinspritzung.get_Einspritzung(k).equals("Homogen"))
+				mKrst_SRE += masterEinspritzung.get_Einspritzung(k).get_mKrst_ASP();
+		}
+		double mGes = mLF + mAGRex + mKrst_SRE; 
 		//Frischgemisch
 		Hashtable<Spezies, Double> frischGemisch_MassenbruchHash=new Hashtable<Spezies,Double>();		
 		frischGemisch_MassenbruchHash.put(feuchteLuft, mLF/mGes);
 		frischGemisch_MassenbruchHash.put(agrEX, mAGRex/mGes);
-		frischGemisch_MassenbruchHash.put(krst, mKrst/mGes);
-		GasGemisch gemischINIT = new GasGemisch("GemischINIT");	
-		gemischINIT.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);	
+		for(int k=0;k<CP.get_AnzahlEinspritzungen();k++){
+			if(masterEinspritzung.get_Einspritzung(k).equals("SRE") || masterEinspritzung.get_Einspritzung(k).equals("Homogen"))
+				frischGemisch_MassenbruchHash.put(masterEinspritzung.get_Einspritzung(k).get_Krst(),
+						masterEinspritzung.get_Einspritzung(k).get_mKrst_ASP()/mGes);
+		}
+		GasGemisch ggTemp = new GasGemisch("GemischSaugrohr");
+		ggTemp.set_Gasmischung_massenBruch(frischGemisch_MassenbruchHash);
+		gFrischluftbehaelter = ggTemp;
 		
-		gFrischluftbehaelter = gemischINIT;	
-		TSaug = this.CP.get_T_LadeLuft();
-		TAbg = this.CP.get_T_Abgas();
-		A_E = this.CP.get_ReferenzflaecheEinlass();
-		A_A = this.CP.get_ReferenzflaecheAuslass();
+		Hashtable<Spezies, Double>gemischINIT_MassenbruchHash=new Hashtable<Spezies,Double>();
+//		gemischINIT_MassenbruchHash.put(feuchteLuft, mLF/mINIT);
+//		gemischINIT_MassenbruchHash.put(agrEX, mAGRex/mINIT);
+//		gemischINIT_MassenbruchHash.put(krst, mKrst/mINIT);
+//		gemischINIT_MassenbruchHash.put(gAbgasbehaelter, mAGRint/mINIT);
+		gemischINIT_MassenbruchHash.put(gAbgasbehaelter, 1.0);
+		GasGemisch gemischINIT = new GasGemisch("GemischINIT");
+		gemischINIT.set_Gasmischung_massenBruch(gemischINIT_MassenbruchHash);
 		
-		DF_Datei_Ein=new DurchflusskennzahlFileReader(this.CP,"Einlass");
-		DF_Datei_Aus=new DurchflusskennzahlFileReader(this.CP,"Auslass");
-		VH_Datei_Ein=new VentilhubFileReader(this.CP, "Einlass");
-		VH_Datei_Aus=new VentilhubFileReader(this.CP, "Auslass");
+		TSaug = CP.get_T_LadeLuft();
+		TAbg = CP.get_T_Abgas();
+		A_E = CP.get_ReferenzflaecheEinlass();
+		A_A = CP.get_ReferenzflaecheAuslass();
+		
+		DF_Datei_Ein=new DurchflusskennzahlFileReader(CP,"Einlass");
+		DF_Datei_Aus=new DurchflusskennzahlFileReader(CP,"Auslass");
+		VH_Datei_Ein=new VentilhubFileReader(CP, "Einlass");
+		VH_Datei_Aus=new VentilhubFileReader(CP, "Auslass");
 		
 		dmEVTemp = 0;
 
 		// Anfangsbedingungen setzen
 		// p Init
-		double p_init = CP.get_p_ini();
+		double p_init = indiD.get_pZyl(CP.get_Auslassoeffnet());
 		// V Init
-		double V_init = motor.get_V(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC);
-		Spezies ggZone_init = gemischINIT;
-		double R = ggZone_init.get_R();
+		double V_init = motor.get_V(CP.get_Auslassoeffnet());
+		double R = gemischINIT.get_R();
 		
-		//T Init und m Init
-		double T_init = CP.get_T_ini_APRkpl();
-		this.mINIT = CP.get_m_ini_APRkpl();
-		is_m_oder_T(); //Prüfen, ob T oder m im Input-File angegeben, ansonsten Fehler
-		if (Double.isNaN(T_init)) {
-			T_init = (p_init * V_init) / (mINIT * R);
-		}
-		if (Double.isNaN(mINIT)) {
-			mINIT = (p_init * V_init) / (T_init * R);
-		}
 		
-		initialZones[0] = new Zone(CP, p_init, V_init, T_init, mINIT, ggZone_init, false, 0);
+		double T_init = (p_init * V_init) / (mINIT * R);
+		initialZones[0] = new Zone(CP, p_init, V_init, T_init, mINIT, gemischINIT, false, 0);
 		
-		Qmax = masterEinspritzung.get_mKrst_Sum_ASP()* masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		Qzu = masterEinspritzung.get_mKrst_Sum_ASP()* masterEinspritzung.get_spezKrstALL().get_Hu_mass();
 		if (bargende) { // Nur wenn Bargende
 			turb.initialize(initialZones, 0);
 		}
@@ -272,8 +281,8 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 		dmAusgabe = 0;
 		dmEinlass = 0;
 		dmAuslass = 0;
-		pSaug =	98261.6;	//TODO: indiD.get_pEin(time);
-		pAbg = 99596;	//TODO: indiD.get_pAus(time);
+		pSaug =	indiD.get_pEin(time);
+		pAbg = indiD.get_pAus(time);
 
 		// Ventilhuebe
 		hub_E = VH_Datei_Ein.get_Hub(time);
@@ -422,80 +431,6 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 
 		return zonen_IN;
 	}
-
-	
-	public void berechne_APRkompletterZyklus(){ //TODO: muss evtl noch weiter angepasst werden (angepasste Version von berechnungDurchfuehren() aus Rechnung)
-		
-		double x0, xn, schrittweite;
-		BerechnungsModell dglSys=CP.BERECHNUNGS_MODELL;
-		Solver sol=CP.SOLVER;
-		// initial value of x
-		x0 = CP.get_Auslassoeffnet();
-		sol.setInitialValueOfX(x0);
-
-		// final value of x
-		xn = CP.get_Auslassoeffnet() + CP.SYS.DAUER_ASP_SEC; //in [s]  
-		sol.setFinalValueOfX(xn);
-
-		schrittweite = CP.SYS.WRITE_INTERVAL_SEC; //in [s]
-		sol.setStepSize(schrittweite);
-		
-		int anzGesamtIterationen=0;
-		
-		//Anzahl simWerte muss für eine APR (minus 1) angepasst werden um einen Interpolationsfehler zu vermeiden 
-		int anzSimWerte = CP.SYS.ANZ_BERECHNETER_WERTE-1;  
-		
-		double time;
-		Zone[] zn=dglSys.get_initialZones();
-		dglSys.bufferErgebnisse(x0, zn);
-		Zone [] znTemp = null;
-	
-
-		for(int i=1;i<anzSimWerte;i++){
-
-			time = x0 + i*CP.SYS.WRITE_INTERVAL_SEC;	
-			
-			if(CP.SYS.IS_KW_BASIERT)
-//				System.out.println("berechne Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");	//ORIGINAL
-				System.out.println("berechne Zeitschritt: " +Math.round(10*CP.convert_SEC2KW(time))/10.0+ "[KW]");	
-			else
-				System.out.println("berechne Zeitschritt: " +time+ "[sec]");
-			
-			sol.setFinalValueOfX(time);		
-			
-			zn = calc_dQburn(zn);
-			znTemp = sol.solveRK(zn);			
-			zn = znTemp;
-			znTemp = null;
-			
-			dglSys.bufferErgebnisse(time,zn);
-			sol.setInitialValueOfX(time);
-			CP.set_aktuelle_Rechenzeit(time);
-			
-			if(dglSys.initialiseBurntZone()){
-				zn=dglSys.get_initialZonesWhileRunning();
-				//Damit die Anfangsbedingungen der Zonen im Ergebnisfile erscheinen
-				//dglSys.bufferErgebnisse(time,zn); 
-			}			
-
-			if(CP.SYS.DUBUGGING_MODE){					
-				if(Math.abs(time-CP.SYS.DUBUGGING_TIME_SEC)<0.5*CP.SYS.WRITE_INTERVAL_SEC){ //Rechnet bis KW und schreibt dann alle Werte ins txt-file
-					CP.schreibeAlleErgebnisFiles("DEBUG_"+CP.get_CaseName()+".txt");	
-					System.out.println("I am plotting...");
-				}
-			}
-		}
-		if(CP.SYS.DUBUGGING_MODE)
-			CP.schreibeAlleErgebnisFiles(CP.get_CaseName()+".txt");
-		else
-			dglSys.schreibeErgebnisFile(CP.get_CaseName()+".txt");
-		String xxx = CP.BERECHNUNGS_MODELL.toString();
-
-		PostProcessor pp = new PostProcessor(dglSys.get_dm_buffer(), dglSys.get_dQb_buffer(), dglSys.get_dQw_buffer(), dglSys.get_p_buffer(), CP); // war bei Juwe auskommentiert
-		pp.schreibeErgebnisFile(CP.get_CaseName() + ".txt");
-		System.out.println("Gesamtanzahl der benoetigeten Iterationen: " + anzGesamtIterationen );
-	}	
-	
 	
 	/**
 	 * 
@@ -535,8 +470,6 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 	
 	public void bufferErgebnisse(double time, Zone[] zn) {
 		
-		Ergebnis = new ErgebnisBuffer(CP,"txt");
-		
 		double dQburn = brennverlauf.get_dQburn(time);
 		double p = zn[0].get_p();
 		dQb_buffer.addValue(time, dQburn);
@@ -557,134 +490,173 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 		esBrennt = verbrennungHatBegonnen;
 
 		// Berechnen integraler Werte
-		zonenMasseVerbrannt = zonenMasseVerbrannt + dmZoneBurn * this.CP.SYS.WRITE_INTERVAL_SEC;
+		zonenMasseVerbrannt = zonenMasseVerbrannt + dmZoneBurn * CP.SYS.WRITE_INTERVAL_SEC;
 		fortschritt = zonenMasseVerbrannt / mINIT;
-		Qb = Qb + dQburn * this.CP.SYS.WRITE_INTERVAL_SEC;
-		Qw = Qw + dQw * this.CP.SYS.WRITE_INTERVAL_SEC;
-		mL = mL + dmL * this.CP.SYS.WRITE_INTERVAL_SEC;
+		Qb = Qb + dQburn * CP.SYS.WRITE_INTERVAL_SEC;
+		Qw = Qw + dQw * CP.SYS.WRITE_INTERVAL_SEC;
+		mL = mL + dmL * CP.SYS.WRITE_INTERVAL_SEC;
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
-		double xQ = Qb / Qmax;
+		double xQ = Qb / Qzu;
 
 		int i = -1;
 		i += 1;
-		// super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]",super.CP.convert_SEC2KW(time),i);
-		// //ORIGINAL
-		Ergebnis.buffer_EinzelErgebnis("Kurbelwinkel [°KW]", Math.round(10 * this.CP.convert_SEC2KW(time)) / 10.0, i);
+		super.buffer_EinzelErgebnis("Kurbelwinkel [°KW]", Math.round(10 * CP.convert_SEC2KW(time)) / 10.0, i);
 
+//		i += 1;
+//		super.buffer_EinzelErgebnis("Zeit [s n. Rechenbeginn]", time, i);
+		
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Zeit [s n. Rechenbeginn]", time, i);
-
-		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Brennraumvolumen [m3]", motor.get_V(time),
+		super.buffer_EinzelErgebnis("Brennraumvolumen [m3]", motor.get_V(time),
 				i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("p [bar]", zn[0].get_p() * 1e-5, i);
+		super.buffer_EinzelErgebnis("p [bar]", zn[0].get_p()*1e-5, i);
+		
+		i += 1;
+		super.buffer_EinzelErgebnis("p_Exp [bar]", indiD.get_pZyl(time) * 1e-5, i);
+		
+		i += 1;
+		super.buffer_EinzelErgebnis("p_Ein [bar]", indiD.get_pEin(time) * 1e-5, i);
+		
+		i += 1;
+		super.buffer_EinzelErgebnis("p_Aus [bar]", indiD.get_pAus(time) * 1e-5, i);
+		
+		i += 1;
+		super.buffer_EinzelErgebnis("Hub_Ein [mm]", VH_Datei_Ein.get_Hub(time) * 1e4, i);
+		
+		i += 1;
+		super.buffer_EinzelErgebnis("Hub_Aus [mm]", VH_Datei_Aus.get_Hub(time) * 1e4, i);
+		
+		i += 1;
+		super.buffer_EinzelErgebnis("dmV [kg/s]", dm/CP.SYS.WRITE_INTERVAL_SEC, i);
+		
+		i += 1;
+		super.buffer_EinzelErgebnis("dmV [kg/KW]", CP.convert_ProSEC_2_ProKW(dm/CP.SYS.WRITE_INTERVAL_SEC), i);
+		
+		i += 1;
+		mEinlass += (dmEinlass * CP.SYS.WRITE_INTERVAL_SEC);
+		super.buffer_EinzelErgebnis("mEinlass [kg]", mEinlass, i);
+		
+		i += 1;
+		mAuslass += (dmAuslass * CP.SYS.WRITE_INTERVAL_SEC);
+		super.buffer_EinzelErgebnis("mAuslass [kg]", mAuslass, i);
+		
+		i += 1;
+		super.buffer_EinzelErgebnis("dQh [J/s]", dQburn - dQw, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("dQh [J/s]", dQburn - dQw, i);
+		super.buffer_EinzelErgebnis("dQh [J/KW]", CP.convert_ProSEC_2_ProKW(dQburn - dQw), i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("dQh [J/KW]", this.CP.convert_ProSEC_2_ProKW(dQburn - dQw), i);
+		super.buffer_EinzelErgebnis("Qh [J]", Qb - Qw, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Qh [J]", Qb - Qw, i);
+		super.buffer_EinzelErgebnis("dQb [J/s]", dQburn, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("dQb [J/s]", dQburn, i);
+		super.buffer_EinzelErgebnis("dQb [J/KW]", CP.convert_ProSEC_2_ProKW(dQburn), i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("dQb [J/KW]", this.CP.convert_ProSEC_2_ProKW(dQburn), i);
-
-		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Qb [J]", Qb, i);
+		super.buffer_EinzelErgebnis("Qb [J]", Qb, i);
 
 		i += 1;
 		double Tm = wandWaermeModell.get_Tmb(zn);
-		Ergebnis.buffer_EinzelErgebnis("T_mittel [K]", Tm, i);
+		super.buffer_EinzelErgebnis("T_mittel [K]", Tm, i);
 		T_buffer.addValue(time, Tm);
+		
+		i += 1;
+		mGes = zn[0].get_m();
+		super.buffer_EinzelErgebnis("m [kg]", zn[0].get_m(), i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis(" kappa [-]", zn[0].get_ggZone().get_kappa(zn[0].get_T()), i);
+		super.buffer_EinzelErgebnis("dQw [J/s]", dQw, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("dQw [J/s]", dQw, i);
+		super.buffer_EinzelErgebnis("dQw [J/KW]", CP.convert_ProSEC_2_ProKW(dQw), i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("dQw [J/KW]", this.CP.convert_ProSEC_2_ProKW(dQw), i);
+		super.buffer_EinzelErgebnis("Qw [J]", Qw, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Qw [J]", Qw, i);
+		super.buffer_EinzelErgebnis("Xb[-]", fortschritt, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Xb[-]", fortschritt, i);
-
-		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Qb/Qmax [-]", xQ, i);
+		super.buffer_EinzelErgebnis("Qb/Qzu [-]", xQ, i);
+		
+		double []mi=zn[0].get_mi();
+		for(int idx=0;idx<mi.length;idx++){
+			i += 1;
+			super.buffer_EinzelErgebnis(CP.SPEZIES_FABRIK.get_Spez(idx).get_name()
+					+"_Massenbruch [kg]" ,mi[idx]/zn[0].get_m(),i);
+			}
+		
 
 		i += 1;
 		double alpha = wandWaermeModell.get_WaermeUebergangsKoeffizient(time,zn, fortschritt);
-		Ergebnis.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
+		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
+		
+		i+=1;		
+		super.buffer_EinzelErgebnis("Brennraumfläche [m^2]",wandWaermeModell.get_BrennraumFlaeche(time),i);	
 
 		// Schleppdruck in bar
 		i += 1;
-		// Ergebnis.buffer_EinzelErgebnis("Schleppdruck [bar]",wandWaermeModell.get_Schleppdruck(time,zn)*1E-5,i);
-		Ergebnis.buffer_EinzelErgebnis("pSchleppWHT [bar]",wandWaermeModell.get_Schleppdruck() * 1E-5, i);
+		// super.buffer_EinzelErgebnis("Schleppdruck [bar]",wandWaermeModell.get_Schleppdruck(time,zn)*1E-5,i);
+		super.buffer_EinzelErgebnis("pSchleppWHT [bar]",wandWaermeModell.get_Schleppdruck() * 1E-5, i);
 
 		i += 1;
 		double HeatFlux = wandWaermeModell.get_WandWaermeStromDichte(time, zn, fortschritt);
-		Ergebnis.buffer_EinzelErgebnis("WSD [MW/m^2]", HeatFlux * 1E-6, i);
+		super.buffer_EinzelErgebnis("WSD [MW/m^2]", HeatFlux * 1E-6, i);
 
 		i += 1;
 		double HeatFluxPiston = wandWaermeModell.get_WandWaermeStromDichtePiston(time, zn, fortschritt);
-		Ergebnis.buffer_EinzelErgebnis("WSD Kolben [MW/m^2]", HeatFluxPiston * 1E-6, i);
+		super.buffer_EinzelErgebnis("WSD Kolben [MW/m^2]", HeatFluxPiston * 1E-6, i);
 
 		i += 1;
 		double HeatFluxHead = wandWaermeModell.get_WandWaermeStromDichteHead(time, zn, fortschritt);
-		Ergebnis.buffer_EinzelErgebnis("WSD Head [MW/m^2]", HeatFluxHead * 1E-6, i);
+		super.buffer_EinzelErgebnis("WSD Head [MW/m^2]", HeatFluxHead * 1E-6, i);
 
 		i += 1;
 		double HeatFluxCyl = wandWaermeModell.get_WandWaermeStromDichteCyl(time, zn, fortschritt);
-		Ergebnis.buffer_EinzelErgebnis("WSD Liner [MW/m^2]", HeatFluxCyl * 1E-6, i);
+		super.buffer_EinzelErgebnis("WSD Liner [MW/m^2]", HeatFluxCyl * 1E-6, i);
 
 		i += 1;
 		double whtp = wandWaermeModell.get_WandWaermeStromPiston(time, zn, fortschritt, T_buffer);
-		Ergebnis.buffer_EinzelErgebnis("dQw Kolben [J/s]", whtp, i);
-		Qwp = Qwp + whtp * this.CP.SYS.WRITE_INTERVAL_SEC; // Kommt einen Zeitschrit zu spät?
+		super.buffer_EinzelErgebnis("dQw Kolben [J/s]", whtp, i);
+		Qwp = Qwp + whtp * CP.SYS.WRITE_INTERVAL_SEC; // Kommt einen Zeitschrit zu spät?
 
 		i += 1;
 		double whth = wandWaermeModell.get_WandWaermeStromHead(time, zn, fortschritt, T_buffer);
-		Ergebnis.buffer_EinzelErgebnis("dQw Head [J/s]", whth, i);
-		Qwh = Qwh + whth * this.CP.SYS.WRITE_INTERVAL_SEC; // Kommt einen Zeitschrit zu spät?
+		super.buffer_EinzelErgebnis("dQw Head [J/s]", whth, i);
+		Qwh = Qwh + whth * CP.SYS.WRITE_INTERVAL_SEC; // Kommt einen Zeitschrit zu spät?
 
 		i += 1;
 		double whtl = wandWaermeModell.get_WandWaermeStromCyl(time, zn,	fortschritt, T_buffer);
-		Ergebnis.buffer_EinzelErgebnis("dQw Liner [J/s]", whtl, i);
-		Qwl = Qwl + whtl * this.CP.SYS.WRITE_INTERVAL_SEC; // Kommt einen Zeitschrit zu spät?
+		super.buffer_EinzelErgebnis("dQw Liner [J/s]", whtl, i);
+		Qwl = Qwl + whtl * CP.SYS.WRITE_INTERVAL_SEC; // Kommt einen Zeitschrit zu spät?
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Qw Kolben [J]", Qwp, i);
+		super.buffer_EinzelErgebnis("Qw Kolben [J]", Qwp, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Qw Head [J]", Qwh, i);
+		super.buffer_EinzelErgebnis("Qw Head [J]", Qwh, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("Qw Liner [J]", Qwl, i);
+		super.buffer_EinzelErgebnis("Qw Liner [J]", Qwl, i);
 
 		if (bargende) { // Nur wenn Bargende
 			i += 1;
-			Ergebnis.buffer_EinzelErgebnis("TKE_M [m^2/s^2]", this.turb.get_k(zn, time), i);
+			super.buffer_EinzelErgebnis("TKE_M [m^2/s^2]", this.turb.get_k(zn, time), i);
 		}
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);
+		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("dmL [kg/KW]",
-				this.CP.convert_ProSEC_2_ProKW(dmL), i);
+		super.buffer_EinzelErgebnis("dmL [kg/KW]",
+				CP.convert_ProSEC_2_ProKW(dmL), i);
 
 		i += 1;
-		Ergebnis.buffer_EinzelErgebnis("mL [kg]", mL, i);
+		super.buffer_EinzelErgebnis("mL [kg]", mL, i);
 
 		// buffer mass of fuel and characteristic evaporation time for each
 		// injection
@@ -693,15 +665,27 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 			if (CP.MASTER_EINSPRITZUNG.get_ModulWahl(CP.MASTER_EINSPRITZUNG.EINSPRITZ_MODELL_FLAG + index,
 				CP.MASTER_EINSPRITZUNG.MOEGLICHE_EINSPRITZ_MODELLE).equals(Frommelt.FLAG)) { // Nur wenn Frommelt
 				i += 1;
-				Ergebnis.buffer_EinzelErgebnis("Kraftstoffmasse_" + index + " [kg]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Mass(time), i);
+				super.buffer_EinzelErgebnis("Kraftstoffmasse_" + index + " [kg]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Mass(time), i);
 				i += 1;
-				Ergebnis.buffer_EinzelErgebnis("Kraftstoffrate_" + index + " [kg/s]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Rate(time), i);
+				super.buffer_EinzelErgebnis("Kraftstoffrate_" + index + " [kg/s]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Rate(time), i);
 				i += 1;
-				Ergebnis.buffer_EinzelErgebnis("Tau_" + index + " [s]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Tau(time), i);
+				super.buffer_EinzelErgebnis("Tau_" + index + " [s]", CP.MASTER_EINSPRITZUNG.get_AllInjections()[index].get_Tau(time), i);
 			}
 			i += 1;
-			Ergebnis.buffer_EinzelErgebnis("Kraftstoffdampf_" + index + " [kg]", this.masterEinspritzung.get_Einspritzung(index).get_mKrst_verdampft(time), i);
+			super.buffer_EinzelErgebnis("Kraftstoffdampf_" + index + " [kg]", this.masterEinspritzung.get_Einspritzung(index).get_mKrst_verdampft(time), i);
 		}
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("cv[J/kg]", zn[0].get_ggZone().get_cv_mass(zn[0].get_T()),i);	
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("cp [J/kg]", zn[0].get_ggZone().get_cp_mass(zn[0].get_T()),i);	
+
+		i+=1;
+		super.buffer_EinzelErgebnis("kappa [-]", zn[0].get_ggZone().get_kappa(zn[0].get_T()),i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("lambda [-]", zn[0].get_ggZone().get_lambda(), i);
 	}		
 
 	
@@ -765,7 +749,7 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 
 	private double verbrennungsBeginn = -5.55;
 
-	public double t_VerbrennungsBeginn() { // TODO: Schlecht programmiert! Besser machen! (Abbruchkriterium,  etc.)
+	public double t_VerbrennungsBeginn() {
 		if (verbrennungsBeginn != -5.55) {
 			return verbrennungsBeginn;
 		}
@@ -782,8 +766,8 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 													// Sinn machen...
 			time = x0 + i * CP.SYS.WRITE_INTERVAL_SEC;
 			double dQburn = brennverlauf.get_dQburn(time);
-			Qbtemp = Qbtemp + dQburn * this.CP.SYS.WRITE_INTERVAL_SEC;
-			double xQ = Qbtemp / Qmax;
+			Qbtemp = Qbtemp + dQburn * CP.SYS.WRITE_INTERVAL_SEC;
+			double xQ = Qbtemp / Qzu;
 			if (xQ > 0.05) {
 				verbrennungsbeginnGefunden = true;
 				verbrennungsBeginn = time;
@@ -813,6 +797,16 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 	
 	public double get_dQburn() {
 		return dQburn;
+	}
+	
+	/**
+	 * Gibt die angesaugte Luftmasse [kg] und die Gesamtmasse [kg] in diesem ASP zurück.
+	 * @author neurohr
+	 * @return {mLuft, mGes}
+	 */
+	public double[] get_massen(){
+		double[] massen = {mEinlass, mGes};
+		return massen;
 	}
 
 	private double get_Massenstromdichte(double pHi, double THi, double pLo,
@@ -853,21 +847,7 @@ public class APR_kompletterZyklus extends BerechnungsModell {
 		return positivValue;
 	}
 	
-	// 
-	/** Überprüft ob die Initialtemperatur oder die Initialmasse im Inputfile angegeben wurde
-	 */
-	private void is_m_oder_T() {
-		if (Double.isNaN(CP.get_T_ini_APRkpl())	&& Double.isNaN(CP.get_m_ini_APRkpl())) {
-			try {
-				throw new ParameterFileWrongInputException(	"Im Inputfile muss für die Berechnung"
-						+ " des kompletten Zyklusses entwerder m_ini [kg] oder T_ini_APRkpl [K] angegeben werden.");
-			} catch (ParameterFileWrongInputException e) {
-				e.stopBremo();
-			}
-		}
-	}
-
-
+	
 	@Override
 	public boolean initialiseBurntZone() {
 		// TODO Auto-generated method stub

@@ -1827,6 +1827,24 @@ public class CasePara {
 	}
 	
 	/**
+	 * Returns a factor to multiply the wall heat transfer 
+	 * density with and thus the actual wall heat transfer 
+	 * in gas exchange calculation
+	 * @return
+	 */
+	public double get_whtfMult_LW(){
+		double whtfCorr=1;
+		try {
+			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("whtfMult_LW"),"[-]",0,Double.MAX_VALUE); 
+			return whtfCorr;
+		} catch (ParameterFileWrongInputException e) {			
+			e.log_Warning("Der Wert fuer \""+ManagerLanguage.getString("whtfMult")+"\" wurde im Inputfile nicht angegeben. \n " +
+					"Es wird ohne Multiplikator für die Anpassung des Wandwaermeverlustes gerechnet!");	
+			return whtfCorr;
+		}					
+	}
+	
+	/**
 	 * Returns a factor to multiply the wall heat transfer during combustion.
 	 * e.g. for knocking, hcci
 	 * @return

@@ -162,7 +162,6 @@ public class IndizierDaten {
 		for(int i=0; i<temp2.length; i++){
 			temp2[i]=zeitAchse[i]-temp;
 		}		   
-		zeitAchse=misc.LittleHelpers.concat(temp2, zeitAchse);
 		
 		if(CP.RESTGASMODELL.involvesGasExchangeCalc() || APRkplZ){
 			////////////////////////////////////
@@ -311,6 +310,8 @@ public class IndizierDaten {
 		//Verdoppeln des Zylinderdrucks damit dieser fuer die LWA das naechste ASP umfasst
 		pZyl=misc.LittleHelpers.concat(pZyl, pZyl);
 		pZyl=misc.LittleHelpers.concat(pZyl, pZyl); //UPDATE 01-2015 neurohr
+		
+		zeitAchse=misc.LittleHelpers.concat(temp2, zeitAchse); //UPDATE 01-2015 neurohr
 		//PZYL_MAX=indiReader.get_pZylMAX();	
 		PZYL_MAX=indiReader.get_pZylMAX();
 		
@@ -542,7 +543,7 @@ public class IndizierDaten {
         
         if (t_Beginn-t_Ende<0){
         
-        double deltat=zeitAchse[0]-zeitAchse[1];
+        double deltat=Math.abs(zeitAchse[0]-zeitAchse[1]);
 		
 		double v1= motor.get_V(t_Beginn);
 		double v2= motor.get_V(t_Ende);

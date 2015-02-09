@@ -1,0 +1,234 @@
+[Bremo::Input::Start]				
+				
+Messtag			20140225	
+Messpunkt			46	
+Datum			20140616	
+				
+###############################				
+#######BERECHNUNGSMODELL#######				
+###############################				
+[berechnungsModell: APR_1Zonig]	
+DVA_1Zonig		
+debuggingMode	[-]	:=	nein	
+debuggingTime	[KWnZOT]	:=	16	
+minimaleZonenMasse	[kg]	:=	1.00E-09	
+T_freeze	[K]	:=	1600	
+polynomKoeffizienten	[-]	:=	Burcat	
+gleichGewichtsKonstanten	[-] 	:=	Burcat	
+arbeitsverfahren	[-]	:=	4T	
+zeit_oder_KW_Basiert	[-]	:=	KW	
+precissionPressureTraceAnalysis	[bar]	:=	1.00E-06	
+rechnungsSchrittweite 	[KW]	:=	1	
+rechnungsBeginn 	[KWnZOT]	:=	-138
+-95	
+rechnungsEnde	[KWnZOT]	:=	123.5	
+[OHC_Solver: Grill]				
+relaxFactor	[-]	:=	0.6	
+VerbrennungsBeginnAutoDetect	[-]	:=	ja	
+verbrennungsBeginn	[KWnZOT]	:=	0	
+###############################				
+				
+###############################				
+##########MOTORMODELL##########				
+###############################				
+[Motor: HubKolbenMotor]				
+Pleuellaenge	[m]	:=	0.144	
+Bohrung	[m]	:=	0.083	
+Kurbelradius	[m]	:=	0.0415	
+Verdichtung	[-]	:=	12.14	
+Schraenkung	[m]	:=	0	
+Desachsierung	[m]	:=	0.001	
+Auslassoeffnet	[KWnZOT]	:=	123.5
+123.5 Phasenlage bei Serienrotax
+127
+122	
+Auslassschluss	[KWnZOT]	:=	384.5
+384.5 Phasenlage bei Serienrotax
+388
+383	
+Einlassoeffnet	[KWnZOT]	:=	-394
+-400
+-384 Phasenlage bei Serienrotax
+-395
+-415
+-395	
+Einlassschluss	[KWnZOT]	:=	-138
+-144
+-128 Phasenlage bei Serienrotax
+-139
+-159
+-139	
+EV_Hub_max	[m]	:=	0.008133618	
+EV_Durchmesser	[m]	:=	0.026	
+###############################				
+				
+###############################				
+#######BETRIEBSPARAMETER#######				
+###############################				
+Drehzahl	[min^-1]	:=	2001.85	
+				
+T_Ladeluft	[K]	:=	328.919	
+				
+T_Abgas	[K]	:=	511.75	
+				
+p_Ladeluft	[Pa]	:=	94970	
+98500
+94970	
+p_Abgas	[Pa]	:=	100615	
+				
+mLuft_feucht	[kg/h]	:=	25.2
+25.15534056	
+Berechnet aus LA4				
+mLuft_Messung	[kg/h]	=	26.5	
+Luftmassenmessung				
+mLuft_Brett	[kg/h]	=	26.5084938	
+Berechnet aus Brettschneider				
+				
+Lambda	[-]	:=	3.402	
+AMALambda	[-]	:=	3.585	
+				
+T_FeuchteMessung	[K]	:=	293.885	
+relative_Luftfeuchte	[%]	:=	27.685	
+p_FeuchteMessung	[Pa]	:=	99815	
+				
+mAGR_extern	[kg/h]	:=	0	
+###############################				
+				
+###############################				
+#########RESTGASMODELL#########				
+###############################				
+[internesRestgasModell: RestgasVorgabe]				
+mAGR_intern_ASP	[kg]	:=	0	
+[Wandwaermemodell_LW: Hohenberg]				
+				
+RefFlaecheAuslass	[m^2]	:=	0.00541061	
+RefFlaecheEinlass	[m^2]	:=	0.00541061	
+				
+durchflusskennzahlEinFileName	[-]	:=	Durchflusskennzahl_Einlass.txt
+VIGS30.txt
+durchflusskennzahlAusFileName 	[-]	:=	Durchflusskennzahl_Auslass.txt	
+spalte_alphaVor	[-]	:=	2	
+spalte_alphaRueck	[-]	:=	3	
+				
+VentilhubEinFileName 	[-] 	:= 	Ventilhub_Einlass.txt	
+VentilhubAusFileName	[-] 	:= 	Ventilhub_Auslass.txt	
+###############################				
+				
+###############################				
+#########INDIZIERDATEN#########				
+###############################				
+indizierFileName	[-]	:=	Druckverlauf.txt
+0KWbeiKolbenOT	[KWnZOT]	:=	ja
+OT_Versatz	[KWNZOT]	:=	0
+spalte_pZyl	[-]	:=	3	
+spalte_pEin	[-]	:=	4	
+spalte_pAbg	[-]	:=	6	
+				
+filtern	[-]	:=	ja	
+sgolayOrder	[-]	:=	2	
+sgolayHalfWidth	[-]	:=	22	
+shift_pEin	[-]	:=	ja
+shift_pAus	[-]	:=	ja
+pressureAdjustmentMethod	[-]	:=	offset	
+ohne / offset / abgleichSaugrohr / abgleichKruemmer / kanalMethode / polytropenMethode				
+offset	[Pa]	:=	100500
+kappa_Druckabgleich	[-]	:=		
+"Irgendwo zwischen 1.32 (Homogenbetr.), 1.38 (Schichtbetr.) und 1.4 (Schleppbetr.)"				
+KW_Beginn_Druckabgleich	[KWnZOT]	:=	-175
+-160				
+KW_Ende_Druckabgleich	[KWnZOT]	:=	-165
+-155				
+Hohenberg empfiehlt zwischen -100 und -65				
+Referenzkanal	[-]	:=	pEin	
+Referenzwert	[bar]	=		
+###############################				
+				
+###############################				
+########EINSPRITZMODELL########				
+###############################				
+Hu_RON_91	[MJ/mol]	:=	4.581231259	
+Hu_RON_95	[MJ/mol]	:=	4.073832	
+Standard 4.247052132508449*1e6				
+Hu_RON_98	[MJ/mol]	:=	4.073832	
+Standard 4.108620603				
+Hu_Diesel	[MJ/mol]	:=	7.849471207	
+Hu_ohc	[MJ/mol]	:=	4.073832
+krst_oAtome	[-]	:=	0.13
+krst_hAtome	[-]	:=	13
+krst_cAtome	[-]	:=	6.7
+krst_nAtome	[-]	:=	0
+				
+anzahlEinspritzungen	[-]	:= 	1	
+[einspritzModell_0: simpleDI]			
+simpleDI	
+InjZone	[-]	:=	0	
+mKrst	[kg/h]	:=	0.485
+0.516	
+krst	[-]	:=	ohc
+RON_98	
+vergleichsKrstVerdampfung	[-]	:=	tetradecan	
+T_Krst_fluessig	[K]	:=	302.35	
+BOI	[KWnZOT]	:=	-39	
+EOI	[KWnZOT]	:=	-23.5	
+###############################				
+				
+###############################				
+########WANDWAERMEMODELL#######				
+###############################				
+[Wandwaermemodell: Hohenberg]				
+T_Cyl	[K] 	:=	376.952466	
+T_Piston	[K] 	:=	429.0922166	
+T_Head	[K] 	:=	406.5843441	
+				
+Quetschspalthoehe	[m]	:=	0.000725	
+Bereich zwischen 0.0006 - 0.001				
+Brennraumdachflaeche	[m^2]	:=	0.008052617	
+Faktor fuer Kolbenflaeche 1.37 - 1.49 (0.007404218 - 0.008052617)				
+Kolbenflaeche	[m^2]	:=	0.00541061	
+Feuersteghoehe	[m]	:=	0.005	
+				
+refPunktWoschniHuber	[KWnZOT]	:=	-60	
+whtfMult	[-]	:=	1	
+swirlRatio	[-]	:=	0	
+T_IVC_WHT	[K]	:=	377
+polyExp_WHT	[-]	=		
+p_IVC	[Pa]	=		
+###############################				
+				
+###############################				
+########TURBULENZMODELL#######				
+###############################				
+[turbModel: k-eps]				
+PistonBowlDiameter	[m]	:=	0	
+PistonBowlDepth	[m]	:=	0	
+###############################				
+				
+###############################				
+#########APR/VERLUSTTEILUNG########				
+###############################				
+Verlustteilung	[-]	:=	nein
+burnFileName	[-]	:=	dva_Inputfile_DVA_1Zonig.dva	
+spalte_dQburn	[-]	:=	12	
+compareToExp	[-]	:=	ja	
+p_Ini	[Pa]	:=	100000
+pmi	[bar]	:=	3.083329693	
+pme	[bar]	:=	3.083329693	
+HC 	[ppm]	:=	259.742	
+CO 	[ppm]	:=	0.132	
+###############################				
+				
+###############################				
+#############BLOWBY############				
+###############################				
+[BlowByModell: Leckage]				
+Leckage / ohne				
+FlaecheBB	[m^2]	:=	1e-12
+0.000249	
+Üblicherweise 0.002 bis 0.004 * Bohrung				
+p_KGH	[Pa]	:=	27.685	
+pKGHindiziert	[-]	:=	nein
+spalte_pKGH	[-]	:=	5
+nein	
+###############################				
+				
+[Bremo::Input::Stop]				

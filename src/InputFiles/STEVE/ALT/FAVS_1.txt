@@ -1,3 +1,0 @@
-Log := No Log
-x_index := [0]
-y_index_1 := [8, 11, 17]

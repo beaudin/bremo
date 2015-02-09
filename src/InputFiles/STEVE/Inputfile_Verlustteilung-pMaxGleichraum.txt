@@ -1,2 +1,0 @@
-Kurbelwinkel [°KW]	Zeit [s n. Rechenbeginn]	Brennraumvolumen [m3]	pMax Gleichraumprozess [bar]
-0.3	 0.011598344333391816	 4.0357542344834556E-5	 68.45077986261359

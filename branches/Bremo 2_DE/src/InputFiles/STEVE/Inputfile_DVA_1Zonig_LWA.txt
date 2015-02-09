@@ -98,7 +98,7 @@ mAGR_extern	[kg/h]	:=	0
 #########RESTGASMODELL#########				
 ###############################				
 [internesRestgasModell: LWA]				
-mAGR_intern_ASP	[kg]	:=		
+mAGR_intern_ASP	[kg]	:=	0	
 [Wandwaermemodell_LW: Hohenberg]				
 				
 RefFlaecheAuslass	[m^2]	:=	0.00541061	
@@ -175,7 +175,7 @@ EOI	[KWnZOT]	:=	-23.5
 ###############################				
 ########WANDWAERMEMODELL#######				
 ###############################				
-[Wandwaermemodell: Woschni]				
+[Wandwaermemodell: Hohenberg]				
 T_Cyl	[K] 	:=	376.952466	
 T_Piston	[K] 	:=	429.0922166	
 T_Head	[K] 	:=	406.5843441	

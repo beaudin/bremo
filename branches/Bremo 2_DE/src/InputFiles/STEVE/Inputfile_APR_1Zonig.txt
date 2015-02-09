@@ -7,7 +7,7 @@ Datum			20140616
 ###############################				
 #######BERECHNUNGSMODELL#######				
 ###############################				
-[berechnungsModell: DVA_1Zonig]	
+[berechnungsModell: APR_1Zonig]	
 DVA_1Zonig		
 debuggingMode	[-]	:=	nein	
 debuggingTime	[KWnZOT]	:=	16	
@@ -97,8 +97,8 @@ mAGR_extern	[kg/h]	:=	0
 ###############################				
 #########RESTGASMODELL#########				
 ###############################				
-[internesRestgasModell: LWA]				
-mAGR_intern_ASP	[kg]	:=		
+[internesRestgasModell: RestgasVorgabe]				
+mAGR_intern_ASP	[kg]	:=	0	
 [Wandwaermemodell_LW: Hohenberg]				
 				
 RefFlaecheAuslass	[m^2]	:=	0.00541061	
@@ -152,6 +152,11 @@ Standard 4.247052132508449*1e6
 Hu_RON_98	[MJ/mol]	:=	4.073832	
 Standard 4.108620603				
 Hu_Diesel	[MJ/mol]	:=	7.849471207	
+Hu_ohc	[MJ/mol]	:=	4.073832
+krst_oAtome	[-]	:=	0.13
+krst_hAtome	[-]	:=	13
+krst_cAtome	[-]	:=	6.7
+krst_nAtome	[-]	:=	0
 				
 anzahlEinspritzungen	[-]	:= 	1	
 [einspritzModell_0: simpleDI]			
@@ -159,7 +164,8 @@ simpleDI
 InjZone	[-]	:=	0	
 mKrst	[kg/h]	:=	0.485
 0.516	
-krst	[-]	:=	RON_98	
+krst	[-]	:=	ohc
+RON_98	
 vergleichsKrstVerdampfung	[-]	:=	tetradecan	
 T_Krst_fluessig	[K]	:=	302.35	
 BOI	[KWnZOT]	:=	-39	
@@ -169,7 +175,7 @@ EOI	[KWnZOT]	:=	-23.5
 ###############################				
 ########WANDWAERMEMODELL#######				
 ###############################				
-[Wandwaermemodell: Woschni]				
+[Wandwaermemodell: Hohenberg]				
 T_Cyl	[K] 	:=	376.952466	
 T_Piston	[K] 	:=	429.0922166	
 T_Head	[K] 	:=	406.5843441	
@@ -184,7 +190,7 @@ Feuersteghoehe	[m]	:=	0.005
 refPunktWoschniHuber	[KWnZOT]	:=	-60	
 whtfMult	[-]	:=	1	
 swirlRatio	[-]	:=	0	
-T_IVC_WHT	[K]	=		
+T_IVC_WHT	[K]	:=	377
 polyExp_WHT	[-]	=		
 p_IVC	[Pa]	=		
 ###############################				
@@ -200,11 +206,11 @@ PistonBowlDepth	[m]	:=	0
 ###############################				
 #########APR/VERLUSTTEILUNG########				
 ###############################				
-Verlustteilung	[-]	:=	ja	
-burnFileName	[-]	:=	DVA_Inputfile.txt	
+Verlustteilung	[-]	:=	nein	
+burnFileName	[-]	:=	dva_Inputfile_DVA_1Zonig.dva	
 spalte_dQburn	[-]	:=	12	
 compareToExp	[-]	:=	ja	
-p_Ini	[Pa]	=		
+p_Ini	[Pa]	:=	100000
 pmi	[bar]	:=	3.083329693	
 pme	[bar]	:=	3.083329693	
 HC 	[ppm]	:=	259.742	
@@ -214,12 +220,15 @@ CO 	[ppm]	:=	0.132
 ###############################				
 #############BLOWBY############				
 ###############################				
-[BlowByModell: ohne]				
+[BlowByModell: Leckage]				
 Leckage / ohne				
-FlaecheBB	[m^2]	:=	0.000249	
+FlaecheBB	[m^2]	:=	1e-12
+0.000249	
 Üblicherweise 0.002 bis 0.004 * Bohrung				
 p_KGH	[Pa]	:=	27.685	
-pKGHindiziert	[-]	:=	nein	
+pKGHindiziert	[-]	:=	nein
+spalte_pKGH	[-]	:=	5
+nein	
 ###############################				
 				
 [Bremo::Input::Stop]				

@@ -1,4 +1,0 @@
-pmi-Werte [bar]	----->>	Idealprozess	Reale Ladung	Verbrennungslage	HC-/CO-Emissionen	Realer Brennverlauf	Wandwärmeverlust	LWAideal	LWA_Original	Reibung	Gleichraumprozess
-NaN	 NaN	 4.83711829730015	 4.232907696787685	 4.155011469677838	 4.019423045923778	 3.739699207651754	 2.8968735055078447	 2.840587902164725	 2.6912390483452033	 3.083329693	 4.882657242375538
-Wirkungsgrade [%]	----->>	Idealprozess	Reale Ladung	Verbrennungslage	HC-/CO-Emissionen	Realer Brennverlauf	Wandwärmeverlust	LWAideal	LWA_Original	Reibung	Gleichraumprozess
-NaN	 NaN	 0.6316060194784547	 0.5527113080281748	 0.5425400194812933	 0.5248355807326154	 0.48831068115700643	 0.3782588374503161	 0.35140814805770776	 0.3709093529646186	 0.40260532706475877	 0.6375522606209069

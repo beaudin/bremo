@@ -629,7 +629,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 						else {
 							controller.SendFileModel(file,false);
 						}
-						SwingBremo.savePathToFile(file.getParent());
+						SwingBremo.updatePath(file.getParent());
 											}
 				} else if (status == JFileChooser.CANCEL_OPTION) {
 

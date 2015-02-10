@@ -15,21 +15,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import bremoswing.SwingBremo;
+
 public class FavoriteManager {
 	
 	HashMap<String, List<String>> favorite ;
 	File file ;
 	
-	public FavoriteManager(String PathDirectory) {
+	public FavoriteManager() {
 		favorite = new HashMap<String, List<String>>();
-		File f = new File((PathDirectory+"bremo.favs"));
-		if (f.exists()) {
+		File f = new File("src/bremoswing/utilFile/bremo.favs");
+		if (f.exists()) { // check favs file im Eclipse
 			file = f;
 			readFavsFile();
-		}
-		else {
-			
-			 file = new File(PathDirectory+"bremo.favs");
+		} else { // Check favs file wenn es ein Applet ist
+			f = new File(SwingBremo.BremoAppletDirectory.getAbsoluteFile()
+					+ File.separator + "bremo.favs");
+			if (SwingBremo.BremoAppletDirectory.exists() && f.exists()) {
+				    file = f;
+					readFavsFile();
+			} else {
+				f = new File("src/bremoswing/utilFile/bremo.favs");
+				try {
+					f.createNewFile();
+					file = f;
+				} catch (IOException e) {
+					if (!SwingBremo.BremoAppletDirectory.exists()) {
+						SwingBremo.BremoAppletDirectory.mkdir();
+					}
+					file = new File(
+							SwingBremo.BremoAppletDirectory.getAbsoluteFile()
+									+ File.separator + "bremo.favs");
+				}
+			}
 		}
 	}
 	public void readFavsFile() {

@@ -26,12 +26,15 @@ public class ShowTable extends JFrame {
     Vector <String> header;
     Vector<Vector<String>> dataModel ;
     
-	public ShowTable() {
+	public ShowTable(File file) {
 		
 		try {
 			header = new Vector<String>();
 			dataModel = new Vector<Vector<String>>();
-			getData2();
+			getData1(file);
+			//getData1("D2T-MORPHEE.txt");
+			//getData2("IFKM-LABVIEW-DAQ.txt");
+			//getData2("IFKM-LABVIEW-DAQ.txt");
 			
 			table = new JTable (dataModel, header);
 			
@@ -40,28 +43,27 @@ public class ShowTable extends JFrame {
 			e.printStackTrace();
 		}
 		
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	    JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 	    table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 	    table.setRowHeight(table.getRowHeight() + 5);
-//	    int gapWidth = 10;
-//	    int gapHeight = 0;
-//	    table.setIntercellSpacing(new Dimension(gapWidth, gapHeight));
+	    int gapWidth = 10;
+	    int gapHeight = 0;
+	    table.setIntercellSpacing(new Dimension(gapWidth, gapHeight));
 	    table.setSelectionBackground(Color.cyan);
 	    table.setSelectionForeground(Color.red);
 	    add(scrollPane, BorderLayout.CENTER);
 	    JPanel panel = new JPanel();
 	    panel.add (new JButton("OK"));
 	    add ( panel, BorderLayout.SOUTH);
-	    setPreferredSize(new Dimension(1920, 830));
+	    //setPreferredSize(new Dimension(1920, 830));
 	    pack();
 	    setVisible(true);
 	}
 	
-	public void getData1() throws IOException {
+	public void getData1(File file) throws IOException {
 		
-		File f = new File("D2T-MORPHEE.txt");
-		BufferedReader br = new BufferedReader(new FileReader(f));
+		BufferedReader br = new BufferedReader(new FileReader(file));
 		String zeile = "";
 		while ((zeile = br.readLine())!= null){
 			if (zeile.contains("\t"))
@@ -81,9 +83,9 @@ public class ShowTable extends JFrame {
 		br.close();
 	}
 	
-    public void getData2() throws IOException {
-    	File f = new File("IFKM-LABVIEW-DAQ.txt");
-		BufferedReader br = new BufferedReader(new FileReader(f));
+    public void getData2(File file) throws IOException {
+    	
+		BufferedReader br = new BufferedReader(new FileReader(file));
 		String zeile = "";
 		while ((zeile = br.readLine())!= null){
 			if (zeile.contains("\t"))
@@ -108,7 +110,7 @@ public class ShowTable extends JFrame {
     
     public static void main (String[] arg ){
     	
-    	new ShowTable();
+    	//new ShowTable();
     	
     }
 

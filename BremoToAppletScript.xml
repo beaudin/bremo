@@ -11,6 +11,23 @@
 		<pathelement location="bibliothek/jfreechart-1.0.15/jfreechart-1.0.15.jar" />
 		<pathelement location="bibliothek/itext-5.3.2/itextpdf-5.3.2.jar" />
 	</path>
+	<!-- Setup  SvnAnt -->
+	<path id="svnant.path">
+		 <fileset dir="bibliothek/Apache-Subversion-1.8.9/bin/">
+			 <include name="**/*.jar"/>
+		 </fileset>
+	</path>
+			       
+	<!-- Load SvnAnt -->
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svnant.path" />  
+			       
+	<!-- Set svnSetting -->
+	<svnSetting  id="svn.settings"
+			     svnkit="false"
+			     javahl="false"
+			     username="${svn.username}"
+			     password="${svn.password}"/>     
+			          
 	<target name="init">
 		<mkdir dir="bin" />
 		<copy includeemptydirs="false" todir="bin">
@@ -24,7 +41,7 @@
 		<delete dir="bin" />
 	</target>
 	<target depends="clean" name="cleanall" />
-	<target depends="build-subprojects,build-project" name="build" />
+	<target depends="SVN,build-subprojects,build-project" name="build" />
 	<target name="build-subprojects" />
 	<target depends="init" name="build-project">
 		<echo message="${ant.project.name}: ${ant.file}" />
@@ -33,7 +50,6 @@
 			<src path="src" />
 			<classpath refid="Bremo.classpath" />
 		</javac>
-		<antcall target="SVN_version" />
 		<antcall target="-post-jar" />
 	</target>
 	<target
@@ -97,10 +113,29 @@
 		<copy file="dist/BremoApplet.html" todir="Applet" />
    	</target>
 	
-	<target name="SVN_version">
-		        <echo file="src/bremoswing/properties/bremo.svnversion">svnversion=</echo>
-		         <exec executable="svnversion"
-		         	output="src/bremoswing/properties/bremo.svnversion" append="true">
-		         </exec>
-	</target> 
+	<target name="SVN">
+		
+		   <svn refid="svn.settings" >
+		         <info target="${basedir}" />
+		   </svn>
+		       
+	   <!-- Display svn revision number -->
+	   <echo>Last Revision = ${svn.info.lastRev} by ${svn.info.author} on ${svn.info.lastDate} </echo>
+	   <antcall target="SVN_log"/>
+    </target> 
+	
+	<target name="SVN_log" description="get Log information">        
+			                   
+		<svn refid="svn.settings" >
+			 <log path="${basedir}" destfile="bremo.log" asxml="false" />
+		</svn>
+		<antcall target="SVN_version"/>
+	</target>
+			       
+   <target name="SVN_version">
+		 <echo file="src/bremoswing/properties/bremo.svnversion">svnversion=</echo>
+		 <exec executable="svnversion"
+			    output="src/bremoswing/properties/bremo.svnversion" append="true">
+		 </exec>
+	</target>
 </project>

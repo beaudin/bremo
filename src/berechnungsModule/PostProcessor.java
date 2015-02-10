@@ -30,7 +30,7 @@ public class PostProcessor {
 	private ErgebnisBuffer ergB;
 	private double pmi = 0;
 	private double [] Qb;
-	private SwingBremo sb;
+	//private SwingBremo sb;
 
 	
 	public PostProcessor(VektorBuffer dm_buffer,VektorBuffer dQb_buffer,VektorBuffer dQw_buffer, CasePara cp){
@@ -40,7 +40,7 @@ public class PostProcessor {
 			inti=new Integrator();
 			double dt=CP.SYS.WRITE_INTERVAL_SEC;
 			Qw=inti.get_IntegralVerlauf(dt,dQw_buffer.getValues());		
-			sb = new SwingBremo();
+			//sb = new SwingBremo();
 			
 //			double matrix [][]=new double [2][];
 //			matrix[0]=mb;
@@ -370,8 +370,8 @@ public class PostProcessor {
 			System.err.println("Berechnungsmodell: " + berechnungsModellVorgabe);
 			
 			i += 1;
-			ergB.buffer_EinzelErgebnis("bremo.svnversion: " + sb.getRevisionNumber(), Double.NaN, i);
-			System.err.println("bremo.svnversion: " + sb.getRevisionNumber());					
+			ergB.buffer_EinzelErgebnis("bremo.svnversion: " + SwingBremo.getRevisionNumber(), Double.NaN, i);
+			System.err.println("bremo.svnversion: " + SwingBremo.getRevisionNumber());					
 	}
 
 
@@ -383,7 +383,7 @@ public class PostProcessor {
 		inti=new Integrator();
 		double dt=CP.SYS.WRITE_INTERVAL_SEC;
 		Qw=inti.get_IntegralVerlauf(dt,dQw_buffer.getValues());
-		sb = new SwingBremo();
+		//sb = new SwingBremo();
 
 		// double matrix [][]=new double [2][];
 		// matrix[0]=mb;
@@ -730,8 +730,8 @@ public class PostProcessor {
 			System.err.println("Berechnungsmodell: " + berechnungsModellVorgabe);
 			
 			i += 1;
-			ergB.buffer_EinzelErgebnis("bremo.svnversion: " + sb.getRevisionNumber(), Double.NaN, i);
-			System.err.println("bremo.svnversion: " + sb.getRevisionNumber());
+			ergB.buffer_EinzelErgebnis("bremo.svnversion: " + SwingBremo.getRevisionNumber(), Double.NaN, i);
+			System.err.println("bremo.svnversion: " + SwingBremo.getRevisionNumber());
 				
 }
 	
@@ -743,7 +743,7 @@ public class PostProcessor {
 		double dt=CP.SYS.WRITE_INTERVAL_SEC;
 		Qw=inti.get_IntegralVerlauf(dt,dQw_buffer.getValues());		
 
-		sb = new SwingBremo();
+		//sb = new SwingBremo();
 		
 		String Separator  ="\n**************************************************\n";
 		System.err.println("DVA_Post_Ergebnisse:"+Separator);
@@ -888,8 +888,8 @@ public class PostProcessor {
 		System.err.println("Berechnungsmodell: " + berechnungsModellVorgabe);
 		
 		i += 1;
-		ergB.buffer_EinzelErgebnis("bremo.svnversion: " + sb.getRevisionNumber(), Double.NaN, i);
-		System.err.println("bremo.svnversion: " + sb.getRevisionNumber());
+		ergB.buffer_EinzelErgebnis("bremo.svnversion: " + SwingBremo.getRevisionNumber(), Double.NaN, i);
+		System.err.println("bremo.svnversion: " + SwingBremo.getRevisionNumber());
 					
 	}
 	

@@ -37,6 +37,7 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 	private double alpha_A_rueck; //Durchflusskennwert des Auslassventils, rückwärts
 	private double hub_A, hub_E;
 	private double dQw;
+	private double whtfMult=CP.get_whtfMult_LW();
 	private int anzZonen; 
 //	Spezies spezZU;
 	private GasGemisch gAbgasbehaelter;
@@ -169,6 +170,7 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 		//Wandwaermestrom
 		double fortschritt = 0; //Kraftstoff wird während des Ladungswechsels nicht umgesetzt
 		dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen, fortschritt, T_buffer);
+		dQw=dQw*whtfMult;
 		//Waermestrom abfuehren
 		zonen[0].set_dQ_ein_aus(-1*dQw);
 		

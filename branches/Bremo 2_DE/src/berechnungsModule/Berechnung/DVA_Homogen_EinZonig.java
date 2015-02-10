@@ -52,7 +52,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 	private double dmL, mL=0;
 	double zonenMasseVerbrannt=0;
 	
-	private double whtfMult=CP.get_whtfMult_LW();
+	private double whtfMult=CP.get_whtfMult();
 	
 	/**
 	 * <p>

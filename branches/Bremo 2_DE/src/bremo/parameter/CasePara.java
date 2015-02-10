@@ -1838,7 +1838,7 @@ public class CasePara {
 			whtfCorr= set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("whtfMult_LW"),"[-]",0,Double.MAX_VALUE); 
 			return whtfCorr;
 		} catch (ParameterFileWrongInputException e) {			
-			e.log_Warning("Der Wert fuer \""+ManagerLanguage.getString("whtfMult")+"\" wurde im Inputfile nicht angegeben. \n " +
+			e.log_Warning("Der Wert fuer \""+ManagerLanguage.getString("whtfMult_LW")+"\" wurde im Inputfile nicht angegeben. \n " +
 					"Es wird ohne Multiplikator für die Anpassung des Wandwaermeverlustes gerechnet!");	
 			return whtfCorr;
 		}					

@@ -27,6 +27,7 @@ import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -71,6 +72,7 @@ import javax.swing.text.StyleConstants;
 
 import com.sun.org.apache.xerces.internal.impl.RevalidationHandler;
 
+import funktionenTests.ShowTable;
 import bremo.main.Bremo;
 import bremoswing.graphik.BremoView;
 import bremoswing.graphik.BremoViewModel;
@@ -95,7 +97,7 @@ import java.net.URI;
  */
 public class SwingBremo extends JFrame {
        
-        public  String  RevisionNumber = getRevisionNumber();
+        public String  RevisionNumber = getRevisionNumber();
         private final String title = "Bremo 2.0 rev "+ RevisionNumber + " Beta" ;
         //private final String title = "Bremo 2.0 rev "+ 286 + " Beta" ;
        
@@ -114,6 +116,7 @@ public class SwingBremo extends JFrame {
         public static JButton sehen ;
         public static JButton docfile;
         public static JButton help;
+        public static JButton table;
         public static JTextPane grosArea;
         private JScrollPane jScrollPane1;
         private JScrollPane jScrollPane2;
@@ -134,7 +137,7 @@ public class SwingBremo extends JFrame {
         public static int percent;
         static SelectItemToPlotten plotten;
         public static double startTime ;
-    
+        public static File BremoAppletDirectory;
         
         private TextPaneOutputStream outputStreamKleinArea;
         /**
@@ -167,6 +170,8 @@ public class SwingBremo extends JFrame {
          * @throws IOException
          ***********************/
         private void initComponents() {
+        	
+        	BremoAppletDirectory= new File (System.getProperty("user.home")+File.separator+"BremoFile"+File.separator);
         	        	
             ManagerLanguage.managerLanguage(new Locale("de, DE"));
         	
@@ -211,23 +216,30 @@ public class SwingBremo extends JFrame {
         };
         
         outputStreamKleinArea = new TextPaneOutputStream(kleinArea);
+        
         warningOut  = new PrintStream(outputStreamKleinArea) {
 
        	 @Override
             public void println(String s) {
-       		    outputStreamKleinArea.SetTextColor(Color.ORANGE);
+       		    outputStreamKleinArea.SetTextColor(new Color (215,120,11));
       	        super.println(s);
             }
 
             @Override
             public void print(String s) {
-            	outputStreamKleinArea.SetTextColor(Color.ORANGE);
+            	outputStreamKleinArea.SetTextColor(new Color (215,120,11));
        	        super.print(s);
            }
    };
+   
+   
                 System.setOut(outStream);
                 System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
-//              JMenu m = new JMenu("Datei");
+              
+                
+                
+                
+                JMenu m = new JMenu("Datei");
 //              m.add(new JMenuItem("Item 1.1"));
 //              m.add(new JMenuItem("Item 1.2"));
 //              m.add(new JMenuItem("Item 1.3"));
@@ -264,7 +276,9 @@ public class SwingBremo extends JFrame {
                 sehen = new JButton();
                 docfile = new JButton();
                 help = new JButton();
+                table = new JButton();
                 textFile = new JTextField();
+                
 
                 // konsole = new JCheckBox();
                 konsole2 = new JPanel(){
@@ -410,6 +424,8 @@ public class SwingBremo extends JFrame {
                 /************ BUTTON Graphic ************************************/
                 sehen.setIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/see_graphik.png")));
+                sehen.setRolloverIcon(new ImageIcon(getClass().getResource(
+                        "/bremoswing/bild/see_graphik-2.png")));
                 sehen.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_see"));
 //                sehen.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_see")); //swingbremo_ToolTip_see
                 sehen.addActionListener(new ActionListener() {
@@ -439,18 +455,41 @@ public class SwingBremo extends JFrame {
                 sehen.setEnabled(true);
                 manager.add(sehen, gc);
                
+//                /************ BUTTON File ************************************/
+//                docfile.setIcon(new ImageIcon(getClass().getResource(
+//                                "/bremoswing/bild/doc-icon.png")));
+//                docfile.setRolloverIcon(new ImageIcon(getClass().getResource(
+//                                "/bremoswing/bild/doc-icon2.png")));
+//                docfile.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_doc"));
+////                docfile.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_doc"));  //swingbremo_ToolTip_doc
+//                docfile.addActionListener(new ActionListener() {
+//                       
+//                        @Override
+//                        public void actionPerformed(ActionEvent arg0) {
+//                                // TODO Auto-generated method stub                           
+//                        }
+//                });
+//                gc.fill = GridBagConstraints.NONE;
+//                gc.insets = new Insets(0, 0, 0, 0);
+//                gc.weightx = 0;
+//                gc.gridx = 4;
+//                gc.gridy = 0;
+//                gc.ipadx = 0;
+//                docfile.setEnabled(true);
+//                manager.add(docfile, gc);
+                
                 /************ BUTTON File ************************************/
-                docfile.setIcon(new ImageIcon(getClass().getResource(
-                                "/bremoswing/bild/doc-icon.png")));
-                docfile.setRolloverIcon(new ImageIcon(getClass().getResource(
-                                "/bremoswing/bild/doc-icon2.png")));
-                docfile.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_doc"));
-//                docfile.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_doc"));  //swingbremo_ToolTip_doc
-                docfile.addActionListener(new ActionListener() {
+                table.setIcon(new ImageIcon(getClass().getResource(
+                                "/bremoswing/bild/table-icon-1.png")));
+                table.setRolloverIcon(new ImageIcon(getClass().getResource(
+                                "/bremoswing/bild/table-icon-2.png")));
+                table.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_table"));
+                table.addActionListener(new ActionListener() {
                        
                         @Override
                         public void actionPerformed(ActionEvent arg0) {
-                                // TODO Auto-generated method stub                           
+                                // TODO Auto-generated method stub 
+                        	tablePush();
                         }
                 });
                 gc.fill = GridBagConstraints.NONE;
@@ -460,7 +499,7 @@ public class SwingBremo extends JFrame {
                 gc.gridy = 0;
                 gc.ipadx = 0;
                 docfile.setEnabled(true);
-                manager.add(docfile, gc);
+                manager.add(table, gc);
                 
                 /*************************COMBO BOX LANGUAGE****************************/
 //                language.setEditable(false);
@@ -579,22 +618,28 @@ public class SwingBremo extends JFrame {
 				"/bremoswing/bild/help.png"));
 		help.setIcon(hilfe); // NOI18N
 		help.setRolloverIcon(new ImageIcon(getClass().getResource(
-				"/bremoswing/bild/help.png")));
+				"/bremoswing/bild/help-2.png")));
 		help.setToolTipText(ManagerLanguage
 				.getString("swingbremo_ToolTip_help"));
-		help.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					Desktop.getDesktop().browse(new URI("http://ifkmhp3.mach.uni-karlsruhe.de/Bremo/Help.html"));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (URISyntaxException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
+//		help.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				try {
+//					//Desktop.getDesktop().browse(new URI("http://ifkmhp3.mach.uni-karlsruhe.de/Bremo/Help.html"));
+//
+//                   URL url = getClass().getResource("/bremoswing/help/BremoHelp.html");
+//            	  //br = new BufferedReader(new InputStreamReader(url.openStream()));
+//				  //File f = new File ("src/bremoswing/help/BremoHelp.html");
+//					Desktop.getDesktop().browse(url.toURI());	
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				} 
+//					catch (URISyntaxException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}
+//		});
 
 		manager.add(help, gc);
 		
@@ -890,7 +935,7 @@ public class SwingBremo extends JFrame {
         private void stopPush(ActionEvent e) {
                 if (!control) {
                         JOptionPane.showMessageDialog(this,
-                                                      "Starten Sie Zu erst die Berechnung.", 
+                                                      "Starten Sie zu erst die Berechnung.", 
                                                       ManagerLanguage.getString("warning"),
                                                       JOptionPane.WARNING_MESSAGE);
                 } else {
@@ -902,6 +947,42 @@ public class SwingBremo extends JFrame {
                         ActiveIcon();
                        
                 }
+        }
+        
+        private void  tablePush(){
+        	
+        	JFileChooser fileChooser = new JFileChooser(path);
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setMultiSelectionEnabled(false);
+            BremoExtensionFileFilter bremoExtensionFileFilter = new BremoExtensionFileFilter();
+    		ExtensionFileFilter [] bremoListExtentionFilter = bremoExtensionFileFilter.getBremoListExtentionFilter();
+            for (int i = 0 ; i < bremoListExtentionFilter.length; i++) {
+            	fileChooser.addChoosableFileFilter(bremoListExtentionFilter[i]);
+            	if (bremoListExtentionFilter[i].getDescription().toLowerCase().equals("txt")){
+            		fileChooser.setFileFilter(bremoListExtentionFilter[i]);
+            	}
+            }
+            try {
+            	    label.setText(ManagerLanguage.getString("swingbremo_label_5"));        
+                    int status = fileChooser.showOpenDialog(getRootPane());
+
+                    if (status == JFileChooser.APPROVE_OPTION) {
+                            if (fileChooser.getSelectedFile() != null) {
+                                    File f = fileChooser.getSelectedFile();
+                                    textFile.setText(f.getPath());
+                                    updatePath(f.getParent());
+                                    new ShowTable(f );
+                                    label.setText(ManagerLanguage.getString("swingbremo_label_6"));
+                            }
+                    } else if (status == JFileChooser.CANCEL_OPTION) {
+                           
+                    	label.setText(ManagerLanguage.getString("swingbremo_label_7"));
+                        fileChooser.cancelSelection();
+                    }
+            } catch (Exception e) {
+            	label.setText(ManagerLanguage.getString("swingbremo_label_8"));
+                  e.printStackTrace();
+            }
         }
 
         /****** Active Icon *********************************/
@@ -1084,15 +1165,24 @@ public class SwingBremo extends JFrame {
          * @throws IOException
          */
         public static void savePathToFile(String path)  {
-                File f = new File("bremo.path");
+                File f = new File("src/bremoswing/utilFile/bremo.path");
                 BufferedWriter wr;
                 try {
-                        wr = new BufferedWriter(new FileWriter(f,false));
-                        wr.write(path);
-                        wr.close();
-                } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                     if (f.exists()) {
+                         wr = new BufferedWriter(new FileWriter(f,false));
+                         wr.write(path);
+                         wr.close();
+                      } else {
+                    	 f = new File (BremoAppletDirectory.getAbsoluteFile()+File.separator+"bremo.path");
+                    	 if (f.exists()) {
+                    		 wr = new BufferedWriter(new FileWriter(f,false));
+                             wr.write(path);
+                             wr.close();
+                    	 }
+                      }
+                }
+                catch (IOException e) {
+                	e.printStackTrace();
                 }
         }
        
@@ -1102,44 +1192,64 @@ public class SwingBremo extends JFrame {
          * @throws IOException
          */
         public static String loadPathFromFile() {
-                File f = new File("bremo.path");
-                BufferedReader br;
-                BufferedWriter wr;
-                String zeile = null;
-                try {
-                if (f.exists()) {
-                        br = new BufferedReader(new FileReader(f));
-                        if ((zeile = br.readLine()) != null) {
-                                br.close();
-                       
-                        }else {
-                                br.close();
-                                zeile = ".";
-                        }
-                } else {
-                        wr = new BufferedWriter(new FileWriter(f,false));
-                        wr.write(".");
-                        wr.close();
-                        zeile = ".";
-                }
-                } catch (IOException e){
-                        zeile = ".";
-                }
-                return zeile;
+           
+		BufferedReader br;
+		BufferedWriter wr;
+		String zeile = null;
+		File f_local = new File("src/bremoswing/utilFile/bremo.path");;
+		File f_home = new File (BremoAppletDirectory.getAbsoluteFile()+File.separator+"bremo.path");
+		try {
+			if (f_local.exists()) {
+				br = new BufferedReader(new FileReader(f_local));
+				if ((zeile = br.readLine()) != null) {
+					br.close();
+
+				} else {
+					br.close();
+					zeile = ".";
+				}
+			} else if (BremoAppletDirectory.exists() && f_home.exists() ){
+				    br = new BufferedReader(new FileReader(f_home));
+					if ((zeile = br.readLine()) != null) {
+						br.close();	
+					} else {
+						br.close();
+						zeile = ".";
+					}
+			} else {
+				try {
+				     wr = new BufferedWriter(new FileWriter(f_local, false));
+				} catch (FileNotFoundException e ) {
+					
+					if (!BremoAppletDirectory.exists()){
+					     BremoAppletDirectory.mkdir();
+					}
+					wr = new BufferedWriter(new FileWriter(f_home, false));
+					System.err.println(f_home.getAbsolutePath());
+				}
+				wr.write(".");
+				wr.close();
+				zeile = ".";
+			}
+		} catch (IOException e) {
+			zeile = ".";
+		}
+		return zeile;
         }
         /**
          * get The revision number of the Project from SVN
          * @return  
          *           Revision as String
          */
-        public String getRevisionNumber() {
+        public static String getRevisionNumber() {
 
                 BufferedReader br;
                 String zeile = "???";
                 try {
-                        URL url = getClass().getResource("/bremoswing/properties/bremo.svnversion");
-                        br = new BufferedReader(new InputStreamReader(url.openStream()));
-                        if ((zeile = br.readLine()) != null) {
+                     URL url = SwingBremo.class.getResource("/bremoswing/properties/bremo.svnversion");
+                	 br = new BufferedReader(new InputStreamReader(url.openStream()));
+                   
+                	  if ((zeile = br.readLine()) != null) {
                                 br.close();
                                 zeile = zeile.split("=")[1];
                                 if (zeile.contains(":")) {
@@ -1187,8 +1297,7 @@ public class SwingBremo extends JFrame {
 				System.err.println(s);
 			}
         }
-        
-        
+                
         /**
          * Show PopUp to prevent the User.
          */
@@ -1197,7 +1306,7 @@ public class SwingBremo extends JFrame {
     		JLabel label = new JLabel();
     		label.setOpaque(true);
     		label.setBorder(BorderFactory.createTitledBorder(null, Titel, 0, 0, new java.awt.Font("Tahoma", 0, 18), Color.red));
-    		label.setBackground(Color.lightGray);
+    		label.setBackground(new Color (102,178,255));
     		
     		String head = "<html><h2>"+message+"</h2></html>";		      
     	
@@ -1222,7 +1331,7 @@ public class SwingBremo extends JFrame {
     	        }
     	      };
     	      // Hide popup in 15 seconds
-    	      Timer timer = new Timer(4000, hider);
+    	      Timer timer = new Timer(7000, hider);
     	      timer.start();
     	    
     	}

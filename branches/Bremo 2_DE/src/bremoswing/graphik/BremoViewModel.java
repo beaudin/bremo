@@ -295,12 +295,12 @@ public class BremoViewModel implements Observable {
 		notifyObserver(stb);
 		if (LineChartMode) { // Line Chart 
 			if (fav_Manager == null ){ // initialization of  fav_manager at the beginning
-				fav_Manager = new FavoriteManager(file.getParent()+File.separator);
+				fav_Manager = new FavoriteManager();
 			}
- 			else if (!fav_Manager.getDirectoryFavsFile().equals(null) &&    // new initialization when the User change the File Directory
- 					 !fav_Manager.getDirectoryFavsFile().equals(file.getParent()+File.separator)) {
- 				fav_Manager = new FavoriteManager(file.getParent()+File.separator);
- 			}
+// 			else if (!fav_Manager.getDirectoryFavsFile().equals(null) &&    // new initialization when the User change the File Directory
+// 					 !fav_Manager.getDirectoryFavsFile().equals(file.getParent()+File.separator)) {
+// 				fav_Manager = new FavoriteManager(file.getParent()+File.separator);
+// 			}
 			notifyObserver(showHeader());
 			if (checkFavsfile()) { 
 				String log_param = readFavsFile();
@@ -1834,9 +1834,9 @@ public class BremoViewModel implements Observable {
 					JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception e ){
 			info = new FertigMeldungFrame("favorite",
-					"No Input file found !",
+					"No View available !",
 					JOptionPane.ERROR_MESSAGE);
-		        
+		      e.printStackTrace();  
 		  }
 		}
 
@@ -1974,7 +1974,7 @@ public class BremoViewModel implements Observable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NullPointerException e) {
-			new FertigMeldungFrame("favorite", "No Input file found !",
+			new FertigMeldungFrame("favorite", "No View available !",
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}

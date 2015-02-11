@@ -268,6 +268,7 @@ public class IndizierDaten {
 			}
 		}
 		//Filtern
+		//TODO Ist es besser erst zu filtern und dann den Abgelich zu machen???
 		if(this.filternBitte)
 			pZyl=sgol.filterData(pZylRoh);
 		else

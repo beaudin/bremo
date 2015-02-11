@@ -40,7 +40,7 @@ public class TauFileReader {
 			File RATE__FILE=CP.get_FileToRead("TauFileName_"+index);		
 			int indexOf=RATE__FILE.getName().indexOf(".");
 			String RATE_FORMAT=RATE__FILE.getName().substring(indexOf+1); //Dateiendung;
-			this.spalte = cp.get_ColumnToRead("spalte_Tau"+index);
+			this.spalte = cp.get_ColumnToRead("spalte_Tau_"+index,false);
 			
 			zeitEinheiten[0]="[KWnBOI]";
 			zeitEinheiten[1]="[snBOI]";

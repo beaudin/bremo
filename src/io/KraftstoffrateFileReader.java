@@ -43,7 +43,7 @@ public class KraftstoffrateFileReader {
 			File RATE__FILE=CP.get_FileToRead("KraftstoffrateFileName_"+index);		
 			int indexOf=RATE__FILE.getName().indexOf(".");
 			String RATE_FORMAT=RATE__FILE.getName().substring(indexOf+1); //Dateiendung;
-			this.spalte = cp.get_ColumnToRead("spalte_Kraftstoffrate"+index);		
+			this.spalte = cp.get_ColumnToRead("spalte_Kraftstoffrate_"+index,false);		
 			
 			zeitEinheiten[0]="[KWnBOI]";
 			zeitEinheiten[1]="[snBOI]";

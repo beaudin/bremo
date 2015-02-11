@@ -11,8 +11,8 @@ public class Motor_VolumenFunktionAusDatei extends Motor{
 	protected Motor_VolumenFunktionAusDatei(CasePara cp){
 		super(cp);
 		mvfr = new EngineFileReader(cp,
-				cp.get_ColumnToRead("spalte_Volumen"),
-				cp.get_ColumnToRead("spalte_Flaeche"),
+				cp.get_ColumnToRead("spalte_Volumen",false),
+				cp.get_ColumnToRead("spalte_Flaeche",false),
 				cp.get_FileToRead("motorDatei"));
 	
 	}

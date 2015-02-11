@@ -26,9 +26,9 @@ public class TurbulenceFileReader {
 
 	public TurbulenceFileReader(CasePara cp){			
 		this.CP=cp;		
-		this.column_TurbIntens = CP.get_ColumnToRead("column_TI");
-		this.column_TurbKinEnergy = CP.get_ColumnToRead("column_TKE");
-		this.column_DissipationRate = CP.get_ColumnToRead("column_EPS");	
+		this.column_TurbIntens = CP.get_ColumnToRead("column_TI",false);
+		this.column_TurbKinEnergy = CP.get_ColumnToRead("column_TKE",false);
+		this.column_DissipationRate = CP.get_ColumnToRead("column_EPS",false);
 		String path=CP.get_FileToRead("turbulenceFileName").getAbsolutePath(); 
 		
 		if( !path.endsWith(ext))

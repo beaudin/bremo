@@ -141,7 +141,7 @@ public abstract class APR_Cantera extends APR {
 		
 		if(dQbReader==null){			
 			dQbReader=new HeatFluxFileReader(CP,
-					CP.get_ColumnToRead("column_dQb"), 
+					CP.get_ColumnToRead("column_dQb",false), 
 					CP.get_FileToRead("dQbFile"));			
 		}
 		

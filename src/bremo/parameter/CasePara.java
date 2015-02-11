@@ -318,6 +318,18 @@ public class CasePara {
 		}
 		return shift_pOut;
 	}
+	
+	public boolean shift_pKGH(){
+		String [] yesno={ManagerLanguage.getString("ja"),ManagerLanguage.getString("nein")};
+		boolean shift_pKGH=false;
+		try {
+			if(set_StringPara(INPUTFILE_PARAMETER,ManagerLanguage.getString("shift_pKGH"),yesno ).equalsIgnoreCase(ManagerLanguage.getString("ja")))
+				shift_pKGH=true;
+		} catch (ParameterFileWrongInputException e) {
+			e.stopBremo();
+		}
+		return shift_pKGH;
+	}
 
 	public String get_pressureAdjustmentMethod(String methodIdentifier){
 		String method=null;
@@ -343,25 +355,33 @@ public class CasePara {
 		}
 	}
 	
-	public int get_ColumnToRead(String columnIdentifier){		
+	/**
+	 * Spalte für Dateieinleseoperationen aus dem Inputfile lesen
+	 * @param String columnIdentifier - Variablenname
+	 * @param boolean unterdruecken - soll Warnung und Fehlermeldung unterdrückt werden? 
+	 * @return
+	 */
+	public int get_ColumnToRead(String columnIdentifier, boolean unterdruecken){		
 		int column;
 		try {
 			column = (int)set_doublePara(INPUTFILE_PARAMETER, columnIdentifier,"",1,40);
 			return column;
 		} catch (ParameterFileWrongInputException e) {
-			if(calledFromGUI){
-				e.log_Warning(e.getMessage());
-			}else{
-				e.printStackTrace();
+			if(!unterdruecken){
+				if(calledFromGUI){
+					e.log_Warning(e.getMessage());
+				}else{
+					e.printStackTrace();
+				}
+				e.stopBremo();
 			}
-			e.stopBremo();
 			return 0;
 		}		
 	}
 	
 	public double get_relaxFactor(){
 		double tmpRELAX;
-		try{				
+		try{
 			tmpRELAX=set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("relaxFactor"),"[-]",0.1,1);	
 		}catch(ParameterFileWrongInputException e){
 			e.log_Warning("The parameter \""+ManagerLanguage.getString("relaxFactor")+"\" has not been defined!"+

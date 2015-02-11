@@ -272,7 +272,8 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 		Motor motor=CP.MOTOR;
 		if(motor.isHubKolbenMotor()){ //Nur für Hubkolbenmotor
 			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
-			if(((hkm.get_Schraenkung()!=0||hkm.get_Desachsierung()!=0)&hkm.get_ZOTbeiKolbenOT())|CP.get_OT_Versatz()!=0){ //Nur bei Schraenkung oder Desachsierung
+//			if(((hkm.get_Schraenkung()!=0||hkm.get_Desachsierung()!=0)&hkm.get_ZOTbeiKolbenOT())|CP.get_OT_Versatz()!=0){ //Nur bei Schraenkung oder Desachsierung
+			if(CP.get_OT_Versatz() != 0){ //Wenn OT-Versatz gewünscht, auch ohne Schraenkung und Desachsierung -- neurohr 02/15
 				LinInterp linInt=new LinInterp(CP); 	
 				double delta_zeit = zeitAchse[1]-zeitAchse[0]; //Schrittweite der oben angelegten Zeitachse bzw. Aufloesung
 				

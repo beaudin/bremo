@@ -11,7 +11,7 @@ public class FromFile extends BlowBy {
 	protected FromFile(CasePara CP) {
 		super(CP);
 		blowby = new BlowByFileReader(CP,
-				CP.get_ColumnToRead("spalte_dmL"),
+				CP.get_ColumnToRead("spalte_dmL",false),
 				CP.get_FileToRead("blowbyFileName"));
 	}
 

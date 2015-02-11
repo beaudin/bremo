@@ -45,8 +45,8 @@ public class DurchflusskennzahlFileReader {
 		this.cp=CP;
 		L_Interp = new LinInterp(CP);			
 
-		spalte_alpha_Vor=CP.get_ColumnToRead("spalte_alphaVor");	
-		spalte_alpha_Rueck=CP.get_ColumnToRead("spalte_alphaRueck");
+		spalte_alpha_Vor=CP.get_ColumnToRead("spalte_alphaVor",false);	
+		spalte_alpha_Rueck=CP.get_ColumnToRead("spalte_alphaRueck",false);
 		if(spalte_alpha_Vor==spalte_alpha_Rueck){
 			try{
 				throw new ParameterFileWrongInputException("Die angegebenen Kanalnummern bzw Spaltennummern " +

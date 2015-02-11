@@ -59,7 +59,7 @@ public class BrennverlaufDaten {
 			File burnFile=CP.get_FileToRead("burnFileName");
 		    int indexOf=burnFile.getName().indexOf(".");
 			String EINGABEDATEI_FORMAT_BURN=burnFile.getName().substring(indexOf+1); //Dateiendung
-			int dQburnNr=CP.get_ColumnToRead("spalte_dQburn");
+			int dQburnNr=CP.get_ColumnToRead("spalte_dQburn",false);
 //			File burnFile= CP.SYS.BRENNVERLAUF_FILE;		
 			String fileName=burnFile.getName();
 					

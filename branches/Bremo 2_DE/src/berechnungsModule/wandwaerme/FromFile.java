@@ -14,7 +14,7 @@ public class FromFile extends WandWaermeUebergang {
 	public FromFile(CasePara cp) {
 		super(cp);		
 		 whtR= new HeatFluxFileReader(cp,
-				 cp.get_ColumnToRead("column_dQw"),
+				 cp.get_ColumnToRead("column_dQw",false),
 				 cp.get_FileToRead("htfFileName"));
 	}
 

@@ -24,6 +24,7 @@ import kalorik.spezies.Spezies;
 import bremo.parameter.CasePara;
 import bremo.sys.Solver;
 import bremoExceptions.BirdBrainedProgrammerException;
+import bremoExceptions.ErrorZoneException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -428,7 +429,15 @@ public class APR_kompletterZyklus extends APR {
 		isValuePositivNumber(zonen_IN[0].get_p(), "Der Druck zum Zeitpunkt " + time + " s (" + CP.convert_SEC2KW(time) + " KW)"	+ " ist negativ oder NaN.");
 		isValuePositivNumber(zonen_IN[0].get_T(), "Die Temperatur zum Zeitpunkt " + time + " s (" + CP.convert_SEC2KW(time) + " KW)" + " ist negativ oder NaN.");
 		isValuePositivNumber(zonen_IN[0].get_m(), "Die Masse zum Zeitpunkt " + time + " s (" + CP.convert_SEC2KW(time) + " KW)" + " ist negativ oder NaN.");
-
+		if(((Double)zonen_IN[0].get_p()).isNaN() || ((Double)zonen_IN[0].get_V()).isNaN() || ((Double)zonen_IN[0].get_T()).isNaN()){
+			try{
+				throw new ErrorZoneException("Warnung: In der Komplettzyklusrechnung haben Druck, Volumen oder Temperatur der "+
+						"Zone unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						super.get_ErgebnisBuffer());
+			}catch(ErrorZoneException eze){
+				eze.stopBremo();
+			}
+		}
 		return zonen_IN;
 	}
 	

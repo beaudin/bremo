@@ -18,6 +18,8 @@ import berechnungsModule.motor.Motor;
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
 import bremo.parameter.CasePara;
 import bremo.parameter.IndizierDaten;
+import bremoExceptions.ErrorZoneException;
+import bremoExceptions.MiscException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -46,7 +48,7 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 	private double dmL, mL=0;
 
 
-	private double pSaug, TSaug,TSaug_alt, pAbg, TAbg, kappa, pZyl, TZyl, Rgas,mLF_mess;
+	private double pSaug, TSaug, TSaug_alt, pAbg, TAbg, kappa, pZyl, TZyl, Rgas,mLF_mess;
 	private double mLF_DIFF,mLF_DIFF_alt;
 	private boolean firstRun=true;
 	
@@ -254,8 +256,19 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 			}else{
 			}
 		}
-		if(((Double)zonen[0].get_p()).isNaN()){
-//			System.out.println("Warnung: in der Ladungswechselanalyse kommen unmögliche Drücke vor");
+		if(((Double)zonen[0].get_p()).isNaN() || ((Double)zonen[0].get_V()).isNaN() || ((Double)zonen[0].get_T()).isNaN()){
+			try{
+				throw new ErrorZoneException("Warnung: In der Ladungswechselanalyse haben Druck, Volumen oder Temperatur der "+
+						"Zone unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						super.get_ErgebnisBuffer());
+			}catch(ErrorZoneException eze){
+				eze.stopBremo();
+			}
+		}
+		if(zonen[0].get_m()<CP.SYS.MINIMALE_ZONENMASSE){
+			System.out.println("Die Masse der Zone in der Ladungswechselanalyse wurde zu klein, es wird versucht die "+
+						"Berechnung fortzuführen.");
+			zonen[0].massenElementZumischen(CP.SYS.MINIMALE_ZONENMASSE-zonen[0].get_m()+1e-6, zonen[0].get_ggZone());
 		}
 		return zonen;
 	}
@@ -401,6 +414,9 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 			TSaug_alt=TSaug;
 
 			TSaug=TSaug-relax*mLF_DIFF/dmLF_DIFF;
+			if(TSaug<=0){
+				TSaug=50;
+			}
 		}
 //				System.out.println("TSaug:" +TSaug);
 				System.err.println("TSaug:" +TSaug);
@@ -440,10 +456,6 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 		return anzZonen;
 	}
 
-
-	public boolean isDVA() {
-		return false;
-	}
 
 	@Override
 	public Zone[] get_initialZonesWhileRunning() {

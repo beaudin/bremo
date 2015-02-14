@@ -17,6 +17,7 @@ import berechnungsModule.ohc_Gleichgewicht.GleichGewichtsRechner;
 import berechnungsModule.turbulence.TurbulenceModel; //für Bargende
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
 import bremo.parameter.CasePara;
+import bremoExceptions.ErrorZoneException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -317,7 +318,24 @@ public class DVA_homogen_ZweiZonig extends DVA {
 			x = kappa * (CP.MOTOR.get_V(time)-CP.MOTOR.get_V(time-CP.SYS.WRITE_INTERVAL_SEC) / CP.SYS.WRITE_INTERVAL_SEC) / 
 					super.get_dp(time);
 		}
-			
+		if(((Double)zonen_IN[0].get_p()).isNaN() || ((Double)zonen_IN[0].get_V()).isNaN() || ((Double)zonen_IN[0].get_T()).isNaN()){
+			try{
+				throw new ErrorZoneException("Warnung: In der Druckverlaufsanalyse haben Druck, Volumen oder Temperatur der "+
+						"Zone 1 unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						super.get_ErgebnisBuffer());
+			}catch(ErrorZoneException eze){
+				eze.stopBremo();
+			}
+		}
+		if(((Double)zonen_IN[1].get_p()).isNaN() || ((Double)zonen_IN[1].get_V()).isNaN() || ((Double)zonen_IN[1].get_T()).isNaN()){
+			try{
+				throw new ErrorZoneException("Warnung: In der Druckverlaufsanalyse haben Druck, Volumen oder Temperatur der "+
+						"Zone 2 unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						super.get_ErgebnisBuffer());
+			}catch(ErrorZoneException eze){
+				eze.stopBremo();
+			}
+		}
 		return zonen_IN;			
 	}
 			

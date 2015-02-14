@@ -18,6 +18,7 @@ import berechnungsModule.motor.Motor;
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
 import bremo.parameter.CasePara;
 import bremo.parameter.IndizierDaten;
+import bremoExceptions.ErrorZoneException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -240,8 +241,19 @@ public class LadungsWechselAnalyse_geschleppt extends MasterLWA {
 			}else{
 			}
 		}
-		if(((Double)zonen[0].get_p()).isNaN()){
-//			System.out.println("Warnung: in der Ladungswechselanalyse kommen unmögliche Drücke vor");
+		if(((Double)zonen[0].get_p()).isNaN() || ((Double)zonen[0].get_V()).isNaN() || ((Double)zonen[0].get_T()).isNaN()){
+			try{
+				throw new ErrorZoneException("Warnung: In der Ladungswechselanalyse haben Druck, Volumen oder Temperatur der "+
+						"Zone unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						super.get_ErgebnisBuffer());
+			}catch(ErrorZoneException eze){
+				eze.stopBremo();
+			}
+		}
+		if(zonen[0].get_m()<CP.SYS.MINIMALE_ZONENMASSE){
+			System.out.println("Die Masse der Zone in der Ladungswechselanalyse wurde zu klein, es wird versucht die "+
+						"Berechnung fortzuführen.");
+			zonen[0].massenElementZumischen(CP.SYS.MINIMALE_ZONENMASSE-zonen[0].get_m()+1e-6, zonen[0].get_ggZone());
 		}
 		return zonen;
 	}
@@ -407,11 +419,6 @@ public class LadungsWechselAnalyse_geschleppt extends MasterLWA {
 
 	public int get_anzZonen() {		
 		return anzZonen;
-	}
-
-
-	public boolean isDVA() {
-		return false;
 	}
 
 	@Override

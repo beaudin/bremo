@@ -21,6 +21,7 @@ import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
 import bremo.parameter.CasePara;
 import bremoExceptions.BirdBrainedProgrammerException;
+import bremoExceptions.ErrorZoneException;
 import bremoExceptions.MiscException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
@@ -337,6 +338,16 @@ public class APR_homogen_EinZonig extends APR{
 		
 		if(bargende){ //Nur wenn Bargende
 			this.turb.update(zonen_IN, time);
+		}
+		
+		if(((Double)zonen_IN[0].get_p()).isNaN() || ((Double)zonen_IN[0].get_V()).isNaN() || ((Double)zonen_IN[0].get_T()).isNaN()){
+			try{
+				throw new ErrorZoneException("Warnung: In der Arbeitsprozessrechnung haben Druck, Volumen oder Temperatur der "+
+						"Zone unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						super.get_ErgebnisBuffer());
+			}catch(ErrorZoneException eze){
+				eze.stopBremo();
+			}
 		}
 		return zonen_IN;
 		

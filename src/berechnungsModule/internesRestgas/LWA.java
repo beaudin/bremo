@@ -141,11 +141,15 @@ public class LWA extends InternesRestgas {
 			if(artLWA.equalsIgnoreCase("zwiko")) {
 				mLuftFeucht=((LadungsWechselAnalyse)dglSys_LW).get_mLuftFeucht(zn_LW);
 				//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
-				((LadungsWechselAnalyse)dglSys_LW).set_TSaug(mLuftFeucht);				
+				((LadungsWechselAnalyse)dglSys_LW).set_TSaug(mLuftFeucht);
+			}else if(artLWA.equalsIgnoreCase("schlepp")) {
+					mLuftFeucht=((LadungsWechselAnalyse_geschleppt)dglSys_LW).get_mLuftFeucht(zn_LW);
+					//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
+					((LadungsWechselAnalyse_geschleppt)dglSys_LW).set_TSaug(mLuftFeucht);
 			}else{
 				mLuftFeucht=((LadungsWechselAnalyse_ohneQb)dglSys_LW).get_mLuftFeucht(zn_LW);
 				//Anpassung der Ladelufttemperatur um auf die gemessenen Luftmasse zu kommen
-				((LadungsWechselAnalyse_ohneQb)dglSys_LW).set_TSaug(mLuftFeucht);
+				((LadungsWechselAnalyse_ohneQb) dglSys_LW).set_TSaug(mLuftFeucht);
 			}
 			idx2+=1;
 		}while(Math.abs((mLuftFeucht_mess-mLuftFeucht)/mLuftFeucht_mess)>0.005&&idx2<=50);
@@ -156,6 +160,8 @@ public class LWA extends InternesRestgas {
 		double agrInt;
 		if(artLWA.equalsIgnoreCase("zwiko")) {
 			agrInt=((LadungsWechselAnalyse)dglSys_LW).get_mAGRintern(zn_LW);
+		}else if(artLWA.equalsIgnoreCase("schlepp")) {
+			agrInt=((LadungsWechselAnalyse_geschleppt)dglSys_LW).get_mAGRintern(zn_LW);
 		}else{
 			agrInt=((LadungsWechselAnalyse_ohneQb)dglSys_LW).get_mAGRintern(zn_LW);
 		}

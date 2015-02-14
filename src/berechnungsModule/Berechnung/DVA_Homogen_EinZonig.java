@@ -16,6 +16,7 @@ import berechnungsModule.turbulence.TurbulenceModel;
 import berechnungsModule.wandwaerme.WandWaermeUebergang;
 import bremo.parameter.CasePara;
 import bremoExceptions.BirdBrainedProgrammerException;
+import bremoExceptions.ErrorZoneException;
 import bremoExceptions.NegativeMassException;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -270,7 +271,15 @@ public class DVA_Homogen_EinZonig extends DVA{
 			x = kappa * (CP.MOTOR.get_V(time)-CP.MOTOR.get_V(time-CP.SYS.WRITE_INTERVAL_SEC) / CP.SYS.WRITE_INTERVAL_SEC) / 
 					super.get_dp(time);
 		}
-		
+		if(((Double)zonen_IN[0].get_p()).isNaN() || ((Double)zonen_IN[0].get_V()).isNaN() || ((Double)zonen_IN[0].get_T()).isNaN()){
+			try{
+				throw new ErrorZoneException("Warnung: In der Druckverlaufsanalyse haben Druck, Volumen oder Temperatur der "+
+						"Zone unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						super.get_ErgebnisBuffer());
+			}catch(ErrorZoneException eze){
+				eze.stopBremo();
+			}
+		}
 		return zonen_IN;			
 	}
 	

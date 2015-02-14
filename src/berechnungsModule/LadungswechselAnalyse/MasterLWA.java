@@ -41,6 +41,7 @@ public abstract class MasterLWA extends BerechnungsModell{
 
 
 	protected abstract Zone[] ersterHSBrennraum(double time, Zone[] zonen_IN);
+	public abstract void set_TSaug(double mLuft);
 
 	
 	public boolean is_pSoll_Gleich_pIst(double pIst, Zone [] zonen ,double time){
@@ -168,5 +169,5 @@ public abstract class MasterLWA extends BerechnungsModell{
 	public double get_turbFaktor(Zone[] zonen_IN, double time) {
 		// TODO Auto-generated method stub
 		return 0;
-	} 
+	}
 }

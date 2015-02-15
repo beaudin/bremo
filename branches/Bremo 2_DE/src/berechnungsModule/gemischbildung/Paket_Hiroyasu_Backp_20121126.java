@@ -1,6 +1,7 @@
 package berechnungsModule.gemischbildung;
 
 
+import io.AusgabeSteurung;
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.motor.Motor;
 import bremo.main.Bremo;
@@ -323,7 +324,7 @@ public class Paket_Hiroyasu_Backp_20121126 {
 			if(((Double) dm).isNaN()) 
 				dm=0; //Passiert wennder Krst fast vollst. verdampft ist
 			if(dm<0){ 
-				System.err.println("FUCK"); 
+				AusgabeSteurung.Error("FUCK"); 
 				dm=0;
 			}
 		}

@@ -20,14 +20,16 @@ public class TextPaneOutputStream extends OutputStream
 	public TextPaneOutputStream(JTextPane textPane)
 	{
 		this.textPane = textPane;
-		SetTextColor(new Color (255,128,0));
+		SetTextColor(Color.red);
+		textPane.validate();
 		
 	}
 	
 	public void  SetTextColor(Color color) {
 		style = textPane.addStyle(null, null);
-		colorText = new  Color(255,128,0);
-		StyleConstants.setForeground(style, new Color(255,128,0));
+		colorText = color;
+		StyleConstants.setForeground(style, colorText);
+		textPane.validate();
 	}
 
 	@Override

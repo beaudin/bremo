@@ -2,6 +2,7 @@ package berechnungsModule.LadungswechselAnalyse;
 
 import java.util.Hashtable;
 
+import io.AusgabeSteurung;
 import io.DurchflusskennzahlFileReader;
 import io.VentilhubFileReader;
 import kalorik.spezies.GasGemisch;
@@ -386,7 +387,7 @@ public class LadungsWechselAnalyse_geschleppt extends MasterLWA {
 			TSaug=TSaug-relax*mLF_DIFF/dmLF_DIFF;
 		}
 //				System.out.println("TSaug:" +TSaug);
-				System.err.println("TSaug:" +TSaug);
+		 AusgabeSteurung.Warning("TSaug:" +TSaug);
 	}
 
 	public Zone[] get_initialZones() {

@@ -1,5 +1,6 @@
 package bremo.main; 
 
+import io.AusgabeSteurung;
 import io.FileWriter_txt;
 import io.SimpleTXTFileReader;
 
@@ -138,10 +139,10 @@ public class Bremo extends Thread {
 				SwingBremo.setNrOfBremoAlive();
 				
 				new FertigMeldungFrame(this.getName(),"<html>"
-						                              +"<u>"+ManagerLanguage.getRb().getString("thread")+ "</u> : "+
-				                                      ManagerLanguage.getRb().getString("bremo_error_message_1") +
+						                              +"<u>"+ManagerLanguage.getString("thread")+ "</u> : "+
+				                                      ManagerLanguage.getString("bremo_error_message_1") +
 				                                      "<b>"+this.getName()+"</b> "+
-				                                      ManagerLanguage.getRb().getString("bremo_error_message_2")+
+				                                      ManagerLanguage.getString("bremo_error_message_2")+
 				                                      " <p> \n "+e.getMessage()+"</p>"+
 				                                      "</html>", 
 						                              JOptionPane.ERROR_MESSAGE);
@@ -155,10 +156,10 @@ public class Bremo extends Thread {
 				r.berechnungDurchfuehren();
 				iterRechnung.auswerten();
 				if(calledFromGUI && !iterRechnung.isIterativ()){
-					SwingBremo.PopUp(ManagerLanguage.getRb().getString("info"),
-							         ManagerLanguage.getRb().getString("thread")+
+					SwingBremo.PopUp(ManagerLanguage.getString("info"),
+							         ManagerLanguage.getString("thread")+
 					                 " "+this.getName()+" "+
-					                 ManagerLanguage.getRb().getString("warning_message_terminate"));
+					                 ManagerLanguage.getString("warning_message_terminate"));
 //					new FertigMeldungFrame(this.getName(),"Thread "+this.getName()+" ist fertig!",JOptionPane.INFORMATION_MESSAGE);
 					SwingBremo.PutInBremoThreadFertig(this.getName());
 				}
@@ -175,19 +176,19 @@ public class Bremo extends Thread {
 			}
 			Verlustteilung verl = new Verlustteilung(casePara);
 			verl.berechneVerluste();
-			SwingBremo.label.setText("swingbremo_label_13");
+			SwingBremo.label.setText(ManagerLanguage.getString("swingbremo_label_13"));
 			if (calledFromGUI) {
 				SwingBremo.StateBremoThread();
-				System.err.println(ManagerLanguage.getRb().getString("calcul_time")
-						+ (System.currentTimeMillis() - SwingBremo.startTime)
-						+ " "+ManagerLanguage.getRb().getString("time_ms"));
+				AusgabeSteurung.Error(ManagerLanguage.getString("calcul_time")
+						+ ((System.currentTimeMillis() - SwingBremo.startTime)/1000)
+						+ " "+ManagerLanguage.getString("time_s"));
 			}
 		} else {
 			if (calledFromGUI) {
 				SwingBremo.StateBremoThread();
-				System.err.println(ManagerLanguage.getRb().getString("calcul_time")
-						+ (System.currentTimeMillis() - SwingBremo.startTime)
-						+ " "+ManagerLanguage.getRb().getString("time_ms"));
+				AusgabeSteurung.Error(ManagerLanguage.getString("calcul_time")
+						+ ((System.currentTimeMillis() - SwingBremo.startTime)/1000)
+						+ " "+ManagerLanguage.getString("time_s"));
 			}
           }
 	}	

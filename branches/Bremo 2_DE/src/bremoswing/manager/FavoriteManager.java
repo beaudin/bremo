@@ -1,5 +1,7 @@
 package bremoswing.manager;
 
+import io.AusgabeSteurung;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -86,7 +88,7 @@ public class FavoriteManager {
 			br.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			System.err.println("Favorite file Not Found !");
+			AusgabeSteurung.Error("Favorite file Not Found !");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -124,7 +126,7 @@ public class FavoriteManager {
 			}
 			bw.close();
 		} catch (FileNotFoundException e) {
-			 System.err.println("Favs File no Found to save !");
+			AusgabeSteurung.Error("Favs File no Found to save !");
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

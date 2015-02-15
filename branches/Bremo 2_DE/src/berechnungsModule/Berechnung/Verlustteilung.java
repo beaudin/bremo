@@ -2,6 +2,7 @@ package berechnungsModule.Berechnung;
 
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
+import io.AusgabeSteurung;
 import io.FileWriter_txt;
 import matLib.Integrator;
 import matLib.MatLibBase;
@@ -126,7 +127,7 @@ public class Verlustteilung {
 					
 		double pmiOriginal = LittleHelpers.berechnePmi (CP, pGesamt );
 		double etaOriginal = pmi2eta(pmiOriginal);
-		SwingBremo.printlnWarning("Verlustteilung FALL 1h: Originaldruckverlauf");		
+		AusgabeSteurung.Warning("Verlustteilung FALL 1h: Originaldruckverlauf");		
 		
 		//Zuerst mit Wandwärmeverlust FALL 1f rechnen, damit für idealen Ladungswechsel vollständig expandiert
 		APR_homogen_EinZonig wandwaermeverlust = new APR_homogen_EinZonig(CP, true,"Vorgabe");
@@ -161,7 +162,7 @@ public class Verlustteilung {
 			}
 		pmiLWAideal = LittleHelpers.berechnePmi (CP, pGesamt );
 		etaLWAideal = pmi2eta(pmiLWAideal);
-		SwingBremo.printlnWarning("Verlustteilung FALL 1g: Ladungswechselverluste, ideal");
+		AusgabeSteurung.Warning("Verlustteilung FALL 1g: Ladungswechselverluste, ideal");
 		
 		
 		//Ladungswechselschleife löschen
@@ -184,11 +185,11 @@ public class Verlustteilung {
 		double pmiMit = LittleHelpers.berechnePmi (CP, pGesamt );
 //		double pmiMit = LittleHelpers.berechnePmi (CP, pMit );
 		double etaMit = pmi2eta(pmiMit);
-		SwingBremo.printlnWarning("Verlustteilung FALL 1f: Realer Brennverlauf mit Wandwärmeverlusten ");
+		AusgabeSteurung.Warning("Verlustteilung FALL 1f: Realer Brennverlauf mit Wandwärmeverlusten ");
 		
 		//Realgasverhalten FALL 1e
 		//NICHT vorhanden
-		SwingBremo.printlnWarning("Verlustteilung FALL 1e: Realgasverhalten  ==NICHT IMPLEMENTIERT==");
+		AusgabeSteurung.Warning("Verlustteilung FALL 1e: Realgasverhalten  ==NICHT IMPLEMENTIERT==");
 		//
 		
 		// Realer Brennverlauf( realer Brennverlauf, adiabat) FALL 1d
@@ -212,7 +213,7 @@ public class Verlustteilung {
 //		double pmiBrennverlauf = LittleHelpers.berechnePmi (CP, pBrennverlauf );
 		double pmiBrennverlauf = LittleHelpers.berechnePmi (CP, pGesamt );
 		double etaBrennverlauf = pmi2eta(pmiBrennverlauf);
-		SwingBremo.printlnWarning("Verlustteilung FALL 1d: Realer Brennverlauf, adiabat");
+		AusgabeSteurung.Warning("Verlustteilung FALL 1d: Realer Brennverlauf, adiabat");
 		
 		
 		//HC/CO-Emissionen Fall 1c'
@@ -272,7 +273,7 @@ public class Verlustteilung {
 		else{
 			HCCOeingabe = false;			
 		}
-		SwingBremo.printlnWarning("Verlustteilung FALL 1c': HC-/CO-Emissionen");		
+		AusgabeSteurung.Warning("Verlustteilung FALL 1c': HC-/CO-Emissionen");		
 				
 		//Verbrennungslage (adiabat, punktuelle Wärmefreisetzung im Verbrennungsschwerpunkt) FALL 1c
 		APR_homogen_EinZonig APRverbrennungslage = new APR_homogen_EinZonig(CP, false,"Qneu-startNeu",Qmax,verbrennungschwerpunkt);
@@ -294,7 +295,7 @@ public class Verlustteilung {
 //		double pmiVerbrennungslage = LittleHelpers.berechnePmi (CP, pVerbrennungslage );
 		double pmiVerbrennungslage = LittleHelpers.berechnePmi (CP, pGesamt );
 		double etaVerbrennungslage = pmi2eta(pmiVerbrennungslage);
-		SwingBremo.printlnWarning("Verlustteilung FALL 1c: Punktuelle Wärmefreisetzung im Verbrennungsschwerpunkt, adiabat");
+		AusgabeSteurung.Warning("Verlustteilung FALL 1c: Punktuelle Wärmefreisetzung im Verbrennungsschwerpunkt, adiabat");
 			
 		//Reale Ladung (adiabat, punktuelle Wärmefreisetzung im OT) FALL 1b
 		APR_homogen_EinZonig APRreal = new APR_homogen_EinZonig(CP, false,"Punktuell-OT");
@@ -317,7 +318,7 @@ public class Verlustteilung {
 //		double pmiReal = LittleHelpers.berechnePmi (CP, pReal );
 		double pmiReal = LittleHelpers.berechnePmi (CP, pGesamt );
 		double etaReal = pmi2eta(pmiReal);
-		SwingBremo.printlnWarning("Verlustteilung FALL 1b: Punktuelle Wärmefreisetzung in OT, adiabat");
+		AusgabeSteurung.Warning("Verlustteilung FALL 1b: Punktuelle Wärmefreisetzung in OT, adiabat");
 		
 		//Idealer Gleichraumprozess FALL 1a
 		
@@ -369,7 +370,7 @@ public class Verlustteilung {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////
 		double pmiIdeal = berechnePmiIdeal();
 		double etaIdeal = berechneEtaIdeal();
-		SwingBremo.printlnWarning("Verlustteilung FALL 1a: Idealer Gleichraumprozess");
+		AusgabeSteurung.Warning("Verlustteilung FALL 1a: Idealer Gleichraumprozess");
 		
 //		if(CP.MODUL_VORGABEN.get("internesRestgasModell").equals("LWA")){ //START: LWA
 //		
@@ -597,10 +598,10 @@ public class Verlustteilung {
 		txtFilePmax.writeLineToFile(pMaxGleichraumArray, true);
 		
 		// Ausgabe in Fenster
-		SwingBremo.printlnWarning("\n"+"Verlustteilung_Post_Ergebnisse (s. MTZ 2/2005 S.120f):");
-		SwingBremo.printlnWarning("====================================");
-		SwingBremo.printlnWarning("pMax_Gleichraumprozess (@Vmin)= " + pMaxGleichraum/1e5 + " [bar]\n");
-		SwingBremo.printlnWarning("pmi_Idealprozess = " + pmiIdeal*1e-5 + " [bar]\n" +
+		AusgabeSteurung.Error("\n"+"Verlustteilung_Post_Ergebnisse (s. MTZ 2/2005 S.120f):");
+		AusgabeSteurung.Error("====================================");
+		AusgabeSteurung.Warning("pMax_Gleichraumprozess (@Vmin)= " + pMaxGleichraum/1e5 + " [bar]\n");
+		AusgabeSteurung.Warning("pmi_Idealprozess = " + pmiIdeal*1e-5 + " [bar]\n" +
 							"pmi_RealeLadung = " + pmiReal*1e-5 + " [bar]\n" +
 							"pmi_Verbrennungslage = " + pmiVerbrennungslage*1e-5 + " [bar]\n" +
 							"pmi_HCCO = " + pmiHCCO*1e-5 + " [bar]\n" +
@@ -611,7 +612,7 @@ public class Verlustteilung {
 							"pmi_Reibung = " + pme*1e-5 + " [bar]\n"
 							//+"pmi_Gleichraumprozess = " + pmiGleichraum*1e-5 +" [bar]\n"
 							);
-		SwingBremo.printlnWarning("Wirkungsgrade:\n" + 
+		AusgabeSteurung.Warning("Wirkungsgrade:\n" + 
 							"eta_Idealprozess = " +etaIdeal + " [-]\n" + 
 							"eta_RealeLadung = " + etaReal + " [-]\n" +
 							"eta_Verbrennungslage = " + etaVerbrennungslage + " [-]\n" +

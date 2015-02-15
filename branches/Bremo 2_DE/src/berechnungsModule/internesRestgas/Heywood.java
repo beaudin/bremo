@@ -1,5 +1,6 @@
 package berechnungsModule.internesRestgas;
 
+import io.AusgabeSteurung;
 import io.VentilhubFileReader;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
 import bremo.parameter.CasePara;
@@ -105,12 +106,12 @@ public class Heywood extends InternesRestgas {
 			}
 		} catch (IndexOutOfBoundsException e) {
 			if (evc < ivoVerschoben) { //Wenn der Auslass schließt, bevor der Einlass öffnet -> keine Ventilüberschneidung
-				System.err.println("**************************************************" +
+				AusgabeSteurung.Error("**************************************************" +
 									"\nFehler bei der Berechnung des internen Restgases mit Heywood (IndexOutOfBoundsException)."
 									+ "\nDie Daten aus dem Input File ergeben keine Ventilüberschneidung." +
 									"\n**************************************************\n");
 			} else {
-				System.err.println("**************************************************" +
+				AusgabeSteurung.Error("**************************************************" +
 								"Fehler bei Berechnung des internen Restgases mitHeywood (IndexOutOfBoundsException)."
 								+ "\n**************************************************\n");
 			}

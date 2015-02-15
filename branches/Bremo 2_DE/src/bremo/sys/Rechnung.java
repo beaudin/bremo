@@ -1,6 +1,7 @@
 package bremo.sys;
 
 
+import io.AusgabeSteurung;
 import matLib.VectorTools;
 import kalorik.spezies.Spezies;
 import berechnungsModule.ErgebnisBuffer;
@@ -125,12 +126,12 @@ public class Rechnung {
 					CP.TURB_FACTORY.get_TurbulenceModel().set_k(turbulence, 0);
 				//Falls set_k nicht funktioniert oder Schmarrn zurück gegeben wird
 				}else{
-					System.err.println("Vorsicht, negative Turbulenz aufgetreten - sollte nicht passieren!");
+					AusgabeSteurung.Error("Vorsicht, negative Turbulenz aufgetreten - sollte nicht passieren!");
 					}
 				}while (isConverged == false && idx<100);
 				
 				if(isConverged==false){
-					System.err.println("mangelnde Konvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
+					AusgabeSteurung.Error("mangelnde Konvergenz im Zeitschritt: " +CP.convert_SEC2KW(time)+ "[KW]");
 					((DVA) dglSys).schreibe_DUBUGGING_Ergebnisse("NO_KON_"+
 							CP.get_CaseName()+"_"+CP.convert_SEC2KW(time)+".txt");
 				}

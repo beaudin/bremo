@@ -1,6 +1,7 @@
 package berechnungsModule.gemischbildung;
 
 
+import io.AusgabeSteurung;
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.motor.Motor;
 import berechnungsModule.motor.Motor_HubKolbenMotor;
@@ -376,7 +377,7 @@ public class Paket_HiroyasuBackUp_20130415 {
 			if(((Double) dm).isNaN()) 
 				dm=0; //Passiert wennder Krst fast vollst. verdampft ist
 			if(dm<0){ 
-				System.err.println("FUCK"); 
+				AusgabeSteurung.Error("FUCK"); 
 				dm=0;
 			}
 		}

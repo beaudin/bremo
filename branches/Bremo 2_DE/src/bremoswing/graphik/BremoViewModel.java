@@ -1,5 +1,7 @@
 package bremoswing.graphik;
 
+import io.AusgabeSteurung;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -21,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.Observer;
 
 //import javafx.scene.chart.XYChart.Series;
+
 
 import javax.swing.JOptionPane;
 
@@ -1955,7 +1958,7 @@ public class BremoViewModel implements Observable {
 			
 			br.close();
 		} catch (IOException e) {
-			System.err.println("File"+file.getAbsolutePath() +" Not Found !!!");
+			AusgabeSteurung.Error("File"+file.getAbsolutePath() +" Not Found !!!");
 		}
 		Build_BarChart_Diagramm();
 	}

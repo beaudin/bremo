@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 
+
 import bremo.parameter.CasePara;
 import bremoExceptions.ParameterFileWrongInputException;
 
@@ -146,7 +147,7 @@ public class BrennverlaufFileReader {
 				for (int i = 0; i < dQburnTemp.length; i++) { // Umrechnung des Brennverlaufs in [J/s], wenn die Einheit [J/KW]
 					dQburnTemp[i] = CP.convert_ProKW_2_ProSEC(data[1][i]);
 				}
-				System.err.println("Der eingelesene Brennverlauf wurde von [J/KW] in [J/s] umgerechnet.\n");
+				AusgabeSteurung.Error("Der eingelesene Brennverlauf wurde von [J/KW] in [J/s] umgerechnet.\n");
 			} else if (einheitdQburn.contains("[J/s]")) {
 				dQburnTemp = data[1]; // bei [J/s] eingelesene Daten einfach übernehmen
 			} else {

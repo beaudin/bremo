@@ -24,6 +24,8 @@ public abstract class StopBremoException extends Exception {
 		try {
 		     SwingBremo.StateBremoThread();
 		     log_Message();
+		     AusgabeSteurung.Error(Separator + "!!!!   Bremo wurde gestopt    !!!!"+ Separator);
+		     
 		} catch (Exception e) {
 			
 		}

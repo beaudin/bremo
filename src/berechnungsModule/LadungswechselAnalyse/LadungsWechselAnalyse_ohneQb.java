@@ -420,7 +420,7 @@ public class LadungsWechselAnalyse_ohneQb extends MasterLWA {
 			}
 		}
 //				System.out.println("TSaug:" +TSaug);
-				System.err.println("TSaug:" +TSaug);
+				AusgabeSteurung.Warning("TSaug:" +TSaug);
 	}
 
 	public Zone[] get_initialZones() {

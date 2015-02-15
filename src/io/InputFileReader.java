@@ -265,7 +265,7 @@ public class InputFileReader {
 						throw new ParameterFileWrongInputException("Es handelt sich nicht um ein gültiges Inputfile. Ein Inputfile muss mit der Zeile \"" +inputStartFlag+"\" " +
 								"beginnen und mit der Zeile \"" +inputStopFlag+ "\" enden.");
 					}catch(ParameterFileWrongInputException e){
-						e.log_Message();
+						e.stopBremo();;
 					}
 					break;
 				}

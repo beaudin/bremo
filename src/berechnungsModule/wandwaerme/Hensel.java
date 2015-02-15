@@ -7,6 +7,7 @@ import java.util.Set;
 
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.Spezies;
+import io.AusgabeSteurung;
 import io.VentilhubFileReader;
 import berechnungsModule.Berechnung.Zone;
 import berechnungsModule.LadungswechselAnalyse.LadungsWechselAnalyse;
@@ -281,10 +282,10 @@ public class Hensel extends WandWaermeUebergang {
 			try{
 				T=tBuffer.getValue(cp.get_time());
 			}catch(InvalidParameterException ipe){
-				System.err.println("Fehler bei Berechnung der Wärmestromdichte nach Hensel.\n" +
+				AusgabeSteurung.Error("Fehler bei Berechnung der Wärmestromdichte nach Hensel.\n" +
 						"Dieser Fehler tritt normalerweise nur im ersten Durchlauf der LWA auf.");
 			}catch(ArrayIndexOutOfBoundsException aiob){
-				System.err.println("Fehler bei Berechnung der Wärmestromdichte nach Hensel in der APR.");
+				AusgabeSteurung.Error("Fehler bei Berechnung der Wärmestromdichte nach Hensel in der APR.");
 			}
 		}else if(ficticious_time<=0){
 			T=tBuffer.getValue(0);

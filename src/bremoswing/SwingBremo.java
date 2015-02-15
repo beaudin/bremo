@@ -1,5 +1,7 @@
 package bremoswing;
 
+import io.AusgabeSteurung;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -13,8 +15,6 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -33,24 +33,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
-import java.util.MissingResourceException;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -70,8 +65,6 @@ import javax.swing.text.Document;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 
-import com.sun.org.apache.xerces.internal.impl.RevalidationHandler;
-
 import funktionenTests.ShowTable;
 import bremo.main.Bremo;
 import bremoswing.graphik.BremoView;
@@ -83,9 +76,7 @@ import bremoswing.util.ExtensionFileFilter;
 import bremoswing.util.FertigMeldungFrame;
 import bremoswing.util.SucheBremo;
 import bremoswing.util.TextPaneOutputStream;
-
-import java.awt.Desktop;
-import java.net.URI;
+import bremoswing.util.ToolTipFrame;
 
 /*
  * SwingBremo.java
@@ -139,22 +130,27 @@ public class SwingBremo extends JFrame {
         public static double startTime ;
         public static File BremoAppletDirectory;
         
-        private TextPaneOutputStream outputStreamKleinArea;
+        public static TextPaneOutputStream outputStreamKleinArea;
         /**
          * replace the Standard System OutStream
          */
         PrintStream outStream ;
         /**
          * replace the Standard System ErrorStream
+         * Active in DEBUGMODE for Programmer
          */
         PrintStream errStream ;
         /**
          * SwingBremo Stream for Warning Information.
          * Can be use in another Class to stream Message.
          */
-        public static PrintStream warningOut;
+        public static PrintStream streamOut;
+        /**
+         * SwingBremo Stream for Error Information.
+         * Can be use in another Class to stream Message.
+         */
+        public static PrintStream erroOut;
         
-//        public static LanguageManager languageManager ;
         
 
         /************************** End of variables declaration ****************************************/
@@ -206,40 +202,58 @@ public class SwingBremo extends JFrame {
 
                 @Override
                 public void println(String s) {
+                	ActivDebugMode();
                 	appendTextPane(kleinArea, s + "\n", Color.RED);
                 	  }
 
                 @Override
                 public void print(String s) {
+                	ActivDebugMode();
                 	appendTextPane(kleinArea, s, Color.RED);
                 }
         };
         
         outputStreamKleinArea = new TextPaneOutputStream(kleinArea);
         
-        warningOut  = new PrintStream(outputStreamKleinArea) {
+        streamOut  = new PrintStream(outputStreamKleinArea, true) {
 
-       	 @Override
-            public void println(String s) {
-       		    outputStreamKleinArea.SetTextColor(new Color (215,120,11));
+       	   @Override
+            public synchronized void println(String s) {
+       		    //outputStreamKleinArea.SetTextColor(new Color (215,120,11));
       	        super.println(s);
             }
 
             @Override
-            public void print(String s) {
-            	outputStreamKleinArea.SetTextColor(new Color (215,120,11));
+            public synchronized void print(String s) {
+               //	outputStreamKleinArea.SetTextColor(new Color (215,120,11));
        	        super.print(s);
            }
-   };
+        }; 
+        
+//        erroOut  = new PrintStream(outputStreamKleinArea) {
+//
+//     	    @Override
+//            public void println(String s) {
+//     		     outputStreamKleinArea.SetTextColor(Color.red);
+//    	         super.println(s);
+//            } 
+//
+//            @Override
+//            public void print(String s) {
+//          	     outputStreamKleinArea.SetTextColor(Color.red);
+//     	         super.print(s);
+//            }
+//         };
    
    
                 System.setOut(outStream);
-                System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
+                //System.setErr(errStream); //Hier auskommentieren um Konsole umzuschalten zwischen Eclipse/Bremo-GUI
               
+                System.setErr(System.err);
                 
                 
                 
-                JMenu m = new JMenu("Datei");
+//               JMenu m = new JMenu("Datei");
 //              m.add(new JMenuItem("Item 1.1"));
 //              m.add(new JMenuItem("Item 1.2"));
 //              m.add(new JMenuItem("Item 1.3"));
@@ -361,7 +375,7 @@ public class SwingBremo extends JFrame {
                 berechnen.setIcon(beri); // NOI18N
                 berechnen.setRolloverIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/play_blue_2.png")));
-                  berechnen.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_play"));
+                  berechnen.setToolTipText(getHtmlToolTip(ManagerLanguage.getString("swingbremo_ToolTip_play")));
 //                berechnen.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_play")); //swingbremo_ToolTip_play
                 berechnen.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -382,7 +396,7 @@ public class SwingBremo extends JFrame {
                 wahlFile.setIcon(wfi); // NOI18N
                 wahlFile.setRolloverIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/folder_blue_2.png")));
-                wahlFile.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_choose"));
+                wahlFile.setToolTipText(getHtmlToolTip(ManagerLanguage.getString("swingbremo_ToolTip_choose")));
 //                wahlFile.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_choose")); //swingbremo_ToolTip_choose
                 wahlFile.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -402,7 +416,7 @@ public class SwingBremo extends JFrame {
                 /************ BUTTON STOP ************************************/
                 stop.setIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/stop_blue.png")));
-                stop.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_stop"));
+                stop.setToolTipText(getHtmlToolTip(ManagerLanguage.getString("swingbremo_ToolTip_stop")));
 //                stop.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_stop")); //swingbremo_ToolTip_stop
                 stop.setEnabled(false);
                 stop.setMargin(new Insets(0, 0, 0, 0));
@@ -426,7 +440,7 @@ public class SwingBremo extends JFrame {
                                 "/bremoswing/bild/see_graphik.png")));
                 sehen.setRolloverIcon(new ImageIcon(getClass().getResource(
                         "/bremoswing/bild/see_graphik-2.png")));
-                sehen.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_see"));
+                sehen.setToolTipText(getHtmlToolTip(ManagerLanguage.getString("swingbremo_ToolTip_see")));
 //                sehen.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_see")); //swingbremo_ToolTip_see
                 sehen.addActionListener(new ActionListener() {
 
@@ -483,7 +497,7 @@ public class SwingBremo extends JFrame {
                                 "/bremoswing/bild/table-icon-1.png")));
                 table.setRolloverIcon(new ImageIcon(getClass().getResource(
                                 "/bremoswing/bild/table-icon-2.png")));
-                table.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_table"));
+                table.setToolTipText(getHtmlToolTip(ManagerLanguage.getString("swingbremo_ToolTip_table")));
                 table.addActionListener(new ActionListener() {
                        
                         @Override
@@ -541,6 +555,7 @@ public class SwingBremo extends JFrame {
                 /************ LABEL ************************************/
 //              label.setOpaque(true);
 //              label.setBackground(new Color(255, 255, 255));
+                label.setFont(new Font("comic sans ms", 0, 13));
        
                 gc.fill = GridBagConstraints.NONE;
                 gc.insets = new Insets(5, 0, 0, 0);
@@ -619,8 +634,8 @@ public class SwingBremo extends JFrame {
 		help.setIcon(hilfe); // NOI18N
 		help.setRolloverIcon(new ImageIcon(getClass().getResource(
 				"/bremoswing/bild/help-2.png")));
-		help.setToolTipText(ManagerLanguage
-				.getString("swingbremo_ToolTip_help"));
+		help.setToolTipText(getHtmlToolTip(ManagerLanguage
+				.getString("swingbremo_ToolTip_help")));
 //		help.addActionListener(new ActionListener() {
 //			public void actionPerformed(ActionEvent e) {
 //				try {
@@ -668,7 +683,7 @@ public class SwingBremo extends JFrame {
                 /************ TEXTAREA GROSAREA OUTPUT ************************************/
                 //grosArea.setColumns(20);
                 grosArea.setEditable(false);
-                // grosArea.setFont(new Font("comic sans ms", 3, 16)); // NOI18N
+                grosArea.setFont(new Font("comic sans ms", 1, 13)); // NOI18N
                 //grosArea.setRows(5);
                 //grosArea.setText("Programm läuft... \nWählen Sie die Input Datei Und Dann Einfach die Berechnung Ausführen .");
                 grosArea.setMinimumSize(new Dimension(76, 22));
@@ -702,8 +717,8 @@ public class SwingBremo extends JFrame {
 //                kleinArea.setColumns(20);
 //                kleinArea.setLineWrap(true);
                 kleinArea.setEditable(false);
-                // kleinArea.setFont(new Font("comic sans ms", 3, 13)); // NOI18N
-                //kleinArea.setForeground(new Color(255, 0, 0));
+                kleinArea.setFont(new Font("comic sans ms", 1, 13)); // NOI18N
+//                kleinArea.setForeground(new Color(255, 0, 0));
 //                kleinArea.setRows(5);
                 kleinArea.addKeyListener(new KeyAdapter() {
                         @Override
@@ -877,7 +892,6 @@ public class SwingBremo extends JFrame {
                 label.setText("");
 
                 DebuggingMode = false;
-                ActiveConsole();
                 progressBar.setValue(0);
                 JFileChooser fileChooser = new JFileChooser(path);
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -1057,7 +1071,7 @@ public class SwingBremo extends JFrame {
                         }
                         for (String str : bremoThreadFertig) {
                                 if (str != null)
-                                        System.err.println(ManagerLanguage.getString("thread")+
+                                        AusgabeSteurung.Error(ManagerLanguage.getString("thread")+
                                         		           " "+str+" "+
                                         		           ManagerLanguage.getString("warning_message_terminate"));
                         }
@@ -1225,7 +1239,6 @@ public class SwingBremo extends JFrame {
 					     BremoAppletDirectory.mkdir();
 					}
 					wr = new BufferedWriter(new FileWriter(f_home, false));
-					System.err.println(f_home.getAbsolutePath());
 				}
 				wr.write(".");
 				wr.close();
@@ -1285,39 +1298,39 @@ public class SwingBremo extends JFrame {
         	
         }
         
-        /**
-         * SwingBremo function to print Warning message for the User. 
-         * Can be use in any Class to Stream Message for the User Console.
-         * @param s
-         */
-        public static void printlnWarning(final String s) {
-        	try {
-				warningOut.println(s);
-			} catch (Exception e) {
-				System.err.println(s);
-			}
-        }
+//        /**
+//         * SwingBremo function to print Warning message for the User. 
+//         * Can be use in any Class to Stream Message for the User Console.
+//         * @param s
+//         */
+//        public static void printlnWarning(final String s) {
+//        	try {
+//				warningOut.println(s);
+//			} catch (Exception e) {
+//				System.err.println(s);
+//			}
+//        }
                 
         /**
          * Show PopUp to prevent the User.
          */
         public static  void PopUp (String Titel, String message){
     		
-    		JLabel label = new JLabel();
-    		label.setOpaque(true);
-    		label.setBorder(BorderFactory.createTitledBorder(null, Titel, 0, 0, new java.awt.Font("Tahoma", 0, 18), Color.red));
-    		label.setBackground(new Color (102,178,255));
+//    		JLabel label = new JLabel();
+//    		label.setOpaque(true);
+//    		label.setBorder(BorderFactory.createTitledBorder(null, Titel, 0, 0, new java.awt.Font("comic sans ms", 2, 18), Color.red));
+//    		label.setBackground(new Color (102,178,255));
     		
-    		String head = "<html><h2>"+message+"</h2></html>";		      
+    		String head = "<html>"+message+"</html>";		      
     	
-    		label.setText(head);
+    		ToolTipFrame tooltip = new ToolTipFrame(Titel, head);
     	     // panel.add(label,BorderLayout.CENTER);
     	      
     	      PopupFactory factory = PopupFactory.getSharedInstance();
     	      Random random = new Random();
     	      int x = random.nextInt(1000);
     	      int y = random.nextInt(1000);
-    	      final Popup popup = factory.getPopup(null, label, x, y);
+    	      final Popup popup = factory.getPopup(null, tooltip.getContentPane(), x, y);
     	      popup.show();
     	      label.addMouseListener(new MouseAdapter() {
     	    	 public void mouseClicked(MouseEvent e) {
@@ -1331,10 +1344,25 @@ public class SwingBremo extends JFrame {
     	        }
     	      };
     	      // Hide popup in 15 seconds
-    	      Timer timer = new Timer(7000, hider);
+    	      Timer timer = new Timer(4000, hider);
     	      timer.start();
     	    
     	}
+        
+        public String getHtmlToolTip(String Text) {
+        	return  "<html><font face =\"comic sans ms\">"+ Text + "</font></html>";
+        }
+        
+        /**
+         * Active Debuging Mode wenn DebuggingMode True ist
+         */
+        public void ActivDebugMode() {
+        	if (DebuggingMode) {
+        		System.setErr(errStream);
+        	} else {
+        		System.setErr(System.err);
+        	}
+        }
 
         /**
          * @param args
@@ -1348,9 +1376,10 @@ public class SwingBremo extends JFrame {
                  * http://download.oracle.com/javase
                  * /tutorial/uiswing/lookandfeel/plaf.html
                  */
-                UIManager.put("ToolTip.font", new FontUIResource("Tahoma",Font.PLAIN,20));
-                UIManager.put("TitledBorder.font", new FontUIResource("Tahoma",Font.PLAIN,16));
-                UIManager.put("Label.font", new FontUIResource("Tahoma",Font.BOLD,14));
+        	    //Tahoma , Font.plaint, 
+                UIManager.put("ToolTip.font", new FontUIResource(new Font("comic sans ms", 2, 20)));
+                UIManager.put("TitledBorder.font", new FontUIResource(new Font("comic sans ms", 2, 16)));
+                UIManager.put("Label.font", new FontUIResource(new Font("comic sans ms",2 , 14)));
                 UIManager.put("nimbusOrange", new ColorUIResource(28, 138, 224)); // (25,49,187));//Color(110,170,0));
                 try {
                         for (UIManager.LookAndFeelInfo info : UIManager

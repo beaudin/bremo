@@ -17,6 +17,7 @@ import misc.PhysKonst;
 import kalorik.spezies.GasGemisch;
 import kalorik.spezies.SpeziesFabrik;
 import kalorik.spezies.Spezies;
+import io.AusgabeSteurung;
 import io.InputFileReader;
 import berechnungsModule.ErgebnisBuffer;
 import berechnungsModule.IterativeBerechnung;
@@ -92,11 +93,11 @@ public class CasePara {
 
 		//		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
 		String separator  =ManagerLanguage.getString("separator");
-		System.err.println(separator+"Inputfile wurde eingelesen!");
+		AusgabeSteurung.Message(separator+"Inputfile wurde eingelesen!");
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));
 		CASE_NAME=inputFile.getName().substring(0, inputFile.getName().lastIndexOf(".")); 
-		System.err.println(WD+CASE_NAME + ".txt"+separator);
+		AusgabeSteurung.Message(WD+CASE_NAME + ".txt"+separator);
 //		//Is doof aber geht jetzt nicht besser
 		callsCantera=BerechnungsModellFabrik.callsCantera(this);	
 		
@@ -170,7 +171,7 @@ public class CasePara {
 
 			// Warnung, wenn die Differenz größer als 0.01 ist
 			if (diff > 0.01) {
-				System.err.println( separator 
+				AusgabeSteurung.Warning( separator 
 						+ "ACHTUNG: Die Differenz zwischen eingelesenem Lambda und berechnetem Lambda beträgt " + diff
 						+ ". \nEs wurden folgende Werte verwendet:\n"+ManagerLanguage.getString("mLuft_feucht")+" = " + get_mLuft_feucht_ASP()
 						+ "\n"+ManagerLanguage.getString("mKrst")+" (Summe aller Einspritzungen) = "	+ MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP()
@@ -1891,9 +1892,9 @@ public class CasePara {
 			whtfDur= this.convert_KW2SEC(set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("whtfMult_dauer"),"["+ManagerLanguage.getString("KW")+"]",0,180)+this.SYS.RECHNUNGS_BEGINN_DVA_KW); 
 			return whtfDur;
 		} catch (ParameterFileWrongInputException e) {
-			System.err.println("**************************************************");
-			System.err.println("ACHTUNG: \"whtfMult_dauer\" wird mit " + convert_ProKW_2_ProSEC(whtfDur) + " ["+ManagerLanguage.getString("KWnZOT")+"] angenommen!");
-			System.err.println("**************************************************");
+			e.log_Warning("**************************************************");
+			e.log_Warning("ACHTUNG: \"whtfMult_dauer\" wird mit " + convert_ProKW_2_ProSEC(whtfDur) + " ["+ManagerLanguage.getString("KWnZOT")+"] angenommen!");
+			e.log_Warning("**************************************************");
 			return whtfDur;
 		}
 	}

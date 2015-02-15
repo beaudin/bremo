@@ -1,5 +1,7 @@
 package bremoswing.graphik;
 
+import io.AusgabeSteurung;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -777,7 +779,7 @@ public  class BremoView extends JFrame implements ActionListener, Observer {
 			
 			
 		default:
-			System.err.println("find no component list !");
+			AusgabeSteurung.Error("find no component list !");
 			break;
 		}
 

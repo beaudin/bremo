@@ -2,6 +2,7 @@ package berechnungsModule.LadungswechselAnalyse;
 
 import java.util.Hashtable;
 
+import io.AusgabeSteurung;
 import io.DurchflusskennzahlFileReader;
 import io.VentilhubFileReader;
 import kalorik.spezies.GasGemisch;

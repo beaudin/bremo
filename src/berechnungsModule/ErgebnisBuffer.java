@@ -1,5 +1,6 @@
 package berechnungsModule;
 
+import io.AusgabeSteurung;
 import io.FileWriter_txt;
 
 import java.util.Enumeration;
@@ -104,7 +105,7 @@ public class ErgebnisBuffer {
 		String Separator  ="\n**************************************************\n";
 //		System.err.println(Separator);
 //		System.err.println(Separator+"Schreibe "+praefix+"Datei:\n"+pfadFinal+Separator);
-		System.err.println(Separator+"Schreibe "+endung+"-Datei:\n"+pfadFinal+Separator);
+		AusgabeSteurung.Error(Separator+"Schreibe "+endung+"-Datei:\n"+pfadFinal+Separator);
 //		System.err.println(pfadFinal);
 //		System.err.println(Separator);
 		if(!ergebnisHash.isEmpty()&& !ergebnisSpalteHash.isEmpty()) //Verhindert einen Fehler wenn die Ergebnisse schon geschrieben wurden (siehe LWA)

@@ -9,7 +9,7 @@ import bremo.parameter.*;
 import bremoExceptions.BirdBrainedProgrammerException;
 
 
-public class Spielwiese extends WandWaermeUebergang{
+public class Rotax83 extends WandWaermeUebergang{
 
 	
 	private Motor_HubKolbenMotor motor;
@@ -31,7 +31,7 @@ public class Spielwiese extends WandWaermeUebergang{
 	private double n; //polytropic exponent
 	private boolean setRefConditions=true;	
 	
-	protected Spielwiese(CasePara cp) {
+	protected Rotax83(CasePara cp) {
 		//TODO: Irgendwas einbauen, damit es nur bei Zweizonenrechnung läuft, sonste einen Fehler wirft!
 		super(cp);
 		this.cp=super.cp;
@@ -164,7 +164,7 @@ public class Spielwiese extends WandWaermeUebergang{
 	double C_w=0;
 	double C_1w=0; //2.28+0.308*0;
 	double C_2w=0.001; //0.00324;
-	double C_k=0.0955; //0.6; //0.01;
+	double C_k=0.066; //0.0955; //0.6; //0.01;
 	double Kolbengeschwindigkeit= motor.get_Kolbengeschwindigkeit(time);
 			
 	double qwk=0;

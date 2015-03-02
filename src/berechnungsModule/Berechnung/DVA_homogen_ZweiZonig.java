@@ -543,6 +543,15 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		i+=1;
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);
 		super.buffer_EinzelErgebnis("Alpha [W/(m^2K)]", alpha, i);
+		
+		i+=1;
+		double alpha_u=wandWaermeModell.get_WaermeUebergangsKoeffizientUnverbrannt(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("Alpha_u [W/(m^2K)]", alpha_u, i);
+		
+		i+=1;
+		double alpha_v=wandWaermeModell.get_WaermeUebergangsKoeffizientVerbrannt(time, zn, fortschritt);
+		super.buffer_EinzelErgebnis("Alpha_b [W/(m^2K)]", alpha_v, i);
+		
 
 		if(bargende){ //Nur wenn Bargende
 			i+=1;

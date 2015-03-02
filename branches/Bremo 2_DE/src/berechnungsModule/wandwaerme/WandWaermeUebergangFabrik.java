@@ -11,7 +11,7 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 	public static final String WANDWAERME_FLAG="Wandwaermemodell";
 	private static final String WANDWAERME_FLAG_LW="Wandwaermemodell_LW";
 	public  static final String[] WANDWAERMEMODELLE
-	={"Bargende", "BargendeFVV", "Chang", "FromFile", "Hans", "Hensel", "Hohenberg", "Spielwiese", "ohne", "Woschni", "WoschniHuber"};
+	={"Bargende", "BargendeFVV", "Chang", "FromFile", "Hans", "Hensel", "Hohenberg", "Spielwiese", "Rotax83", "ohne", "Woschni", "WoschniHuber"};
 	public final  WandWaermeUebergang WAND_WAERME_MODUL;
 	public final  WandWaermeUebergang WAND_WAERME_MODUL_LW;
 	
@@ -70,6 +70,22 @@ public class WandWaermeUebergangFabrik extends ModulFabrik {
 					throw new ParameterFileWrongInputException("Das ausgewaehlte Waermeuebergangsmodell \"" +
 							wandwaermemodellVorgabe+ "\" ist nur fuer Hubkolbenmotoren geeignet.\n" +
 					"Die Rechnung erfolgt ohne Waermeuebergangsmodell");
+				}
+			}
+			else if(wandwaermemodellVorgabe.equals("Rotax83")){
+				System.out.println("Mit diesem WWÜ wird versucht die Verhöltnisse am kleinen Rotax zweizonig abzubilden."
+						+ "Es funktioniert nur mit dem Berechnungsmodell DVA_2Zonig");
+				if(	CP.MODUL_VORGABEN.get("berechnungsModell").equals("DVA_2Zonig")){
+					if(motor.isHubKolbenMotor()){
+						temp=new Rotax83(CP);
+					}else{
+						throw new ParameterFileWrongInputException("Das ausgewaehlte Waermeuebergangsmodell \"" +
+						wandwaermemodellVorgabe+ "\" ist nur fuer Hubkolbenmotoren geeignet.\n" +
+						"Die Rechnung erfolgt ohne Waermeuebergangsmodell");	
+						}
+				}
+				else{
+					temp=null; //Das wird dann unten abgefangen und dann halt ohne ohne WWÜ gerechnet...
 				}
 			}
 			else if(wandwaermemodellVorgabe.equals("Chang")){

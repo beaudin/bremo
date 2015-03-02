@@ -30,6 +30,16 @@ public abstract class WandWaermeUebergang {
 	//Hiermit bekommt der Benutzer den Alpha-Wert in W/(m^2K)
 	public abstract double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt);
 	
+	//Hiermit bekommt der Benutzer den Alpha_unverbrannt-Wert in W/(m^2K)
+	public double get_WaermeUebergangsKoeffizientUnverbrannt(double time, Zone[] zonen_IN, double fortschritt){
+		return 0;
+	}
+		
+	//Hiermit bekommt der Benutzer den Alpha_verbrannt-Wert in W/(m^2K)
+	public double get_WaermeUebergangsKoeffizientVerbrannt(double time, Zone[] zonen_IN, double fortschritt){
+	return 0;
+	}
+	
 	/**
 	 * Liefert die Flaeche die zur Berechnung des Wandwaermestroms verwendet wird. 
 	 * @param time
@@ -238,7 +248,7 @@ public abstract class WandWaermeUebergang {
 	double qwk=0;
 	double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
 	if(motor.isHubKolbenMotor()){
-		Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		//Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
 		//double pistonSurf=hkm.get_Kolbenflaeche()+feuerstegMult*hkm.get_FeuerstegFlaeche();
 
 		if(Double.isNaN(T_piston))	{
@@ -264,7 +274,7 @@ public abstract class WandWaermeUebergang {
 	double qwh=0;
 	double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
 	if(motor.isHubKolbenMotor()){
-		Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		//Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
 		//double headSurf=hkm.get_fireDeckArea();
 
 		if(Double.isNaN(T_head))	{
@@ -290,7 +300,7 @@ public abstract class WandWaermeUebergang {
 	double qwc=0;
 	double alpha=this.get_WaermeUebergangsKoeffizient(time, zonen_IN, fortschritt);
 	if(motor.isHubKolbenMotor()){
-		Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		//Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
 		//double cylWallSurf=hkm.get_CylinderLinerArea(time);
 
 		if(Double.isNaN(T_cyl))	{

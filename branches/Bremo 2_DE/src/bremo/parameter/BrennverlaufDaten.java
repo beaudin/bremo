@@ -117,7 +117,7 @@ public class BrennverlaufDaten {
 								* 6.9 * (1 + vibePara[2]) * Math.pow(alpha_vibe, vibePara[2])
 								* Math.exp(-6.9 * Math.pow(alpha_vibe, 1+vibePara[2])));
 //						dQburn[alpha]=QB_ges/alpha_ges*6.9*(1+m)*(alpha_vibe^m)*EXP(-6.9*(alpha_vibe^(1+m)))
-						if(dQburnTemp[i]<1e-6 && zeitAchseTemp[i]>cp.convert_KW2SEC(vibePara[0])){
+						if((dQburnTemp[i]<1e-6 && zeitAchseTemp[i]>cp.convert_KW2SEC(vibePara[0])) || i==anzSimWerte-3){
 							dQburnTemp[i] = 0;
 							if(!ende){
 								idx_ende = i+2;

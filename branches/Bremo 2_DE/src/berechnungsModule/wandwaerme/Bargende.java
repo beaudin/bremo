@@ -34,6 +34,7 @@ public class Bargende extends WandWaermeUebergang {
 	public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt) {
 		
 		//Turbulenz k aus Berechnungsmodell
+		//TODO Bargende für LWA lauffähig machen
 		k = cp.BERECHNUNGS_MODELL.get_turbFaktor(zonen_IN, time);
 		
 		double p = zonen_IN[0].get_p();										//Zylinderdruck

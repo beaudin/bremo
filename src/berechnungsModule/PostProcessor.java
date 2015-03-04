@@ -209,6 +209,16 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("Q_max [J]",Qmax,i);
 			AusgabeSteurung.Message("Q_max = " + Qmax + " [J]");
 			
+			Qb = inti.get_IntegralVerlauf(dt, dQb_buffer.getValues());
+			double QbMAX = getMaximum(Qb);
+			i+=1;
+			ergB.buffer_EinzelErgebnis("QbMAX [J]", QbMAX, i);
+			AusgabeSteurung.Message("QbMAX = " + QbMAX + " [J]");
+			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Umsatz [%]", QbMAX/Qmax*100, i);
+			AusgabeSteurung.Message("Umsatz = " + QbMAX/Qmax*100 + " [%]");
+			
 		//if (CP.is_Verlustteilung()) {
 			double x50;
 			if (CP.SYS.IS_KW_BASIERT)
@@ -255,12 +265,6 @@ public class PostProcessor {
 			i+=1;
 			ergB.buffer_EinzelErgebnis("L_St", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);
 			AusgabeSteurung.Message("L_St = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() + " [-]");
-			
-			Qb = inti.get_IntegralVerlauf(dt, dQb_buffer.getValues());
-			double QbMAX = getMaximum(Qb);
-			i+=1;
-			ergB.buffer_EinzelErgebnis("QbMAX [J]", QbMAX, i);
-			AusgabeSteurung.Message("QbMAX = " + QbMAX + " [J]");
 			
 			double QwMAX =getMaximum(Qw);
 			i+=1;

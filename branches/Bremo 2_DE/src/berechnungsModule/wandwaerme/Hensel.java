@@ -260,6 +260,7 @@ public class Hensel extends WandWaermeUebergang {
 		
 //		Multiplier für den Wärmeübergang während der Verbrennung für eine bestimmte Zeit. Anschließend klingt Multiplier
 //		linear in 1/3 der angegebenen Zeit ab. --> Zur Berücksichtigung von Grenzschicht-Störung durch extrem schnelle Verbrennung.
+		//TODO FEHLER EINES DÄMLICHES PROGRAMMIERERS AUSBÜGELN !!!
 		if(neuerfortschritt<0.1){
 			time_MultStart = time;
 		}else if(neuerfortschritt>=0.1 && time <= time_MultStart+burnDurMult){

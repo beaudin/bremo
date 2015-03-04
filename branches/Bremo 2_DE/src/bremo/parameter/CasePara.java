@@ -1143,7 +1143,7 @@ public class CasePara {
 		if(phi<=3){
 			try {
 				throw new ParameterFileWrongInputException("Ein relative Luftfeuchte von: "+
-						phi+ "% ist ungweoehnlich!");
+						phi+ "% ist ungewoehnlich!");
 
 			} catch (ParameterFileWrongInputException e) {
 				e.log_Warning();			
@@ -1886,15 +1886,12 @@ public class CasePara {
 	 * @return
 	 */
 	public double get_whtfMult_burn_duration(){
-		double whtfDur=this.convert_KW2SEC(this.SYS.RECHNUNGS_ENDE_DVA_KW+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
+		double whtfDur=this.SYS.RECHNUNGS_ENDE_DVA_SEC;
 		//double whtfDur=this.convert_KW2SEC(50+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
 		try {
 			whtfDur= this.convert_KW2SEC(set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("whtfMult_dauer"),"["+ManagerLanguage.getString("KW")+"]",0,180)+this.SYS.RECHNUNGS_BEGINN_DVA_KW); 
 			return whtfDur;
 		} catch (ParameterFileWrongInputException e) {
-			e.log_Warning("**************************************************");
-			e.log_Warning("ACHTUNG: \"whtfMult_dauer\" wird mit " + convert_ProKW_2_ProSEC(whtfDur) + " ["+ManagerLanguage.getString("KWnZOT")+"] angenommen!");
-			e.log_Warning("**************************************************");
 			return whtfDur;
 		}
 	}

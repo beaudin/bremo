@@ -1076,7 +1076,7 @@ public class CasePara {
 			}
 			return mAGR;
 		} catch (ParameterFileWrongInputException e) {
-			e.stopBremo();
+//			e.stopBremo();
 			return Double.NaN;
 		}		
 	}

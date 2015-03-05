@@ -309,11 +309,12 @@ public class IndizierDaten {
 		////////////////////////////////
 		if(motor.isHubKolbenMotor()){
 			//Schleife über Wert 0 bis n-2
-			int pktProAS = pZylRoh.length;
+			int pktProAS = pZylRoh.length/3;
 			double kw=0.0;
 			pmi=0;
 			for(int i=0; i < pktProAS-1; i++){
-				kw = i*CP.SYS.DAUER_ASP_KW/pktProAS-360;
+				kw = CP.convert_SEC2KW(zeitAchse[i]);
+//				kw = i*CP.SYS.DAUER_ASP_KW/pktProAS-360;
 				pmi+=0.5*(pZylRoh[i]+pZylRoh[i+1])*(motor.get_V(CP.convert_KW2SEC(kw+CP.SYS.DAUER_ASP_KW/pktProAS))
 						-motor.get_V(CP.convert_KW2SEC(kw)));
 			}

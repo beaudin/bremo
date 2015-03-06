@@ -52,12 +52,40 @@ public class Rotax83 extends WandWaermeUebergang{
 	
 	//Hiermit bekommt der Benutzer den Alpha-Wert in W/(m^2K)
 	public double get_WaermeUebergangsKoeffizient(double time, Zone[] zonen_IN, double fortschritt){		
-		double p=zonen_IN[0].get_p();	//Zylinderdruck
+//		double p=zonen_IN[0].get_p();	//Zylinderdruck
 		double T=get_Tmb(zonen_IN);		//Mittlere Brennraumtemperatur
-		double alpha=C_1*Math.pow( (motor.get_V(time)),-0.06)*Math.pow( (p*1E-5),0.8)*
-			Math.pow(T,-0.4)*Math.pow((mittlereKolbengeschwindigkeit +C_2),0.8) ;
-		return alpha;
+//		double alpha=C_1*Math.pow( (motor.get_V(time)),-0.06)*Math.pow( (p*1E-5),0.8)*
+//			Math.pow(T,-0.4)*Math.pow((mittlereKolbengeschwindigkeit +C_2),0.8) ;
+		
+		double alpha=0;
+		
+		if(motor.isHubKolbenMotor()){
+			
+			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+			double pistonSurf=hkm.get_Kolbenflaeche()+feuerstegMult*hkm.get_FeuerstegFlaeche();
+			double headSurf=hkm.get_fireDeckArea();
+			double cylWallSurf=hkm.get_CylinderLinerArea(time);
+
+			if(Double.isNaN(T_cyl)||Double.isNaN(T_piston)||Double.isNaN(T_head))	{
+				T_cyl=cp.get_T_Cyl();	
+				T_piston=cp.get_T_Piston();	
+				T_head=cp.get_T_Head();	
+			}
+			
+			//alpha=get_WandWaermeStromDichte(time, zonen_IN, fortschritt)*(pistonSurf+headSurf+cylWallSurf)/(pistonSurf*(T-T_piston)+headSurf*(T-T_head)+cylWallSurf*(T-T_cyl));
+			alpha=get_WandWaermeStromDichte(time, zonen_IN, fortschritt)*(pistonSurf+headSurf)/(pistonSurf*(T-T_piston)+headSurf*(T-T_head));
+							
+		}else{
+			try{
+				throw new BirdBrainedProgrammerException("WHT-Models " +
+						"for non Piston engines must override this method!");					
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
+		}
+		return alpha; // 
 	}
+
 	
 	
 	//Hiermit bekommt der Benutzer den Alpha-Wert in W/(m^2K) für die unverbrannte Zone
@@ -159,54 +187,57 @@ public class Rotax83 extends WandWaermeUebergang{
 	}
 	
 	//Wärmestromdichte Kolben in W/m^2
+	@Override
 	public double get_WandWaermeStromDichtePiston(double time, Zone[] zonen_IN, double fortschritt){
-		
-	double C_w=0;
-	double C_1w=0; //2.28+0.308*0;
-	double C_2w=0.001; //0.00324;
-	double C_k=0.066; //0.0955; //0.6; //0.01;
-	double Kolbengeschwindigkeit= motor.get_Kolbengeschwindigkeit(time);
 			
-	double qwk=0;
-	double alpha_u=this.get_WaermeUebergangsKoeffizientUnverbrannt(time, zonen_IN, fortschritt);
-	double alpha_b=this.get_WaermeUebergangsKoeffizientVerbrannt(time, zonen_IN, fortschritt);
-	double p=zonen_IN[0].get_p();
-	Volumen = motor.get_V(time); //TODO: Sauber programmieren!
-	//double p_0=this.get_Schleppdruck(time, zonen_IN, fortschritt);
-	double p_0=this.get_Schleppdruck();
-	//double T=get_Tmb(zonen_IN);		//Mittlere Brennraumtemperatur
-	double T_u=zonen_IN[0].get_T();
-	double T_b=zonen_IN[1].get_T();
-	
-	//double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+(p-p_0)*C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1, 0.8);
-	double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+(p-p_0)*C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1, 1);
-	double KolbengeschwindigkeitsTerm=1+Math.abs(Kolbengeschwindigkeit);
-	
-	double Verbrennungsterm=(1+WoschniTerm*C_w)*(1+KolbengeschwindigkeitsTerm*C_k);
-	
-	if(motor.isHubKolbenMotor()){
-		//Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		double C_w=0;
+		double C_1w=0; //2.28+0.308*0;
+		double C_2w=0.001; //0.00324;
+		double C_k=0.055; //0.0955; //0.6; //0.01;
+		double Kolbengeschwindigkeit= motor.get_Kolbengeschwindigkeit(time);
+				
+		double qwk=0;
+		double alpha_u=this.get_WaermeUebergangsKoeffizientUnverbrannt(time, zonen_IN, fortschritt);
+		double alpha_b=this.get_WaermeUebergangsKoeffizientVerbrannt(time, zonen_IN, fortschritt);
+		double p=zonen_IN[0].get_p();
+		Volumen = motor.get_V(time); //TODO: Sauber programmieren!
+		//double p_0=this.get_Schleppdruck(time, zonen_IN, fortschritt);
+		double p_0=this.get_Schleppdruck();
+		//double T=get_Tmb(zonen_IN);		//Mittlere Brennraumtemperatur
+		double T_u=zonen_IN[0].get_T();
+		double T_b=zonen_IN[1].get_T();
+		
+		//double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+(p-p_0)*C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1, 0.8);
+		double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+(p-p_0)*C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1, 1);
+		double KolbengeschwindigkeitsTerm=1+Math.abs(Kolbengeschwindigkeit);
+		//double KolbengeschwindigkeitsTerm=Kolbengeschwindigkeit;
+		
+		double Verbrennungsterm=(1+WoschniTerm*C_w)*(1+KolbengeschwindigkeitsTerm*C_k);
+		
+		if(motor.isHubKolbenMotor()){
+			//Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
 
-		if(Double.isNaN(T_piston))	{
-			T_piston=cp.get_T_Piston();	
-		}
-		qwk=alpha_u*(T_u-T_piston)*(1-fortschritt)+alpha_b*(T_b-T_piston)*fortschritt*Verbrennungsterm;
+			if(Double.isNaN(T_piston))	{
+				T_piston=cp.get_T_Piston();	
+			}
+			qwk=alpha_u*(T_u-T_piston)*(1-fortschritt)+alpha_b*(T_b-T_piston)*fortschritt*Verbrennungsterm;
 
-	}else{
-		try{
-			throw new BirdBrainedProgrammerException("WHT-Models " +
-					"for non Piston engines must override this method!");					
-		}catch(BirdBrainedProgrammerException bbpe){
-			bbpe.stopBremo();
+		}else{
+			try{
+				throw new BirdBrainedProgrammerException("WHT-Models " +
+						"for non Piston engines must override this method!");					
+			}catch(BirdBrainedProgrammerException bbpe){
+				bbpe.stopBremo();
+			}
 		}
-	}
-	return qwk; // [W/m^2]	
-	}
+		return qwk; // [W/m^2]	
+		}	
 	
 	//Wärmestromdichte Zylinderkopf in W/m^2
+	@Override
 	public double get_WandWaermeStromDichteHead(double time, Zone[] zonen_IN, double fortschritt){
 			
-		double C_w=40; //40;
+		double C_w=40; //44; //40;
 		double C_1w=0; //2.28+0.308*0;
 		double C_2w=1E-6; //0.00324
 		double C_k=0; //0.6;
@@ -225,8 +256,9 @@ public class Rotax83 extends WandWaermeUebergang{
 		
 		//double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1*(p-p_0), 0.8);
 		double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1*(p-p_0), 1);
+		double KolbengeschwindigkeitsTerm=Math.abs(Kolbengeschwindigkeit);
+		//double KolbengeschwindigkeitsTerm=Kolbengeschwindigkeit;
 		
-		double KolbengeschwindigkeitsTerm=1+Math.abs(Kolbengeschwindigkeit);
 		double Verbrennungsterm=(1+WoschniTerm*C_w)*(1+KolbengeschwindigkeitsTerm*C_k);
 		
 		if(motor.isHubKolbenMotor()){
@@ -249,17 +281,137 @@ public class Rotax83 extends WandWaermeUebergang{
 		return qwk; // [W/m^2]	
 	}
 	
-	//Wärmestrom Zylinderkopf
-	//Methode aus WandWaermeUebergang überschrieben mit eigener Methode
+//	//Wärmestromdichte Liner in W/m^2
+//	@Override
+//	public double get_WandWaermeStromDichteCyl(double time, Zone[] zonen_IN, double fortschritt){
+//		
+//	double C_w=0; //40;
+//	double C_1w=0; //2.28+0.308*0;
+//	double C_2w=0; //0.00324
+//	double C_k=0.06; //0.6;
+//	double Kolbengeschwindigkeit= motor.get_Kolbengeschwindigkeit(time);
+//		
+//	double qwc=0;
+//	double alpha_u=this.get_WaermeUebergangsKoeffizientUnverbrannt(time, zonen_IN, fortschritt);
+//	double alpha_b=this.get_WaermeUebergangsKoeffizientVerbrannt(time, zonen_IN, fortschritt);
+//	double p=zonen_IN[0].get_p();
+//	Volumen = motor.get_V(time); //TODO: Sauber programmieren!
+//	//double p_0=this.get_Schleppdruck(time, zonen_IN, fortschritt);
+//	double p_0=this.get_Schleppdruck();
+//	//double T=get_Tmb(zonen_IN);
+//	double T_u=zonen_IN[0].get_T();
+//	double T_b=zonen_IN[1].get_T();
+//	
+//	if(motor.isHubKolbenMotor()){
+//		//Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+//		//double cylWallSurf=hkm.get_CylinderLinerArea(time);
+//
+//		if(Double.isNaN(T_cyl))	{
+//			T_cyl=cp.get_T_Cyl();	
+//		}
+//		
+//		//double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1*(p-p_0), 0.8);
+//		double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1*(p-p_0), 1);
+//		double KolbengeschwindigkeitsTerm=1+Math.abs(Kolbengeschwindigkeit);
+//		
+//		double Verbrennungsterm=(1+WoschniTerm*C_w)*(1+KolbengeschwindigkeitsTerm*C_k);
+//		
+//		//qwc=alpha*cylWallSurf*(T-T_cyl)/cylWallSurf;
+//		//qwc=alpha_u*(T_u-T_cyl);
+//		qwc=alpha_u*(T_u-T_cyl)*(1-fortschritt)+alpha_b*(T_b-T_cyl)*fortschritt*Verbrennungsterm;
+//		//qwk=alpha_u*(T_u-T_piston)*(1-fortschritt)+alpha_b*(T_b-T_piston)*fortschritt*Verbrennungsterm;
+//
+//	}else{
+//		try{
+//			throw new BirdBrainedProgrammerException("WHT-Models " +
+//					"for non Piston engines must override this method!");					
+//		}catch(BirdBrainedProgrammerException bbpe){
+//			bbpe.stopBremo();
+//		}
+//	}
+//	return qwc; // [W/m^2]	
+//	}
+	
+
+	
+	//Wärmestromdichte in W/m^2
+	@Override 
+	public double get_WandWaermeStromDichte(double time, Zone[] zonen_IN, double fortschritt){	
+//		
+//	double C_w=40; //40;
+//	double C_1w=0; //2.28+0.308*0;
+//	double C_2w=1E-6; //0.00324;
+//	double C_k=0.0955; //0.0955; //0.6; //0.01;
+//	double Kolbengeschwindigkeit= motor.get_Kolbengeschwindigkeit(time);
+//			
+	double qw=0;
+//	double alpha_u=this.get_WaermeUebergangsKoeffizientUnverbrannt(time, zonen_IN, fortschritt);
+//	double alpha_b=this.get_WaermeUebergangsKoeffizientVerbrannt(time, zonen_IN, fortschritt);
+//	double p=zonen_IN[0].get_p();
+//	Volumen = motor.get_V(time); //TODO: Sauber programmieren!
+//	//double p_0=this.get_Schleppdruck(time, zonen_IN, fortschritt);
+//	double p_0=this.get_Schleppdruck();
+//	//double T=get_Tmb(zonen_IN);		//Mittlere Brennraumtemperatur
+//	double T_u=zonen_IN[0].get_T();
+//	double T_b=zonen_IN[1].get_T();
+//	
+//	//double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+(p-p_0)*C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1, 0.8);
+//	double WoschniTerm=Math.pow(C_1w*mittlereKolbengeschwindigkeit+(p-p_0)*C_2w*Hubvolumen*Temperatur_1/Druck_1/Volumen_1, 1);
+//	double KolbengeschwindigkeitsTerm=1+Math.abs(Kolbengeschwindigkeit);
+//	
+//	double V_K=1+KolbengeschwindigkeitsTerm*C_k;
+//	double V_ZK=1+WoschniTerm*C_w;
+//	
+	if(motor.isHubKolbenMotor()){
+		Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+		double pistonSurf=hkm.get_Kolbenflaeche()+feuerstegMult*hkm.get_FeuerstegFlaeche();
+		double headSurf=hkm.get_fireDeckArea();
+		double cylWallSurf=hkm.get_CylinderLinerArea(time);
+//
+		if(Double.isNaN(T_cyl)||Double.isNaN(T_piston)||Double.isNaN(T_head))	{
+			T_cyl=cp.get_T_Cyl();	
+			T_piston=cp.get_T_Piston();	
+			T_head=cp.get_T_Head();	
+		}
+//		double delta_Tu=(pistonSurf*(T_u-T_piston)+headSurf*(T_u-T_head)+cylWallSurf*(T_u-T_cyl))/(pistonSurf+headSurf+cylWallSurf);
+//		double delta_Tb=(pistonSurf*(T_b-T_piston)+headSurf*(T_b-T_head)+cylWallSurf*(T_b-T_cyl))/(pistonSurf+headSurf+cylWallSurf);
+//		
+//		qw=(alpha_u*delta_Tu*(1-fortschritt)*(1+1.5*Math.pow((1-fortschritt), 2))+alpha_b*delta_Tb*fortschritt*(V_K+1.5*(fortschritt*fortschritt-3*fortschritt+3)*V_ZK))/2.5;
+//		qw=(this.get_WandWaermeStromDichtePiston(time, zonen_IN, X)*pistonSurf+this.get_WandWaermeStromDichteHead(time, zonen_IN, X)*headSurf)/(pistonSurf+headSurf+cylWallSurf);
+		qw=(this.get_WandWaermeStromDichtePiston(time, zonen_IN, fortschritt)*pistonSurf
+			+this.get_WandWaermeStromDichteHead(time, zonen_IN, fortschritt)*headSurf)
+			/(pistonSurf+headSurf);
+//		qw=(this.get_WandWaermeStromDichtePiston(time, zonen_IN, X)*pistonSurf
+//			+this.get_WandWaermeStromDichteHead(time, zonen_IN, X)*headSurf
+//			+this.get_WandWaermeStromDichteCyl(time, zonen_IN, X)*cylWallSurf)
+//			/(pistonSurf+headSurf+cylWallSurf);
+//
+	}else{
+		try{
+			throw new BirdBrainedProgrammerException("WHT-Models " +
+					"for non Piston engines must override this method!");					
+		}catch(BirdBrainedProgrammerException bbpe){
+			bbpe.stopBremo();
+		}
+	}
+	return qw; // [W/m^2]	
+	}
+	
+	//Modelle die auch fuer nicht Kolbenmotoren geeignet sind muessen diese Methode ueberschreiben
 	@Override
-	public double get_WandWaermeStromHead(double time, Zone[] zonen_IN,
-		double fortschritt, VektorBuffer tBuffer) {		
-		double whth=0;
+	public double get_WandWaermeStrom(double time, Zone[] zonen_IN,
+			double fortschritt, VektorBuffer tBuffer) {		
+		double wht=0;
+
 		if(motor.isHubKolbenMotor()){
 			Motor_HubKolbenMotor hkm=((Motor_HubKolbenMotor)motor);
+			double pistonSurf=hkm.get_Kolbenflaeche()+feuerstegMult*hkm.get_FeuerstegFlaeche();
 			double headSurf=hkm.get_fireDeckArea();
-			double HeatFluxHead=this.get_WandWaermeStromDichtePiston(time, zonen_IN, fortschritt);
-				whth=HeatFluxHead*headSurf;
+			double cylWallSurf=hkm.get_CylinderLinerArea(time);
+
+			//wht=this.get_WandWaermeStromDichte(time, zonen_IN,fortschritt)*(pistonSurf+headSurf+cylWallSurf);
+			wht=this.get_WandWaermeStromDichte(time, zonen_IN,fortschritt)*(pistonSurf+headSurf);
+
 		}else{
 			try{
 				throw new BirdBrainedProgrammerException("WHT-Models " +
@@ -268,8 +420,8 @@ public class Rotax83 extends WandWaermeUebergang{
 				bbpe.stopBremo();
 			}
 		}
-		return whth;
-		}		
+		return wht;
+	}
 		
 	public double get_Schleppdruck(){
 	//public double get_Schleppdruck(double time, Zone[] zonen_IN, double fortschritt){

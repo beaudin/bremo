@@ -87,7 +87,8 @@ public abstract class WandWaermeUebergang {
 			R_mix += R_i*x_i;
 		}
 		
-		return R_mix;	}
+		return R_mix;	
+	}
 
 	//Modelle die auch fuer nicht Kolbenmotoren geeignet sind muessen diese Methode ueberschreiben
 	public double get_WandWaermeStrom(double time, Zone[] zonen_IN,
@@ -326,6 +327,10 @@ public abstract class WandWaermeUebergang {
 	}
 	
 	public double get_WandWaermeStromDichteVerbrannt(double time, Zone[] zonen_IN, double fortschritt){	
+		return 0;
+	}
+	
+	public double get_WandWaermeStromDichteSpielwiese(double time, Zone[] zonen_IN, double fortschritt){
 		return 0;
 	}
 	

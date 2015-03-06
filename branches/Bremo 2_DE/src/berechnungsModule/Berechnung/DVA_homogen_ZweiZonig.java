@@ -40,7 +40,7 @@ import bremoExceptions.ParameterFileWrongInputException;
  */
 public class DVA_homogen_ZweiZonig extends DVA {
 
-	private  WandWaermeUebergang wandWaermeModell;
+	private WandWaermeUebergang wandWaermeModell;
 	private Motor motor;
 	private GleichGewichtsRechner gg;
 	private MasterEinspritzung masterEinspritzung;
@@ -122,6 +122,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 
 		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();
+		//TODO: Daher kommt der Fehler, dass bei DI X größer als 1 wird weil ohne Krst initialisiert wird.
+		//Hinterher ist mehr Masse drin als bei INIT! Mit Krst initialisieren?
 		double mKrstDampfINIT=masterEinspritzung.get_mKrst_dampffoermig_Sum_Zone(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,0); 
 		this.mINIT= mVerbrennungsLuft+mKrstDampfINIT;
 		Spezies krst=masterEinspritzung.get_spezKrst_verdampft(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,0);
@@ -256,7 +258,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 			//Wandwaermestrom bestimmen			
 			dQw=wandWaermeModell.get_WandWaermeStrom(time, zonen_IN, fortschritt, T_buffer);
-			dQw=whtfMult*dQw;
+			dQw=whtfMult*dQw; //TODO: Alle anderen relevanten Ausgaben sind (noch) ohne den Faktor!
 
 			//Wandwaermestrom abfuehren
 			double dQwu=dQw*Vu/(Vu+Vb);
@@ -388,7 +390,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		dQb_buffer.addValue(time, dQburn);
 		dQw_buffer.addValue(time, dQw);
 		dmb_buffer.addValue(time, dmZoneBurn);
-
+		
 		if(dQburn>dQburnMAX)dQburnMAX=dQburn;
 
 		//bei jedem Rechenschritt wird der Buffer mit den dQb-Werten aufgefüllt

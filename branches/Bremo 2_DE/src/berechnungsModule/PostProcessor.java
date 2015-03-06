@@ -53,8 +53,10 @@ public class PostProcessor {
 			AusgabeSteurung.Error("DVA_Post_Ergebnisse:"+Separator);
 	
 			int i=0;
-					
-			IndizierDaten indi=new IndizierDaten(CP);
+						
+			AusgabeSteurung.Message(Separator+"Indiziergrˆﬂen"+Separator);
+			
+			IndizierDaten indi=new IndizierDaten(CP); //TODO: Hier schon wieder neu Indizierdaten einlesen?! Was wenn APR?
 						
 			double pmi=indi.get_pmi();
 
@@ -79,9 +81,16 @@ public class PostProcessor {
 			AusgabeSteurung.Message("OT-Versatz= " + versatz + " [KWnZOT]");	
 			}
 			
+			//TODO: Warum ab hier Farbwechsel? In Ausgabesteuerung! Das heiﬂt SteuErung und nicht Steurung!
+			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Kappa Druckabgleich Polytropenmethode", indi.get_kappa_druckabgleich(), i);
 			AusgabeSteurung.Message("Kappa Druckabgleich Polytropenmethode = " + indi.get_kappa_druckabgleich() + " [-]");
+			
+
+			//TODO: T_IVC_berechnet (Falls Rechenbeginn bei IVC) hier einpflegen
+
+			AusgabeSteurung.Message(Separator+"Zylinderladung"+Separator);		
 			
 			double mAGR_inter=CP.RESTGASMODELL.get_mInternesRestgas_ASP();
 			mAGR_inter=CP.RESTGASMODELL.get_mInternesRestgas_ASP();
@@ -97,6 +106,8 @@ public class PostProcessor {
 			i+=1;
 			ergB.buffer_EinzelErgebnis("AGR_intern [%]",100*mAGR_inter/mGes,i);	
 			AusgabeSteurung.Message("mAGR_intern = " + 100*mAGR_inter/mGes + " [%]");
+			
+			//TODO: Luft- und Kraftstoffmasse/ASP angeben? Liefergrad angeben?!
 			
 			double temp = cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst();
 			double lambda_abgas = cp.get_mLuft_feucht_ASP() / (cp.MASTER_EINSPRITZUNG.get_mKrst_Sum_ASP() * cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() );
@@ -114,6 +125,11 @@ public class PostProcessor {
 				s="[KW]";
 			else
 				s="[s n. RechenBeginn]";
+
+			
+			AusgabeSteurung.Message(Separator+"Massenbezogener Umsatz (Masse_verbrannt/Masse_Rechenbeginn"+Separator);
+			
+			
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_1 "+ s,umsp[0],i);
 			AusgabeSteurung.Message("X_1 = " + umsp[0] + " [-]");
@@ -149,6 +165,10 @@ public class PostProcessor {
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" X_99 "+ s,umsp[8],i);
 			AusgabeSteurung.Message("X_99 = " + umsp[8] + " [-]");
+			
+			
+			AusgabeSteurung.Message(Separator+"W‰rmebezogener Umsatz (Qb/QbMAX"+Separator);
+			
 			
 			double umspQ[]=findUmsatzPunkte(dQb_buffer);			
 			i+=1;
@@ -186,7 +206,11 @@ public class PostProcessor {
 			i+=1;
 			ergB.buffer_EinzelErgebnis(" Q_99 "+ s,umspQ[8],i);
 			AusgabeSteurung.Message("Q_99 = " + umspQ[8] + " [-]");
-					
+			
+
+			AusgabeSteurung.Message(Separator+"W‰rmemengen"+Separator);
+			
+			
 			MasterEinspritzung masterEinspritzung;
 			masterEinspritzung=CP.MASTER_EINSPRITZUNG;
 			//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25∞C abgekuehlt wird 
@@ -206,7 +230,7 @@ public class PostProcessor {
 			
 			double Qmax = Qzu - get_Q_UV();
 			i+=1;
-			ergB.buffer_EinzelErgebnis("Q_max [J]",Qmax,i);
+			ergB.buffer_EinzelErgebnis("Q_max (Q_zu-Q_UV) [J]",Qmax,i);
 			AusgabeSteurung.Message("Q_max = " + Qmax + " [J]");
 			
 			Qb = inti.get_IntegralVerlauf(dt, dQb_buffer.getValues());
@@ -216,8 +240,25 @@ public class PostProcessor {
 			AusgabeSteurung.Message("QbMAX = " + QbMAX + " [J]");
 			
 			i+=1;
-			ergB.buffer_EinzelErgebnis("Umsatz [%]", QbMAX/Qmax*100, i);
-			AusgabeSteurung.Message("Umsatz = " + QbMAX/Qmax*100 + " [%]");
+			ergB.buffer_EinzelErgebnis("QbMAX/Qmax [%]", QbMAX/Qmax*100, i);
+			AusgabeSteurung.Message("QbMAX/Qmax = " + QbMAX/Qmax*100 + " [%]");
+			
+			double QwMAX =getMaximum(Qw);
+			i+=1;
+			ergB.buffer_EinzelErgebnis("QwMAX [J]", QwMAX, i);
+			AusgabeSteurung.Message("QwMAX = " + QwMAX + " [J]");
+			
+//			i += 1;
+//			ergB.buffer_EinzelErgebnis("Qw [J]", Qw[Qw.length - 1], i);
+//			AusgabeSteurung.Message("Qw = " + Qw[Qw.length - 1] + " [J]");
+	
+			i+=1;
+			ergB.buffer_EinzelErgebnis("QhMAX [J]", QbMAX - QwMAX, i);
+			AusgabeSteurung.Message("QhMAX = " +  (QbMAX - QwMAX) + " [J]");
+			
+	
+			AusgabeSteurung.Message(Separator+"Verlustteilung"+Separator);
+
 			
 		//if (CP.is_Verlustteilung()) {
 			double x50;
@@ -228,10 +269,6 @@ public class PostProcessor {
 				x50 = umspQ[4];
 
 			double h[] = calcVerlustteilung(x50, Qw[Qw.length - 1], pmi);
-
-			i += 1;
-			ergB.buffer_EinzelErgebnis("Qw [J]", Qw[Qw.length - 1], i);
-			AusgabeSteurung.Message("Qw = " + Qw[Qw.length - 1] + " [J]");
 
 			i += 1;
 			ergB.buffer_EinzelErgebnis("h_therm [-]", h[0], i);
@@ -262,19 +299,14 @@ public class PostProcessor {
 			AusgabeSteurung.Message("delta_h_Ladungswechsel = " + h[4] + " [-]");
 		//}
 			
+	
+			AusgabeSteurung.Message(Separator+"Kraftstoff"+Separator);
+
+			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("L_St", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst(), i);
 			AusgabeSteurung.Message("L_St = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_Lst() + " [-]");
-			
-			double QwMAX =getMaximum(Qw);
-			i+=1;
-			ergB.buffer_EinzelErgebnis("QwMAX [J]", QwMAX, i);
-			AusgabeSteurung.Message("QwMAX = " + QwMAX + " [J]");
-	
-			i+=1;
-			ergB.buffer_EinzelErgebnis("QhMAX [J]", QbMAX - QwMAX, i);
-			AusgabeSteurung.Message("QhMAX = " +  (QbMAX - QwMAX) + " [J]");
-					
+				
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Anz C-Atome [-]", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_AnzC_Atome(), i);
 			AusgabeSteurung.Message("Anz C-Atome = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_AnzC_Atome() + " [-]");
@@ -291,6 +323,9 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("Anz N-Atome [-]", cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_AnzN_Atome(), i);
 			AusgabeSteurung.Message("Anz N-Atome = " + cp.MASTER_EINSPRITZUNG.get_spezKrstALL().get_AnzN_Atome() + " [-]");
 			
+
+			AusgabeSteurung.Message(Separator+"s_max, V_h, V_c, Epsilon"+Separator);
+
 			
 			if (motor.isHubKolbenMotor()) {
 			Motor_HubKolbenMotor hkm = ((Motor_HubKolbenMotor) motor);
@@ -315,7 +350,9 @@ public class PostProcessor {
 			AusgabeSteurung.Message("Eps_thermodynamisch=" +  hkm.get_Epsilon_thermo()+" [-]");
 			}
 			
-			AusgabeSteurung.Warning("Berechnungs- und Steuerzeiten in KW:");
+			
+			AusgabeSteurung.Warning(Separator+"Berechnungs- und Steuerzeiten in [KWnZOT]:"+Separator);
+				
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Berechnungsbeginn [KW]", cp.SYS.RECHNUNGS_BEGINN_DVA_KW, i);
@@ -341,7 +378,9 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("Auslass schlieﬂt [KW]", cp.convert_SEC2KW(cp.get_Auslassschluss()), i);
 			AusgabeSteurung.Message("Auslass schlieﬂt = " + cp.convert_SEC2KW(cp.get_Auslassschluss()) + " [KW]");
 			
-			AusgabeSteurung.Warning("Berechnungs- und Steuerzeiten in s:");
+			
+			AusgabeSteurung.Warning(Separator+"Berechnungs- und Steuerzeiten in [s]:"+Separator);
+			
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Berechnungsbeginn [s]", cp.SYS.RECHNUNGS_BEGINN_DVA_SEC, i);
@@ -367,6 +406,8 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("Auslass schlieﬂt [s]", cp.get_Auslassschluss(), i);
 			AusgabeSteurung.Message("Auslass schlieﬂt = " + cp.get_Auslassschluss() + " [s]");
 			
+			AusgabeSteurung.Warning(Separator);	
+			
 			BerechnungsModellFabrik bmf =new BerechnungsModellFabrik(cp);
 			String berechnungsModellVorgabe=bmf.get_ModulWahl(bmf.DVAmodulFlag, bmf.DVA_MODULE);
 			
@@ -375,8 +416,8 @@ public class PostProcessor {
 			AusgabeSteurung.Error("Berechnungsmodell: " + berechnungsModellVorgabe);
 			
 			i += 1;
-			ergB.buffer_EinzelErgebnis("bremo.svnversion: " + SwingBremo.getRevisionNumber(), Double.NaN, i);
-			AusgabeSteurung.Error("bremo.svnversion: " + SwingBremo.getRevisionNumber());					
+			ergB.buffer_EinzelErgebnis("BremoRevisionNumber: " + SwingBremo.getRevisionNumber(), Double.NaN, i);
+			AusgabeSteurung.Error("BremoRevisionNumber: " + SwingBremo.getRevisionNumber());					
 	}
 
 

@@ -84,7 +84,7 @@ public class CasePara {
 	public final double HU_H2 = 241.1*1e3; // [J/mol] aus Screenshot von Philipp
 	public final double HU_C = 2041.367*1e3;	// [J/mol] aus Merker/Schwarz/Teichmann "Grundlagen Verbrennungsmotoren" S.353
 	
-
+	
 	public CasePara(File inputFile) throws ParameterFileWrongInputException {			
 		InputFileReader	ifr =new InputFileReader(inputFile);
 		INPUTFILE_PARAMETER=ifr.get_eingabeParameter();
@@ -1063,8 +1063,9 @@ public class CasePara {
 		//Eine Abfrage über das Restgasmodell mach eher weniger sinnn
 		//Dies gilt für alle Eingabegrößen die von der LWA ueberschrieben werden muessen....
 		//Alternativ denkbar ist auch die Uebergabe aller Werte aus der LWA direkt in die Berechnungsmodule
+		double mAGR;
 		try {
-			double mAGR;
+			//double mAGR;
 			String[] einheiten = new String[2];
 			einheiten[0] = "["+ManagerLanguage.getString("kg")+"]";
 			einheiten[1] = "["+ManagerLanguage.getString("%")+"]";
@@ -1076,8 +1077,12 @@ public class CasePara {
 			}
 			return mAGR;
 		} catch (ParameterFileWrongInputException e) {
-//			e.stopBremo();
-			return Double.NaN;
+
+			//e.stopBremo();
+			//return Double.NaN;
+			e.log_Warning("Im Inputfile wurde \""+ManagerLanguage.getString("mAGR_intern_ASP")+"\" nicht angegeben!\n"+
+					"Die Iteration bei der Ladungswechselanalyse wird mit \""+ManagerLanguage.getString("mAGR_intern_ASP")+"\"=0 begonnen!");
+			return mAGR=0;
 		}		
 	}
 
@@ -1894,6 +1899,17 @@ public class CasePara {
 		} catch (ParameterFileWrongInputException e) {
 			return whtfDur;
 		}
+//		double whtfDur=this.convert_KW2SEC(this.SYS.RECHNUNGS_ENDE_DVA_KW+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
+//		//double whtfDur=this.convert_KW2SEC(50+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
+//		try {
+//		whtfDur= this.convert_KW2SEC(set_doublePara(INPUTFILE_PARAMETER, ManagerLanguage.getString("whtfMult_dauer"),"["+ManagerLanguage.getString("KW")+"]",0,180)+this.SYS.RECHNUNGS_BEGINN_DVA_KW);
+//		return whtfDur;
+//		} catch (ParameterFileWrongInputException e) {
+//		e.log_Warning("**************************************************");
+//		e.log_Warning("ACHTUNG: \"whtfMult_dauer\" wird mit " + convert_ProKW_2_ProSEC(whtfDur) + " ["+ManagerLanguage.getString("KWnZOT")+"] angenommen!");
+//		e.log_Warning("**************************************************");
+//		return whtfDur;
+//		}
 	}
 		
 	/**

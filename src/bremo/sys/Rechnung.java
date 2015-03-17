@@ -34,7 +34,8 @@ public class Rechnung {
 		int s = (int) Math.round(n);
 		xVc = new double[s];
 		yVc = new double[s];
-		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
+		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")||
+			CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeHeinle")){ //vor der do-while-Schleife, sonst würde bei jedem Schritt "equals("Bargende")" im CP-File abgefragt werden
 			bargende=true;
 		}
 		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")){ //für Bargende nach FVV

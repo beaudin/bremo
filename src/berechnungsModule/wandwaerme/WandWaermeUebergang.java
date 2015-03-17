@@ -339,4 +339,14 @@ public abstract class WandWaermeUebergang {
 		return 0;
 	}
 	
+	//Für Ausgabe Heinle in DVA-File
+	public double get_u_v(double p, double T, double fortschritt, double time, Zone[] zonen_IN) {
+		return 0;
+	}
+	
+	//Für Ausgabe Heinle in DVA-File
+	public double get_Verbrennungsterm(double p, double T, double fortschritt, double time, Zone[] zonen_IN) {
+		return 0;
+	}
+	
 }

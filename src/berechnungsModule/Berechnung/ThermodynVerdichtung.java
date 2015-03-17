@@ -90,7 +90,8 @@ public class ThermodynVerdichtung extends DVA{
 		blowbyModell = CP.BLOW_BY_MODELL;
 		
 		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")||
-				CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")){
+		   CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")||
+		   CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeHeinle")){
 			bargende = true;
 		}
 		if(bargende){ //Nur wenn Bargende oder BargendeFVV

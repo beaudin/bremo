@@ -71,7 +71,8 @@ public class Bargende extends WandWaermeUebergang {
 		return alpha;
 	}
 
-	private double get_Verbrennungsterm(double p, double T, double fortschritt, double time, Zone[] zonen_IN) {
+	//private double get_Verbrennungsterm(double p, double T, double fortschritt, double time, Zone[] zonen_IN) {
+	public double get_Verbrennungsterm(double p, double T, double fortschritt, double time, Zone[] zonen_IN) {
 		
 		double A, B, verbrennungsbeginn = 0;
 		double T_uv;														//Temp. im Unverbrannten

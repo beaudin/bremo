@@ -106,7 +106,7 @@ public class CasePara {
 		//SpeziesFabrik	
 		SPEZIES_FABRIK=new SpeziesFabrik(this, new MakeMeUnique());	 
 		//MakeMeUnique sorgt dafür, dass es nur eine Instanz der Speziesfabrik geben kann. 
-		//Ansonsten wuerde es Probleme mit der INtegration der einzelnen Speziesmassen geben. 
+		//Ansonsten wuerde es Probleme mit der Integration der einzelnen Speziesmassen geben. 
 		//CO2 ist zwar CO2 aber bei verschiedenen Objekt IDs weiss Bremo das nicht!			
 
 		//Solver
@@ -2901,6 +2901,45 @@ private void Werte_und_Variablen_zur_Berechnung_des_WWÜ_Bargende(){}
 			return -1;
 		}
 	}
+	
+	/** Wärmemenge der unverbrannten Abgasbestandteile 
+	 * Q_UV = mGes * (co*Hu_CO + h2 * Hu_H2 + hc * Hu_HC+ c * Hu_C) / M in [J]
+	 * 	<br> h2, c, co, hc =  Volumenbrüche, M = Molmasse
+	 * @return Q_UV (oder 0, wenn alle Volumenbrüche = 0)
+	 */
+	public double get_Q_UV() {
+
+		MasterEinspritzung me = this.MASTER_EINSPRITZUNG;
+		GasGemisch frischGemisch = new GasGemisch("Frischgemisch");
+		GasGemisch abgas = new GasGemisch("abgas");
+		abgas.set_Gasmischung_molenBruch(this.OHC_SOLVER.get_GG_molenBrueche(1e5, 300, frischGemisch));
+		
+		double mGes = this.get_mVerbrennungsLuft_ASP() + me.get_mKrst_Sum_ASP();
+		double M = abgas.get_M(); // [kg/mol]
+		double h2 = this.get_H2();
+		double c = this.get_C();
+		double hc = this.get_HC();
+		double co = this.get_CO();
+		
+		return mGes * (co*this.HU_CO + h2 * this.HU_H2 + hc * this.HU_HC+ c * this.HU_C) / M; // [J]
+	
+	}
+	
+	/** Masse der unverbrannten Abgasbestandteile 
+	 * m_UV = Q_UV/H_u_Gesamt in [kg]
+	 * 	<br> h2, c, co, hc =  Volumenbrüche, M = Molmasse
+	 * @return Q_UV (oder 0, wenn alle Volumenbrüche = 0)
+	 */
+	public double get_m_UV() {
+
+		MasterEinspritzung me = this.MASTER_EINSPRITZUNG;
+		Spezies krst=me.get_spezKrstALL();
+		double H_u_Gesamt = krst.get_Hu_mass();
+		return this.get_Q_UV()/H_u_Gesamt;// [kg]
+	
+	}
+	
+	
 	//////////////////////////////////////////////////////////
 	// Kerrom: für kompletten Zyklus
 	public double get_m_ini_APRkpl(){

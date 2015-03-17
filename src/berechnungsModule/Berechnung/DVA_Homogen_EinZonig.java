@@ -62,7 +62,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 	 * </p>
 	 * mINIT=Masse aus mVerbrennungsluft+mKrst_dampf [kg]
 	 */
-	double mINIT=-5.55; 
+	double mINIT=-5.55, mFortschritt=-5.55, mKrst_DE=0; 
 	
 	
 	double dmZoneBurn=0, Qmax;
@@ -96,7 +96,8 @@ public class DVA_Homogen_EinZonig extends DVA{
 		blowbyModell = CP.BLOW_BY_MODELL;
 		
 		if(CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende")||
-				CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")){
+		   CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")||
+		   CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeHeinle")){
 			bargende = true;
 		}
 		if(bargende){ //Nur wenn Bargende oder BargendeFVV
@@ -115,8 +116,13 @@ public class DVA_Homogen_EinZonig extends DVA{
 
 		
 		double mVerbrennungsLuft=CP.get_mVerbrennungsLuft_ASP();
-		double mKrstDampfINIT=masterEinspritzung.get_mKrst_dampffoermig_Sum_Zone(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,0); 
-		this.mINIT= mVerbrennungsLuft+mKrstDampfINIT;
+		double mKrstDampfINIT=masterEinspritzung.get_mKrst_dampffoermig_Sum_Zone(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,0); //ORIGINAL von Juwe, mKrst bei Rechenbeginn
+		this.mINIT= mVerbrennungsLuft+mKrstDampfINIT; //ORIGINAL von Juwe (ergibt bei Brennende höhere Masse als mINIT wenn DI)
+		for(int k=0;k<CP.get_AnzahlEinspritzungen();k++){
+			if(masterEinspritzung.get_Einspritzung(k).get_BOI()>CP.SYS.RECHNUNGS_BEGINN_DVA_SEC) //Einspritzung nach Rechenbeginn
+				mKrst_DE += masterEinspritzung.get_Einspritzung(k).get_mKrst_ASP();
+		}
+		this.mFortschritt= this.mINIT+this.mKrst_DE-CP.get_m_UV(); //Zur Fortschrittsberechnung, zuzüglich Kraftstoffmasse (direkt eingespritzt), abzüglich mHCCO (falls angegeben)
 		Spezies krst=masterEinspritzung.get_spezKrst_verdampft(CP.SYS.RECHNUNGS_BEGINN_DVA_SEC,0);
 		Spezies verbrennungsLuft=CP.get_spezVerbrennungsLuft();	
 		
@@ -313,7 +319,8 @@ public class DVA_Homogen_EinZonig extends DVA{
 		
 		//Berechnen integraler Werte
 		zonenMasseVerbrannt=zonenMasseVerbrannt+dmZoneBurn*super.CP.SYS.WRITE_INTERVAL_SEC;
-		fortschritt=zonenMasseVerbrannt/mINIT;
+		//fortschritt=zonenMasseVerbrannt/mINIT; //ORIGINAL von Juwe (ergibt bei Brennende höhere Masse als mINIT wenn DI
+		fortschritt=zonenMasseVerbrannt/mFortschritt; //Verbrannte Masse bezogen auf gesamt umsetzbare Masse
 		Qb=Qb+dQburn*super.CP.SYS.WRITE_INTERVAL_SEC;
 		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC;
 		mL=mL+dmL*super.CP.SYS.WRITE_INTERVAL_SEC;
@@ -426,6 +433,14 @@ public class DVA_Homogen_EinZonig extends DVA{
 			i+=1;
 			double k=turb.get_k(zn, time);
 			super.buffer_EinzelErgebnis("k_turb [m^2/s^2]", k, i);
+//			
+//			i+=1;
+//			double u_v=wandWaermeModell.get_u_v(zn[0].get_p(), wandWaermeModell.get_Tmb(zn), fortschritt, time, zn);
+//			super.buffer_EinzelErgebnis("u_v [m/s]", u_v, i);
+//			
+//			i+=1;
+//			double delta=wandWaermeModell.get_Verbrennungsterm(zn[0].get_p(), wandWaermeModell.get_Tmb(zn), fortschritt, time, zn);
+//			super.buffer_EinzelErgebnis("delta [m/s]", delta, i);
 		}
 		
 		

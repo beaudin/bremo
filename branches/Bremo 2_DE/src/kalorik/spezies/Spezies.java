@@ -25,7 +25,7 @@ public abstract class Spezies {
 	
 	protected Spezies(){
 		//diese Anweisung sorgt dafuer, dass alle Spezies AUTOMATISCH keine GasGemische sind 
-		//Der GasGemsich-Konstruktor ueberschreibt diesen Wert
+		//Der GasGemisch-Konstruktor ueberschreibt diesen Wert
 		isGasGemisch=false; 
 		isToIntegrate=false;		
 	}

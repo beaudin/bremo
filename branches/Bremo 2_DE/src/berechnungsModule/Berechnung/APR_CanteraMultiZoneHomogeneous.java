@@ -1512,7 +1512,7 @@ public class APR_CanteraMultiZoneHomogeneous extends APR_Cantera {
 	}
 	public double get_turbFaktor(Zone [] zonen_IN, double time){
 		try{
-			throw new ParameterFileWrongInputException("Kein Bargende zul√§ssig!");
+			throw new ParameterFileWrongInputException("Kein Bargende zul‰ssig!");
 		}catch(ParameterFileWrongInputException e){
 			e.log_Message();
 			e.stopBremo();

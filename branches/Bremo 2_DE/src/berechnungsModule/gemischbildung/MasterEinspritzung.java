@@ -330,7 +330,7 @@ public class MasterEinspritzung extends ModulFabrik{
 	}	
 
 	/**
-	 * <p>Liefert die gesamte Kraftsoffmasse  die im Arbeitsspiel eingespritzt wird in [kg]. </p> 
+	 * <p>Liefert die gesamte Kraftstoffmasse  die im Arbeitsspiel eingespritzt wird in [kg]. </p> 
 	 * @return gesamte Kraftstoffmasse (aller Einspritzungen) 
 	 */
 	public  double get_mKrst_Sum_ASP(){

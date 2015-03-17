@@ -225,10 +225,10 @@ public class PostProcessor {
 //			stattdessen: get_Q_UV();		
 			
 			i+=1;
-			ergB.buffer_EinzelErgebnis("Q_UV [J]",get_Q_UV(),i);
-			AusgabeSteurung.Message("Q_UV = " + get_Q_UV() + " [J]");
+			ergB.buffer_EinzelErgebnis("Q_UV [J]",CP.get_Q_UV(),i);
+			AusgabeSteurung.Message("Q_UV = " + CP.get_Q_UV() + " [J]");
 			
-			double Qmax = Qzu - get_Q_UV();
+			double Qmax = Qzu - CP.get_Q_UV();
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Q_max (Q_zu-Q_UV) [J]",Qmax,i);
 			AusgabeSteurung.Message("Q_max = " + Qmax + " [J]");
@@ -600,10 +600,10 @@ public class PostProcessor {
 		// get_Q_UV() (berücksichtigt auch H2 und C)
 
 		i += 1;
-		ergB.buffer_EinzelErgebnis("Q_UV [J]", get_Q_UV(), i);
-		AusgabeSteurung.Message("Q_UV = " + get_Q_UV() + " [J]");
+		ergB.buffer_EinzelErgebnis("Q_UV [J]", CP.get_Q_UV(), i);
+		AusgabeSteurung.Message("Q_UV = " + CP.get_Q_UV() + " [J]");
 
-		double Qmax = Qzu - get_Q_UV();
+		double Qmax = Qzu - CP.get_Q_UV();
 		i += 1;
 		ergB.buffer_EinzelErgebnis("Qmax [J]", Qmax, i);
 		AusgabeSteurung.Message("Qmax = " + Qmax + " [J]");
@@ -716,7 +716,7 @@ public class PostProcessor {
 		}	
 				
 			
-			AusgabeSteurung.Warning("Berechnungs- und Steuerzeiten in KW:");
+			AusgabeSteurung.Message("Berechnungs- und Steuerzeiten in KW:");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Berechnungsbeginn [KW]", cp.SYS.RECHNUNGS_BEGINN_DVA_KW, i);
@@ -742,7 +742,7 @@ public class PostProcessor {
 			ergB.buffer_EinzelErgebnis("Auslass schließt [KW]", cp.convert_SEC2KW(cp.get_Auslassschluss()), i);
 			AusgabeSteurung.Message("Auslass schließt = " + cp.convert_SEC2KW(cp.get_Auslassschluss()) + " [KW]");
 			
-			AusgabeSteurung.Warning("Berechnungs- und Steuerzeiten in s:");
+			AusgabeSteurung.Message("Berechnungs- und Steuerzeiten in s:");
 			
 			i+=1;
 			ergB.buffer_EinzelErgebnis("Berechnungsbeginn [s]", cp.SYS.RECHNUNGS_BEGINN_DVA_SEC, i);
@@ -1071,28 +1071,29 @@ public class PostProcessor {
 	// return Double.NaN;
 	// }
 
-	/** Wärmemenge der unverbrannten Abgasbestandteile 
-	 * Q_UV = mGes * (co*Hu_CO + h2 * Hu_H2 + hc * Hu_HC+ c * Hu_C) / M in [J]
-	 * 	<br> h2, c, co, hc =  Volumenbrüche, M = Molmasse
-	 * @return Q_UV (oder 0, wenn alle Volumenbrüche = 0)
-	 */
-	private double get_Q_UV() {
-
-		MasterEinspritzung me = CP.MASTER_EINSPRITZUNG;
-		GasGemisch frischGemisch = new GasGemisch("Frischgemisch");
-		GasGemisch abgas = new GasGemisch("abgas");
-		abgas.set_Gasmischung_molenBruch(CP.OHC_SOLVER.get_GG_molenBrueche(1e5, 300, frischGemisch));
-		
-		double mGes = CP.get_mVerbrennungsLuft_ASP() + me.get_mKrst_Sum_ASP();
-		double M = abgas.get_M(); // [kg/mol]
-		double h2 = CP.get_H2();
-		double c = CP.get_C();
-		double hc = CP.get_HC();
-		double co = CP.get_CO();
-		
-		return mGes * (co*CP.HU_CO + h2 * CP.HU_H2 + hc * CP.HU_HC+ c * CP.HU_C) / M; // [J]
-	
-	}
+//	Umgezogen in CasePara
+//	/** Wärmemenge der unverbrannten Abgasbestandteile 
+//	 * Q_UV = mGes * (co*Hu_CO + h2 * Hu_H2 + hc * Hu_HC+ c * Hu_C) / M in [J]
+//	 * 	<br> h2, c, co, hc =  Volumenbrüche, M = Molmasse
+//	 * @return Q_UV (oder 0, wenn alle Volumenbrüche = 0)
+//	 */
+//	private double get_Q_UV() {
+//
+//		MasterEinspritzung me = CP.MASTER_EINSPRITZUNG;
+//		GasGemisch frischGemisch = new GasGemisch("Frischgemisch");
+//		GasGemisch abgas = new GasGemisch("abgas");
+//		abgas.set_Gasmischung_molenBruch(CP.OHC_SOLVER.get_GG_molenBrueche(1e5, 300, frischGemisch));
+//		
+//		double mGes = CP.get_mVerbrennungsLuft_ASP() + me.get_mKrst_Sum_ASP();
+//		double M = abgas.get_M(); // [kg/mol]
+//		double h2 = CP.get_H2();
+//		double c = CP.get_C();
+//		double hc = CP.get_HC();
+//		double co = CP.get_CO();
+//		
+//		return mGes * (co*CP.HU_CO + h2 * CP.HU_H2 + hc * CP.HU_HC+ c * CP.HU_C) / M; // [J]
+//	
+//	}
 
 	private double get_p_MAX(VektorBuffer p_buffer){
         

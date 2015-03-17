@@ -57,7 +57,7 @@ public class APR_kompletterZyklus extends APR {
 	
 	private double whtfMult;
 
-	private double mINIT;
+	private double mINIT = -5.55, mFortschritt=-5.55, mKrst_DE=0;;
 
 	private double dmZoneBurn = 0, Qzu;
 	private Zone[] initialZones;
@@ -167,7 +167,9 @@ public class APR_kompletterZyklus extends APR {
 		gg = CP.OHC_SOLVER;
 		this.checkEinspritzungen(masterEinspritzung);
 		blowbyModell = CP.BLOW_BY_MODELL;
-		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende") || CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV")) {
+		if (CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("Bargende") || 
+			CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeFVV") ||
+			CP.MODUL_VORGABEN.get("Wandwaermemodell").equals("BargendeHeinle")) {
 			bargende = true;
 		}
 		if (bargende) { // Nur wenn Bargende
@@ -187,8 +189,13 @@ public class APR_kompletterZyklus extends APR {
 		double mW = CP.get_mWasser_Luft_ASP();	//Wassermasse pro Arbeitsspiel
 		double mAGRex = CP.get_mAGR_extern_ASP();	//Masse externer AGR kg/ASP
 		double mKrst = masterEinspritzung.get_mKrst_Sum_ASP();
-		this.mINIT = CP.get_m_ini_APRkpl();
+		this.mINIT = CP.get_m_ini_APRkpl(); //ORIGINAL von Marius
 		double mAGRint = mINIT - (mLuft_tr + mW + mKrst + mAGRex);
+		for(int k=0;k<CP.get_AnzahlEinspritzungen();k++){
+			if(masterEinspritzung.get_Einspritzung(k).get_BOI()>CP.SYS.RECHNUNGS_BEGINN_DVA_SEC) //Einspritzung nach Rechenbeginn
+				mKrst_DE += masterEinspritzung.get_Einspritzung(k).get_mKrst_ASP();
+		}
+		this.mFortschritt= this.mINIT+this.mKrst_DE-CP.get_m_UV(); //Zur Fortschrittsberechnung, zuzüglich Kraftstoffmasse, abzüglich mHCCO (falls angegeben)
 		
 		// analog zur LWA
 		gAbgasbehaelter = new GasGemisch("AGR_intern");
@@ -500,7 +507,8 @@ public class APR_kompletterZyklus extends APR {
 
 		// Berechnen integraler Werte
 		zonenMasseVerbrannt = zonenMasseVerbrannt + dmZoneBurn * CP.SYS.WRITE_INTERVAL_SEC;
-		fortschritt = zonenMasseVerbrannt / mINIT;
+		//fortschritt = zonenMasseVerbrannt / mINIT; //ORIGINAL von Marius
+		fortschritt = zonenMasseVerbrannt / mFortschritt; //Verbrannte Masse bezogen auf gesamt umsetzbare Masse
 		Qb = Qb + dQburn * CP.SYS.WRITE_INTERVAL_SEC;
 		Qw = Qw + dQw * CP.SYS.WRITE_INTERVAL_SEC;
 		mL = mL + dmL * CP.SYS.WRITE_INTERVAL_SEC;

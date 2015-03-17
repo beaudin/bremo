@@ -70,7 +70,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 	 * mINIT=Masse aus mVerbrennungsluft+mKrst_dampf [kg]
 	 */
 	double mINIT=-5.55, mFortschritt=-5.55, mKrst_DE=0; 	
-	double dmZoneBurn=0, Qmax;
+	double dmZoneBurn=0, Qzu, Qmax;
 
 	Zone []  initialZones;	
 	Zone [] initialZonesWhileRunning;	
@@ -170,7 +170,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 				m1,ggZone_init, true,1);
 
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
-		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		Qzu=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		Qmax=Qzu-CP.get_Q_UV();
 		
 		if(bargende){ //Nur wenn Bargende
 		turb.initialize(initialZones, 0); //für Bargende
@@ -422,7 +423,8 @@ public class DVA_homogen_ZweiZonig extends DVA {
 
 		mL=mL+dmL*CP.SYS.WRITE_INTERVAL_SEC;
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
-		double xQ=Qb/Qmax;
+		double xQ=Qb/Qzu;
+		double xQmax=Qb/Qmax;
 
 		int i=-1;
 		i+=1;
@@ -523,8 +525,14 @@ public class DVA_homogen_ZweiZonig extends DVA {
 //		super.buffer_EinzelErgebnis("brennt's", esBrennt?1.0:0.0,i);
 
 		i+=1;		
-		super.buffer_EinzelErgebnis("Qb/Qmax [-]", xQ,i);
+		super.buffer_EinzelErgebnis("Qb/Qzu [-]", xQ,i);
+		
+		i+=1;		
+		super.buffer_EinzelErgebnis("Qb/Qmax [-]", xQmax,i);
 
+		i+=1;
+		super.buffer_EinzelErgebnis("Qzu [J]", Qzu,i);	
+		
 		i+=1;
 		super.buffer_EinzelErgebnis("Qmax [J]", Qmax,i);	
 		

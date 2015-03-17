@@ -65,7 +65,7 @@ public class APR_homogen_EinZonig extends APR{
 	 */
 	double mINIT=-5.55, mFortschritt=-5.55, mKrst_DE=0;  
 	
-	double dmZoneBurn=0, Qmax;
+	double dmZoneBurn=0, Qzu, Qmax;
 	Zone []  initialZones;	
 	
 	
@@ -238,7 +238,8 @@ public class APR_homogen_EinZonig extends APR{
 		
 		
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
-		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		Qzu=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		Qmax=Qzu-CP.get_Q_UV();
 		if(bargende){ //Nur wenn Bargende
 			turb.initialize(initialZones, 0);
 		}
@@ -436,7 +437,8 @@ public class APR_homogen_EinZonig extends APR{
 		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC; 
 		mL=mL+dmL*super.CP.SYS.WRITE_INTERVAL_SEC;
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
-		double xQ=Qb/Qmax;
+		double xQ=Qb/Qzu;
+		double xQmax=Qb/Qmax;
 
 		int i=-1;
 		i+=1;
@@ -500,7 +502,10 @@ public class APR_homogen_EinZonig extends APR{
 		super.buffer_EinzelErgebnis("Xb[-]", fortschritt,i);
 
 		i+=1;		
-		super.buffer_EinzelErgebnis("Qb/Qmax [-]", xQ,i);
+		super.buffer_EinzelErgebnis("Qb/Qzu [-]", xQ,i);
+		
+		i+=1;		
+		super.buffer_EinzelErgebnis("Qb/Qmax [-]", xQmax,i);
 		
 		i+=1;
 		double alpha=wandWaermeModell.get_WaermeUebergangsKoeffizient(time, zn, fortschritt);

@@ -236,25 +236,29 @@ public class PostProcessor {
 			Qb = inti.get_IntegralVerlauf(dt, dQb_buffer.getValues());
 			double QbMAX = getMaximum(Qb);
 			i+=1;
-			ergB.buffer_EinzelErgebnis("QbMAX [J]", QbMAX, i);
-			AusgabeSteurung.Message("QbMAX = " + QbMAX + " [J]");
+			ergB.buffer_EinzelErgebnis("Q_b_max [J]", QbMAX, i);
+			AusgabeSteurung.Message("Q_b_max = " + QbMAX + " [J]");
 			
 			i+=1;
-			ergB.buffer_EinzelErgebnis("QbMAX/Qmax [%]", QbMAX/Qmax*100, i);
-			AusgabeSteurung.Message("QbMAX/Qmax = " + QbMAX/Qmax*100 + " [%]");
+			ergB.buffer_EinzelErgebnis("Q_b_max/Q_max [%]", QbMAX/Qmax*100, i);
+			AusgabeSteurung.Message("Q_b_max/Q_max = " + QbMAX/Qmax*100 + " [%]");
+			
+			i+=1;
+			ergB.buffer_EinzelErgebnis("Q_b_max/Q_zu [%]", QbMAX/Qzu*100, i);
+			AusgabeSteurung.Message("Q_b_max/Q_zu = " + QbMAX/Qzu*100 + " [%]");
 			
 			double QwMAX =getMaximum(Qw);
 			i+=1;
-			ergB.buffer_EinzelErgebnis("QwMAX [J]", QwMAX, i);
-			AusgabeSteurung.Message("QwMAX = " + QwMAX + " [J]");
+			ergB.buffer_EinzelErgebnis("Q_w_max [J]", QwMAX, i);
+			AusgabeSteurung.Message("Q_w_max = " + QwMAX + " [J]");
 			
 //			i += 1;
 //			ergB.buffer_EinzelErgebnis("Qw [J]", Qw[Qw.length - 1], i);
 //			AusgabeSteurung.Message("Qw = " + Qw[Qw.length - 1] + " [J]");
 	
 			i+=1;
-			ergB.buffer_EinzelErgebnis("QhMAX [J]", QbMAX - QwMAX, i);
-			AusgabeSteurung.Message("QhMAX = " +  (QbMAX - QwMAX) + " [J]");
+			ergB.buffer_EinzelErgebnis("Q_h_max [J]", QbMAX - QwMAX, i);
+			AusgabeSteurung.Message("Q_h_max = " +  (QbMAX - QwMAX) + " [J]");
 			
 	
 			AusgabeSteurung.Message(Separator+"Verlustteilung"+Separator);

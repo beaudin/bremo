@@ -65,7 +65,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 	double mINIT=-5.55, mFortschritt=-5.55, mKrst_DE=0; 
 	
 	
-	double dmZoneBurn=0, Qmax;
+	double dmZoneBurn=0, Qzu, Qmax;
 	Zone []  initialZones;	
 	
 	
@@ -149,7 +149,8 @@ public class DVA_Homogen_EinZonig extends DVA{
 				mINIT,ggZone_init, false,0);			
 		
 		//die maximal moegliche freigesetzte Waermemenge, wenn das Abgas wieder auf 25°C abgekuehlt wird 
-		Qmax=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();	
+		Qzu=masterEinspritzung.get_mKrst_Sum_ASP()*masterEinspritzung.get_spezKrstALL().get_Hu_mass();
+		Qmax=Qzu-CP.get_Q_UV();
 		
 		if(bargende){ //Nur wenn Bargende
 			turb.initialize(initialZones, 0);
@@ -162,7 +163,7 @@ public class DVA_Homogen_EinZonig extends DVA{
 	
 	
 	/**
-	 * Erstellt eine Objetk vom Typ Spezies, als Mischung aus Verbrennungsluft (Luft + AGR) 
+	 * Erstellt eine Objekt vom Typ Spezies, als Mischung aus Verbrennungsluft (Luft + AGR) 
 	 * und allen Kraftstoffen die in dem Arbeitsspiel verbrannt werden. Unabhängig von der 
 	 * tatsaechlichen Gemischbildung verbrennt der Kraftstoff immer mit dem 
 	 * selben Luftverhältnis
@@ -325,7 +326,8 @@ public class DVA_Homogen_EinZonig extends DVA{
 		Qw=Qw+dQw*super.CP.SYS.WRITE_INTERVAL_SEC;
 		mL=mL+dmL*super.CP.SYS.WRITE_INTERVAL_SEC;
 		this.masterEinspritzung.berechneIntegraleGroessen(time, zn);
-		double xQ=Qb/Qmax;
+		double xQ=Qb/Qzu;
+		double xQmax=Qb/Qmax;
 
 		int i=-1;
 		i+=1;
@@ -400,10 +402,16 @@ public class DVA_Homogen_EinZonig extends DVA{
 		super.buffer_EinzelErgebnis("Xb[-]", fortschritt,i);
 
 		i+=1;		
-		super.buffer_EinzelErgebnis("Qb/Qmax [-]", xQ,i);
+		super.buffer_EinzelErgebnis("Qb/Qzu [-]", xQ,i);
+		
+		i+=1;		
+		super.buffer_EinzelErgebnis("Qb/Qmax [-]", xQmax,i);
 		
 		i+=1;
-		super.buffer_EinzelErgebnis("Qmax [J]", Qmax,i);	
+		super.buffer_EinzelErgebnis("Qzu [J]", Qzu,i);
+		
+		i+=1;
+		super.buffer_EinzelErgebnis("Qmax [J]", Qmax,i);
 		
 		i+=1;
 		super.buffer_EinzelErgebnis("dmL [kg/s]", dmL, i);

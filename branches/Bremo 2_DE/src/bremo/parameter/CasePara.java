@@ -92,7 +92,7 @@ public class CasePara {
 		MODUL_VORGABEN=ifr.get_berechnungsModule();
 
 		//		LittleHelpers.print_Hash(INPUTFILE_PARAMETER);
-		String separator  =ManagerLanguage.getString("separator");
+		String separator = ManagerLanguage.getString("separator");
 		AusgabeSteurung.Message(separator+"Inputfile wurde eingelesen!");
 		//WD wird in SYS verwendet, muss also vorher mit einem Wert belegt sein
 		WD=inputFile.getAbsolutePath().substring(0, inputFile.getAbsolutePath().indexOf(inputFile.getName()));

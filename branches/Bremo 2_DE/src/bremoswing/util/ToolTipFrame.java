@@ -7,6 +7,7 @@ import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 /**
@@ -26,13 +27,26 @@ public class ToolTipFrame extends JFrame {
 	 * Creates new form ToolTipFrame
 	 */
 	public ToolTipFrame(String Titel, String message) {
-		initComponents(Titel, message);
+		initComponents(Titel, message, null);
 	}
 
-	private void initComponents(String Titel, String message) {
+	/**
+	 * Creates new form ToolTipFrame
+	 */
+	public ToolTipFrame(String Titel, String message, ImageIcon icon) {
+		initComponents(Titel, message, icon);
+	}
+
+	private void initComponents(String Titel, String message, ImageIcon icon) {
 
 		title = new JLabel();
-		textInfo = new JLabel();
+
+		if (icon != null) {
+			textInfo = new JLabel(message, icon, SwingConstants.LEFT);
+
+		} else {
+			textInfo = new JLabel(message);
+		}
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -48,7 +62,7 @@ public class ToolTipFrame extends JFrame {
 		textInfo.setFont(new Font("Comic Sans MS", 0, 14));
 		textInfo.setBorder(BorderFactory.createLineBorder(new java.awt.Color(0,
 				0, 0)));
-		textInfo.setText(message);
+
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(layout
@@ -56,15 +70,23 @@ public class ToolTipFrame extends JFrame {
 				.addComponent(title, GroupLayout.DEFAULT_SIZE,
 						GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 				.addComponent(textInfo, GroupLayout.DEFAULT_SIZE, 200,
-						Short.MAX_VALUE));
+						GroupLayout.DEFAULT_SIZE));
 		layout.setVerticalGroup(layout.createParallelGroup(
 				GroupLayout.Alignment.LEADING).addGroup(
 				layout.createSequentialGroup()
 						.addComponent(title)
-						.addGap(0, 0, Short.MAX_VALUE)
+						.addGap(0, 0, 0)
 						.addComponent(textInfo, GroupLayout.PREFERRED_SIZE, 80,
-								GroupLayout.PREFERRED_SIZE)));
+								Short.MAX_VALUE)));
 
 		pack();
+		System.err.println(textInfo.getWidth());
+		System.err.println(textInfo.getHeight());
+	}
+
+	public int getCutHeightOfTextInfo() {
+		int c = (textInfo.getWidth() / 200) + 1;
+		c = 50 * c + 5 * c;
+		return c;
 	}
 }

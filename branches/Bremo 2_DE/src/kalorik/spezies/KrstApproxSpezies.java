@@ -98,11 +98,11 @@ public class KrstApproxSpezies extends Spezies  {
 			h=calc_h_mol(T) + delta_hf298_mol;
 		}else{
 			try{
-			throw new IllegalArgumentException(
+			throw new MiscException(
 			"KrstApproxSpezies: Für Temperaturen über 2000K ist das Modell von Grill nicht geeignet");	
-			}catch(IllegalArgumentException e){
+			}catch(MiscException e){
 				e.printStackTrace();
-				System.exit(0);		
+				e.stopBremo();
 			}
 		}
 		

@@ -1,6 +1,5 @@
 package bremo.main;
 
-import io.AusgabeSteurung;
 import io.FileWriter_txt;
 import io.SimpleTXTFileReader;
 
@@ -9,7 +8,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Observer;
 
 import javax.swing.JOptionPane;
 
@@ -24,47 +26,38 @@ import bremo.parameter.CasePara;
 import bremo.sys.Rechnung;
 import bremoExceptions.BirdBrainedProgrammerException;
 import bremoExceptions.ParameterFileWrongInputException;
-import bremoswing.SwingBremo;
+import bremoswing.graphik.Observable;
 import bremoswing.manager.ManagerLanguage;
-import bremoswing.util.FertigMeldungFrame;
+import bremoswing.util.BremoInfoFrame;
 
 /**
  * @author eichmeier
  * @author Ngueneko
  * 
  */
-public class Bremo extends Thread {
+public class Bremo extends Thread implements Observable {
 
-	private CasePara casePara; // TODO Make me final
+	private CasePara casePara;
 	private Rechnung r;
+	private Verlustteilung v;
 	private File inputFile;
 	private boolean caseParaerzeugt = false;
 	private boolean calledFromGUI;
 	public static String LOCALE_GERMANY_LANGUAGE = "de, DE";
 	public static String LOCALE_ENGLISH_LANGUAGE = "en, EN";
 
-	public Bremo(ThreadGroup group, File inputFile) {
-		super(group, inputFile.getName());
-		calledFromGUI = true;
-		this.inputFile = inputFile;
-		// try {
-		// casePara = new CasePara(inputFile);
-		// r = new Rechnung(casePara);
-		// } catch (ParameterFileWrongInputException e) {
-		// e.stopBremo();
-		// }
-	}
+	private Observer observer;
+
+	public final String STRING_VerlustTeilung = "verlustteilungsprozess lauft ...";
+	public final String STRING_CalculEnd = "berechnungsprozess";
+	public final String STRING_StopBremo = "stopsprozess";
+	private final String STRING_SetBremoAsLife = "SetBremoAsLife";
+	private final String STRING_SetDebbugingMode = "SetDebbugingMode";
+	private final String STRING_PutInBremoThreadFertig = "PutInBremoThreadFertig";
+	private final String STRING_FinishTime = "FinishTime";
 
 	public Bremo(File inputFile) {
-		super(inputFile.getName());
-		this.inputFile = inputFile;
-
-		// try {
-		// casePara = new CasePara(inputFile);
-		// r = new Rechnung(casePara);
-		// } catch (ParameterFileWrongInputException e) {
-		// e.stopBremo();
-		// }
+		this(inputFile, false);
 	}
 
 	public Bremo(File inputFile, boolean calledFromGUI) {
@@ -72,14 +65,6 @@ public class Bremo extends Thread {
 		this.inputFile = inputFile;
 		this.calledFromGUI = calledFromGUI;
 	}
-
-	// public Bremo() {
-	// super("ModelAbgleichKivaTurbulence/KIVA_C1_0.1_C1_0.5.txt");
-	// File file = new File("src//InputFiles//" +
-	// "ModelAbgleichKivaTurbulence/KIVA_C1_0.1_C1_0.5.txt");
-	// this.inputFile=file;
-	// this.calledFromGUI=false;
-	// }
 
 	public Bremo() throws ParameterFileWrongInputException {
 		System.out.println("Juchuu, es klappt");
@@ -107,10 +92,8 @@ public class Bremo extends Thread {
 	}
 
 	public Bremo(String absolutePath2InputFile) {
-		File fileCP = new File(absolutePath2InputFile);
-		Bremo bremo = new Bremo(fileCP, false);
-		bremo.run();
-		bremo = null;
+		this(new File(absolutePath2InputFile), false);
+		this.run();
 	}
 
 	/**
@@ -136,18 +119,21 @@ public class Bremo extends Thread {
 			verlustteilungProzess();
 
 		} catch (ParameterFileWrongInputException e) {
-			if (calledFromGUI) {
-				SwingBremo.setNrOfBremoAlive();
 
-				new FertigMeldungFrame(this.getName(), "<html>" + "<u>"
+			if (calledFromGUI) {
+
+				notifyObserver(STRING_SetBremoAsLife);
+
+				new BremoInfoFrame(this.getName(), "<html>" + "<u>"
 						+ ManagerLanguage.getString("thread") + "</u> : "
 						+ ManagerLanguage.getString("bremo_error_message_1")
 						+ "<b>" + this.getName() + "</b> "
 						+ ManagerLanguage.getString("bremo_error_message_2")
 						+ " <p> \n " + e.getMessage() + "</p>" + "</html>",
 						JOptionPane.ERROR_MESSAGE);
-				SwingBremo.StateBremoThread();
+
 			}
+			e.printStackTrace();
 			e.stopBremo();
 		}
 	}
@@ -157,7 +143,7 @@ public class Bremo extends Thread {
 		casePara = new CasePara(inputFile);
 		caseParaerzeugt = true;
 		casePara.set_CalledFromGUI(calledFromGUI);
-		SwingBremo.SetDebbugingMode(casePara.SYS.DUBUGGING_MODE);
+		notifyObserver(STRING_SetDebbugingMode);
 		iterRechnung.initialisieren(casePara);
 		casePara.set_IterativeBerechnung(iterRechnung);
 		r = new Rechnung(casePara);
@@ -169,15 +155,12 @@ public class Bremo extends Thread {
 		r.berechnungDurchfuehren();
 		iterRechnung.auswerten();
 		if (calledFromGUI && !iterRechnung.isIterativ()) {
-			SwingBremo.PopUp(
-					ManagerLanguage.getString("info"),
-					ManagerLanguage.getString("thread")
-							+ " "
-							+ this.getName()
-							+ " "
-							+ ManagerLanguage
-									.getString("warning_message_terminate"));
-			SwingBremo.PutInBremoThreadFertig(this.getName());
+			List<String> message = new ArrayList<String>();
+			message.add(this.getName());
+			message.add(STRING_CalculEnd);
+			message.add(STRING_PutInBremoThreadFertig);
+			notifyObserver(message);
+
 		}
 	}
 
@@ -187,28 +170,24 @@ public class Bremo extends Thread {
 				&& !casePara.get_CaseName().toString().contains("Weltformel")) {
 
 			if (calledFromGUI) {
-				SwingBremo.VerlustteilungModeEnable();
-			}
-			Verlustteilung verl = new Verlustteilung(casePara);
-			verl.berechneVerluste();
-			SwingBremo.label.setText(ManagerLanguage
-					.getString("swingbremo_label_13"));
-			if (calledFromGUI) {
-				SwingBremo.StateBremoThread();
-				AusgabeSteurung
-						.Error(ManagerLanguage.getString("calcul_time")
-								+ ((System.currentTimeMillis() - SwingBremo.startTime) / 1000)
-								+ " " + ManagerLanguage.getString("time_s"));
-			}
-		} else {
-			if (calledFromGUI) {
-				SwingBremo.StateBremoThread();
-				AusgabeSteurung
-						.Error(ManagerLanguage.getString("calcul_time")
-								+ ((System.currentTimeMillis() - SwingBremo.startTime) / 1000)
-								+ " " + ManagerLanguage.getString("time_s"));
-			}
+				List<String> message = new ArrayList<String>();
+				message.add(this.getName());
+				message.add(STRING_VerlustTeilung);
+				message.add("");
+				notifyObserver(message);
 
+				v = new Verlustteilung(casePara);
+				v.berechneVerluste();
+				// SwingBremo.label.setText(ManagerLanguage
+				// .getString("swingbremo_label_13"));
+				if (calledFromGUI) {
+					notifyObserver(STRING_FinishTime);
+				}
+			} else {
+				if (calledFromGUI) {
+					notifyObserver(STRING_FinishTime);
+				}
+			}
 		}
 	}
 
@@ -228,7 +207,7 @@ public class Bremo extends Thread {
 						"Es wurde versucht auf die Klasse CasePara zuzugreifen. "
 								+ "Diese wurde aber noch nicht erzeugt. Volldeppprogrammierer");
 			} catch (BirdBrainedProgrammerException e) {
-				e.stopBremo();
+				// e.stopBremo();
 			}
 			return null;
 		}
@@ -255,6 +234,45 @@ public class Bremo extends Thread {
 		return inputFile;
 	}
 
+	@Override
+	public void addObserver(Observer obs) {
+		observer = obs;
+
+	}
+
+	@Override
+	public void deleteObserver() {
+		observer = null;
+
+	}
+
+	@Override
+	public Observer getObserver() {
+
+		return observer;
+	}
+
+	public void notifyObserver(String str) {
+		observer.update(null, str);
+	}
+
+	public void notifyObserver(List<String> str) {
+		observer.update(null, str);
+	}
+
+	public void forceToStop() {
+		if (r != null) {
+			r.destroy();
+		} else if (v != null) {
+			v.destroy();
+		} else {
+			casePara = null;
+		}
+		// r.stop();
+		// v.stop();
+
+	}
+
 	/**
 	 * Main-Methode um Bremo ohne das GUI aufzurufen.
 	 * 
@@ -264,17 +282,18 @@ public class Bremo extends Thread {
 	 */
 	public static void main(String[] args)
 			throws ParameterFileWrongInputException {
-		
+
 		ManagerLanguage.managerLanguage(new Locale(LOCALE_GERMANY_LANGUAGE));
 
 		long begTest = new java.util.Date().getTime();
 		System.out.println(System.getProperty("java.library.path"));
 		// Um Funktionen zu testen gibt es die Klasse FunktionsTester
 		// Hier einige Beisspile wie Funktionen getestet werden können
-//		System.out.println(System.getProperty("home"));
-//		File fileCP = new File(
-//				"D://Daten//Bremo//Referenzmessungen//iterativ//bremo_setup_140702_00002_zyklus0.txt"); // TODO
-																										// Filename
+		// System.out.println(System.getProperty("home"));
+		// File fileCP = new File(
+		// "D://Daten//Bremo//Referenzmessungen//iterativ//bremo_setup_140702_00002_zyklus0.txt");
+		// // TODO
+		// Filename
 		// File fileCP = new
 		// File("D://Daten//Studenten//Carolin Sturm//Studentenordner//von_philipp//BREMO//20140205//05_neu//PhH//Inputfile_P_202_Huegel_20140205_0005-p_m.txt");
 		// File fileCP = new
@@ -287,13 +306,13 @@ public class Bremo extends Thread {
 		// "bremo_setup_140123_00009_zyklus163.txt"); //TODO Filename
 		// File fileCP = new
 		// File("d://Daten//bremo//java_ws//bremo 2_de//src//inputfiles//apr//bremo_setup.txt");
-//		double startTime = System.currentTimeMillis();
-//		Bremo bremo = new Bremo(fileCP, false);
-//		bremo.run();
-//		double finishTime = System.currentTimeMillis();
-//		bremo = null;
-//		System.out.println(finishTime - startTime + " ms");
-//		// FunktionsTester.testVerlustteilung(bremo); //fuer Verlustteilung
+		// double startTime = System.currentTimeMillis();
+		// Bremo bremo = new Bremo(fileCP, false);
+		// bremo.run();
+		// double finishTime = System.currentTimeMillis();
+		// bremo = null;
+		// System.out.println(finishTime - startTime + " ms");
+		// // FunktionsTester.testVerlustteilung(bremo); //fuer Verlustteilung
 		// Frank Haertel
 		// File fileCP = new
 		// File("src//InputFiles//Mode7_MultiZoneInitFromKiva//mode7InpFromKiva_0.txt");
@@ -308,1010 +327,48 @@ public class Bremo extends Thread {
 			inputFileNames = args;
 		else {
 			String[] ifn = {
-					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus1.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus1_Luft.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus1_LuftEps.txt",
-					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus1_mkonst.txt"
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus1_Krst.txt"
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus10.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus100.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus101.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus102.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus103.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus104.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus105.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus106.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus107.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus108.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus109.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus11.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus110.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus111.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus112.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus113.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus114.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus115.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus116.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus117.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus118.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus119.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus12.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus120.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus121.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus122.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus123.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus124.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus125.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus126.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus127.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus128.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus129.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus13.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus130.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus131.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus132.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus133.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus134.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus135.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus136.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus137.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus138.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus139.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus14.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus140.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus141.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus142.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus143.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus144.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus145.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus146.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus147.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus148.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus149.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus15.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus150.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus151.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus152.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus153.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus154.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus155.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus156.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus157.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus158.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus159.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus16.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus160.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus161.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus162.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus163.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus164.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus165.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus166.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus167.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus168.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus169.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus17.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus170.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus171.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus172.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus173.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus174.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus175.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus176.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus177.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus178.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus179.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus18.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus180.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus181.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus182.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus183.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus184.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus185.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus186.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus187.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus188.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus189.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus19.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus190.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus191.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus192.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus193.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus194.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus195.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus196.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus197.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus198.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus199.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus2.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus20.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus200.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus201.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus202.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus203.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus204.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus205.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus206.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus207.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus208.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus209.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus21.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus210.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus211.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus212.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus213.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus214.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus215.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus216.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus217.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus218.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus219.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus22.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus220.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus221.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus222.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus223.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus224.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus225.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus226.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus227.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus228.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus229.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus23.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus230.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus231.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus232.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus233.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus234.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus235.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus236.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus237.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus238.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus239.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus24.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus240.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus241.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus242.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus243.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus244.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus245.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus246.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus247.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus248.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus249.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus25.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus250.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus26.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus27.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus28.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus29.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus3.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus30.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus31.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus32.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus33.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus34.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus35.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus36.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus37.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus38.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus39.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus4.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus40.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus41.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus42.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus43.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus44.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus45.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus46.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus47.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus48.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus49.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus5.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus50.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus51.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus52.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus53.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus54.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus55.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus56.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus57.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus58.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus59.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus6.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus60.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus61.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus62.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus63.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus64.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus65.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus66.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus67.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus68.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus69.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus7.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus70.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus71.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus72.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus73.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus74.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus75.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus76.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus77.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus78.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus79.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus8.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus80.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus81.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus82.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus83.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus84.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus85.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus86.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus87.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus88.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus89.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus9.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus90.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus91.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus92.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus93.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus94.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus95.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus96.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus97.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus98.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00001_zyklus99.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus1.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus10.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus100.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus101.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus102.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus103.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus104.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus105.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus106.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus107.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus108.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus109.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus11.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus110.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus111.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus112.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus113.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus114.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus115.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus116.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus117.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus118.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus119.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus12.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus120.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus121.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus122.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus123.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus124.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus125.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus126.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus127.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus128.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus129.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus13.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus130.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus131.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus132.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus133.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus134.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus135.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus136.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus137.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus138.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus139.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus14.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus140.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus141.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus142.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus143.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus144.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus145.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus146.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus147.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus148.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus149.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus15.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus150.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus151.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus152.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus153.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus154.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus155.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus156.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus157.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus158.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus159.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus16.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus160.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus161.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus162.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus163.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus164.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus165.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus166.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus167.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus168.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus169.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus17.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus170.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus171.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus172.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus173.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus174.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus175.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus176.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus177.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus178.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus179.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus18.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus180.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus181.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus182.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus183.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus184.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus185.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus186.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus187.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus188.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus189.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus19.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus190.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus191.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus192.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus193.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus194.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus195.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus196.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus197.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus198.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus199.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus2.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus20.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus200.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus201.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus202.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus203.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus204.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus205.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus206.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus207.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus208.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus209.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus21.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus210.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus211.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus212.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus213.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus214.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus215.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus216.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus217.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus218.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus219.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus22.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus220.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus221.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus222.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus223.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus224.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus225.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus226.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus227.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus228.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus229.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus23.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus230.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus231.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus232.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus233.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus234.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus235.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus236.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus237.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus238.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus239.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus24.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus240.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus241.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus242.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus243.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus244.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus245.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus246.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus247.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus248.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus249.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus25.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus250.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus26.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus27.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus28.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus29.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus3.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus30.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus31.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus32.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus33.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus34.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus35.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus36.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus37.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus38.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus39.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus4.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus40.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus41.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus42.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus43.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus44.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus45.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus46.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus47.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus48.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus49.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus5.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus50.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus51.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus52.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus53.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus54.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus55.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus56.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus57.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus58.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus59.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus6.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus60.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus61.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus62.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus63.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus64.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus65.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus66.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus67.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus68.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus69.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus7.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus70.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus71.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus72.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus73.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus74.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus75.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus76.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus77.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus78.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus79.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus8.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus80.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus81.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus82.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus83.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus84.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus85.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus86.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus87.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus88.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus89.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus9.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus90.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus91.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus92.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus93.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus94.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus95.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus96.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus97.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus98.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00002_zyklus99.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus1.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus10.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus100.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus101.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus102.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus103.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus104.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus105.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus106.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus107.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus108.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus109.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus11.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus110.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus111.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus112.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus113.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus114.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus115.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus116.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus117.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus118.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus119.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus12.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus120.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus121.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus122.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus123.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus124.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus125.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus126.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus127.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus128.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus129.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus13.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus130.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus131.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus132.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus133.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus134.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus135.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus136.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus137.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus138.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus139.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus14.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus140.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus141.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus142.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus143.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus144.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus145.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus146.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus147.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus148.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus149.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus15.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus150.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus151.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus152.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus153.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus154.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus155.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus156.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus157.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus158.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus159.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus16.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus160.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus161.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus162.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus163.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus164.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus165.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus166.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus167.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus168.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus169.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus17.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus170.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus171.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus172.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus173.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus174.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus175.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus176.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus177.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus178.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus179.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus18.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus180.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus181.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus182.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus183.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus184.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus185.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus186.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus187.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus188.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus189.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus19.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus190.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus191.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus192.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus193.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus194.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus195.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus196.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus197.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus198.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus199.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus2.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus20.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus200.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus201.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus202.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus203.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus204.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus205.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus206.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus207.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus208.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus209.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus21.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus210.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus211.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus212.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus213.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus214.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus215.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus216.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus217.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus218.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus219.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus22.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus220.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus221.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus222.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus223.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus224.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus225.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus226.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus227.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus228.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus229.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus23.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus230.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus231.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus232.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus233.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus234.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus235.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus236.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus237.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus238.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus239.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus24.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus240.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus241.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus242.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus243.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus244.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus245.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus246.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus247.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus248.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus249.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus25.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus250.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus26.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus27.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus28.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus29.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus3.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus30.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus31.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus32.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus33.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus34.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus35.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus36.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus37.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus38.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus39.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus4.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus40.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus41.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus42.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus43.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus44.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus45.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus46.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus47.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus48.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus49.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus5.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus50.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus51.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus52.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus53.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus54.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus55.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus56.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus57.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus58.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus59.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus6.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus60.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus61.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus62.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus63.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus64.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus65.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus66.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus67.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus68.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus69.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus7.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus70.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus71.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus72.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus73.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus74.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus75.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus76.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus77.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus78.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus79.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus8.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus80.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus81.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus82.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus83.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus84.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus85.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus86.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus87.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus88.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus89.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus9.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus90.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus91.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus92.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus93.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus94.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus95.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus96.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus97.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus98.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00003_zyklus99.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus1.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus10.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus100.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus101.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus102.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus103.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus104.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus105.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus106.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus107.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus108.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus109.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus11.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus110.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus111.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus112.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus113.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus114.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus115.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus116.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus117.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus118.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus119.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus12.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus120.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus121.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus122.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus123.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus124.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus125.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus126.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus127.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus128.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus129.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus13.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus130.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus131.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus132.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus133.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus134.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus135.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus136.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus137.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus138.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus139.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus14.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus140.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus141.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus142.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus143.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus144.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus145.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus146.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus147.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus148.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus149.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus15.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus150.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus151.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus152.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus153.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus154.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus155.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus156.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus157.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus158.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus159.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus16.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus160.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus161.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus162.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus163.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus164.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus165.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus166.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus167.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus168.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus169.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus17.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus170.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus171.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus172.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus173.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus174.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus175.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus176.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus177.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus178.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus179.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus18.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus180.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus181.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus182.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus183.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus184.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus185.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus186.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus187.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus188.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus189.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus19.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus190.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus191.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus192.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus193.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus194.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus195.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus196.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus197.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus198.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus199.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus2.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus20.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus200.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus201.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus202.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus203.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus204.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus205.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus206.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus207.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus208.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus209.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus21.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus210.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus211.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus212.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus213.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus214.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus215.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus216.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus217.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus218.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus219.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus22.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus220.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus221.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus222.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus223.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus224.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus225.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus226.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus227.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus228.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus229.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus23.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus230.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus231.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus232.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus233.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus234.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus235.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus236.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus237.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus238.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus239.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus24.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus240.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus241.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus242.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus243.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus244.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus245.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus246.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus247.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus248.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus249.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus25.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus250.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus26.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus27.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus28.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus29.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus3.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus30.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus31.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus32.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus33.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus34.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus35.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus36.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus37.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus38.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus39.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus4.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus40.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus41.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus42.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus43.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus44.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus45.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus46.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus47.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus48.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus49.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus5.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus50.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus51.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus52.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus53.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus54.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus55.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus56.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus57.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus58.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus59.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus6.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus60.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus61.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus62.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus63.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus64.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus65.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus66.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus67.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus68.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus69.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus7.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus70.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus71.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus72.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus73.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus74.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus75.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus76.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus77.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus78.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus79.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus8.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus80.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus81.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus82.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus83.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus84.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus85.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus86.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus87.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus88.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus89.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus9.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus90.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus91.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus92.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus93.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus94.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus95.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus96.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus97.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus98.txt",
-//					"D://Daten//FVV_CFD_BSZ_II//Messungen//mat//150310//bremo_setup_150310_00004_zyklus99.txt"
+			// "apr//bremo_setup_eps.txt",
+			// "apr//bremo_setup_mL.txt",
+			// "apr//bremo_setup_mK.txt",
+			// "apr//bremo_setup_offset.txt",
+			// "apr//bremo_setup_mRG.txt",
+			// "apr//bremo_setup_dOT.txt"
+			// "d://Daten//FVV_CFD_BSZ_II//Auswertung//Bremo//140123//SIS_Z2_5_7//bremo_setup_140123_00009_zyklus163.txt"
+			// "PhH/Messpunkt_10_Schichtreferenz/Bremo_Inputfile_Messpunkt_10.txt"
+			// "Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/withMixing/mode3_Mix.txt",
+			// "Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/withDiffusion/KivaFixed/mode3_DiffusionInp.txt",
+			// "Mode7/Rasterfahndung/mode7InpRF.txt"
+			// "Mode7/mode7Inp_Mix1.txt"
+			// "Mode3/RasterFahndung/mode3InpMix_T_IVC_351.txt",
+			// "Mode7/mode7Inp_Mix6.txt",
+			// "Mode7/InputFromGTPower/m7_GTPowerRed_Mix1_b_OldParameters.txt"
+			// "Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_35_Mix1_b.txt",
+			// "Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_45_Mix1_b.txt",
+			// "Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_54_Mix1_b.txt",
+			// "Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_65_Mix1_b.txt",
+			// "Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_65_Mix1_b_BestMatch.txt",
+			// "Mode7/InputFromGTPowerM7/m7_GT_T_INTAKE_75_Mix1_b.txt",
+			// "Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_40_Mix1_b.txt",
+			// "Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_50_Mix1_b.txt",
+			// "Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_60_Mix1_b.txt",
+			// "Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_70_Mix1_b.txt",
+			// "Mode4/InputFromGTPowerM4/m4_GT_T_INTAKE_90_Mix1_b.txt",
+			// "Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_40_Mix1_b.txt",
+			// "Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_50_Mix1_b.txt",
+			// "Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_60_Mix1_b.txt",
+			// "Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_70_Mix1_b.txt",
+			// "Mode8/InputFromGTPowerM8/m8_GT_T_INTAKE_80_Mix1_b.txt",
+			// // "Mode6/InputFromGTPowerM6/m6_GT_30_Mix1_b.txt",
+			// "Mode6/InputFromGTPowerM6/m6_GT_40_Mix1_b.txt",
+			// "Mode6/InputFromGTPowerM6/m6_GT_51_Mix1_b.txt",
+			// "Mode6/InputFromGTPowerM6/m6_GT_60_Mix1_b.txt",
+			// "Mode6/InputFromGTPowerM6/m6_GT_70_Mix1_b.txt",
+			// "Mode3/InputFromGTPowerM3/m3_GT_T_INTAKE_30_Mix1_b_BestMatch.txt",
+			// "Mode3/VergleichMitChemkin/mode3_Compare2Chemkin.txt"
+			// "Mode3/DERCMeeting/m3_T_IVC_351_Mix1_bTest.txt"
+			// "Mode3/InputFromGT/m3_GTPowerReducedInput_Mix1_b_DERCConstants.txt",
+			// "InputFromGT/Mode3/m3_GTPowerReducedInput_Mix6.txt",
+			// "Mode3_MultiZoneInitFromKiva/INIT_11CAD_BTDC/VergleichMitChemkin/mode3_Compare2Chemkin.txt"
 			};
 			inputFileNames = ifn;
 		}
@@ -1386,15 +443,15 @@ public class Bremo extends Thread {
 	private static void multiFileRun(String[] inputFileNames) {
 		File file;
 		for (int i = 0; i < inputFileNames.length; i++) {
-//			file = new File("src//InputFiles//" + inputFileNames[i]);
+			// file = new File("src//InputFiles//" + inputFileNames[i]);
 			file = new File(inputFileNames[i]);
 			Bremo bremo = new Bremo(file, false);
-//			try{
-				bremo.run();
-				bremo = null;
-//			}catch(ErrorZoneException e){
-//				bremo = null;
-//			}
+			// try{
+			bremo.run();
+			bremo = null;
+			// }catch(ErrorZoneException e){
+			// bremo = null;
+			// }
 		}
 	}
 

@@ -233,7 +233,6 @@ public class SwingBremoModel implements Observer {
 			bremoActiv = false;
 			try {
 				for (int i = 0; i < files.length; i++) {
-					bremoThread[i].addObserver(this);
 					bremoThread[i].start();
 				}
 
@@ -273,7 +272,7 @@ public class SwingBremoModel implements Observer {
 					bremoThread = new Bremo[files.length];
 					// group = new ThreadGroup("BremoFamily");
 					for (int i = 0; i < bremoThread.length; i++) {
-						bremoThread[i] = new Bremo(files[i], true);
+						bremoThread[i] = new Bremo(files[i], true, this);
 					}
 					bremoThreadFertig = new String[files.length];
 					NrOfFile = files.length;

@@ -329,7 +329,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		if(((Double)zonen_IN[0].get_p()).isNaN() || ((Double)zonen_IN[0].get_V()).isNaN() || ((Double)zonen_IN[0].get_T()).isNaN()){
 			try{
 				throw new ErrorZoneException("Warnung: In der Druckverlaufsanalyse haben Druck, Volumen oder Temperatur der "+
-						"Zone 1 unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						"Zone 1 unmögliche Werte angenommen. Bitte Eingabeparameter prüfen. (Case: " + CP.get_CaseName() +")",
 						super.get_ErgebnisBuffer());
 			}catch(ErrorZoneException eze){
 				eze.stopBremo();
@@ -338,7 +338,7 @@ public class DVA_homogen_ZweiZonig extends DVA {
 		if(((Double)zonen_IN[1].get_p()).isNaN() || ((Double)zonen_IN[1].get_V()).isNaN() || ((Double)zonen_IN[1].get_T()).isNaN()){
 			try{
 				throw new ErrorZoneException("Warnung: In der Druckverlaufsanalyse haben Druck, Volumen oder Temperatur der "+
-						"Zone 2 unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.",
+						"Zone 2 unmögliche Werte angenommen. Bitte Eingabeparameter prüfen.(Case: " + CP.get_CaseName() +")",
 						super.get_ErgebnisBuffer());
 			}catch(ErrorZoneException eze){
 				eze.stopBremo();

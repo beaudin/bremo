@@ -3142,7 +3142,7 @@ public class CasePara {
 			return set_doublePara(INPUTFILE_PARAMETER,
 					ManagerLanguage.getString("OT_Versatz"), "["
 							+ ManagerLanguage.getString("KWnZOT") + "]", -360,
-					360);
+					720);
 		} catch (ParameterFileWrongInputException e) {
 			return 0;
 		}

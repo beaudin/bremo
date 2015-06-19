@@ -19,7 +19,7 @@ public class RestgasVorgabe extends InternesRestgas{
 	
 	private double get_ausInputfile(){
 		try{
-			super.CP.get_mAGR_intern_ASP_aus_InputFile();
+			return super.CP.get_mAGR_intern_ASP_aus_InputFile();
 		}catch (Exception e){
 			try{
 				throw new ParameterFileWrongInputException("mAGRinter_ASP nicht angegeben.");

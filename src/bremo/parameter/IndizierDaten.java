@@ -684,7 +684,7 @@ public class IndizierDaten {
 			double abgleichDauer=dae-dab;
 			double schrittZahl=(-abgleichDauer)/deltat;
 			if (schrittZahl>1){
-			double pZyl_temp []=new double [(int)Math.round(schrittZahl)];
+			double pZyl_temp []=new double [(int)Math.ceil(schrittZahl)];
 			double pRef_temp =1e5*CP.get_Referenzwert(); //Referenzwert einlesen und von [bar] nach [Pa] konvertieren
 			for(int i=0;i<=schrittZahl;i++){
 				double time=dab-(i*deltat);			

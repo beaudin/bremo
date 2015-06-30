@@ -291,7 +291,7 @@ public class IndizierFileReader_txt extends IndizierFileReader{
 				double zotbeikolbenot=hkm.get_OT_Versatz(); //Versatz wenn Indizierdaten ZOT bei KolbenOT und aktiver Desachsierung/Schraenkung
 				zotbeikolbenot=Math.round(zotbeikolbenot*10)/10.0; //Math.round(x*1000)/1000.0;
 				double otversatz=CP.get_OT_Versatz(); //Beliebiger bekannter OT-Versatz der Indizierdaten
-//				otversatz=otversatz/(CP.get_DrehzahlInUproSec()*360);	
+				
 				double versatz = (zotbeikolbenot+otversatz)/(CP.get_DrehzahlInUproSec()*360); //(Gesamtversatz umgerechnet in Zeit)
 				
 				int i=0;

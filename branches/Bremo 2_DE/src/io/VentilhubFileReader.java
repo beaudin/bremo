@@ -14,7 +14,7 @@ import bremoExceptions.ParameterFileWrongInputException;
 
 public class VentilhubFileReader {
 	private static String ext = "txt";
-	private String [] zeitEinheiten=new String [2];
+	private String [] zeitEinheiten=new String [3];
 	private String zeitEinheit, einheitHub; 
 	private double kf_hub;//Faktor für die Umrechnung von mm nach m
 	private File file;
@@ -50,6 +50,7 @@ public class VentilhubFileReader {
 		if(typ.equalsIgnoreCase("Einlass")){
 			zeitEinheiten[0]="[KWnEO]";
 			zeitEinheiten[1]="[snEO]";
+			zeitEinheiten[2]="[KWnVO]";
 			offsetKW=cp.get_Einlassoeffnet_KW();
 			offsetSEC=cp.get_Einlassoeffnet();
 			 if( !VENTILHUB_EIN_FORMAT.equalsIgnoreCase(ext))
@@ -65,6 +66,7 @@ public class VentilhubFileReader {
 		 }else if(typ.equalsIgnoreCase("Auslass")){
 				zeitEinheiten[0]="[KWnAO]";
 				zeitEinheiten[1]="[snAO]";
+				zeitEinheiten[2]="[KWnVO]";
 				offsetKW=cp.get_Auslassoeffnet_KW();
 				offsetSEC=cp.get_Auslassoeffnet();
 			 if( !VENTILHUB_AUS_FORMAT.equalsIgnoreCase(ext))
@@ -112,13 +114,14 @@ public class VentilhubFileReader {
 							convertKW2SEC=true;
 						einheitHub=theline[1];
 						
-						if(zeitEinheit.equals(zeitEinheiten[0])||zeitEinheit.equals(zeitEinheiten[1])){}else{
+						if(zeitEinheit.equals(zeitEinheiten[0])||zeitEinheit.equals(zeitEinheiten[1])||zeitEinheit.equals(zeitEinheiten[2])){}else{
 							throw new ParameterFileWrongInputException("Die Einheit in der ersten Spalte " +
 									"des Ventilhubtextfiles muss "+ zeitEinheiten[0]+ 
-									" oder " +zeitEinheiten[1] +" sein. \n Eingegeben wurde aber "+ zeitEinheit +
+									" oder " +zeitEinheiten[1] +" oder "+ zeitEinheiten[2]+" sein. \n Eingegeben wurde aber "+ zeitEinheit +
 									"\n Es bedeuten: " +
 									"\n KWnAO: KW nach Auslassoeffnet " +
-									"\n KWnEO: KW nach Einlassoeffnet");}							
+									"\n KWnEO: KW nach Einlassoeffnet" +
+									"\n KWnVO: KW nach Ventiloeffnet");}							
 						
 						kf_hub=set_kalibrierfaktor(einheitHub);
 						kalibrierungErfolgreich=true;
@@ -127,7 +130,7 @@ public class VentilhubFileReader {
 					if(!kalibrierungErfolgreich)
 						throw new ParameterFileWrongInputException("Im angegebenen Ventilhubfile wurden keine Einheiten angegeben. \n" +
 								"Diese muessen vor den eigentlicehn Hubdaten in eckigen Klammern angegeben werden z.B.: \n" +
-								"[KWnAO] [mm] oder [KWnEO] [m] oder [snEO] [mm] oder ...\n" +
+								"[KWnAO] [mm] oder [KWnEO] [m] oder [snEO] [mm] oder [KWnVO] [mm] oder ...\n" +
 								"Eine weiter Fehlermoeglichkeit: Die Spaltenangaben stimmen nicht!!");
 							
 					zeilenZaehlen=true; //Wenn numerische Daten in den Zeilen stehen sollen diese gezaehlt werden

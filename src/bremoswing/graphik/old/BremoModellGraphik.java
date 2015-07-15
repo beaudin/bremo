@@ -310,7 +310,7 @@
 //      
 //      TabellePanel.add(b5);
 //        
-//        String str = "<html><b>\" Bitte Wählen : \"</b></html>";
+//        String str = "<html><b>\" Bitte Waehlen : \"</b></html>";
 //		graphik2ComboBox1.addItem(str);
 //		graphik2ComboBox1.addItem("p-V-Digramm");
 //		graphik2ComboBox1.addItem("Andere Diagramm");
@@ -569,7 +569,7 @@
 //		dQbVerlauf = collectionVerlauf1;
 //		Qb_QmaxVerlauf = collectionVerlauf2;
 //		ChartPanel chartVerlauf = null;
-//	    //chartVerlauf = createChartPanel(null, "[°KW]",null , datasetVerlauf);
+//	    //chartVerlauf = createChartPanel(null, "[grdKW]",null , datasetVerlauf);
 //		chartVerlauf = createChartPanel(null, zeit_oder_KW, "[J/KW]", "[--]", dQbVerlauf, Qb_QmaxVerlauf);
 //	
 //		br.close();
@@ -705,7 +705,7 @@
 ////        defaultcategorydataset.addValue(6D, s2, s7);
 // 		
 // 		ChartPanel chartVerlauf = null;
-// 		//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
+// 		//chartDruckVerlauf = createChartPanel(null, "[grdKW]",null , datasetDruckVerlauf);
 // 		chartVerlauf = createBarChartPanel(null, null, null , datasetVerlauf);
 //         
 // 		br.close();
@@ -799,7 +799,7 @@
 //		numberaxisX.setTickLabelFont(new Font("Arial", Font.BOLD, 10));
 //		numberaxisX.setPositiveArrowVisible(false);
 //		if (XLabel != null
-//				&& (XLabel.equals("KW") || XLabel.equals("Kurbelwinkel [°KW]"))) {
+//				&& (XLabel.equals("KW") || XLabel.equals("Kurbelwinkel [grdKW]"))) {
 //			numberaxisX.setTickUnit(new NumberTickUnit(30));
 //		}
 //

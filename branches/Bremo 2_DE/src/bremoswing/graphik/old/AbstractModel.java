@@ -29,7 +29,7 @@
 //			setFileName(file);
 //			setHeader(file);
 //		} catch (FileNotFoundException e) {
-//           System.err.println("File don´t exist at this path !");
+//           System.err.println("File dont exist at this path !");
 //		}
 //	}
 //	

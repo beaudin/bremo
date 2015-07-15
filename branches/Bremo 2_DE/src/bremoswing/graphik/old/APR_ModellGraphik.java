@@ -265,7 +265,7 @@
 //			datasetDruckVerlauf = collectionDruckVerlauf;
 //			ChartPanel chartDruckVerlauf = null;
 //			if (zeit_oder_KW.equals("KW")){
-//				//chartDruckVerlauf = createChartPanel(null, "[°KW]",null , datasetDruckVerlauf);
+//				//chartDruckVerlauf = createChartPanel(null, "[grdKW]",null , datasetDruckVerlauf);
 //				chartDruckVerlauf = createChartPanel(null, zeit_oder_KW, "[bar]" , datasetDruckVerlauf);
 //			}
 //			else {
@@ -313,7 +313,7 @@
 //		collectionVerlauf.addSeries(serie2);
 //		datasetVerlauf = collectionVerlauf;
 //		ChartPanel chartVerlauf = null;
-//	    //chartVerlauf = createChartPanel(null, "[°KW]",null , datasetVerlauf);
+//	    //chartVerlauf = createChartPanel(null, "[grdKW]",null , datasetVerlauf);
 //		chartVerlauf = createChartPanel(null, null, null , datasetVerlauf);
 //	
 //		br.close();

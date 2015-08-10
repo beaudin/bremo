@@ -1,5 +1,6 @@
 package bremoswing;
 
+import gui.AppView;
 import io.AusgabeSteurung;
 
 import java.awt.Color;
@@ -31,17 +32,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
 
 import bremoswing.graphik.BremoView;
 import bremoswing.graphik.BremoViewModel;
@@ -51,12 +47,14 @@ import bremoswing.util.BremoSwingUtil;
 import bremoswing.util.PaintPanel;
 import bremoswing.util.SucheBremo;
 
-/*
- * SwingBremo.java
+/* *
+ *  Diese Klasse erzeugt die Hauptoberfläsche ( Swing GUI ) um Bremo Graphik zu steuert. 
+ *  Das ganzen funktionniert mit der Prinzip von MVC Patter ( Modell - View - Controller )
+ *  und Diese Klasse entspricht zu den View d.h implementiert nur der GUI und ein 
+ *  paaren einfachen funktionen die der Komposanten  der GUI aktulisieren oder ändern.
+ *  in der  gleiche package  sind " SwingBremoController" die der Kontroller implementiert und 
+ *  "SwingBremoModel" die der Modell von der GUI implementiert.
  *
- *
-
- /**
  * @author Ngueneko Steve
  */
 public class SwingBremo extends JFrame implements ActionListener {
@@ -67,32 +65,55 @@ public class SwingBremo extends JFrame implements ActionListener {
 	// private static SwingBremo instanceSwingBremo;
 
 	// public String RevisionNumber = getRevisionNumber();
+
+	// Der GUI hat die folgenden Komponent
+
+	// ******************* KOMPONENT *******************************/
+
 	private String title = "Bremo 2.0 rev ? Beta";
 
-	private SucheBremo suche;
+	private SucheBremo suche; // kleine GUI um text im TextPAne zu suchen
 
-	private JButton berechnen;
-	private JButton wahlFile;
-	private JButton stop;
-	private JButton sehen;
-	private JButton docfile;
-	private JButton help;
-	private JButton table;
+	private JButton berechnen; // starte die Berechnung in Bremo
+
+	private JButton wahlFile; // ermöglicht ein File oder mehrere file für die
+								// Berechnung auszuwählen
+
+	private JButton stop; // Stop die laufende Berechnung im Bremo
+
+	private JButton sehen; // ruf eine andere GUI für die Darstellung von
+							// Ergebnis File als Kurven
+
+	private JButton docfile; //
+
+	private JButton help; // ruf der link wo steht die Dokumentation für Bremo
+
+	private JButton table; // ruf eine andere GUI für die Darstellung von
+							// InputFile oder output file als JTable
 
 	private JScrollPane jScrollPane1;
 	private JScrollPane jScrollPane2;
-	private JTextPane kleinArea;
-	private JTextPane grosArea;
 
-	private PaintPanel konsole;
-	private PaintPanel manager;
+	private JTextPane kleinArea; // klein Konsole für den Outpout im Normale
+									// Mode
 
-	private JTextField textFile;
+	private JTextPane grosArea; // große Konsole für den Outpout im Debug Mode
 
-	private JProgressBar progressBar;
-	private JProgressBar progressBarInd;
+	private PaintPanel konsole; // Panel für die Konsole
 
-	private JLabel label;
+	private PaintPanel manager; // Panel für die Steuerung
+
+	private JProgressBar progressBar; // Progessbar für die Berechnung
+
+	private JProgressBar progressBarInd; // indeterministische Progressbar falls
+											// der Progress nicht bekannt ist
+
+	private JLabel label; // repräsentier den path für den aktuelle active
+							// odner.
+
+	// ******************* ENDE KOMPONENT *******************************/
+
+	// ******************** Resource Für der GUI **************************/
 
 	public final String PATH_FROZE_BLUE = "/bremoswing/bild/Abstract_Frozen_Blue.jpg";
 	public final String PATH_BREMO_APP_ICON = "/bremoswing/bild/bremo1.png";
@@ -100,12 +121,14 @@ public class SwingBremo extends JFrame implements ActionListener {
 	public final String PATH_BREMO_PLAY_ICON = "/bremoswing/bild/play_blue.png";
 	public final String PATH_BREMO_STOP_ICON = "/bremoswing/bild/stop_blue.png";
 	public final String PATH_BREMO_SEE_ICON = "/bremoswing/bild/see_graphik.png";
+	public final String PATH_BREMO_DOC_FILE = "/bremoswing/bild/doc-icon.png";
 	public final String PATH_BREMO_TABLE_ICON = "/bremoswing/bild/table-icon-1.png";
 	public final String PATH_BREMO_HELP_ICON = "/bremoswing/bild/help.png";
 
 	public final String PATH_BREMO_CHOOSEFILE_ROLLOVER_ICON = "/bremoswing/bild/folder_blue_2.png";
 	public final String PATH_BREMO_PLAY_ROLLOVER_ICON = "/bremoswing/bild/play_blue_2.png";
 	public final String PATH_BREMO_SEE_ROLLOVER_ICON = "/bremoswing/bild/see_graphik-2.png";
+	public final String PATH_BREMO_DOC_FILE_ROLLOVER_ICON = "/bremoswing/bild/doc-icon2.png";
 	public final String PATH_BREMO_TABLE_ROLLOVER_ICON = "/bremoswing/bild/table-icon-2.png";
 	public final String PATH_BREMO_HELP_ROLLOVER_ICON = "/bremoswing/bild/help-2.png";
 
@@ -125,31 +148,36 @@ public class SwingBremo extends JFrame implements ActionListener {
 	public final String BUTTON_HELP = "help";
 	public final String BUTTON_TABLE = "table";
 
-	private SwingBremoController controller;
+	// ** ENDE Resource Für der GUI ************/
+
+	private SwingBremoController controller; // Kontroller die als Verbindung
+												// mit der Modell dienst
+
+	private AppView EditorView;
 
 	/************************** End of variables declaration ****************************************/
 
-	/***** Creates new form SwingBremo *************************************************************/
-
+	/**
+	 * Constructor to Creates new form SwingBremo
+	 */
 	public SwingBremo() {
+		// initialisierung der Komponeneten
 		initComponents();
+		// stellt der GUI in der Mitte der Bildchirm
 		BremoSwingUtil.placeFrame(this);
 	}
-
-	// public static SwingBremo getInstance() {
-	// if (SwingBremo.instanceSwingBremo == null) {
-	// SwingBremo.instanceSwingBremo = new SwingBremo();
-	// }
-	// return SwingBremo.instanceSwingBremo;
-	// }
 
 	/***
 	 * This method is called from within the constructor to initialize the form.
 	 * 
 	 * @throws IOException
-	 ***********************/
+	 */
 	@SuppressWarnings("static-access")
 	private void initComponents() {
+
+		// initilaisierung von Komponent
+		// und für ein paar ein Name geben um später
+		// komponent mit hilfe der Name zu identifizieren
 
 		kleinArea = new JTextPane();
 		grosArea = new JTextPane();
@@ -180,8 +208,6 @@ public class SwingBremo extends JFrame implements ActionListener {
 		table = new JButton();
 		table.setName(BUTTON_TABLE);
 
-		textFile = new JTextField();
-
 		jScrollPane1 = new JScrollPane();
 		jScrollPane2 = new JScrollPane();
 
@@ -194,16 +220,25 @@ public class SwingBremo extends JFrame implements ActionListener {
 
 		/****** HAUPT FRAME ****************************************************************/
 
+		/* Einstellung der Fenster */
+		// Title
 		setTitle(title);
+		// Farbe der Background
 		setBackground(new Color(255, 255, 255));
+		// icon der GUI
 		setIconImage(new ImageIcon(getClass().getResource(PATH_BREMO_APP_ICON))
 				.getImage());
+		// Name
 		setName(ManagerLanguage.getString("swingbremo_app_titel"));
+		// size nicht ändern
 		setResizable(false);
+		// aktion um GUI zu schließen
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		// size der GUI
 		Dimension size = new Dimension(720, 320);
 		setPreferredSize(size);
 
+		// listener wenn mann der GUI schließen will
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -211,46 +246,54 @@ public class SwingBremo extends JFrame implements ActionListener {
 			}
 		});
 
+		/*
+		 * Layout der Panel "Manager". Sie erfahren mehr über "GridBagLayout"
+		 * wenn sie java layout einlesehen. Komponenete sind als Grid mit
+		 * Koordonate X,Y eingepackt.
+		 */
 		manager.setLayout(new GridBagLayout());
-
 		GridBagConstraints gc = new GridBagConstraints();
 
 		/************ BUTTON BERECHNEN ************************************/
 		ImageIcon beri = new ImageIcon(getClass().getResource(
-				PATH_BREMO_PLAY_ICON));
+				PATH_BREMO_PLAY_ICON)); // set Icon
 		berechnen.setIcon(beri);
 		berechnen.setRolloverIcon(new ImageIcon(getClass().getResource(
-				PATH_BREMO_PLAY_ROLLOVER_ICON)));
+				PATH_BREMO_PLAY_ROLLOVER_ICON))); // set reloverIcon
 		berechnen.setToolTipText(getHtmlToolTip(ManagerLanguage
-				.getString("swingbremo_ToolTip_play")));
+				.getString("swingbremo_ToolTip_play"))); // set der TooltipText
 
-		berechnen.addActionListener(this);
+		berechnen.addActionListener(this); // funge zu der liste der listener
+											// der GUI inzu
 
+		/* Layout der Panel " Manager " odnert komponent als Koordonate (X,Y) */
 		gc.insets = new Insets(0, 0, 0, 0);
 		gc.ipadx = 0;
 		gc.ipady = 0;
 		gc.weightx = 0;
-		gc.gridx = 0;
-		gc.gridy = 0;
+		gc.gridx = 0; // X
+		gc.gridy = 0; // Y
 
 		manager.add(berechnen, gc);
 
 		/************ BUTTON WAHLFILE ************************************/
 
 		wahlFile.setIcon(new ImageIcon(getClass().getResource(
-				PATH_BREMO_CHOOSEFILE_ICON)));
+				PATH_BREMO_CHOOSEFILE_ICON))); // set Icon
 		wahlFile.setRolloverIcon(new ImageIcon(getClass().getResource(
-				PATH_BREMO_CHOOSEFILE_ROLLOVER_ICON)));
+				PATH_BREMO_CHOOSEFILE_ROLLOVER_ICON))); // set reloverIcon
 		wahlFile.setToolTipText(getHtmlToolTip(ManagerLanguage
-				.getString("swingbremo_ToolTip_choose")));
+				.getString("swingbremo_ToolTip_choose"))); // set der
+															// TooltipText
 
-		wahlFile.addActionListener(this);
+		wahlFile.addActionListener(this); // funge zu der liste der listener der
+											// GUI inzu
 
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(0, 0, 0, 0);
 		gc.weightx = 0;
-		gc.gridx = 1;
-		gc.gridy = 0;
+		gc.gridx = 1; // X
+		gc.gridy = 0; // y
 		gc.ipadx = 0;
 
 		manager.add(wahlFile, gc);
@@ -266,8 +309,8 @@ public class SwingBremo extends JFrame implements ActionListener {
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(0, 0, 0, 0);
 		gc.weightx = 0;
-		gc.gridx = 2;
-		gc.gridy = 0;
+		gc.gridx = 2; // X
+		gc.gridy = 0; // y
 		gc.ipadx = 0;
 
 		manager.add(stop, gc);
@@ -284,35 +327,30 @@ public class SwingBremo extends JFrame implements ActionListener {
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(0, 0, 0, 0);
 		gc.weightx = 0;
-		gc.gridx = 3;
-		gc.gridy = 0;
+		gc.gridx = 3; // X
+		gc.gridy = 0; // y
 		gc.ipadx = 0;
 
 		manager.add(sehen, gc);
 
-		// /************ BUTTON File ************************************/
-		// docfile.setIcon(new ImageIcon(getClass().getResource(
-		// "/bremoswing/bild/doc-icon.png")));
-		// docfile.setRolloverIcon(new ImageIcon(getClass().getResource(
-		// "/bremoswing/bild/doc-icon2.png")));
-		// docfile.setToolTipText(ManagerLanguage.getString("swingbremo_ToolTip_doc"));
-		// //
-		// docfile.setToolTipText(languageManager.getJButtonTextByID("swingbremo_ToolTip_doc"));
-		// //swingbremo_ToolTip_doc
-		// docfile.addActionListener(new ActionListener() {
-		//
-		// @Override
-		// public void actionPerformed(ActionEvent arg0) {
-		// }
-		// });
-		// gc.fill = GridBagConstraints.NONE;
-		// gc.insets = new Insets(0, 0, 0, 0);
-		// gc.weightx = 0;
-		// gc.gridx = 4;
-		// gc.gridy = 0;
-		// gc.ipadx = 0;
-		// docfile.setEnabled(true);
-		// manager.add(docfile, gc);
+		/************ BUTTON File ************************************/
+		docfile.setIcon(new ImageIcon(getClass().getResource(
+				PATH_BREMO_DOC_FILE)));
+		docfile.setRolloverIcon(new ImageIcon(getClass().getResource(
+				PATH_BREMO_DOC_FILE_ROLLOVER_ICON)));
+		docfile.setToolTipText(getHtmlToolTip(ManagerLanguage
+				.getString("swingbremo_ToolTip_doc")));
+
+		docfile.addActionListener(this);
+
+		gc.fill = GridBagConstraints.NONE;
+		gc.insets = new Insets(0, 0, 0, 0);
+		gc.weightx = 0;
+		gc.gridx = 4; // X
+		gc.gridy = 0; // y
+		gc.ipadx = 0;
+
+		manager.add(docfile, gc);
 
 		/************ BUTTON File ************************************/
 		table.setIcon(new ImageIcon(getClass().getResource(
@@ -327,46 +365,11 @@ public class SwingBremo extends JFrame implements ActionListener {
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(0, 0, 0, 0);
 		gc.weightx = 0;
-		gc.gridx = 4;
-		gc.gridy = 0;
+		gc.gridx = 5; // X
+		gc.gridy = 0; // y
 		gc.ipadx = 0;
 
 		manager.add(table, gc);
-
-		/************************* COMBO BOX LANGUAGE ****************************/
-		// language.setEditable(false);
-		// language.addActionListener(new ActionListener() {
-		//
-		// @Override
-		// public void actionPerformed(ActionEvent e) {
-		// int index = language.getSelectedIndex();
-		// if (index == 0) {
-		//
-		// ManagerLanguage.setLocale(new Locale("de, DE"));
-		// ManagerLanguage.managerLanguage(Locale.GERMANY);
-		// updateLanguage();
-		//
-		// } else if(index == 1) {
-		//
-		// ManagerLanguage.setLocale(new Locale("en, EN"));
-		// ManagerLanguage.managerLanguage(Locale.ENGLISH);
-		// updateLanguage();
-		//
-		//
-		// } else if (index == 2) {
-		// ManagerLanguage.setLocale(new Locale("fr, FR"));
-		// ManagerLanguage.managerLanguage(Locale.FRANCE);
-		// updateLanguage();
-		// }
-		// }
-		// });
-		// gc.fill = GridBagConstraints.NONE;
-		// gc.insets = new Insets(0, 0, 0, 0);
-		// gc.weightx = 0;
-		// gc.gridx = 5;
-		// gc.gridy = 0;
-		// gc.ipadx = 0;
-		// manager.add(language, gc);
 
 		/** LABEL ************************************/
 		label.setFont(new Font("comic sans ms", 0, 13));
@@ -374,8 +377,8 @@ public class SwingBremo extends JFrame implements ActionListener {
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(5, 0, 0, 0);
 		gc.weightx = 0.1;
-		gc.gridx = 6;
-		gc.gridy = 0;
+		gc.gridx = 6; // X
+		gc.gridy = 0; // y
 		gc.ipadx = 0;
 		gc.ipady = 0;
 
@@ -416,25 +419,13 @@ public class SwingBremo extends JFrame implements ActionListener {
 
 		manager.add(help, gc);
 
-		/************ TEXTFIELD TEXTFILE ************************************/
-		// textFile.setEditable(false);
-		// textFile.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		// textFile.setEnabled(false);
-		// textFile.setMaximumSize(new Dimension(0, 0));
-		// textFile.setMinimumSize(new Dimension(0, 0));
-		// textFile.setPreferredSize(new Dimension(0, 0));
-		// textFile.setBounds(180, 20, 0, 0);
-
-		/************ PANEL KONSOLE ************************************/
-		// konsole2.setBorder(BorderFactory.createTitledBorder(null, "Konsole",
-		// TitledBorder.DEFAULT_JUSTIFICATION,
-		// TitledBorder.DEFAULT_POSITION, new Font("comic sans ms", 1, 14))); //
-		// NOI18N
-
 		/************ TEXTAREA GROSAREA OUTPUT ************************************/
 		grosArea.setEditable(false);
 		grosArea.setFont(new Font("comic sans ms", 1, 13)); // NOI18N
 		grosArea.setMinimumSize(new Dimension(76, 22));
+
+		// Mit der Kombinationstatste von " Strg + F"
+		// kann man in diese TextPane Wörten suchen
 		grosArea.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -458,6 +449,9 @@ public class SwingBremo extends JFrame implements ActionListener {
 		/************ TEXTAREA KLEINAREA OUTPUT ************************************/
 		kleinArea.setEditable(false);
 		kleinArea.setFont(new Font("comic sans ms", 1, 13));
+
+		// Mit der Kombinationstatste von " Strg + F"
+		// kann man in diese TextPane Wörten suchen
 		kleinArea.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -471,53 +465,39 @@ public class SwingBremo extends JFrame implements ActionListener {
 		jScrollPane2.setBounds(13, 450, 660, 180);
 		konsole.add(jScrollPane2, c);
 
-		// JToolBar toolBar = new JToolBar("BremoManager");
-		// toolBar.setFloatable(true);
-		// toolBar.setRollover( true);
-		// toolBar.setMargin(new Insets(5,10 , 5, 10));
-		//
-		// toolBar.add(berechnen);
-		// toolBar.add(wahlFile);
-		// toolBar.add(stop);
-		// toolBar.addSeparator(new Dimension(100,0));
-		// toolBar.add(label);
-		// toolBar.addSeparator(new Dimension(100,0));
-		//
-		// toolBar.add(progressBarInd);
-		// toolBar.add(progressBar);
-		// getContentPane().setBackground(new Color(225, 225, 225));
-
-		// manager.add(toolBar, BorderLayout.PAGE_START);
 		/************ FRAME LAYOUT EINSTELUNG ************************************/
+
+		// Diese Layout ist sehr gut für komplexe darstellung aber kanna uch
+		// komplex zu verstehen
+		// wenn sie nicht gut verstehen, ich bitte sie um Java Doc über
+		// "GroupLayout" zu lesen.
+
 		GroupLayout layout = new GroupLayout(getContentPane());
+
 		getContentPane().setLayout(layout);
+		// Horizontal Group Einstellung
 		layout.setHorizontalGroup(layout.createParallelGroup(
 				GroupLayout.Alignment.LEADING).addGroup(
 				GroupLayout.Alignment.TRAILING,
-				layout.createSequentialGroup()
-				// .addContainerGap()
-						.addGroup(
-								layout.createParallelGroup(
-										GroupLayout.Alignment.TRAILING)
-										.addComponent(manager,
-												GroupLayout.Alignment.LEADING,
-												GroupLayout.DEFAULT_SIZE, 685,
-												Short.MAX_VALUE)
-										.addComponent(konsole,
-												GroupLayout.Alignment.LEADING,
-												GroupLayout.DEFAULT_SIZE, 685,
-												Short.MAX_VALUE))
-		/* .addContainerGap() */));
+				layout.createSequentialGroup().addGroup(
+						layout.createParallelGroup(
+								GroupLayout.Alignment.TRAILING)
+								.addComponent(manager,
+										GroupLayout.Alignment.LEADING,
+										GroupLayout.DEFAULT_SIZE, 685,
+										Short.MAX_VALUE)
+								.addComponent(konsole,
+										GroupLayout.Alignment.LEADING,
+										GroupLayout.DEFAULT_SIZE, 685,
+										Short.MAX_VALUE))));
+		// Verticale Group Einstellung
 		layout.setVerticalGroup(layout.createParallelGroup(
 				GroupLayout.Alignment.LEADING).addGroup(
 				layout.createSequentialGroup()
-						// .addContainerGap()
 						.addComponent(manager, GroupLayout.PREFERRED_SIZE, 38,
 								GroupLayout.PREFERRED_SIZE)
-						// .addPreferredGap(
-						// LayoutStyle.ComponentPlacement.RELATED)
 						.addComponent(konsole, GroupLayout.DEFAULT_SIZE, 180,
-								Short.MAX_VALUE)/* .addContainerGap() */));
+								Short.MAX_VALUE)));
 		/*****************************************************************************************/
 		pack();
 
@@ -527,6 +507,8 @@ public class SwingBremo extends JFrame implements ActionListener {
 	 * Call the View Frame to plot Graphic
 	 */
 	public void callBremoView() {
+		// geruft wenn mann vorher
+		// keine rechnung gemacht hat
 
 		BremoView view = new BremoView(new BremoViewModel());
 
@@ -540,6 +522,8 @@ public class SwingBremo extends JFrame implements ActionListener {
 	 * Call the View Frame to plot Graphic with the Speccific file
 	 */
 	public void callBremoViewWhitFile(File file) {
+		// geruft wenn mann eine Berechnung durchgefuhrt hat
+		// und ergebniss als Graphic anschauen will
 
 		BremoView view = new BremoView(new BremoViewModel());
 
@@ -556,16 +540,6 @@ public class SwingBremo extends JFrame implements ActionListener {
 
 	}
 
-	/** Warning Message **********/
-	protected void messsage() {
-		new BremoInfoFrame(ManagerLanguage.getString("warning"),
-				ManagerLanguage.getString("swingbremo_warning_message_1")
-						+ ManagerLanguage.getString("swingbremo_point")
-						+ ManagerLanguage
-								.getString("swingbremo_warning_message_2"),
-				JOptionPane.WARNING_MESSAGE);
-	}
-
 	/**
 	 * Event To Search in TextPane
 	 */
@@ -580,31 +554,18 @@ public class SwingBremo extends JFrame implements ActionListener {
 		}
 	}
 
-	//
-	// /**
-	// * Change the Mode of The Console When DebbugMode is Active
-	// */
-	// public void ActiveConsole() {
-	//
-	// if (NrOfFile > 1) {
-	// jScrollPane1.setVisible(false);
-	// setSize(710, 320);
-	// DebuggingMode = false;
-	// } else if (NrOfFile == 1) {
-	// if (!DebuggingMode) {
-	// jScrollPane1.setVisible(false);
-	// setSize(710, 320);
-	// } else {
-	// jScrollPane1.setVisible(true);
-	// setSize(710, 750);
-	// }
-	// }
-	// }
-
+	/**
+	 * get the KleinArea
+	 * 
+	 * @return
+	 */
 	public JTextPane getKleinArea() {
 		return kleinArea;
 	}
 
+	/**
+	 * get the GrosArea
+	 */
 	public JTextPane getGrosArea() {
 		return grosArea;
 	}
@@ -613,11 +574,12 @@ public class SwingBremo extends JFrame implements ActionListener {
 	 * Set the Size of the Console
 	 */
 	public void setSizeConsole(int width, int height) {
+		// Size von der Konsole ändern sich abhängig von der Mode.
 
-		if (height <= 320) {
+		if (height <= 320) { // Normale Mode
 			jScrollPane1.setVisible(false);
 			setSize(width, height);
-		} else {
+		} else { // Debug Mode
 			jScrollPane1.setVisible(true);
 			setSize(width, height);
 			BremoSwingUtil.placeFrame(this);
@@ -625,7 +587,7 @@ public class SwingBremo extends JFrame implements ActionListener {
 	}
 
 	/**
-	 * Change the GUI when Verlustteilung is Enable to the Process
+	 * Change the Component of GUI when Verlustteilung is Enable to the Process
 	 */
 	public void VerlustteilungModeEnable() {
 		progressBar.setVisible(false);
@@ -635,7 +597,7 @@ public class SwingBremo extends JFrame implements ActionListener {
 	}
 
 	/**
-	 * close the Frame
+	 * close the Frame with the yes or No Dialogue
 	 */
 	public void closeFrame() {
 		URL url = getClass().getResource(PATH_BREMO_CLOSE_FRAME_ICON);
@@ -672,6 +634,12 @@ public class SwingBremo extends JFrame implements ActionListener {
 		}
 	}
 
+	/**
+	 * Decorate simple Text to text whit Font and html tag only for Tooltip
+	 * 
+	 * @param Text
+	 * @return
+	 */
 	public String getHtmlToolTip(String Text) {
 		return "<html><font face =\"comic sans ms\">" + Text + "</font></html>";
 	}
@@ -727,7 +695,7 @@ public class SwingBremo extends JFrame implements ActionListener {
 	}
 
 	/**
-	 * to Change the text of the Label from the Controller
+	 * to Change the text of the Label from
 	 * 
 	 * @param text
 	 */
@@ -735,35 +703,19 @@ public class SwingBremo extends JFrame implements ActionListener {
 		label.setText(text);
 	}
 
+	/**
+	 * set the Value of the progressbar
+	 * 
+	 * @param percent
+	 */
 	public void setProgressValue(int percent) {
 		progressBar.setValue(percent);
 	}
 
 	/**
-	 * help function to print Text inside JTextPane with a particular Color.
-	 * 
-	 * @param pane
-	 * @param Text
-	 * @param color
-	 */
-	private synchronized void appendTextPane(JTextPane pane, String Text,
-			Color color) {
-
-		Document doc = pane.getDocument();
-		Style style = pane.addStyle(null, null);
-		StyleConstants.setForeground(style, color);
-		try {
-			doc.insertString(doc.getLength(), Text, style);
-		} catch (BadLocationException e) {
-		}
-		pane.setCaretPosition(doc.getLength() - 1);
-
-	}
-
-	/**
 	 * Get the Swingbremo View Controller
 	 * 
-	 * @return
+	 * @return controller
 	 */
 	public SwingBremoController getController() {
 		return controller;
@@ -771,10 +723,12 @@ public class SwingBremo extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		// Listener to perform click Buton action
 		switch (((Component) e.getSource()).getName()) {
 
 		case BUTTON_BERCHNEN:
 			controller.berechnen();
+
 			break;
 
 		case BUTTON_WAHLFILE:
@@ -790,7 +744,7 @@ public class SwingBremo extends JFrame implements ActionListener {
 			break;
 
 		case BUTTON_DOCFILE:
-
+			controller.FileEditor();
 			break;
 
 		case BUTTON_TABLE:
@@ -814,14 +768,18 @@ public class SwingBremo extends JFrame implements ActionListener {
 	public static void main(String args[]) {
 
 		/* Set the Nimbus look and feel */
-		// Tahoma , Font.plaint,
+
+		// Tooltip Font ändern
 		UIManager.put("ToolTip.font", new FontUIResource(new Font(
 				"comic sans ms", 2, 20)));
+		// TitledBorder Font ändern
 		UIManager.put("TitledBorder.font", new FontUIResource(new Font(
 				"comic sans ms", 2, 16)));
+		// Label Font ändern
 		UIManager.put("Label.font", new FontUIResource(new Font(
 				"comic sans ms", 2, 14)));
-		UIManager.put("nimbusOrange", new ColorUIResource(28, 138, 224)); // (25,49,187));//Color(110,170,0));
+		// Farbe der ProgressBar ändern
+		UIManager.put("nimbusOrange", new ColorUIResource(28, 138, 224));
 		try {
 			for (UIManager.LookAndFeelInfo info : UIManager
 					.getInstalledLookAndFeels()) {

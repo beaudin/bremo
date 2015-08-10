@@ -4,10 +4,16 @@ import java.awt.Color;
 
 import bremoswing.SwingBremoModel;
 
+/**
+ * Die Klasse steuert die Ausgabe auf Der Konsole. Es gibt 3 mögliche Ausgabe.
+ * Warning message im gelbe Farbe , Error Message im rote Farbe und Normale
+ * Message im blau Farbe.Wenn Bremo lauft Ohne GUI Konsole dann alle Ausgabe
+ * werden direkt an normale streamt geleitet.
+ */
 public class AusgabeSteurung {
 
 	public AusgabeSteurung() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -31,7 +37,7 @@ public class AusgabeSteurung {
 	}
 
 	/**
-	 * Print message als Simple Information
+	 * Print message als Simple/ Normale Information
 	 * 
 	 * @param message
 	 */
@@ -40,6 +46,10 @@ public class AusgabeSteurung {
 		Ausgabe(message, Color.blue);
 	}
 
+	/**
+	 * Wenn Bremo mit GUI lauft dann leitet auf die Konsole sonst auf normale
+	 * ERROR Stream von JAVA.
+	 */
 	private static synchronized void Ausgabe(String message, Color color) {
 
 		try {

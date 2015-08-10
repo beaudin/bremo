@@ -286,6 +286,9 @@ public class Rechnung {
 		}
 	}
 
+	/**
+	 * Destroy CasePara to Stop the calcul
+	 */
 	public void destroy() {
 		CP = null;
 	}

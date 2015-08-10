@@ -1,5 +1,7 @@
 package bremoswing;
 
+import funktionenTests.ShowTable;
+import gui.AppView;
 import io.AusgabeSteurung;
 
 import java.awt.Color;
@@ -39,37 +41,68 @@ import bremoswing.util.BremoExtensionFileFilter;
 import bremoswing.util.BremoInfoFrame;
 import bremoswing.util.BremoSwingUtil;
 import bremoswing.util.ExtensionFileFilter;
-import bremoswing.util.SucheBremo;
 import bremoswing.util.TextPaneOutputStream;
-import funktionenTests.ShowTable;
 
+/*
+ * Die Klasse SwingBremoModel implementiert die Funktionen oder die Methoden die werden aufgeruft 
+ * für die realisierung der Arbeit von Bremo. Die Ergenniss sind an der der View weitergeletet und 
+ *  sagt auch an der View wie soll er sich verhalten abhängige der Situation.
+ *  Die Klasse implements der Interface Observer weil sie informationen oder änderungen von die Objekten
+ *  von type BREMO bekommen.
+ */
 public class SwingBremoModel implements Observer {
 
 	/************************** Variables declaration ****************************************/
 
-	private Observer SwinwgBremoObserver;
-
+	/**
+	 * pfad der letzte ausgewählte File
+	 */
 	public static String path;
 
-	private static SucheBremo suche;
 	public static ThreadGroup group;
 
+	/**
+	 * Array von ausgewahlte File
+	 */
 	private static File[] files;
+	/**
+	 * Array von Bremo
+	 */
 	public static Bremo[] bremoThread;
+	/**
+	 * Array enthält nur Name von fertige Bremo
+	 */
 	public static String[] bremoThreadFertig;
-
+	/**
+	 * Pfad der Ordner für die file (.path und .fav) nötig für den applet.
+	 */
 	public static File BremoAppletDirectory;
-
+	/**
+	 * Boolean sagt ob der Debbug Mode activ oder nicht
+	 */
 	public static boolean DebuggingMode;
 
+	/**
+	 * Anzahl von ausgewählten Bremo File bereit zu laufen
+	 */
 	public static int NrOfFile;
+	/**
+	 * Anzahl Bremo, die noch laufen.
+	 */
 	public static int NrBremoAlive;
+
+	// variable "percent" für die Progressbar
 	public static int percent;
-
-	public static Timer timerCalcul;
-
+	/**
+	 * Timer,die die Prozent von Progressbar berechnet
+	 */
+	public static Timer timerProgress;
+	// speichern die Startzeit von die Berechnung in ms
 	public static double startTime;
 
+	/**
+	 * Outputstream,die Text mit Farbe auf die Kleine Konsole Streamt
+	 */
 	public static TextPaneOutputStream outputStreamKleinArea;
 	/**
 	 * replace the Standard System OutStream
@@ -94,22 +127,32 @@ public class SwingBremoModel implements Observer {
 	public static String PATH_BREMO_FILEPATH = "src/bremoswing/utilFile/bremo.path";
 	public static String PATH_BREMO_FILE_SVN = "/bremoswing/properties/bremo.svnversion";
 
+	/*
+	 * Enstellung für die Sprache
+	 */
 	public String LOCALE_GERMANY_LANGUAGE = "de, DE";
 	public String LOCALE_ENGLISH_LANGUAGE = "en, EN";
-	public String USER_PROPERTY = "user.home";
 
+	public String USER_PROPERTY = "user.home";
+	/*
+	 * Informationen der Bremo an diese Klasse mitteilen kann.
+	 */
 	private final String STRING_VerlustTeilung = "verlustteilungsprozess lauft ...";
 	private final String STRING_CalculEnd = "berechnungsprozess";
-	private final String STRING_StopBremo = "stopsprozess";
-	private final String STRING_SetBremoAsLife = "SetBremoAsLife";
 	private final String STRING_SetDebbugingMode = "SetDebbugingMode";
 	private final String STRING_PutInBremoThreadFertig = "PutInBremoThreadFertig";
 	private final String STRING_FinishTime = "FinishTime";
 
+	// Kontroler: kommunication mit der View erfolgt nur über Kontroller
 	private static SwingBremoController controller;
 
+	// boolean sagt ob eine instanz von Bremo schon dabei zu laufen ist
 	private boolean bremoActiv;
 
+	// GUI um inputFile zu erzeugen oder editieren.
+	private AppView EditorView;
+
+	// Listener um Werten der Progressbar zu berechnen.
 	private final ActionListener calculProgess = new ActionListener() {
 
 		@Override
@@ -118,7 +161,12 @@ public class SwingBremoModel implements Observer {
 			if (bremoActiv) { // true = one Instance of Bremo hast already a
 								// casepara activ
 				double Sum = 0;
-				for (int i = 0; i < bremoThread.length; i++) {
+				for (int i = 0; i < bremoThread.length; i++) { // summe von
+																// (aktuelle
+																// Time /
+																// gesamte Zeit)
+																// für alle
+																// bremo
 					if (bremoThread[i].get_myCaseState()) {
 						Sum = Sum
 								+ (bremoThread[i].get_myCase().get_time() / bremoThread[i]
@@ -128,23 +176,28 @@ public class SwingBremoModel implements Observer {
 				int last_percent = percent;
 				percent = (int) ((Sum / NrBremoAlive) * 100);
 
-				if (last_percent <= percent) {
+				if (last_percent <= percent) { // sicher dass der Progress muss
+												// nicht klein als vorher
 					controller.getView().ActionComponent_BremoActiv();
 					controller.getView().setProgressValue(percent);
 				}
 
-				if (percent >= 100) {
-					timerCalcul.stop();
+				if (percent >= 100) { // wenn progress ist max dann stopt Der
+										// Timer
+					timerProgress.stop();
 				}
 
 			} else {
 				controller.getView().ChangeTextLabel(
 						ManagerLanguage.getString("swingbremo_label_2"));
-				isBremoactiv();
+				isBremoactiv(); // pruft ob eine Instanz von Bremo activ ist
 				if (bremoActiv) {
 					int nbr = getNrBremoRunning();
 					if (nbr < NrBremoAlive) {
-						NrBremoAlive = nbr;
+						NrBremoAlive = nbr; // im lauf der ausführung kann der
+											// Anzahl von lebende Bremo sinken.
+											// ZB: fertig oder flasche parameter
+											// im file
 					}
 				}
 			}
@@ -154,7 +207,13 @@ public class SwingBremoModel implements Observer {
 
 	/************************** End of variables declaration ****************************************/
 
-	public SwingBremoModel(SwingBremoController controller) {
+	public SwingBremoModel(SwingBremoController controller) { // erzeugt ein
+																// Objekt von
+																// type
+																// SwingBremomodel
+																// ausgehen von
+																// sein
+																// Kontroller
 
 		setController(controller);
 
@@ -163,14 +222,22 @@ public class SwingBremoModel implements Observer {
 	}
 
 	private void init() {
-
+		// Name der Odner ist "BremoFile" im USER.HOME
 		BremoAppletDirectory = new File(System.getProperty(USER_PROPERTY)
-				+ File.separator + "BremoFile" + File.separator);
-
+				+ File.separator + "BremoFile" + File.separator); // pfad für
+																	// die File
+																	// .path
+																	// .fav für
+																	// das
+																	// Applet
+		// manager um wörter im Deutsche zu laden
 		ManagerLanguage.managerLanguage(new Locale(LOCALE_GERMANY_LANGUAGE));
 
-		timerCalcul = new Timer(300, calculProgess);
+		// die berechnung der prozent erfolgt jede 300 ms
+		timerProgress = new Timer(300, calculProgess);
 
+		// System.out ist umgeleitet in diese Printstream und schreibe auf
+		// GrosArea
 		outStream = new PrintStream(System.out, true) {
 
 			@Override
@@ -222,26 +289,40 @@ public class SwingBremoModel implements Observer {
 		controller = Controller;
 	}
 
+	/**
+	 * Startet der Ausfuhrung von Bremo
+	 */
 	public void startCalcul() {
-
-		if (files == null || files[0] == null) {
+		// prüft die ausgewählten Bremo File
+		if (files == null || files[0] == null) { // die file sind nicht
+													// vorhanden
+			// Melde an der User
 			new BremoInfoFrame(ManagerLanguage.getString("warning"),
 					ManagerLanguage.getString("swingbremo_warning_message_3"),
 					JOptionPane.WARNING_MESSAGE);
-		} else {
+		} else { // file sind vorhanden.
+			// Kontroller gebe signal für die Komponenten
 			controller.getView().ActionComponent_Berechnen_start();
+			// Bremo hat sein CasePara noch nicht erzeugt
 			bremoActiv = false;
 			try {
-				for (int i = 0; i < files.length; i++) {
+				for (int i = 0; i < files.length; i++) { // erzeugt alle
+															// Intanzen von
+															// Bremo und startet
+															// jede instanz
 					bremoThread[i].start();
 				}
-
+				// controller startet der Timer die alle Bremo Beobachtet
+				// und prüft ob sind fertig sind
 				controller.checkTimerstart();
 
-				timerCalcul.start();
+				// Berechnung für Progressbar kann starten
+				timerProgress.start();
 
-			} catch (IllegalThreadStateException e1) {
+			} catch (IllegalThreadStateException e1) { // Wenn eine fehler
+														// vorkommt
 				e1.printStackTrace();
+				// aller Component der View wieder zum 1. Zustand bringen
 				controller.getView().ActionComponent_Berechnen_end();
 				controller.getView().ChangeTextLabel(
 						ManagerLanguage.getString("swingbremo_label_4"));
@@ -251,44 +332,65 @@ public class SwingBremoModel implements Observer {
 
 	}
 
-	public void chooseFile() {
+	/**
+	 * Auswahl von Bremo file durch der filechooser from der EDITOR GUI
+	 */
+	public static void chooseFileFromEditor(File selection) {
+		controller.getView().ChangeTextLabel(
+				ManagerLanguage.getString("swingbremo_label_6"));
+	}
 
+	/**
+	 * Auswahl von Bremo file durch der filechooser
+	 */
+	public void chooseFile() {
+		// Kontroller gebe signal für die Komponenten
 		controller.getView().ActionComponent_wahlfile_start();
 
+		// DebbugingMode ausschalten
 		SetDebbugingMode(false);
 
 		JFileChooser fileChooser = BremoFileChooser();
 
 		try {
+
 			controller.getView().ChangeTextLabel(
 					ManagerLanguage.getString("swingbremo_label_5"));
 
 			int status = fileChooser.showOpenDialog(controller.getView());
 
-			if (status == JFileChooser.APPROVE_OPTION) {
+			if (status == JFileChooser.APPROVE_OPTION) { // OK
 				if (fileChooser.getSelectedFile() != null) {
+					// selektierten file speichern
 					files = fileChooser.getSelectedFiles();
+
+					// Globale path ändernt und speichern
 					updatePath(files[0].getParent());
+
+					// Bremo Felder initialisieren und starten
 					bremoThread = new Bremo[files.length];
-					// group = new ThreadGroup("BremoFamily");
 					for (int i = 0; i < bremoThread.length; i++) {
 						bremoThread[i] = new Bremo(files[i], true, this);
 					}
+
+					// Bremo Felder für fertige berechnung initialisieren
 					bremoThreadFertig = new String[files.length];
+
 					NrOfFile = files.length;
 					NrBremoAlive = files.length;
+
 					controller.getView().ChangeTextLabel(
 							ManagerLanguage.getString("swingbremo_label_6"));
 
 				}
-			} else if (status == JFileChooser.CANCEL_OPTION) {
+			} else if (status == JFileChooser.CANCEL_OPTION) { // Abbrechen
 
 				controller.getView().ChangeTextLabel(
 						ManagerLanguage.getString("swingbremo_label_7"));
 
 				fileChooser.cancelSelection();
 			}
-		} catch (Exception e) {
+		} catch (Exception e) { // fehler aufgetretten
 			controller.getView().ChangeTextLabel(
 					ManagerLanguage.getString("swingbremo_label_8"));
 			e.printStackTrace();
@@ -296,12 +398,18 @@ public class SwingBremoModel implements Observer {
 
 	}
 
+	/**
+	 * Spezielle JFileChooser für Bremo mit File filter
+	 * 
+	 * @return JFileChooser
+	 */
 	public JFileChooser BremoFileChooser() {
 
 		JFileChooser fileChooser = new JFileChooser(path);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(true);
 
+		// filter zu speziale auswahlt von Bremo file wie ( .apr oder ...)
 		BremoExtensionFileFilter bremoExtensionFileFilter = new BremoExtensionFileFilter();
 		ExtensionFileFilter[] bremoListExtentionFilter = bremoExtensionFileFilter
 				.getBremoListExtentionFilter();
@@ -332,14 +440,16 @@ public class SwingBremoModel implements Observer {
 	 * @throws IOException
 	 */
 	public static void savePathToFile(String path) {
+
 		File f = new File(PATH_BREMO_FILEPATH);
 		BufferedWriter wr;
 		try {
-			if (f.exists()) {
+			if (f.exists()) {// Der file existiert schon im lokal
 				wr = new BufferedWriter(new FileWriter(f, false));
 				wr.write(path);
 				wr.close();
-			} else {
+			} else { // Der file existiert im USER.HOME
+
 				f = new File(BremoAppletDirectory.getAbsoluteFile()
 						+ File.separator + "bremo.path");
 				if (f.exists()) {
@@ -363,35 +473,45 @@ public class SwingBremoModel implements Observer {
 
 		BufferedReader br;
 		BufferedWriter wr;
+
 		String zeile = null;
 		File f_local = new File(PATH_BREMO_FILEPATH);
 		;
 		File f_home = new File(BremoAppletDirectory.getAbsoluteFile()
 				+ File.separator + "bremo.path");
 		try {
-			if (f_local.exists()) {
+			if (f_local.exists()) { // file im local exist
 				br = new BufferedReader(new FileReader(f_local));
 				if ((zeile = br.readLine()) != null) {
 					br.close();
 
-				} else {
+				} else { // file leer
 					br.close();
 					zeile = ".";
 				}
-			} else if (BremoAppletDirectory.exists() && f_home.exists()) {
+			} else if (BremoAppletDirectory.exists() && f_home.exists()) { // file
+																			// im
+																			// USER.HOME
+																			// exist
 				br = new BufferedReader(new FileReader(f_home));
 				if ((zeile = br.readLine()) != null) {
 					br.close();
-				} else {
+				} else { // file leer
 					br.close();
 					zeile = ".";
 				}
-			} else {
+			} else { // file nicht im lokal und im USER.HOME. es muss jetzt neu
+						// file erstellen
 				try {
+					// file im Lokal erstellen wenn möglich ist (für applet
+					// nicht möglich)
 					wr = new BufferedWriter(new FileWriter(f_local, false));
-				} catch (FileNotFoundException e) {
-
-					if (!BremoAppletDirectory.exists()) {
+				} catch (FileNotFoundException e) { // nicht möglich wegen
+													// Applet
+					// im USER.HOME erstellen
+					if (!BremoAppletDirectory.exists()) { // Ordner "BremoFile"
+															// im USER.HOME
+															// erstellen
 						BremoAppletDirectory.mkdir();
 					}
 					wr = new BufferedWriter(new FileWriter(f_home, false));
@@ -410,6 +530,11 @@ public class SwingBremoModel implements Observer {
 		return "<html><font face =\"comic sans ms\">" + Text + "</font></html>";
 	}
 
+	/**
+	 * Prüft ob mindesten 1 Instanz von Bremo ist noch dabei zu laufen
+	 * 
+	 * @return
+	 */
 	public static boolean isBremoRunning() {
 
 		boolean live = false;
@@ -423,6 +548,11 @@ public class SwingBremoModel implements Observer {
 		return live;
 	}
 
+	/**
+	 * gebe an wie viele Instanze von Bremo sind dabei zu laufen
+	 * 
+	 * @return
+	 */
 	public int getNrBremoRunning() {
 		int count = 0;
 		for (Bremo b : bremoThread) {
@@ -433,26 +563,38 @@ public class SwingBremoModel implements Observer {
 		return count;
 	}
 
+	/**
+	 * Set der DebbugingMode gegeben von eine Instanz von Bremo
+	 */
 	public void SetDebbugingMode() {
 
-		if (NrOfFile == 1) {
+		if (NrOfFile == 1) { // wenn es gibt nur 1 Bremo input file dann debbug
+								// mode in dies lesen
 			if (bremoThread[0].get_myCase() == null) {
 				DebuggingMode = false;
 			} else {
 				DebuggingMode = bremoThread[0].get_myCase().SYS.DUBUGGING_MODE;
 			}
 
-		} else {
+		} else { // wenn mehrere file dann automatisch debbug mode ausschalten
 			DebuggingMode = false;
 		}
 		ChangeConsole();
 	}
 
+	/**
+	 * Set Der DebbugingMode mit eine Boolean
+	 * 
+	 * @param mode
+	 */
 	public void SetDebbugingMode(boolean mode) {
 		DebuggingMode = mode;
 		ChangeConsole();
 	}
 
+	/**
+	 * Prüft ob Casepara für mindesten 1 Instanz von Bremo schon verfügbar ist.
+	 */
 	public void isBremoactiv() {
 
 		for (Bremo b : bremoThread) {
@@ -463,6 +605,9 @@ public class SwingBremoModel implements Observer {
 		}
 	}
 
+	/**
+	 * Größe der Konsole ändern abhängig von DebuggingMode
+	 */
 	public void ChangeConsole() {
 
 		if (DebuggingMode) {
@@ -472,10 +617,21 @@ public class SwingBremoModel implements Observer {
 		}
 	}
 
+	/**
+	 * Wenn ein Bremo input file zur ende geht oder gestop ist, ist der aANzahl
+	 * von lebende zu eins reduziert
+	 */
 	public void setNrOfBremoAslife() {
 		NrBremoAlive--;
 	}
 
+	/**
+	 * Wenn ein Bremo input ist fertig d.h geht bist zum ende dann sein Name ist
+	 * in ein Felder gespeichert
+	 * 
+	 * @param s
+	 *            Name der Bremo File
+	 */
 	public void PutInBremoThreadFertig(String s) {
 		for (int i = 0; i < bremoThreadFertig.length; i++) {
 			if (bremoThreadFertig[i] != null)
@@ -517,6 +673,9 @@ public class SwingBremoModel implements Observer {
 		return zeile;
 	}
 
+	/**
+	 * Stop die Berechung im laufend
+	 */
 	public void stopCalcul() {
 
 		do {
@@ -546,23 +705,29 @@ public class SwingBremoModel implements Observer {
 		pane.setCaretPosition(doc.getLength() - 1);
 	}
 
+	/**
+	 * Starte den Graphic Mode
+	 */
 	public void showGraphicFrame() {
 
 		if (bremoThreadFertig != null) {
-			if (bremoThreadFertig[0] != null) {
+			if (bremoThreadFertig[0] != null) { // starte mit der Ergebniss File
 				SelectItemToPlotten selectItem = new SelectItemToPlotten(path,
 						bremoThreadFertig);
 				selectItem.setVisible(true);
 
-			} else {
+			} else { // Starte ohne Erbegniss File
 				SelectItemToPlotten.callBremoView();
 			}
-		} else {
+		} else { // Starte ohne Ergebniss File
 			SelectItemToPlotten.callBremoView();
 		}
 
 	}
 
+	/**
+	 * Anzage inhalt der File im JTABLE MODE
+	 */
 	public void showTableFrame() {
 
 		JFileChooser fileChooser = BremoFileChooser();
@@ -594,6 +759,9 @@ public class SwingBremoModel implements Observer {
 
 	}
 
+	/**
+	 * Zeige die Hilfe Mode an
+	 */
 	public void showHelp() {
 
 		try {
@@ -608,9 +776,13 @@ public class SwingBremoModel implements Observer {
 
 	}
 
+	/**
+	 * Kontroller sagt Berechnung ist fertig und starte Process für die
+	 * Abschluss für jede Fertige Bremoo input file.
+	 */
 	public static void calcul_end() {
 
-		timerCalcul.stop();
+		timerProgress.stop();
 
 		if (bremoThreadFertig[0] != null) {
 
@@ -636,6 +808,9 @@ public class SwingBremoModel implements Observer {
 
 	}
 
+	/**
+	 * berechnet die Zeit bis zu abschluss der Berechnung von Bremo
+	 */
 	private void FinishTime() {
 		AusgabeSteurung.Error(ManagerLanguage.getString("calcul_time")
 				+ ((System.currentTimeMillis() - startTime) / 1000) + " "
@@ -684,7 +859,7 @@ public class SwingBremoModel implements Observer {
 			if (getNrBremoRunning() > 1 && percent < 100) {
 				BremoSwingUtil.PopUp(name, STRING_VerlustTeilung);
 			} else {
-				timerCalcul.stop();
+				timerProgress.stop();
 				controller.getView().VerlustteilungModeEnable();
 			}
 		}
@@ -694,6 +869,11 @@ public class SwingBremoModel implements Observer {
 		}
 	}
 
+	/**
+	 * Update beim vergleich von String
+	 * 
+	 * @param arg
+	 */
 	private void update(String arg) {
 
 		switch (arg) {
@@ -708,5 +888,12 @@ public class SwingBremoModel implements Observer {
 		default:
 			break;
 		}
+	}
+
+	/**
+	 * Erzeugt eine GUI um Bremo InputFile zu erzeugen oder zu editieren
+	 */
+	public void editor() {
+		EditorView = new AppView();
 	}
 }

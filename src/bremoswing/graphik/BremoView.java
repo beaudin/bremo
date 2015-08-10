@@ -970,8 +970,11 @@ public class BremoView extends JFrame implements ActionListener, Observer {
 		barChartButton.setIcon(new ImageIcon(getClass().getResource(
 				resource.getIconButtonChart())));
 		barChartButton.setToolTipText("Enable LineChart Mode");
+
 		DeactiveComponent();
+
 		isBarChartMode = true;
+
 		URL urlTest = getClass().getResource(resource.getIconBarChartBig());
 		ImageIcon iconTest = new ImageIcon(urlTest);
 		Image imageTest = iconTest.getImage();
@@ -980,9 +983,11 @@ public class BremoView extends JFrame implements ActionListener, Observer {
 		iconTest = new ImageIcon(imageTest);
 		GraphikLabel.setIcon(iconTest);
 		GraphikLabel.revalidate();
+
 		ImageBackgroundJPanel panel = new ImageBackgroundJPanel(
 				resource.iconBackgroungColored_1, 100, 100);
 		panel.add(GraphikLabel);
+
 		update(panel);
 		update("BarChart Mode");
 	}
@@ -995,8 +1000,11 @@ public class BremoView extends JFrame implements ActionListener, Observer {
 		barChartButton.setIcon(new ImageIcon(getClass().getResource(
 				resource.getIconBarChart())));
 		barChartButton.setToolTipText("Enable BarChart Mode");
+
 		ActiveComponent();
+
 		isBarChartMode = false;
+
 		URL urlTest = getClass().getResource(resource.getIconBackgroungChart());
 		ImageIcon iconTest = new ImageIcon(urlTest);
 		Image imageTest = iconTest.getImage();
@@ -1005,14 +1013,19 @@ public class BremoView extends JFrame implements ActionListener, Observer {
 		iconTest = new ImageIcon(imageTest);
 		GraphikLabel.setIcon(iconTest);
 		GraphikLabel.revalidate();
+
 		ImageBackgroundJPanel panel = new ImageBackgroundJPanel(
 				resource.iconBackgroungColored_1, 100, 100);
 		panel.add(GraphikLabel);
+
 		update(panel);
 		update("LineChart Mode");
 
 	}
 
+	/**
+	 * Set all component Enable
+	 */
 	protected void ActiveComponent() {
 		x_achse.setEnabled(true);
 		nbr_of_Achse.setEnabled(true);
@@ -1037,6 +1050,9 @@ public class BremoView extends JFrame implements ActionListener, Observer {
 
 	}
 
+	/**
+	 * set all Component unenable
+	 */
 	protected void DeactiveComponent() {
 		x_achse.setEnabled(false);
 		nbr_of_Achse.setEnabled(false);
